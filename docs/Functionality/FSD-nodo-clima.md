@@ -1,21 +1,23 @@
 # Nodo Clima Piloto — Especificación Funcional (FSD)
 
 ```yaml
-document_status: borrador — valores propuestos pendientes de aceptación (ver §4.4)
-fsd_version: 0.1.0
+document_status: vigente — D1–D20 aceptadas; D21–D22 pendientes (ver §4.4)
+fsd_version: 0.2.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
 author: Rafael Rodriguez
 reviewers: []
-approval_status: no aprobado
+approval_status: decisiones D1–D20 y FR-OTA-11 aceptadas por el propietario (2026-10-11)
 created: 2026-10-11
 last_updated: 2026-10-11
 change_history:
   - 0.1.0 (2026-10-11): versión inicial; incluye sincronización SNTP (FR-TIME-*) y lista OTA
     verificada contra la cadena de redirección real de GitHub Releases.
+  - 0.2.0 (2026-10-11): aceptadas D1–D20 y FR-OTA-11; ota_repo enlazado a
+    rafaelrodWebpos/villa-nodo-clima-piloto; D21–D22 abiertas.
 superseded_requirements: []
-open_decisions: ver §4.4 — cada entrada nombra los requisitos que bloquea
+open_decisions: [D21 (T01, T02), D22 (C-HW-03)] — ver §4.4
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
 ```
 
@@ -31,8 +33,9 @@ related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /b
   lógica de un requisito `[user]`), `[pack:esp32]` (propuesto por el paquete
   ESP32 y aceptado por el usuario).
 - **Estado**: un requisito es `aprobado` salvo que contenga un valor marcado
-  **(propuesto)**. En ese caso queda `propuesto` hasta que se acepte el valor
-  (§4.4). Ningún valor propuesto pasa a normativo de forma implícita.
+  **(propuesto, Dnn)**. En ese caso queda `propuesto` hasta que se acepte el valor
+  (§4.4). Ningún valor propuesto pasa a normativo de forma implícita. Los
+  valores de las decisiones aceptadas (§4.4) llevan su número, no la marca.
 - **Contratos de verificación**: cada Must/Should lleva su contrato. Se usa la
   forma compacta (tabla) salvo donde un aprobado erróneo es plausible
   (recuperación, rollback, ausencia de reinicios), donde se usa YAML completo.
@@ -107,9 +110,9 @@ el publicador no está conectado, la lectura se descarta (§5, FR-MED-06).
 |---|---|---|
 | C-HW-01 [Must] | La placa debe ser una ESP32-S3-DevKitC-1 con módulo ESP32-S3-WROOM-1 **N8R8**: 8 MB de flash y 8 MB de PSRAM. | [user] |
 | C-HW-02 [Must] | Una unidad con menos de 8 MB de flash no puede ejecutar este firmware; el build debe fijar `esptool` a 8 MB y no autodetectar. | [derived] |
-| C-HW-03 [Must] | El firmware no debe requerir PSRAM; debe arrancar y funcionar con la PSRAM deshabilitada. | [derived] (propuesto: permite usar la variante N8) |
-| C-HW-04 [Must] | El SHT41 debe conectarse por I²C a **SDA = GPIO8** y **SCL = GPIO9** **(propuesto)**, con alimentación de 3V3, en la dirección **0x44** (variante SHT41-AD1B). | [user] sensor; pines propuestos |
-| C-HW-05 [Must] | El bus I²C debe operar a **100 kHz** **(propuesto)**, con resistencias pull-up en SDA y SCL (las del breakout o externas de 4,7–10 kΩ). | [derived] |
+| C-HW-03 [Must] | El firmware no debe requerir PSRAM; debe arrancar y funcionar con la PSRAM deshabilitada. | [derived] **(propuesto, D22)** |
+| C-HW-04 [Must] | El SHT41 debe conectarse por I²C a **SDA = GPIO8** y **SCL = GPIO9** (D1), con alimentación de 3V3, en la dirección **0x44** (variante SHT41-AD1B). | [user] sensor; pines D1 |
+| C-HW-05 [Must] | El bus I²C debe operar a **100 kHz** (D1), con resistencias pull-up en SDA y SCL (las del breakout o externas de 4,7–10 kΩ). | [derived] |
 | C-HW-06 [Must] | La alimentación debe ser de 5 V por el USB de la DevKitC-1. | (assumed) |
 | C-HW-07 [Must] | El firmware no debe usar GPIO0, GPIO3, GPIO45, GPIO46 (strapping), GPIO19/20 (USB) ni el LED RGB integrado (GPIO38/48, según revisión), para dejarlos libres de efectos de arranque. | [derived] |
 
@@ -125,7 +128,7 @@ defecto.
 | ota_0 | app | ota_0 | 0x20000 | 0x300000 (3 MB) |
 | ota_1 | app | ota_1 | 0x320000 | 0x300000 (3 MB) |
 
-- **C-BLD-01** [Must] [derived] **(propuesto)**: la tabla de particiones debe
+- **C-BLD-01** [Must] [derived] (D2): la tabla de particiones debe
   ser la anterior; termina en 0x620000, dentro de los 8 MB.
 - **C-BLD-02** [Must] [derived]: una imagen de aplicación mayor de 0x300000
   bytes (3 MB) no cabe en un slot OTA, y el build debe fallar si se supera.
@@ -285,19 +288,20 @@ reservados ni tópicos de comando definidos para él.
 | Log por UDP | Propuesto por pack:esp32, no aceptado |
 | Emisor IR para aire acondicionado | Fase futura [user] |
 
-### 4.4 Decisiones abiertas — valores propuestos pendientes de aceptación
+### 4.4 Decisiones de valores
 
-Cada valor está marcado **(propuesto)** en el texto. Hasta que se acepte, el
-requisito que lo contiene queda en estado `propuesto`.
+D1–D20 están **aceptadas** por el propietario y son normativas. D21 y D22
+siguen **abiertas**: su valor está marcado **(propuesto, Dnn)** en el texto y los
+requisitos que lo contienen quedan en estado `propuesto`.
 
-| # | Valor propuesto | Requisitos que bloquea |
+| # | Valor | Requisitos |
 |---|---|---|
 | D1 | Pines I²C SDA=GPIO8, SCL=GPIO9; 100 kHz | C-HW-04, C-HW-05 |
 | D2 | Tabla de particiones de §2.2 | C-BLD-01 |
 | D3 | Tolerancia del periodo: 60 s ± 1 s | FR-MED-01 |
 | D4 | Redondeo a 1 decimal en las tres medidas | FR-MED-05 |
 | D5 | Nombres de medida `temperatura`, `humedad`, `punto_rocio`; unidades `°C`, `%`, `°C` | FR-MQTT-01, FR-MQTT-02 |
-| D6 | `ts` en segundos Unix UTC del instante de medida; servidor `pool.ntp.org`; primera sincronización ≤ 30 s; resincronización cada 1 h. La regla de `null` y la prohibición de 1970 son [user], no propuestas | FR-MQTT-03, FR-TIME-01, FR-TIME-04 |
+| D6 | `ts` en segundos Unix UTC del instante de medida; servidor `pool.ntp.org`; primera sincronización ≤ 30 s; resincronización cada 1 h. La regla de `null` y la prohibición de 1970 son [user] | FR-MQTT-03, FR-TIME-01, FR-TIME-04 |
 | D7 | Medidas retained con QoS 0; `status` retained con QoS 1; keepalive 60 s | FR-MQTT-04, FR-MQTT-05 |
 | D8 | Backoff 1 s ×2 hasta un techo de 60 s | FR-CON-02 |
 | D9 | Plazos: arranque → 1.ª publicación ≤ 30 s; vuelta del Wi-Fi → ≤ 90 s; vuelta del broker → ≤ 75 s | FR-CON-03, -04, -05 |
@@ -306,12 +310,14 @@ requisito que lo contiene queda en estado `propuesto`.
 | D12 | Prueba de unión del portal ≤ 20 s; reinicio tras guardar ≤ 5 s | FR-POR-05, FR-POR-06 |
 | D13 | `expire_after` = 180 s en Discovery | FR-HA-03 |
 | D14 | Hosts OTA permitidos: `github.com` y `release-assets.githubusercontent.com` (verificados contra la cadena real, §7.3); máximo 3 redirecciones | FR-OTA-02 |
-| D19 | Restringir la URL inicial a `https://github.com/{{ota_repo}}/releases/download/`, con `{{ota_repo}}` = `<owner>/villa-nodo-clima-piloto` fijado en el build | FR-OTA-11 |
+| D19 | Restringir la URL inicial a `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/`, fijada en el build | FR-OTA-11 |
 | D15 | Validación de imagen nueva ≤ 300 s; versión nueva visible ≤ 120 s | FR-OTA-06, FR-OTA-07 |
 | D16 | Timeout del watchdog de tareas: 30 s | NFR-WDT-01 |
 | D17 | Exactitud frente a referencia: ± 0,5 °C y ± 3 %HR | NFR-SEN-01 |
 | D18 | Campos y periodo del diagnóstico en `status` (§9.3) | FR-MQTT-08 |
-| D20 | Valor de `{{ota_repo}}`: el dueño del repositorio en GitHub. Es público y no identifica el lugar de instalación | FR-OTA-11 |
+| D20 | `ota_repo` = `rafaelrodWebpos/villa-nodo-clima-piloto`. Es público y no identifica el lugar de instalación | FR-OTA-11 |
+| D21 | **Abierta.** Límites de T01 (configuración → STA en ≤ 2 s) y de T02 (sin configuración → AP en ≤ 10 s) | T01, T02 |
+| D22 | **Abierta.** El firmware no requiere PSRAM (permite usar la variante N8) | C-HW-03 |
 
 ---
 
@@ -328,7 +334,7 @@ conectividad salvo ARRANQUE (§6).
 ### 5.2 Requisitos
 
 - **FR-MED-01** [Must] [user]: el nodo deberá iniciar un ciclo de medición
-  cada 60 s **± 1 s (propuesto)**, medidos con reloj monotónico e
+  cada 60 s **± 1 s**, medidos con reloj monotónico e
   independientemente del estado de conectividad.
 - **FR-MED-02** [Must] [user]: el nodo deberá ejecutar el ciclo de medición en
   los estados PORTAL, VALIDANDO, CONECTANDO_WIFI, CONECTANDO_BROKER, OPERATIVO
@@ -342,7 +348,7 @@ conectividad salvo ARRANQUE (§6).
   de un ciclo en el que la temperatura o la humedad sean inválidas (FR-SEN-02),
   o en el que la HR sea ≤ 0 %.
 - **FR-MED-05** [Must] [derived]: el campo `v` deberá redondearse a **1
-  decimal (propuesto)**, alejando de cero los empates.
+  decimal**, alejando de cero los empates.
 - **FR-MED-06** [Must] [user]: una lectura tomada mientras el nodo no está en
   OPERATIVO no deberá publicarse nunca; al entrar en OPERATIVO, solo se
   publicará la lectura válida más reciente de cada medida.
@@ -395,17 +401,17 @@ imagen recién instalada) → `VÁLIDA`. Su estado persiste en `otadata`.
 ### 6.3 Tabla de transiciones (normativa)
 
 Todas las filas son requisitos [Must]. Procedencia: [user] para la ausencia de
-reinicios y los reintentos; [derived] para el resto. Los plazos marcados
-**(propuesto)** dependen de §4.4.
+reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.4;
+los marcados **(propuesto, D21)** siguen abiertos.
 
 | ID | Estado | Evento | Guarda | Siguiente | Acción | Límite | No debe ocurrir |
 |---|---|---|---|---|---|---|---|
-| T01 | ARRANQUE | fin_arranque | Configuración válida en NVS | CONECTANDO_WIFI | Arrancar el STA y el ciclo de medición | 2 s (propuesto) | Abrir el AP |
-| T02 | ARRANQUE | fin_arranque | No hay configuración válida | PORTAL | Arrancar el AP, el DNS, el HTTP y el ciclo de medición | 10 s (propuesto) | Intentar el STA |
+| T01 | ARRANQUE | fin_arranque | Configuración válida en NVS | CONECTANDO_WIFI | Arrancar el STA y el ciclo de medición | 2 s (propuesto, D21) | Abrir el AP |
+| T02 | ARRANQUE | fin_arranque | No hay configuración válida | PORTAL | Arrancar el AP, el DNS, el HTTP y el ciclo de medición | 10 s (propuesto, D21) | Intentar el STA |
 | T03 | PORTAL | envío | Algún campo inválido (§17) | PORTAL | Responder con un error por campo | 1 s | Escribir en la NVS |
 | T04 | PORTAL | envío | Todos los campos válidos | VALIDANDO | Probar la unión STA (AP+STA) con los datos del formulario | — | Escribir en la NVS |
-| T05 | VALIDANDO | wifi_up | — | ARRANQUE (reinicio) | Persistir la configuración, responder con éxito y reiniciar | 5 s (propuesto) | Reiniciar sin haber persistido |
-| T06 | VALIDANDO | wifi_down o 20 s sin IP | — | PORTAL | Responder «no se pudo conectar» y descartar los datos | 20 s (propuesto) | Persistir; apagar el AP |
+| T05 | VALIDANDO | wifi_up | — | ARRANQUE (reinicio) | Persistir la configuración, responder con éxito y reiniciar | 5 s | Reiniciar sin haber persistido |
+| T06 | VALIDANDO | wifi_down o 20 s sin IP | — | PORTAL | Responder «no se pudo conectar» y descartar los datos | 20 s | Persistir; apagar el AP |
 | T07 | VALIDANDO | envío | — | VALIDANDO | Responder «ocupado» | 1 s | Iniciar una segunda prueba |
 | T08 | CONECTANDO_WIFI | wifi_up | — | CONECTANDO_BROKER | Reiniciar el backoff de Wi-Fi; arrancar SNTP y el cliente MQTT | 1 s | — |
 | T09 | CONECTANDO_WIFI | wifi_down (intento fallido) | — | CONECTANDO_WIFI | Programar un reintento con el backoff (FR-CON-02) | — | Reiniciar el nodo; abrir el AP |
@@ -422,7 +428,7 @@ reinicios y los reintentos; [derived] para el resto. Los plazos marcados
 | T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>`; conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
 | T21 | OTA_DESCARGA | cmd_ota | — | OTA_DESCARGA | Publicar `ota` = `rechazado:ocupado` | 2 s | Abortar o reiniciar la descarga en curso |
 | T22 | OTA_DESCARGA | mqtt_down o wifi_down | — | CONECTANDO_BROKER o CONECTANDO_WIFI, según el evento | Abortar la descarga; conservar la imagen en ejecución | 2 s | Reiniciar; activar una imagen parcial |
-| T23 | (Validación) PENDIENTE | 300 s sin T11 desde el arranque | — | Reinicio → rollback | Reiniciar; el bootloader arranca la imagen anterior | 300 s (propuesto) | Seguir con la imagen no validada |
+| T23 | (Validación) PENDIENTE | 300 s sin T11 desde el arranque | — | Reinicio → rollback | Reiniciar; el bootloader arranca la imagen anterior | 300 s | Seguir con la imagen no validada |
 
 **Acciones globales.** Si salta el watchdog de tareas (NFR-WDT-01), el nodo se
 reinicia desde cualquier estado. Es el único reinicio no ordenado por T05, T19
@@ -457,17 +463,15 @@ ignora.
   duración de la pérdida.
 - **FR-CON-02** [Must] [user]: los reintentos de Wi-Fi y de MQTT deberán seguir
   un backoff exponencial que empieza en **1 s, se duplica en cada fallo y tiene
-  un techo de 60 s (propuesto)**, y que vuelve a 1 s tras cada conexión
+  un techo de 60 s**, y que vuelve a 1 s tras cada conexión
   lograda.
 - **FR-CON-03** [Must] [user]: después de que el AP Wi-Fi vuelva a estar
-  disponible, el nodo deberá publicar una medida válida en ≤ **90 s
-  (propuesto)**.
+  disponible, el nodo deberá publicar una medida válida en ≤ **90 s**.
 - **FR-CON-04** [Must] [user]: después de que el broker vuelva a estar
-  disponible, el nodo deberá publicar una medida válida en ≤ **75 s
-  (propuesto)**, sin desasociarse del Wi-Fi.
+  disponible, el nodo deberá publicar una medida válida en ≤ **75 s**, sin desasociarse del Wi-Fi.
 - **FR-CON-05** [Must] [derived]: desde el encendido de un nodo configurado,
   con Wi-Fi y broker disponibles, la primera medida válida deberá llegar al
-  broker en ≤ **30 s (propuesto)**.
+  broker en ≤ **30 s**.
 - **FR-CON-06** [Must] [derived]: un nodo configurado no deberá volver a PORTAL
   por fallos de conexión; solo vuelve a PORTAL si la NVS no contiene una
   configuración válida.
@@ -563,13 +567,12 @@ estado, versión → aceptar o rechazar con motivo) que se prueba en host.
 
 - **FR-OTA-02** [Must] [user]: el nodo deberá rechazar con `rechazado:host`
   toda URL que no empiece por `https://` o cuyo host no esté en la lista
-  permitida — **`github.com` y `release-assets.githubusercontent.com`
-  (propuesto)** —, y deberá aplicar la misma regla a cada redirección HTTP,
-  con un máximo de **3 redirecciones (propuesto)**; la siguiente se aborta con
+  permitida — **`github.com` y `release-assets.githubusercontent.com`** —, y deberá aplicar la misma regla a cada redirección HTTP,
+  con un máximo de **3 redirecciones**; la siguiente se aborta con
   `error:redirecciones`.
-- **FR-OTA-11** [Must] [derived] **(propuesto)**: el nodo deberá rechazar con
+- **FR-OTA-11** [Must] [user]: el nodo deberá rechazar con
   `rechazado:ruta` toda URL inicial que no empiece por
-  `https://github.com/{{ota_repo}}/releases/download/`. Sin esta regla, el host
+  `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/`. Sin esta regla, el host
   `github.com` permitiría instalar la release de cualquier cuenta de GitHub
   desde un comando enviado por la LAN.
 - **FR-OTA-03** [Must] [derived]: el nodo deberá abortar con `error:tls`
@@ -583,9 +586,9 @@ estado, versión → aceptar o rechazar con motivo) que se prueba en host.
   con la que está en ejecución.
 - **FR-OTA-06** [Must] [user]: tras una descarga válida, el nodo deberá
   reiniciar en la imagen nueva y publicar su versión en el campo `fw` de
-  `status` en ≤ **120 s (propuesto)** desde el final de la descarga.
+  `status` en ≤ **120 s** desde el final de la descarga.
 - **FR-OTA-07** [Must] [user]: si la imagen nueva no alcanza OPERATIVO en ≤
-  **300 s (propuesto)** desde su primer arranque, el nodo deberá volver a la
+  **300 s** desde su primer arranque, el nodo deberá volver a la
   imagen anterior.
 - **FR-OTA-08** [Must] [derived]: una pérdida de Wi-Fi o de MQTT durante la
   descarga deberá abortarla sin reiniciar y sin cambiar la imagen arrancable.
@@ -662,7 +665,7 @@ verification:
 |---|---|---|---|---|
 | FR-OTA-02 | Política con `http://github.com/x`, `https://evil.example/x`, `https://github.com/x` → redirección a `objects.githubusercontent.com`, y una cadena de 4 redirecciones | `rechazado:host` en las tres primeras; `error:redirecciones` en la cuarta | Aceptar alguna; descargar algún byte de un host no permitido | host (política) |
 | FR-OTA-02 | Comando con la URL `releases/download/<tag>/` real del repo y otro con `releases/latest/download/` | Ambas descargas se completan (1 y 2 saltos) | `rechazado:host` en una URL legítima | bench |
-| FR-OTA-11 | Política con `https://github.com/otro/repo/releases/download/v1/x.bin` y `https://github.com/{{ota_repo}}/archive/x` | `rechazado:ruta` en ambas | Descargar la release de otra cuenta | host |
+| FR-OTA-11 | Política con `https://github.com/otro/repo/releases/download/v1/x.bin` y `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/archive/x` | `rechazado:ruta` en ambas | Descargar la release de otra cuenta | host |
 | FR-OTA-03 | URL a un servidor permitido con un certificado autofirmado (DNS del banco) | `ota` = `error:tls` | Escritura en el slot inactivo | bench |
 | FR-OTA-04 | Publicar el comando OTA con retain y reconectar el DUT | Sin descarga; log «retained ignorado» | Descarga; bucle de OTA en cada reconexión | bench |
 | FR-OTA-05 | Imagen para esp32 (no S3); imagen truncada; imagen con la misma versión | `error:imagen`, `error:imagen`, `rechazado:misma_version` | Cambio de slot; reinicio | bench |
@@ -696,8 +699,7 @@ HR = −6 + 125·S_RH/65535, con la HR recortada a [0, 100].
   ciclo con lectura válida, sin reiniciarse.
 - **NFR-SEN-01** [Should] [derived]: tras 30 min de estabilización, la
   temperatura y la HR publicadas deberán coincidir con las de un instrumento de
-  referencia situado junto al sensor dentro de **± 0,5 °C y ± 3 %HR
-  (propuesto)**.
+  referencia situado junto al sensor dentro de **± 0,5 °C y ± 3 %HR**.
 
 ### 8.3 Contratos de verificación
 
@@ -736,7 +738,7 @@ verification:
 ### 9.1 Par y protocolo
 
 Broker MQTT 3.1.1 en la LAN, TCP sin TLS, autenticación por usuario y
-contraseña [user]. Keepalive de **60 s (propuesto)**. El Last Will se registra
+contraseña [user]. Keepalive de **60 s**. El Last Will se registra
 al conectar.
 
 ### 9.2 Tópicos y payloads
@@ -774,15 +776,14 @@ al conectar.
 
 - **FR-MQTT-01** [Must] [user]: el nodo deberá publicar cada medida en
   `villa/<zona>/<nodo>/<medida>`, con `<medida>` ∈ {**`temperatura`,
-  `humedad`, `punto_rocio`** (propuesto)}.
+  `humedad`, `punto_rocio`**}.
 - **FR-MQTT-02** [Must] [user]: el payload de medida deberá ser un objeto JSON
-  con exactamente las claves `v` (número), `u` (string: **`°C`, `%`, `°C`**
-  (propuesto)) y `ts` (entero o `null`).
+  con exactamente las claves `v` (número), `u` (string: **`°C`, `%`, `°C`**) y `ts` (entero o `null`).
 - **FR-MQTT-03** [Must] [user]: con hora válida (FR-TIME-02), `ts` deberá
-  ser el instante de la medida en **segundos Unix UTC (propuesto)**; sin hora
+  ser el instante de la medida en **segundos Unix UTC**; sin hora
   válida, `ts` deberá ser `null` (FR-TIME-03).
 - **FR-MQTT-04** [Must] [derived]: los mensajes de medida deberán publicarse
-  con **retain y QoS 0 (propuesto)**.
+  con **retain y QoS 0**.
 - **FR-MQTT-05** [Must] [user]: el nodo deberá registrar como Last Will
   `{"estado":"offline"}` en `status`, con retain y QoS 1, de modo que un
   suscriptor lo reciba en ≤ 100 s tras un corte de alimentación del nodo.
@@ -792,7 +793,7 @@ al conectar.
   la contraseña configurados; con el usuario vacío, deberá conectarse sin
   credenciales.
 - **FR-MQTT-08** [Must] [pack:esp32]: el nodo deberá publicar `status` con los
-  campos de §9.3 al conectar y en cada ciclo de medición **(propuesto)**.
+  campos de §9.3 al conectar y en cada ciclo de medición.
 - **FR-MQTT-09** [Must] [pack:esp32]: el nodo deberá publicar `status` en ≤ 2 s
   tras cualquier cambio del campo `ota`.
 
@@ -844,7 +845,7 @@ Tópico `homeassistant/sensor/<nodo>/<medida>/config`, retain, QoS 1:
   de §10.2, con `unique_id` = `<nodo>_<medida>` y `sw_version` = la versión en
   ejecución.
 - **FR-HA-03** [Should] [derived]: cada configuración deberá declarar
-  `expire_after` = **180 s (propuesto)**.
+  `expire_after` = **180 s**.
 
 ### 10.4 Contratos de verificación
 
@@ -874,13 +875,13 @@ consulta A.
 - **FR-POR-03** [Must] [user]: `GET /` deberá servir un formulario con los
   siete campos de §17 que se configuran por el portal.
 - **FR-POR-04** [Must] [derived]: un envío con algún campo fuera de las reglas
-  de validación de §17 **(propuesto)** deberá responderse con el error del
+  de validación de §17 deberá responderse con el error del
   campo y no deberá modificar la NVS.
 - **FR-POR-05** [Must] [derived]: un envío válido cuya unión STA no obtenga IP
-  en ≤ **20 s (propuesto)** deberá responderse con «no se pudo conectar»,
+  en ≤ **20 s** deberá responderse con «no se pudo conectar»,
   dejando el AP activo y la NVS sin cambios.
 - **FR-POR-06** [Must] [derived]: un envío válido con unión STA exitosa deberá
-  persistir la configuración y reiniciar el nodo en ≤ **5 s (propuesto)**;
+  persistir la configuración y reiniciar el nodo en ≤ **5 s**;
   tras el reinicio, el nodo arranca por T01.
 - **FR-POR-07** [Must] [derived]: fuera de PORTAL y VALIDANDO, el nodo no
   deberá emitir ningún AP ni servir HTTP.
@@ -938,8 +939,8 @@ se prueba en host.
 ### 13.1 Requisitos de hora
 
 - **FR-TIME-01** [Must] [user]: tras cada `wifi_up` (T08), el nodo deberá
-  sincronizar el reloj por SNTP con **`pool.ntp.org` (propuesto)** y, si el
-  servidor es alcanzable, tener hora válida en ≤ **30 s (propuesto)**.
+  sincronizar el reloj por SNTP con **`pool.ntp.org`** y, si el
+  servidor es alcanzable, tener hora válida en ≤ **30 s**.
 - **FR-TIME-02** [Must] [user]: la hora deberá considerarse válida solo si se
   completó una sincronización SNTP desde el último arranque **y** el reloj
   resultante no es anterior a la fecha de build del firmware. En cualquier
@@ -948,8 +949,7 @@ se prueba en host.
   medida con `"ts": null` y `status` con `hora_valida` = `false`; ningún
   mensaje deberá llevar un `ts` anterior a la fecha de build (en particular,
   ninguna fecha de 1970).
-- **FR-TIME-04** [Should] [derived]: el nodo deberá resincronizar cada **1 h
-  (propuesto)**; una resincronización fallida no deberá invalidar una hora ya
+- **FR-TIME-04** [Should] [derived]: el nodo deberá resincronizar cada **1 h**; una resincronización fallida no deberá invalidar una hora ya
   válida.
 - **FR-TIME-05** [Must] [user]: la falta de hora válida no deberá retrasar ni
   impedir la medición ni la publicación.
@@ -998,8 +998,7 @@ través de §7, §9 y §12.
   atómica (todo o nada) en T05.
 - Driver I²C maestro de ESP-IDF (C-HW-04, C-HW-05).
 - **NFR-WDT-01** [Must] [pack:esp32]: si la tarea de medición o la de
-  conectividad dejan de alimentar el watchdog de tareas durante **30 s
-  (propuesto)**, el nodo deberá reiniciarse, y su siguiente `status` deberá
+  conectividad dejan de alimentar el watchdog de tareas durante **30 s**, el nodo deberá reiniciarse, y su siguiente `status` deberá
   mostrar `reset` = `task_wdt`.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
@@ -1015,7 +1014,7 @@ través de §7, §9 y §12.
 
 - **FR-ID-01** [Must] [derived]: el identificador del nodo deberá ser
   **`clima-` seguido de los 3 últimos bytes de la MAC STA en hexadecimal en
-  minúsculas (propuesto)** (p. ej., `clima-a1b2c3`), y deberá ser estable entre
+  minúsculas** (p. ej., `clima-a1b2c3`), y deberá ser estable entre
   reinicios y OTA.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
@@ -1025,7 +1024,7 @@ través de §7, §9 y §12.
 
 ## 17. Catálogo de configuración
 
-| Nombre | Tipo | Por defecto | Validación (propuesto, D11) | Persistencia | Sensibilidad | Interfaz | Efecto | Reset |
+| Nombre | Tipo | Por defecto | Validación (D11) | Persistencia | Sensibilidad | Interfaz | Efecto | Reset |
 |---|---|---|---|---|---|---|---|---|
 | `wifi_ssid` | string | ninguno | 1–32 bytes | NVS | operativa (identifica la red) | portal | reinicio (T05) | se borra con la NVS |
 | `wifi_pass` | string | vacío | vacío (red abierta) u 8–63 ASCII imprimible | NVS | **secreto** | portal | reinicio | se borra con la NVS |
@@ -1036,7 +1035,7 @@ través de §7, §9 y §12.
 | `zona` | string | ninguno | `^[a-z0-9_-]{1,32}$` | NVS | operativa (puede identificar la vivienda) | portal | reinicio | se borra con la NVS |
 | Hosts OTA permitidos | lista | §7 | — | firmware | pública | build | nueva imagen | — |
 | Servidor SNTP | string | `pool.ntp.org` | — | firmware | pública | build | nueva imagen | — |
-| `{{ota_repo}}` | string | `<owner>/villa-nodo-clima-piloto` | `owner/repo` de GitHub | firmware | pública | build | nueva imagen | — |
+| `ota_repo` | string | `rafaelrodWebpos/villa-nodo-clima-piloto` | `owner/repo` de GitHub | firmware | pública | build | nueva imagen | — |
 
 - **FR-CFG-01** [Must] [user]: la configuración aprobada en el portal deberá
   mantenerse tras cortes de alimentación y OTA, hasta que se borre la NVS.

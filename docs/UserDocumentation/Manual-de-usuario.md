@@ -27,8 +27,7 @@ se llenan a medida que cada fase del FSD (§3) se completa.
 
 ## 2. Montaje
 
-SHT41 → DevKitC-1: VDD → 3V3, GND → GND, SDA → GPIO8, SCL → GPIO9 (pines
-pendientes de aceptar: FSD D1). Separa el sensor al menos 5 cm de la placa: el
+SHT41 → DevKitC-1: VDD → 3V3, GND → GND, SDA → GPIO8, SCL → GPIO9 (FSD C-HW-04). Separa el sensor al menos 5 cm de la placa: el
 calor del ESP32 falsea la temperatura.
 
 ## 3. Primer flasheo

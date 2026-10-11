@@ -23,8 +23,8 @@ FSD §2.4; aquí se dice cómo los refleja el código.
   - la PSRAM deshabilitada (C-HW-03).
 - La versión de la aplicación sale del tag de git (`git describe`) y la fecha
   de build se incrusta para FR-TIME-02.
-- `{{ota_repo}}` (FR-OTA-11) es una opción de Kconfig cuyo valor por defecto es
-  el repo público; no es un secreto.
+- `ota_repo` (FR-OTA-11) es una opción de Kconfig con valor por defecto
+  `rafaelrodWebpos/villa-nodo-clima-piloto`; no es un secreto.
 
 ## Estructura de fuentes (refleja las capas)
 
