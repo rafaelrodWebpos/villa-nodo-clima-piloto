@@ -1,8 +1,8 @@
 # Nodo Clima Piloto — Especificación Funcional (FSD)
 
 ```yaml
-document_status: vigente — D1–D22 aceptadas (ver §4.4)
-fsd_version: 0.3.0
+document_status: vigente — Load defined
+fsd_version: 0.4.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -17,6 +17,7 @@ change_history:
   - 0.2.0 (2026-10-11): aceptadas D1–D20 y FR-OTA-11; ota_repo enlazado a
     rafaelrodWebpos/villa-nodo-clima-piloto; D21–D22 abiertas.
   - 0.3.0 (2026-10-11): aceptadas D21–D22; sin decisiones abiertas.
+  - 0.4.0 (2026-10-11): supuestos confirmados por el propietario; Fase 0 cerrada (Load defined).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -81,7 +82,7 @@ nodos posteriores.
   aquí (§3.4) [user].
 - Almacenar lecturas durante las desconexiones para reenviarlas después [user].
 - Confidencialidad del tráfico MQTT en la LAN (sin TLS) [user].
-- Funcionar a batería o con sueño profundo (assumed).
+- Funcionar a batería o con sueño profundo [user].
 
 ### 1.5 Flujo de alto nivel
 
@@ -114,7 +115,7 @@ el publicador no está conectado, la lectura se descarta (§5, FR-MED-06).
 | C-HW-03 [Must] | El firmware no debe requerir PSRAM; debe arrancar y funcionar con la PSRAM deshabilitada. | [derived] (D22) |
 | C-HW-04 [Must] | El SHT41 debe conectarse por I²C a **SDA = GPIO8** y **SCL = GPIO9** (D1), con alimentación de 3V3, en la dirección **0x44** (variante SHT41-AD1B). | [user] sensor; pines D1 |
 | C-HW-05 [Must] | El bus I²C debe operar a **100 kHz** (D1), con resistencias pull-up en SDA y SCL (las del breakout o externas de 4,7–10 kΩ). | [derived] |
-| C-HW-06 [Must] | La alimentación debe ser de 5 V por el USB de la DevKitC-1. | (assumed) |
+| C-HW-06 [Must] | La alimentación debe ser de 5 V por el USB de la DevKitC-1. | [user] |
 | C-HW-07 [Must] | El firmware no debe usar GPIO0, GPIO3, GPIO45, GPIO46 (strapping), GPIO19/20 (USB) ni el LED RGB integrado (GPIO38/48, según revisión), para dejarlos libres de efectos de arranque. | [derived] |
 
 **Tabla de particiones (normativa).** El build debe usar exactamente esta
@@ -269,12 +270,12 @@ reservados ni tópicos de comando definidos para él.
 
 - La LAN doméstica tiene un broker MQTT accesible por usuario y contraseña en
   un puerto TCP sin TLS (por defecto 1883) [user].
-- Home Assistant usa el prefijo de Discovery `homeassistant` (assumed: es el
-  valor por defecto de HA).
-- El router Wi-Fi es de 2,4 GHz, WPA2-PSK o abierto (assumed: el ESP32-S3 no
+- Home Assistant usa el prefijo de Discovery `homeassistant` [user] (es el valor
+  por defecto de HA).
+- El router Wi-Fi es de 2,4 GHz, WPA2-PSK o abierto [user] (el ESP32-S3 no
   soporta 5 GHz).
 - La LAN tiene salida a Internet para SNTP y para descargar desde GitHub
-  (assumed).
+  [user].
 
 ### 4.3 Explícitamente fuera de alcance
 
@@ -814,7 +815,7 @@ al conectar.
 
 ### 10.1 Par
 
-Integración MQTT de Home Assistant, con el prefijo `homeassistant` (assumed).
+Integración MQTT de Home Assistant, con el prefijo `homeassistant` (§4.2).
 
 ### 10.2 Esquema (una configuración por medida)
 
