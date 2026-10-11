@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.4.0
+fsd_version: 0.5.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -18,6 +18,8 @@ change_history:
     rafaelrodWebpos/villa-nodo-clima-piloto; D21–D22 abiertas.
   - 0.3.0 (2026-10-11): aceptadas D21–D22; sin decisiones abiertas.
   - 0.4.0 (2026-10-11): supuestos confirmados por el propietario; Fase 0 cerrada (Load defined).
+  - 0.5.0 (2026-10-11): log UDP hacia el banco (FR-LOG-01…03, C-LOG-01), desactivado en
+    producción; nivel field y pruebas OTA contra releases reales de GitHub (§22.0).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -43,8 +45,10 @@ related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /b
   (recuperación, rollback, ausencia de reinicios), donde se usa YAML completo.
   La columna **No debe ocurrir** es obligatoria.
 - **Niveles de prueba**: `host` (lógica pura en el PC), `target` (el ESP32-S3
-  real), `bench` (dispositivo con pares reales: AP Wi-Fi, broker, HA) y `other`
-  (CI o revisión). Ver §22.0.
+  real), `bench` (dispositivo con pares reales: AP Wi-Fi, broker, HA), `field` (el nodo
+  instalado, con los pares reales de la vivienda; solo se observa y se manda,
+  nunca se inyectan fallos) y `other` (CI o revisión). `bench⁺` es `bench`
+  cuyo AP da salida a Internet. Ver §22.0.
 
 ---
 
@@ -212,7 +216,7 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   60 s.
 - **Criterios de salida.** Pasan FR-SEN-01, FR-SEN-02, FR-MED-03…05, FR-ID-01,
   FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02, FR-CON-06,
-  NFR-SEC-01, C-CFG-01 y las filas T01–T07, T09 y T10. Todo se verifica por
+  NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-01…03 y las filas T01–T07, T09 y T10. Todo se verifica por
   host, target, log serie y escaneo Wi-Fi; nada requiere MQTT.
 - **Dependencias.** Hardware (DevKitC-1 N8R8 y SHT41) y el harness del
   proyecto (`/harness`). No depende de ninguna fase anterior.
@@ -238,7 +242,8 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   MQTT, y rollback automático si la imagen nueva no alcanza OPERATIVO.
 - **Criterios de salida.** Pasan FR-OTA-*, NFR-OTA-01, FR-MQTT-09, NFR-SEC-02,
   FR-CFG-01 (fila de OTA) y las filas T17–T23.
-- **Dependencias.** Fase 2, porque el comando llega por MQTT y la validación de
+- **Dependencias.** Salida a Internet desde la red de prueba (§22.0, capacidad
+  `bench-ap-internet`, o el nivel field como alternativa). Fase 2, porque el comando llega por MQTT y la validación de
   la imagen exige alcanzar OPERATIVO. Además, al menos una release publicada en
   GitHub con una versión distinta a la instalada, que la CI del proyecto
   (`/harness`, setup-action) produce.
@@ -287,7 +292,7 @@ reservados ni tópicos de comando definidos para él.
 | Secure Boot v2 y firma de imagen | Rechazado por el usuario; riesgo aceptado |
 | Cifrado de flash/NVS | No justificado por el perfil (§19); riesgo aceptado |
 | Botón BOOT para reabrir el portal con el nodo configurado | Propuesto por pack:esp32, no aceptado. Para reaprovisionar se borra la NVS por USB |
-| Log por UDP | Propuesto por pack:esp32, no aceptado |
+| Log por UDP en la imagen de producción | Rechazado por el usuario; solo existe en la imagen de banco (§18, C-LOG-01) |
 | Emisor IR para aire acondicionado | Fase futura [user] |
 
 ### 4.4 Decisiones de valores
@@ -634,7 +639,7 @@ verification:
     - Que el DUT quede en B sin publicar.
     - Bucle de reinicios entre A y B (más de un rollback).
     - Necesidad de flasheo por USB para recuperarlo.
-  tier: bench
+  tier: bench⁺ · alternativa field (el rollback se provoca con una release, no con un fallo)
   evidence: [log serie con ambos banners, instantes, status final]
   cleanup: [DUT en A, OPERATIVO]
 ```
@@ -656,7 +661,7 @@ verification:
     - Reinicio del DUT.
     - Arranque de una imagen parcial o de B.
     - `otadata` apuntando a la partición escrita a medias.
-  tier: bench
+  tier: bench⁺ (exige cortar el AP; no hay alternativa field)
   evidence: [log serie, status final, uptime antes y después]
   cleanup: [AP activo; DUT en A]
 ```
@@ -664,14 +669,14 @@ verification:
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
 | FR-OTA-02 | Política con `http://github.com/x`, `https://evil.example/x`, `https://github.com/x` → redirección a `objects.githubusercontent.com`, y una cadena de 4 redirecciones | `rechazado:host` en las tres primeras; `error:redirecciones` en la cuarta | Aceptar alguna; descargar algún byte de un host no permitido | host (política) |
-| FR-OTA-02 | Comando con la URL `releases/download/<tag>/` real del repo y otro con `releases/latest/download/` | Ambas descargas se completan (1 y 2 saltos) | `rechazado:host` en una URL legítima | bench |
+| FR-OTA-02 | Comando con la URL `releases/download/<tag>/` real del repo y otro con `releases/latest/download/` | Ambas descargas se completan (1 y 2 saltos) | `rechazado:host` en una URL legítima | bench⁺ · alt. field |
 | FR-OTA-11 | Política con `https://github.com/otro/repo/releases/download/v1/x.bin` y `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/archive/x` | `rechazado:ruta` en ambas | Descargar la release de otra cuenta | host |
 | FR-OTA-03 | URL a un servidor permitido con un certificado autofirmado (DNS del banco) | `ota` = `error:tls` | Escritura en el slot inactivo | bench |
-| FR-OTA-04 | Publicar el comando OTA con retain y reconectar el DUT | Sin descarga; log «retained ignorado» | Descarga; bucle de OTA en cada reconexión | bench |
-| FR-OTA-05 | Imagen para esp32 (no S3); imagen truncada; imagen con la misma versión | `error:imagen`, `error:imagen`, `rechazado:misma_version` | Cambio de slot; reinicio | bench |
-| FR-OTA-06 | Comando con la release B válida | `fw` = B en ≤ 120 s desde el fin de la descarga | Rollback de una imagen buena | bench |
-| FR-OTA-10 | Segundo comando durante una descarga | `rechazado:ocupado`; la primera descarga termina bien | Aborto de la primera | bench |
-| NFR-OTA-01 | Medidas recibidas durante una OTA de B | Intervalos en [55, 65] s | Ciclo perdido sin conexión caída | bench |
+| FR-OTA-04 | Publicar el comando OTA con retain y reconectar el DUT | Sin descarga; log «retained ignorado» | Descarga; bucle de OTA en cada reconexión | bench⁺ · alt. field |
+| FR-OTA-05 | Imagen para esp32 (no S3); imagen truncada; imagen con la misma versión | `error:imagen`, `error:imagen`, `rechazado:misma_version` | Cambio de slot; reinicio | bench⁺ · alt. field |
+| FR-OTA-06 | Comando con la release B válida | `fw` = B en ≤ 120 s desde el fin de la descarga | Rollback de una imagen buena | bench⁺ · alt. field |
+| FR-OTA-10 | Segundo comando durante una descarga | `rechazado:ocupado`; la primera descarga termina bien | Aborto de la primera | bench⁺ · alt. field |
+| NFR-OTA-01 | Medidas recibidas durante una OTA de B | Intervalos en [55, 65] s | Ciclo perdido sin conexión caída | bench⁺ · alt. field |
 
 ---
 
@@ -918,7 +923,7 @@ rechaza con `rechazado:payload`.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-OTA-01 | Publicar `{"url":"https://github.com/…/clima.bin"}` válido | `status` con `ota` = `en_curso` en ≤ 2 s | Ignorar el comando | bench |
+| FR-OTA-01 | Publicar `{"url":"https://github.com/…/clima.bin"}` válido | `status` con `ota` = `en_curso` en ≤ 2 s | Ignorar el comando | bench⁺ · alt. field |
 | FR-OTA-09 | Parser con `{}`, `{"url":5}`, `no-json`, URL de 513 bytes y `{"url":"…","x":1}` | `rechazado:payload` en todos | Fallo de memoria; aceptación | host |
 
 ---
@@ -1036,6 +1041,7 @@ través de §7, §9 y §12.
 | Hosts OTA permitidos | lista | §7 | — | firmware | pública | build | nueva imagen | — |
 | Servidor SNTP | string | `pool.ntp.org` | — | firmware | pública | build | nueva imagen | — |
 | `ota_repo` | string | `rafaelrodWebpos/villa-nodo-clima-piloto` | `owner/repo` de GitHub | firmware | pública | build | nueva imagen | — |
+| `CONFIG_NODO_UDP_LOG`, `_HOST`, `_PORT` | bool / IPv4 / entero | `n` / `192.168.4.1` / `5555` | §18.1 | firmware | operativa | build (Kconfig) | nueva imagen | — |
 
 - **FR-CFG-01** [Must] [user]: la configuración aprobada en el portal deberá
   mantenerse tras cortes de alimentación y OTA, hasta que se borre la NVS.
@@ -1055,6 +1061,35 @@ El log serie (USB-Serial/JTAG) registra cada transición de §6.3 como
 `con: <ESTADO> -> <ESTADO> (<evento>)`, cada ciclo de medición y cada decisión
 OTA. Los tests consumen ese formato de log; cambiarlo es un cambio de
 interfaz. El diagnóstico remoto es `status` (§9.3).
+
+### 18.1 Log por UDP hacia el banco [user]
+
+La imagen de banco puede enviar una copia de cada línea de log, como texto
+plano en un datagrama UDP, al receptor del testbench. Se gobierna por Kconfig:
+
+| Símbolo | Tipo | Por defecto | Valor en la imagen de banco |
+|---|---|---|---|
+| `CONFIG_NODO_UDP_LOG` | bool | `n` | `y` |
+| `CONFIG_NODO_UDP_LOG_HOST` | IPv4 decimal | `192.168.4.1` | IP del testbench en su AP [derived: contrato del testbench; se confirma en /commission] |
+| `CONFIG_NODO_UDP_LOG_PORT` | entero | `5555` | `5555` [derived: contrato del testbench] |
+
+- **C-LOG-01** [Must] [user]: la imagen de producción (la de las releases
+  `v*.*.*`) debe construirse con `CONFIG_NODO_UDP_LOG=n`.
+- **FR-LOG-01** [Must] [user]: con `CONFIG_NODO_UDP_LOG=n`, el nodo no deberá
+  emitir ningún datagrama de log por la red.
+- **FR-LOG-02** [Must] [user]: con `CONFIG_NODO_UDP_LOG=y`, el nodo deberá
+  enviar cada línea del log serie, en ≤ 1 s desde que la escribe, solo al
+  host:puerto de Kconfig y por unicast, una vez que tenga IP.
+- **FR-LOG-03** [Must] [derived]: un receptor UDP ausente o inalcanzable no
+  deberá retrasar el ciclo de medición ni la publicación, ni provocar
+  reinicios.
+
+| ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
+|---|---|---|---|---|
+| C-LOG-01 | Imagen de producción e imagen de banco del mismo commit; buscar el marcador de banco en ambos binarios | El marcador está ausente en la de producción y presente en la de banco | Una release con el marcador | other (CI) |
+| FR-LOG-01 | Imagen de producción en OPERATIVO; capturar el tráfico UDP del DUT durante el arranque y 3 ciclos | Solo DHCP, DNS y SNTP | Datagramas al puerto 5555 o a cualquier otro destino | bench |
+| FR-LOG-02 | Imagen de banco; receptor en el host:puerto configurado; arrancar | Llegan `UDP logging -> <host>:<port>` y cada línea del log serie posterior, en ≤ 1 s | Broadcast; otro destino; líneas perdidas con el receptor activo | bench |
+| FR-LOG-03 | Imagen de banco con el receptor apagado durante 10 ciclos | Periodo de medición de 60 s ± 1 s; publicaciones normales | Bloqueo; reinicio; ciclo perdido | bench |
 
 ## 19. Seguridad
 
@@ -1086,7 +1121,7 @@ cuenta de GitHub comprometida puede distribuir firmware.
 - **NFR-SEC-02** [Must] [derived]: las imágenes de firmware publicadas no
   deberán contener SSIDs, contraseñas, hosts de broker ni zonas.
 - **FR-SEC-03** [Must] [derived]: el nodo no deberá emitir `wifi_pass` ni
-  `mqtt_pass` por el log serie, por MQTT ni por HTTP.
+  `mqtt_pass` por el log serie, por el log UDP, por MQTT ni por HTTP.
 - Las reglas OTA de seguridad son FR-OTA-02, FR-OTA-03 y FR-OTA-04 (§7).
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
@@ -1122,7 +1157,17 @@ borrando la NVS para reaprovisionar (§19.1). Los pasos concretos están en
 | host | PC, compilador nativo, sin ESP-IDF | Validez de la hora, punto de rocío, redondeo, conversión y CRC del SHT41, serialización JSON, generador de Discovery, validación de §17, política OTA, parser de comandos, backoff, lógica de la tabla de transiciones, identificador |
 | target | ESP32-S3 real | Lectura I²C, NVS, servidor HTTP del portal, watchdog |
 | bench | DUT + AP Wi-Fi + broker + HA + operador | Recuperación, LWT, OTA y rollback, portal de extremo a extremo, ausencia de reinicios, exactitud |
-| other | CI / revisión | Secretos en el repo y en las releases, C-CFG-01 |
+| bench⁺ | bench cuyo AP da salida a Internet | OTA contra releases reales de GitHub del repo |
+| field | El nodo instalado en la vivienda, con su router, su broker y su HA | Alternativa a bench⁺ para la OTA cuando el banco no da salida a Internet; solo se manda y se observa |
+| other | CI / revisión | Secretos en el repo y en las releases, C-CFG-01, C-LOG-01 |
+
+**OTA contra GitHub real.** Las pruebas OTA usan releases reales de este
+repositorio: los tags `v*.*.*` para versiones de producto, y pre-releases de
+prueba con tags `ota-test-*` para las imágenes de prueba (versión B, imagen que
+no alcanza OPERATIVO, imagen para otro chip, imagen truncada), fuera del
+espacio de nombres de las releases. Se ejecutan en bench⁺. Si el banco no puede
+dar salida a Internet, pasan a field, salvo FR-OTA-03 (necesita el DNS del
+banco) y FR-OTA-08 (necesita cortar el AP), que quedan bloqueadas en bench⁺.
 
 Correspondencia con capas: L2 en host como funciones puras; L1 con su núcleo
 puro en host y el cable/flujo en target o bench; L0 de forma transitiva, sin
