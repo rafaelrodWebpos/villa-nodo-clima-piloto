@@ -163,10 +163,10 @@ tests:
     needs: [hosted-ci]
     expect: la imagen de producción no contiene NODO-BENCH-IMAGE y la de banco sí (cada ejecución verifica la suya)
     impl: .github/workflows/build.yml#build/Verify the image matches the variant asked for
-    status: not done
-    reason: >
-      sentido producción cubierto en cada push; el sentido banco necesita una
-      ejecución workflow_dispatch con variant=bench
+    status: successful
+    commit: 221be30
+    date: 2026-10-11
+    evidence: "runs 38164183233 (producción, push) y 38164188670 (banco, workflow_dispatch) en el mismo commit"
 
 # Comprobaciones de que cada nivel funciona. No verifican el FSD y no son tests
 # del plan; se listan para que la reconciliación no las tome por huérfanas.
