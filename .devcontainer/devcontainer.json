@@ -1,0 +1,11 @@
+{
+  "name": "nodo-clima-piloto",
+  "build": { "dockerfile": "Dockerfile", "context": ".." },
+  // Red del host: el contenedor tiene que alcanzar el testbench en la LAN.
+  "runArgs": ["--network=host"],
+  "containerEnv": {
+    // URL del testbench; se fija en /commission. Nunca una IP de la vivienda en el repo.
+    "TESTBENCH_URL": "${localEnv:TESTBENCH_URL}"
+  },
+  "postCreateCommand": "git config --global --add safe.directory '*'"
+}

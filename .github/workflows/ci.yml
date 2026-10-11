@@ -1,0 +1,56 @@
+# Puerta previa al merge: lo que un runner alojado puede ejecutar de verdad.
+# No sustituye a las pruebas en hardware (target, bench, field).
+name: host tests + secret scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run host tier
+        run: |
+          cmake -S tests/host -B build-host
+          cmake --build build-host
+          ctest --test-dir build-host --output-on-failure
+
+  secret-scan:          # FSD NFR-SEC-01 (repositorio público)
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # el historial completo también se escanea
+      - name: Install pinned gitleaks
+        run: |
+          curl -sSfL -o gl.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gl.tgz" | sha256sum -c -
+          tar xzf gl.tgz gitleaks
+      - name: Scan tree and history
+        run: ./gitleaks git --redact --exit-code 1 .
+      - name: Scan for installation-identifying patterns
+        # Lista de patrones (SSID, IP, zona reales…) guardada como secreto del
+        # repo, nunca en el árbol. Sin el secreto el paso no puede decidir y lo
+        # dice en vez de pasar en silencio.
+        env:
+          DENYLIST: ${{ secrets.NODO_DENYLIST }}
+        run: |
+          if [ -z "$DENYLIST" ]; then
+            echo "::warning title=NFR-SEC-01 not done::secreto NODO_DENYLIST sin definir; patrones de la instalación sin comprobar"
+            exit 0
+          fi
+          printf '%s\n' "$DENYLIST" | sed '/^$/d' > /tmp/deny
+          if git log --all -p | grep -F -i -q -f /tmp/deny || grep -R -F -i -q -f /tmp/deny --exclude-dir=.git .; then
+            echo "::error title=NFR-SEC-01::el repositorio contiene un patrón de la instalación"
+            exit 1
+          fi
+          echo "sin patrones de la instalación"

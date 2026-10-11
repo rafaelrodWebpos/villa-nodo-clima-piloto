@@ -1,0 +1,24 @@
+# Prueba que el devcontainer (toolchain + nivel bench + runner) se construye.
+name: devcontainer image builds
+
+on:
+  push:
+    branches: [main]
+    paths: ['.devcontainer/**', 'tests/bench/requirements.txt', '.github/workflows/devcontainer.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the devcontainer image
+        run: docker build -f .devcontainer/Dockerfile -t nodo-clima-dev .
+      - name: Toolchain and bench tier present
+        run: |
+          docker run --rm nodo-clima-dev bash -lc '. $IDF_PATH/export.sh >/dev/null && idf.py --version'
+          docker run --rm nodo-clima-dev python3 -m pytest --version
+          docker run --rm nodo-clima-dev test -x /opt/actions-runner/config.sh

@@ -1,0 +1,154 @@
+# Build en cada push; release solo con un tag v*.*.*, y solo si el recorrido
+# (journey) pasa en el testbench con los bytes exactos que se publican.
+#
+# Estado: los jobs verify y release no se han ejecutado nunca. Quedan inactivos
+# hasta el primer tag, que se crea cuando /build anuncia Ready for shipment.
+name: Build Firmware
+
+env:
+  IDF_TAG: v6.0.2                # igual que la imagen del contenedor de abajo
+  MULTI_VARIANT: 'true'          # producción + imagen de banco (FSD §18.1)
+  VARIANT_MARKER: NODO-BENCH-IMAGE
+  APP_NAME: nodo_clima
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Versión (p. ej. 0.1.0)'
+        required: true
+      variant:
+        description: 'Imagen a construir'
+        type: choice
+        options: [production, bench]
+        default: production
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: espressif/idf:v6.0.2
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+    steps:
+      - name: Trust the workspace
+        working-directory: ${{ github.workspace }}
+        run: git config --global --add safe.directory '*'
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show the IDF version actually used
+        run: . $IDF_PATH/export.sh >/dev/null && idf.py --version
+
+      - name: Decide what to build
+        id: plan
+        run: |
+          VARIANT="${{ github.event.inputs.variant || 'production' }}"
+          [ "$MULTI_VARIANT" = "true" ] || VARIANT=production
+          # Un tag es siempre producción (C-LOG-01).
+          [[ "$GITHUB_REF" == refs/tags/v* ]] && VARIANT=production
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="0.0.0-$(git rev-parse --short HEAD)"
+          fi
+
+          DEFAULTS="sdkconfig.defaults"
+          if [ "$VARIANT" != "production" ]; then
+            DEFAULTS="sdkconfig.defaults;sdkconfig.$VARIANT.defaults"
+            VERSION="$VERSION-$VARIANT"
+          fi
+          { echo "variant=$VARIANT"; echo "version=$VERSION"
+            echo "defaults=$DEFAULTS"; } >> $GITHUB_OUTPUT
+          echo "Building the $VARIANT firmware as $VERSION"
+
+      - name: Build firmware
+        run: |
+          . $IDF_PATH/export.sh >/dev/null
+          ARGS="-B build -DSDKCONFIG=$PWD/build/sdkconfig \
+                -DSDKCONFIG_DEFAULTS=${{ steps.plan.outputs.defaults }} \
+                -DPROJECT_VER=${{ steps.plan.outputs.version }}"
+          idf.py $ARGS set-target esp32s3
+          idf.py $ARGS build
+
+      - name: Verify the image matches the variant asked for   # C-LOG-01
+        if: env.MULTI_VARIANT == 'true'
+        run: |
+          grep -q "$VARIANT_MARKER" build/$APP_NAME.bin && FOUND=yes || FOUND=no
+          WANT=no; [ "${{ steps.plan.outputs.variant }}" = "production" ] || WANT=yes
+          if [ "$FOUND" != "$WANT" ]; then
+            echo "FATAL: ${{ steps.plan.outputs.variant }} image, marker found=$FOUND, expected=$WANT"
+            exit 1
+          fi
+          echo "verified: ${{ steps.plan.outputs.variant }} image, marker $FOUND"
+
+      - name: Collect artefacts
+        run: |
+          V="${{ steps.plan.outputs.version }}"
+          mkdir -p out/coldflash
+          cp build/$APP_NAME.bin out/firmware_v${V}.bin
+          cp build/$APP_NAME.elf out/firmware_v${V}.elf
+          cp build/flash_args out/coldflash/
+          awk '$1 ~ /^0x/ {print $2}' build/flash_args | while read -r f; do
+            cp "build/$f" out/coldflash/ || { echo "FATAL: missing build/$f"; exit 1; }
+          done
+          cp build/sdkconfig out/sdkconfig.generated
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware-v${{ steps.plan.outputs.version }}
+          path: out/
+
+  # El journey sobre los bytes de esta ejecución, en el testbench. Runner
+  # self-hosted dentro del devcontainer del proyecto; solo con tags del
+  # propietario, nunca con pull requests (repositorio público).
+  verify:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') && github.repository_owner == 'rafaelrodWebpos'
+    runs-on: [self-hosted, testbench]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware-v${{ needs.build.outputs.version }}
+          path: fw
+      - name: Precondition — testbench reachable
+        # Banco apagado = precondición no cumplida (not done), no un fallo
+        # del firmware. En ambos casos no se publica nada.
+        run: |
+          curl -sf --max-time 10 "$TESTBENCH_URL/api/info" >/dev/null || {
+            echo "::error title=not done::testbench no alcanzable en \$TESTBENCH_URL; enciéndelo y relanza el job"
+            exit 1; }
+      - name: Journey on the released bytes
+        run: python3 -m pytest tests/bench -m journey --firmware-dir fw -q
+
+  release:
+    needs: [build, verify]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: firmware-v${{ needs.build.outputs.version }}
+          path: fw
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            fw/firmware_v*.bin
+            fw/firmware_v*.elf
+          generate_release_notes: true

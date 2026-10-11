@@ -1,0 +1,27 @@
+menu "Nodo clima"
+
+    config NODO_BENCH_BUILD
+        bool "Imagen de banco (nunca en una release)"
+        default n
+        help
+            Selecciona la imagen de banco. La activa sdkconfig.bench.defaults;
+            la CI comprueba que la imagen de producción no la lleva (FSD C-LOG-01).
+
+    config NODO_UDP_LOG
+        bool "Copia del log por UDP hacia el testbench (FSD §18.1)"
+        default n
+        help
+            Desactivado en producción (C-LOG-01, FR-LOG-01).
+
+    config NODO_UDP_LOG_HOST
+        string "IPv4 del receptor UDP del testbench"
+        depends on NODO_UDP_LOG
+        default "192.168.4.1"
+
+    config NODO_UDP_LOG_PORT
+        int "Puerto del receptor UDP del testbench"
+        depends on NODO_UDP_LOG
+        range 1 65535
+        default 5555
+
+endmenu

@@ -1,0 +1,5 @@
+# Imagen de banco — se aplica sobre sdkconfig.defaults; nunca en una release
+CONFIG_NODO_BENCH_BUILD=y
+CONFIG_NODO_UDP_LOG=y
+CONFIG_NODO_UDP_LOG_HOST="192.168.4.1"
+CONFIG_NODO_UDP_LOG_PORT=5555
