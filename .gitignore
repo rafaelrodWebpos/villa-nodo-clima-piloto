@@ -2,10 +2,10 @@
 .claude/settings.local.json
 
 # Salidas de build de ESP-IDF (docs/Method/project/arquitectura.md)
-build/
-sdkconfig
-sdkconfig.old
-managed_components/
+/build/
+/sdkconfig
+/sdkconfig.old
+/managed_components/
 
 # Secretos locales del banco: nunca en el repo (NFR-SEC-01)
 .env
