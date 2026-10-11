@@ -16,7 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY tests/bench/requirements.txt /tmp/bench-requirements.txt
 RUN python3 -m venv /opt/bench-venv \
     && /opt/bench-venv/bin/pip install --no-cache-dir -r /tmp/bench-requirements.txt
-ENV PATH="/opt/bench-venv/bin:${PATH}"
+# El entrypoint de IDF antepone su propio Python: el nivel bench se invoca
+# siempre como /opt/bench-venv/bin/python.
 
 # El runner se niega a ejecutarse como root: usuario propio.
 RUN useradd -m -s /bin/bash runner \

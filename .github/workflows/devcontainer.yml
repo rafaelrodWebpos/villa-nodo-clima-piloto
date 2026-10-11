@@ -20,5 +20,5 @@ jobs:
       - name: Toolchain and bench tier present
         run: |
           docker run --rm nodo-clima-dev bash -lc '. $IDF_PATH/export.sh >/dev/null && idf.py --version'
-          docker run --rm nodo-clima-dev python3 -m pytest --version
+          docker run --rm nodo-clima-dev /opt/bench-venv/bin/python -m pytest --version
           docker run --rm nodo-clima-dev test -x /opt/actions-runner/config.sh

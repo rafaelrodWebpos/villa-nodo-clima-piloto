@@ -133,7 +133,7 @@ jobs:
             echo "::error title=not done::testbench no alcanzable en \$TESTBENCH_URL; enciéndelo y relanza el job"
             exit 1; }
       - name: Journey on the released bytes
-        run: python3 -m pytest tests/bench -m journey --firmware-dir fw -q
+        run: /opt/bench-venv/bin/python -m pytest tests/bench -m journey --firmware-dir fw -q
 
   release:
     needs: [build, verify]

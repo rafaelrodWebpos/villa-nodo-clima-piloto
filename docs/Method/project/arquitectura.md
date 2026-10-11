@@ -83,7 +83,7 @@ idf.py -B build -DSDKCONFIG=$PWD/build/sdkconfig set-target esp32s3 build      #
 idf.py -B build-bench -DSDKCONFIG=$PWD/build-bench/sdkconfig \
   -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.bench.defaults" set-target esp32s3 build
 cmake -S tests/host -B build-host && cmake --build build-host && ctest --test-dir build-host   # nivel host
-python3 -m pytest tests/bench -m journey     # nivel bench (cuando exista el banco)
+/opt/bench-venv/bin/python -m pytest tests/bench -m journey   # nivel bench (cuando exista el banco)
 ```
 
 El flasheo y la monitorización son de `esp-idf-handling` y de los skills
