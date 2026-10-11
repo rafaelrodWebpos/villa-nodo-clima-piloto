@@ -2,17 +2,21 @@
 # release-verify (docs/Method/project/arquitectura.md).
 FROM espressif/idf:v6.0.2
 
+ARG DEBIAN_FRONTEND=noninteractive
 ARG RUNNER_VERSION=2.337.0
 ARG RUNNER_SHA256=70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        curl ca-certificates jq gh sudo \
+        curl ca-certificates jq gh sudo python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
 # Nivel bench (pytest). TestbenchDriver se instala en /commission, cuando el
 # banco exista (testing/test-plan.yaml, capacidad bench-driver).
+# Venv propio, separado del Python de ESP-IDF (que solo existe tras export.sh).
 COPY tests/bench/requirements.txt /tmp/bench-requirements.txt
-RUN PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install --no-cache-dir -r /tmp/bench-requirements.txt
+RUN python3 -m venv /opt/bench-venv \
+    && /opt/bench-venv/bin/pip install --no-cache-dir -r /tmp/bench-requirements.txt
+ENV PATH="/opt/bench-venv/bin:${PATH}"
 
 # El runner se niega a ejecutarse como root: usuario propio.
 RUN useradd -m -s /bin/bash runner \

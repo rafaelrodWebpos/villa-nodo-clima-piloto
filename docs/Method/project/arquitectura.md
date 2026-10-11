@@ -63,7 +63,28 @@ tests/bench/          pytest contra el testbench
 - La CI ejecuta un escáner de secretos sobre el árbol y el historial
   (NFR-SEC-01) y `strings` sobre el binario de release (NFR-SEC-02).
 
+## Imágenes
+
+| Imagen | Defaults | Lleva | Uso |
+|---|---|---|---|
+| producción | `sdkconfig.defaults` | sin log UDP ni ganchos de prueba | releases `v*.*.*`, journey de release-verify |
+| banco | `sdkconfig.defaults;sdkconfig.bench.defaults` | `CONFIG_NODO_BENCH_BUILD`, log UDP hacia el testbench, marcador `NODO-BENCH-IMAGE` | depuración en el banco; versión con el sufijo `-bench` |
+
+Los ganchos de inyección de fallos (NFR-WDT-01) se añaden solo a la imagen de
+banco (`CONFIG_NODO_BENCH_BUILD`) y la CI ya comprueba que la de producción no
+lleva su marcador.
+
 ## Comandos
 
-Los define `/harness` (build, flash, tests host/target/bench y lint) y se
-añaden aquí cuando existan.
+```bash
+# Dentro del devcontainer
+. $IDF_PATH/export.sh
+idf.py -B build -DSDKCONFIG=$PWD/build/sdkconfig set-target esp32s3 build      # producción
+idf.py -B build-bench -DSDKCONFIG=$PWD/build-bench/sdkconfig \
+  -DSDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.bench.defaults" set-target esp32s3 build
+cmake -S tests/host -B build-host && cmake --build build-host && ctest --test-dir build-host   # nivel host
+python3 -m pytest tests/bench -m journey     # nivel bench (cuando exista el banco)
+```
+
+El flasheo y la monitorización son de `esp-idf-handling` y de los skills
+`testbench-*`.

@@ -1,0 +1,179 @@
+# Plan de pruebas — Nodo Clima Piloto
+#
+# Propiedad de /build. Cada test declara lo que verifica (verifies: IDs del
+# FSD), lo que necesita (needs: capacidades) y dónde está su ejecutable (impl:).
+# El bloqueo se CALCULA a partir de needs × capabilities; nunca se escribe.
+# Los resultados (status, commit, date) los escribe quien ejecuta el test.
+
+project: villa-nodo-clima-piloto
+fsd: docs/Functionality/FSD-nodo-clima.md
+fsd_version: 0.5.0
+testing_standard: docs/Method/standards/testing.md
+debugging_agenda: testing/debugging-agenda.md
+gates_dir: testing/gates/
+
+dut:
+  board: ESP32-S3-DevKitC-1, módulo ESP32-S3-WROOM-1 N8R8 (FSD C-HW-01)
+  target: esp32s3
+  flash: 8MB (C-HW-02)
+  slot: pendiente — se asigna en /commission
+  boot_marker: "Init complete"      # última línea de app_main (contrato del testbench)
+  bench_image_marker: NODO-BENCH-IMAGE   # solo en la imagen de banco (C-LOG-01)
+
+testbench:
+  status: pendiente   # el banco no existe todavía: las piezas no han llegado
+  note: >
+    Las capacidades del banco se copian de lo que el banco reporte en
+    /commission. Hasta entonces figuran como available: no, y cada test que
+    las necesita aparece bloqueado con ese motivo.
+
+tiers: [host, target, bench, bench+, field, other]   # FSD §22.0
+
+# ---------------------------------------------------------------------------
+# Capacidades. Banco: available: no hasta /commission (no existe). Proyecto:
+# unproven hasta verlas funcionar aquí; cada unproven es un punto de la agenda.
+# ---------------------------------------------------------------------------
+capabilities:
+  # --- banco (pendiente de /commission) ---
+  bench-flash:
+    what: flashear el DUT a través del testbench (/api/flash, offsets de flash_args)
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-serial-monitor:
+    what: leer la consola USB-Serial/JTAG del DUT con DTR/RTS en bajo
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-udp-log-receiver:
+    what: receptor UDP 5555 del testbench con buffer de líneas
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-wifi-ap:
+    what: SoftAP del testbench al que se une el DUT
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-wifi-ap-outage:
+    what: apagar y encender el AP del banco bajo demanda
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-portal-driver:
+    what: el banco se une al AP del DUT y maneja el portal (GET/POST, escaneo de SSID)
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-mqtt-broker:
+    what: broker MQTT del banco con autenticación por usuario y contraseña
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-broker-outage:
+    what: parar y arrancar el broker del banco bajo demanda
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-ap-internet:
+    what: el AP del banco da salida a Internet (github.com, release-assets.githubusercontent.com, pool.ntp.org) — nivel bench+
+    available: no
+    reason: banco pendiente — se declara en /commission
+    consequence: >
+      si el banco no puede dar salida, las pruebas OTA pasan a field (FSD §22.0)
+      salvo TC-OTA-03 y TC-OTA-08, que quedan bloqueadas
+  bench-sntp-block:
+    what: bloquear y desbloquear UDP/123 hacia fuera desde la red del banco
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-dns-override:
+    what: resolver un host permitido hacia un servidor con certificado autofirmado (FR-OTA-03)
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-traffic-capture:
+    what: capturar el tráfico UDP que sale del DUT (FR-LOG-01)
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-power-cycle:
+    what: cortar y devolver la alimentación del DUT
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-operator-prompt:
+    what: avisos bloqueantes al operador en la UI del banco (acciones físicas)
+    available: no
+    reason: banco pendiente — se declara en /commission
+  bench-driver:
+    what: TestbenchDriver instalado en el devcontainer (nivel bench)
+    available: no
+    reason: banco pendiente — se instala en /commission
+
+  # --- infraestructura propia ---
+  hosted-ci:
+    what: runner alojado de GitHub (host, build, escaneo de secretos)
+    available: yes
+  release-verification:
+    what: journey lanzado por tag contra el artefacto publicado (runner self-hosted en el devcontainer)
+    available: no
+    reason: runner instalado pero sin registrar — el registro es una autorización del propietario (scripts/runner/register.sh)
+
+  # --- equipo y pares del proyecto (unproven hasta verlos funcionar aquí) ---
+  dut-board:
+    what: la DevKitC-1 N8R8 del proyecto, identificada como la unidad del FSD
+    available: unproven
+  sht41-wiring:
+    what: SHT41 en GPIO8/9, 100 kHz, dirección 0x44, con pull-ups (C-HW-04/05)
+    available: unproven
+  sda-disconnect:
+    what: interrumpir SDA del SHT41 bajo demanda (operador o conmutador)
+    available: unproven
+  home-assistant-test:
+    what: instancia de Home Assistant con integración MQTT apuntando al broker de prueba
+    available: unproven
+  github-test-releases:
+    what: pre-releases ota-test-* del repo con las imágenes de prueba OTA (FSD §22.0)
+    available: unproven
+  reference-instrument:
+    what: termohigrómetro de referencia para NFR-SEN-01
+    available: unproven
+  field-site:
+    what: el nodo instalado en la vivienda con su router, broker y HA (nivel field)
+    available: unproven
+
+# ---------------------------------------------------------------------------
+# Tests. JRN = workflow (el recorrido estándar, en orden). TC = atómico.
+# Ola 1 escribe solo standard; deviation y negative quedan bloqueados por ola.
+# ---------------------------------------------------------------------------
+tests:
+  # El journey (JRN-01.*) se siembra con la respuesta a la pregunta 2 del
+  # harness: el recorrido ordinario de principio a fin.
+
+  - id: TC-SEC-01
+    shape: atomic
+    kind: security
+    wave: 1           # la protección es parte del camino estándar en un repo público
+    phase: 1
+    tier: other
+    verifies: [NFR-SEC-01]
+    needs: [hosted-ci]
+    expect: gitleaks sobre árbol e historial sin hallazgos; lista de patrones de la instalación sin coincidencias
+    impl: .github/workflows/ci.yml#secret-scan
+    status: not done
+    reason: >
+      parcial — el paso de patrones de la instalación necesita el secreto
+      NODO_DENYLIST, que solo el propietario puede definir
+  - id: TC-LOG-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-LOG-01]
+    needs: [hosted-ci]
+    expect: la imagen de producción no contiene NODO-BENCH-IMAGE y la de banco sí (cada ejecución verifica la suya)
+    impl: .github/workflows/build.yml#build/Verify the image matches the variant asked for
+    status: not done
+    reason: >
+      sentido producción cubierto en cada push; el sentido banco necesita una
+      ejecución workflow_dispatch con variant=bench
+
+# Comprobaciones de que cada nivel funciona. No verifican el FSD y no son tests
+# del plan; se listan para que la reconciliación no las tome por huérfanas.
+tier_checks:
+  - impl: tests/host/tier_smoke.c
+    proves: el nivel host compila y ejecuta en CI
+  - impl: .github/workflows/devcontainer.yml
+    proves: el devcontainer (toolchain, pytest, runner) se construye
+
+gate_verdicts: []   # [{gate, verdict, date, commit}] — los escribe el checker
