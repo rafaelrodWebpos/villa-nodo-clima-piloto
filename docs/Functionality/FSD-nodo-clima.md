@@ -1,14 +1,14 @@
 # Nodo Clima Piloto — Especificación Funcional (FSD)
 
 ```yaml
-document_status: vigente — D1–D20 aceptadas; D21–D22 pendientes (ver §4.4)
-fsd_version: 0.2.0
+document_status: vigente — D1–D22 aceptadas (ver §4.4)
+fsd_version: 0.3.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
 author: Rafael Rodriguez
 reviewers: []
-approval_status: decisiones D1–D20 y FR-OTA-11 aceptadas por el propietario (2026-10-11)
+approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11)
 created: 2026-10-11
 last_updated: 2026-10-11
 change_history:
@@ -16,8 +16,9 @@ change_history:
     verificada contra la cadena de redirección real de GitHub Releases.
   - 0.2.0 (2026-10-11): aceptadas D1–D20 y FR-OTA-11; ota_repo enlazado a
     rafaelrodWebpos/villa-nodo-clima-piloto; D21–D22 abiertas.
+  - 0.3.0 (2026-10-11): aceptadas D21–D22; sin decisiones abiertas.
 superseded_requirements: []
-open_decisions: [D21 (T01, T02), D22 (C-HW-03)] — ver §4.4
+open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
 ```
 
@@ -110,7 +111,7 @@ el publicador no está conectado, la lectura se descarta (§5, FR-MED-06).
 |---|---|---|
 | C-HW-01 [Must] | La placa debe ser una ESP32-S3-DevKitC-1 con módulo ESP32-S3-WROOM-1 **N8R8**: 8 MB de flash y 8 MB de PSRAM. | [user] |
 | C-HW-02 [Must] | Una unidad con menos de 8 MB de flash no puede ejecutar este firmware; el build debe fijar `esptool` a 8 MB y no autodetectar. | [derived] |
-| C-HW-03 [Must] | El firmware no debe requerir PSRAM; debe arrancar y funcionar con la PSRAM deshabilitada. | [derived] **(propuesto, D22)** |
+| C-HW-03 [Must] | El firmware no debe requerir PSRAM; debe arrancar y funcionar con la PSRAM deshabilitada. | [derived] (D22) |
 | C-HW-04 [Must] | El SHT41 debe conectarse por I²C a **SDA = GPIO8** y **SCL = GPIO9** (D1), con alimentación de 3V3, en la dirección **0x44** (variante SHT41-AD1B). | [user] sensor; pines D1 |
 | C-HW-05 [Must] | El bus I²C debe operar a **100 kHz** (D1), con resistencias pull-up en SDA y SCL (las del breakout o externas de 4,7–10 kΩ). | [derived] |
 | C-HW-06 [Must] | La alimentación debe ser de 5 V por el USB de la DevKitC-1. | (assumed) |
@@ -290,9 +291,8 @@ reservados ni tópicos de comando definidos para él.
 
 ### 4.4 Decisiones de valores
 
-D1–D20 están **aceptadas** por el propietario y son normativas. D21 y D22
-siguen **abiertas**: su valor está marcado **(propuesto, Dnn)** en el texto y los
-requisitos que lo contienen quedan en estado `propuesto`.
+D1–D22 están **aceptadas** por el propietario y son normativas. No hay
+decisiones abiertas.
 
 | # | Valor | Requisitos |
 |---|---|---|
@@ -316,8 +316,8 @@ requisitos que lo contienen quedan en estado `propuesto`.
 | D17 | Exactitud frente a referencia: ± 0,5 °C y ± 3 %HR | NFR-SEN-01 |
 | D18 | Campos y periodo del diagnóstico en `status` (§9.3) | FR-MQTT-08 |
 | D20 | `ota_repo` = `rafaelrodWebpos/villa-nodo-clima-piloto`. Es público y no identifica el lugar de instalación | FR-OTA-11 |
-| D21 | **Abierta.** Límites de T01 (configuración → STA en ≤ 2 s) y de T02 (sin configuración → AP en ≤ 10 s) | T01, T02 |
-| D22 | **Abierta.** El firmware no requiere PSRAM (permite usar la variante N8) | C-HW-03 |
+| D21 | Límites de T01 (configuración → STA en ≤ 2 s) y de T02 (sin configuración → AP en ≤ 10 s) | T01, T02 |
+| D22 | El firmware no requiere PSRAM (permite usar la variante N8) | C-HW-03 |
 
 ---
 
@@ -401,13 +401,12 @@ imagen recién instalada) → `VÁLIDA`. Su estado persiste en `otadata`.
 ### 6.3 Tabla de transiciones (normativa)
 
 Todas las filas son requisitos [Must]. Procedencia: [user] para la ausencia de
-reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.4;
-los marcados **(propuesto, D21)** siguen abiertos.
+reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.4.
 
 | ID | Estado | Evento | Guarda | Siguiente | Acción | Límite | No debe ocurrir |
 |---|---|---|---|---|---|---|---|
-| T01 | ARRANQUE | fin_arranque | Configuración válida en NVS | CONECTANDO_WIFI | Arrancar el STA y el ciclo de medición | 2 s (propuesto, D21) | Abrir el AP |
-| T02 | ARRANQUE | fin_arranque | No hay configuración válida | PORTAL | Arrancar el AP, el DNS, el HTTP y el ciclo de medición | 10 s (propuesto, D21) | Intentar el STA |
+| T01 | ARRANQUE | fin_arranque | Configuración válida en NVS | CONECTANDO_WIFI | Arrancar el STA y el ciclo de medición | 2 s (D21) | Abrir el AP |
+| T02 | ARRANQUE | fin_arranque | No hay configuración válida | PORTAL | Arrancar el AP, el DNS, el HTTP y el ciclo de medición | 10 s (D21) | Intentar el STA |
 | T03 | PORTAL | envío | Algún campo inválido (§17) | PORTAL | Responder con un error por campo | 1 s | Escribir en la NVS |
 | T04 | PORTAL | envío | Todos los campos válidos | VALIDANDO | Probar la unión STA (AP+STA) con los datos del formulario | — | Escribir en la NVS |
 | T05 | VALIDANDO | wifi_up | — | ARRANQUE (reinicio) | Persistir la configuración, responder con éxito y reiniciar | 5 s | Reiniciar sin haber persistido |
