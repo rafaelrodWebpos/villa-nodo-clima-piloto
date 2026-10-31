@@ -477,3 +477,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "el caso «redirecciones» de T20 en bench⁺ no se puede montar con releases reales (un solo salto)"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: d878f57,
      findings: "solo la fila 1, que hereda la puerta 01"}
+  - {gate: 01-load-defined, verdict: OPEN, date: 2026-10-31, commit: 552d9f3,
+     findings: "sin bloqueantes; no bloqueantes: §22.0 describe FR-OTA-04 con el broker reiniciado; ventana de FR-MED-06/FR-CON-04 ajustada; inicio de la ventana de FR-CON-06; C-HW-*/C-BLD-* fuera de los criterios de fase"}
+  - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-10-31, commit: 552d9f3,
+     findings: "sin bloqueantes; no bloqueante: el reported_by de bench-flash dice running y el banco reporta idle"}
