@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.7.3
+fsd_version: 0.8.1
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -96,7 +96,7 @@ capabilities:
   bench-mqtt-auth:
     what: broker MQTT del banco con autenticación por usuario y contraseña (FR-MQTT-07)
     available: no
-    reason: /api/mqtt/status no reporta autenticación; se confirma con el banco en /commission o es petición de cambio
+    reason: /api/mqtt/status no reporta autenticación — petición CR-TB-03 (testing/testbench-change-requests.md)
   bench-operator-prompt:
     what: avisos bloqueantes al operador en la UI del banco (acciones físicas)
     available: yes
@@ -108,20 +108,27 @@ capabilities:
     consequence: >
       dependencia de las Fases 2 y 3 (FSD §3.2, §3.3). Hasta que el banco la
       reporte quedan bloqueados JRN-01.6, los contratos de hora en bench+
-      (FR-TIME-01/03/04, FR-MQTT-03) y todo JRN-02; las pruebas OTA pueden
-      pasar a field (FSD §22.0) salvo TC-OTA-03 y TC-OTA-08
+      (FR-TIME-01…04, FR-MQTT-03, FR-MED-06) y todo JRN-02; los contratos OTA
+      marcados «alt. field» pueden pasar a field (FSD §22.0), salvo FR-OTA-08 y
+      T22, que quedan bloqueados en bench+
   bench-sntp-block:
     what: bloquear y desbloquear UDP/123 hacia fuera desde la red del banco
     available: no
-    reason: el banco no reporta esta capacidad — petición de cambio al testbench si se necesita
+    reason: el banco no reporta esta capacidad — petición CR-TB-02 (testing/testbench-change-requests.md)
   bench-dns-override:
-    what: resolver un host permitido hacia un servidor con certificado autofirmado (FR-OTA-03)
+    what: resolver un host permitido hacia un servidor HTTPS con certificado autofirmado (FR-OTA-03, T20 tls)
     available: no
-    reason: el banco no reporta esta capacidad — petición de cambio al testbench si se necesita
+    reason: el banco no reporta esta capacidad — petición CR-TB-05 (testing/testbench-change-requests.md)
   bench-traffic-capture:
-    what: capturar el tráfico UDP que sale del DUT (FR-LOG-01)
+    what: capturar el tráfico UDP que sale del DUT (FR-LOG-01, FR-LOG-02 fila de captura)
     available: no
-    reason: el banco solo reporta el receptor del puerto 5555, no una captura del tráfico
+    reason: >
+      el banco solo reporta el receptor del puerto 5555, no una captura del
+      tráfico — petición CR-TB-04 (testing/testbench-change-requests.md)
+  bench-serial-write:
+    what: escribir en la consola del DUT por el slot (comandos de la imagen de banco, FSD §18 E13)
+    available: no
+    reason: el banco no reporta escritura serie por GET — se confirma en /commission
   bench-power-cycle:
     what: cortar y devolver la alimentación del DUT por instrumento
     available: no
@@ -217,8 +224,9 @@ tests:
     needs: [bench-driver, bench-portal-driver, bench-wifi-ap, bench-serial-monitor, dut-board]
     expect: >
       el banco envía por el portal el SSID y la clave de su AP, el broker y la
-      zona; el portal confirma, el AP clima-xxxxxx desaparece en ≤ 5 s y el
-      nodo reinicia
+      zona; el portal confirma, el log muestra nvs: config escrita y
+      con: VALIDANDO -> ARRANQUE (wifi_up), el AP clima-xxxxxx desaparece en
+      ≤ 5 s desde esa línea y el nodo reinicia (boot:)
     impl: null
   - id: JRN-01.3
     shape: workflow
@@ -229,9 +237,11 @@ tests:
     verifies: [T01, FR-LOG-02]
     needs: [bench-driver, bench-wifi-ap, bench-serial-monitor, bench-udp-log-receiver, dut-board]
     expect: >
-      tras el reinicio, T01 con la zona enviada; se une al AP del banco y el log
-      muestra la IP obtenida (wifi_up); el receptor UDP del banco recibe líneas
-      del nodo
+      tras el reinicio, el log muestra boot:, cfg: zona=<zona enviada> y
+      con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque); se une al AP del banco
+      (con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)); el receptor UDP del
+      banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
+      del log serie en ≤ 1 s
     impl: null
   - id: JRN-01.4
     shape: workflow
@@ -240,7 +250,7 @@ tests:
     phase: 2
     tier: bench
     verifies: [T11, FR-MQTT-06, FR-MQTT-08]
-    needs: [bench-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-serial-monitor, dut-board]
     expect: >
       se conecta al broker (CONECTANDO_BROKER -> OPERATIVO); el primer mensaje
       es status retained con estado = online y los 9 campos de diagnóstico con
@@ -253,7 +263,7 @@ tests:
     phase: 2
     tier: bench
     verifies: [FR-HA-01]
-    needs: [bench-driver, bench-mqtt-broker, home-assistant-test, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, home-assistant-test, dut-board]
     expect: >
       las tres configuraciones de Discovery llegan retained y Home Assistant
       muestra 1 dispositivo con 3 entidades (temperatura, humedad, punto de
@@ -266,11 +276,13 @@ tests:
     phase: 2
     tier: bench+   # SNTP con pool.ntp.org necesita la salida a Internet del banco
     verifies: [FR-MED-01, FR-MQTT-01, FR-MQTT-03, FR-TIME-01]
-    needs: [bench-driver, bench-mqtt-broker, bench-ap-internet, sht41-wiring, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-ap-internet, bench-serial-monitor, sht41-wiring, dut-board]
     expect: >
-      llega una medida válida de cada tópico y la siguiente 60 ± 1 s después;
-      una vez sincronizado el SNTP (hora_valida = true), ts no es nulo y
-      |ts − hora del broker| ≤ 2 s
+      llega en vivo (retain = 0) una medida válida de cada tópico y la
+      siguiente 60 ± 1 s después; sntp: sincronizado en ≤ 30 s desde wifi_up y
+      hora_valida = true en el primer status posterior; ts no es nulo y
+      |ts − hora de llegada al suscriptor| ≤ 2 s, con el reloj del suscriptor
+      sincronizado por NTP
     impl: null
   - id: JRN-01.7
     shape: workflow
@@ -279,11 +291,12 @@ tests:
     phase: 2
     tier: bench
     verifies: [FR-CON-05, FR-CFG-01]
-    needs: [bench-driver, bench-operator-prompt, bench-serial-monitor, bench-mqtt-broker, bench-portal-driver, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-operator-prompt, bench-serial-monitor, bench-mqtt-broker, bench-portal-driver, dut-board]
     expect: >
-      el operador desenchufa el USB-C y lo vuelve a enchufar; el nodo arranca
-      con T01 y la misma zona, sin AP clima-* en el escaneo, y vuelve a publicar
-      la primera medida en ≤ 30 s
+      el operador desenchufa el USB-C y lo vuelve a enchufar; el log muestra
+      cfg: zona=<misma zona> y con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque),
+      sin AP clima-* en el escaneo, y la primera medida en vivo llega en ≤ 30 s
+      desde la primera línea del arranque en la consola (bootloader o boot:)
     impl: null
 
   # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
@@ -296,11 +309,11 @@ tests:
     phase: 3
     tier: bench+
     verifies: [T17, T19, FR-OTA-02, FR-OTA-06]
-    needs: [bench-driver, bench-ap-internet, bench-mqtt-broker, github-test-releases, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-ap-internet, bench-mqtt-broker, github-test-releases, dut-board]
     expect: >
       comando OTA (no retained) con la URL releases/download/ota-test-*/ de la
       versión B; status pasa por ota = en_curso y ota = ok, y fw = B en ≤ 120 s
-      desde el fin de la descarga
+      desde el status con ota = ok
     impl: null
   - id: JRN-02.2
     shape: workflow
@@ -309,10 +322,12 @@ tests:
     phase: 3
     tier: bench+
     verifies: [FR-OTA-07]
-    needs: [bench-driver, bench-ap-internet, bench-mqtt-broker, github-test-releases, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-ap-internet, bench-mqtt-broker, bench-serial-monitor, github-test-releases, dut-board]
     expect: >
-      comando OTA con la pre-release ota-test-* cuya imagen no alcanza OPERATIVO;
-      en ≤ 300 s desde su primer arranque el nodo vuelve a B y status muestra fw = B
+      comando OTA con la pre-release ota-test-* construida con
+      CONFIG_NODO_TEST_SIN_MQTT=y, que no alcanza OPERATIVO; el log muestra su
+      boot: … img=pendiente, ota: rollback y boot: … fw=B en ≤ 300 s, y status
+      muestra fw = B
     impl: null
 
   - id: TC-SEC-01
