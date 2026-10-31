@@ -383,3 +383,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "T08/T10/T13/T17 sin «No debe ocurrir» y T04/T09/T10/T12/T13 sin límite; la Fase 2 necesita salida a Internet (FR-TIME-*, FR-MQTT-03) y no la declara"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
      findings: "solo la fila 1 (hereda la puerta 01); comprobación de comportamiento superada"}
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 18cb6fb,
+     findings: "FR-OTA-08: el estímulo «log ≥ 30 % descargado» no es observable (§18 no define una línea de progreso)"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 18cb6fb,
+     findings: "fila 1 hereda la puerta 01; las ediciones de 9da59ad a la puerta 02 no constan en gate_changes; comprobación de comportamiento superada"}
