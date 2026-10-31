@@ -351,4 +351,8 @@ tier_checks:
   - impl: .github/workflows/devcontainer.yml
     proves: el devcontainer (toolchain, pytest, runner) se construye
 
-gate_verdicts: []   # [{gate, verdict, date, commit}] — los escribe el checker
+gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
+     findings: "T08/T10/T13/T17 sin «No debe ocurrir» y T04/T09/T10/T12/T13 sin límite; la Fase 2 necesita salida a Internet (FR-TIME-*, FR-MQTT-03) y no la declara"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
+     findings: "solo la fila 1 (hereda la puerta 01); comprobación de comportamiento superada"}
