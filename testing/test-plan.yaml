@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.8.3
+fsd_version: 0.8.4
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -473,3 +473,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "T23 no tiene una línea con: deducible de §18 y su límite se medía desde una línea inexistente"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 8aac765,
      findings: "solo la fila 1, que hereda la puerta 01; nota: JRN-01.2 no puede observar la confirmación del portal (un solo radio)"}
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: d878f57,
+     findings: "el caso «redirecciones» de T20 en bench⁺ no se puede montar con releases reales (un solo salto)"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: d878f57,
+     findings: "solo la fila 1, que hereda la puerta 01"}
