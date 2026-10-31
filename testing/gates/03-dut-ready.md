@@ -8,7 +8,7 @@
 |---|---|---|---|
 | 1 | Las capacidades `bench-*` están copiadas de lo que el banco reporta ahora mismo | `testing/test-plan.yaml`; `curl $TESTBENCH_URL/api/info` | Cada `bench-*` en `yes` aparece en la respuesta en vivo; ninguna sigue con el motivo «banco pendiente» |
 | 2 | `bench-ap-internet` está resuelta (`yes` o `no` con su consecuencia), y el nivel de cada test OTA es coherente con ella (bench+ o field, FSD §22.0) | plan | Campo `tier` de los TC-OTA y JRN de OTA |
-| 3 | Registro del DUT: la placa es una DevKitC-1 N8R8 con 8 MB de flash (C-HW-01/02), con el slot asignado | `testing/test-plan.yaml` → `dut` | `flash-id` registrado por el test de commissioning, con su commit |
+| 3 | Registro del DUT: la placa del SLOT1 es una Waveshare ESP32-S3-DEV-KIT-N8R8 (ESP32-S3, 8 MB de flash, PSRAM de 8 MB; C-HW-01/02), y la consola aparece en UART0 y en USB-Serial/JTAG (C-HW-08) | `testing/test-plan.yaml` → `dut` | `flash-id` registrado por el test de commissioning, con su commit |
 | 4 | Camino de ida probado: ejecución de CI → artefacto → flasheo con los offsets de `flash_args` → marcador `Init complete` observado en serie | plan, resultado del test de camino de ida | status `successful` con commit y run id |
 | 5 | La agenda de depuración no tiene puntos abiertos del lado del proyecto | `testing/debugging-agenda.md` | Todas las filas cerradas, cada una con su capacidad pasada de `unproven` a `yes` |
 | 6 | No queda ninguna capacidad del proyecto en `unproven` que necesite un test de la ola 1 | plan | needs × capabilities |

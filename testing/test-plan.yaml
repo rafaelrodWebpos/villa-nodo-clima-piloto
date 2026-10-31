@@ -7,25 +7,32 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.5.0
+fsd_version: 0.6.0
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
 
 dut:
-  board: ESP32-S3-DevKitC-1, módulo ESP32-S3-WROOM-1 N8R8 (FSD C-HW-01)
+  board: Waveshare ESP32-S3-DEV-KIT-N8R8, módulo ESP32-S3-WROOM-1 N8R8 (FSD C-HW-01)
+  usb: un USB-C con hub — USB-Serial/JTAG 303a:1001 + CH343 1a86:55d3 (consola primaria UART0, C-HW-08)
   target: esp32s3
   flash: 8MB (C-HW-02)
-  slot: pendiente — se asigna en /commission
+  slot: SLOT1   # el banco lo lista presente e idle (2026-10-31); la identidad del chip la verifica /commission
+  test_partner_slot: SLOT2   # segunda Waveshare N8R8, presente e idle; su uso lo fija /commission
   boot_marker: "Init complete"      # última línea de app_main (contrato del testbench)
   bench_image_marker: NODO-BENCH-IMAGE   # solo en la imagen de banco (C-LOG-01)
 
 testbench:
-  status: pendiente   # el banco no existe todavía: las piezas no han llegado
+  status: montado
+  hostname: testbench-b99c
+  address: no se versiona — el repo es público; se descubre en cada sesión o
+    se lee de un fichero ignorado por git (.env)
+  reported: 2026-10-31   # lecturas GET de /api/info, /api/devices, /api/wifi/*,
+                         # /api/mqtt/status, /api/udplog, /api/human/status
   note: >
-    Las capacidades del banco se copian de lo que el banco reporte en
-    /commission. Hasta entonces figuran como available: no, y cada test que
-    las necesita aparece bloqueado con ese motivo.
+    Las capacidades del banco se copian de lo que el banco reporta y se
+    declaran yes sin prueba propia. Lo que el banco no reporta queda en no con
+    su motivo; si un test lo necesita, es una petición de cambio al testbench.
 
 tiers: [host, target, bench, bench+, field, other]   # FSD §22.0
 
@@ -34,70 +41,78 @@ tiers: [host, target, bench, bench+, field, other]   # FSD §22.0
 # unproven hasta verlas funcionar aquí; cada unproven es un punto de la agenda.
 # ---------------------------------------------------------------------------
 capabilities:
-  # --- banco (pendiente de /commission) ---
+  # --- banco: copiadas de lo que reporta (2026-10-31); un proyecto no las prueba ---
   bench-flash:
     what: flashear el DUT a través del testbench (/api/flash, offsets de flash_args)
-    available: no
-    reason: banco pendiente — se declara en /commission
+    available: yes
+    reported_by: /api/devices — SLOT1 presente, running, RFC2217 en el puerto 4001
   bench-serial-monitor:
-    what: leer la consola USB-Serial/JTAG del DUT con DTR/RTS en bajo
-    available: no
-    reason: banco pendiente — se declara en /commission
+    what: leer la consola del DUT (UART0 por el CH343 y USB-Serial/JTAG, C-HW-08) con DTR/RTS en bajo
+    available: yes
+    reported_by: /api/devices — SLOT1 monitor_port 5001, devnodes ttyACM0 y ttyACM1
   bench-udp-log-receiver:
     what: receptor UDP 5555 del testbench con buffer de líneas
-    available: no
-    reason: banco pendiente — se declara en /commission
+    available: yes
+    reported_by: /api/udplog responde ok
   bench-wifi-ap:
     what: SoftAP del testbench al que se une el DUT
-    available: no
-    reason: banco pendiente — se declara en /commission
+    available: yes
+    reported_by: /api/wifi/ap_status responde ok (inactivo)
   bench-wifi-ap-outage:
     what: apagar y encender el AP del banco bajo demanda
-    available: no
-    reason: banco pendiente — se declara en /commission
+    available: yes
+    reported_by: /api/wifi/ap_status — el AP se arranca y se para por API
   bench-portal-driver:
     what: el banco se une al AP del DUT y maneja el portal (GET/POST, escaneo de SSID)
-    available: no
-    reason: banco pendiente — se declara en /commission
+    available: yes
+    reported_by: /api/wifi/events responde ok (modo estación y relé HTTP de la misma API)
   bench-mqtt-broker:
-    what: broker MQTT del banco con autenticación por usuario y contraseña
-    available: no
-    reason: banco pendiente — se declara en /commission
+    what: broker mosquitto del banco en la red de su AP, puerto 1883
+    available: yes
+    reported_by: /api/mqtt/status responde ok (parado)
   bench-broker-outage:
     what: parar y arrancar el broker del banco bajo demanda
+    available: yes
+    reported_by: /api/mqtt/status — start/stop por API
+  bench-mqtt-auth:
+    what: broker MQTT del banco con autenticación por usuario y contraseña (FR-MQTT-07)
     available: no
-    reason: banco pendiente — se declara en /commission
+    reason: /api/mqtt/status no reporta autenticación; se confirma con el banco en /commission o es petición de cambio
+  bench-operator-prompt:
+    what: avisos bloqueantes al operador en la UI del banco (acciones físicas)
+    available: yes
+    reported_by: /api/human/status responde ok
   bench-ap-internet:
     what: el AP del banco da salida a Internet (github.com, release-assets.githubusercontent.com, pool.ntp.org) — nivel bench+
     available: no
-    reason: banco pendiente — se declara en /commission
+    reason: el banco no reporta salida a Internet desde su AP
     consequence: >
-      si el banco no puede dar salida, las pruebas OTA pasan a field (FSD §22.0)
-      salvo TC-OTA-03 y TC-OTA-08, que quedan bloqueadas
+      las pruebas OTA pasan a field (FSD §22.0) salvo TC-OTA-03 y TC-OTA-08,
+      que quedan bloqueadas; JRN-01.6 (ts no nulo tras SNTP con pool.ntp.org) y
+      todo JRN-02 quedan bloqueados hasta que el banco la reporte
   bench-sntp-block:
     what: bloquear y desbloquear UDP/123 hacia fuera desde la red del banco
     available: no
-    reason: banco pendiente — se declara en /commission
+    reason: el banco no reporta esta capacidad — petición de cambio al testbench si se necesita
   bench-dns-override:
     what: resolver un host permitido hacia un servidor con certificado autofirmado (FR-OTA-03)
     available: no
-    reason: banco pendiente — se declara en /commission
+    reason: el banco no reporta esta capacidad — petición de cambio al testbench si se necesita
   bench-traffic-capture:
     what: capturar el tráfico UDP que sale del DUT (FR-LOG-01)
     available: no
-    reason: banco pendiente — se declara en /commission
+    reason: el banco solo reporta el receptor del puerto 5555, no una captura del tráfico
   bench-power-cycle:
-    what: cortar y devolver la alimentación del DUT
+    what: cortar y devolver la alimentación del DUT por instrumento
     available: no
-    reason: banco pendiente — se declara en /commission
-  bench-operator-prompt:
-    what: avisos bloqueantes al operador en la UI del banco (acciones físicas)
-    available: no
-    reason: banco pendiente — se declara en /commission
+    reason: >
+      el banco reporta EN/BOOT por GPIO (has_gpio, gpio_wired sin determinar),
+      no corte de alimentación; el corte lo hace el operador desenchufando el
+      USB-C (bench-operator-prompt)
   bench-driver:
     what: TestbenchDriver instalado en el devcontainer (nivel bench)
     available: no
-    reason: banco pendiente — se instala en /commission
+    reason: lo instala /commission en el devcontainer del proyecto (.devcontainer/Dockerfile)
 
   # --- infraestructura propia ---
   hosted-ci:
@@ -110,22 +125,22 @@ capabilities:
 
   # --- equipo y pares del proyecto (unproven hasta verlos funcionar aquí) ---
   dut-board:
-    what: la DevKitC-1 N8R8 del proyecto, identificada como la unidad del FSD
+    what: la Waveshare ESP32-S3-DEV-KIT-N8R8 del SLOT1, identificada como la unidad del FSD (chip, flash 8 MB, PSRAM)
     available: unproven
   sht41-wiring:
     what: SHT41 en GPIO8/9, 100 kHz, dirección 0x44, con pull-ups (C-HW-04/05)
     available: unproven
   sda-disconnect:
-    what: interrumpir SDA del SHT41 bajo demanda (operador o conmutador)
+    what: interrumpir SDA del SHT41 bajo demanda — el operador desconecta el Dupont de SDA en la protoboard (no hay conmutador)
     available: unproven
   home-assistant-test:
-    what: instancia de Home Assistant con integración MQTT apuntando al broker de prueba
+    what: instancia de Home Assistant con integración MQTT apuntando al broker de prueba (Pi del banco o PC con Docker; lo decide /commission)
     available: unproven
   github-test-releases:
     what: pre-releases ota-test-* del repo con las imágenes de prueba OTA (FSD §22.0)
     available: unproven
   reference-instrument:
-    what: termohigrómetro de referencia para NFR-SEN-01
+    what: termohigrómetro de referencia para NFR-SEN-01, contrastado con sobres de calibración de HR del 33 % y del 75 %
     available: unproven
   field-site:
     what: el nodo instalado en la vivienda con su router, broker y HA (nivel field)
@@ -136,8 +151,142 @@ capabilities:
 # Ola 1 escribe solo standard; deviation y negative quedan bloqueados por ola.
 # ---------------------------------------------------------------------------
 tests:
-  # El journey (JRN-01.*) se siembra con la respuesta a la pregunta 2 del
-  # harness: el recorrido ordinario de principio a fin.
+  # JRN-01 — el recorrido ordinario de principio a fin (pregunta 2 del harness,
+  # respondida por el propietario el 2026-10-31). Los pasos se ejecutan en orden
+  # y cada uno parte del estado que deja el anterior; es la puerta que pasa cada
+  # sesión con hardware y los primeros tests de la ola 1. impl lo escribe /build.
+  - id: JRN-01.0
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [C-BLD-01, C-HW-02, C-HW-08]
+    needs: [bench-driver, hosted-ci, bench-flash, bench-serial-monitor, dut-board]
+    expect: >
+      se graba en SLOT1 la imagen de banco del último run verde de la CI (offsets
+      de flash_args, NVS borrada); la consola muestra NODO-BENCH-IMAGE y
+      «Init complete» en UART0 y en USB-Serial/JTAG
+    impl: null
+  - id: JRN-01.1
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [T02, FR-POR-01, FR-ID-01]
+    needs: [bench-driver, bench-serial-monitor, bench-portal-driver, dut-board]
+    expect: >
+      arranca sin configuración: el log muestra ARRANQUE -> PORTAL y el escaneo
+      del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
+    impl: null
+  - id: JRN-01.2
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [T04, T05, FR-POR-06]
+    needs: [bench-driver, bench-portal-driver, bench-wifi-ap, bench-serial-monitor, dut-board]
+    expect: >
+      el banco envía por el portal el SSID y la clave de su AP, el broker y la
+      zona; el portal confirma, el AP clima-xxxxxx desaparece en ≤ 5 s y el
+      nodo reinicia
+    impl: null
+  - id: JRN-01.3
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [T01, T08, FR-LOG-02]
+    needs: [bench-driver, bench-wifi-ap, bench-serial-monitor, bench-udp-log-receiver, dut-board]
+    expect: >
+      tras el reinicio, T01 con la zona enviada; se une al AP del banco y obtiene
+      IP (CONECTANDO_WIFI -> CONECTANDO_BROKER en el log); el receptor UDP del
+      banco recibe líneas del nodo
+    impl: null
+  - id: JRN-01.4
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [T11, FR-MQTT-06, FR-MQTT-08]
+    needs: [bench-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      se conecta al broker (CONECTANDO_BROKER -> OPERATIVO); el primer mensaje
+      es status retained con estado = online y los 9 campos de diagnóstico con
+      sus tipos (§9.3)
+    impl: null
+  - id: JRN-01.5
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-HA-01]
+    needs: [bench-driver, bench-mqtt-broker, home-assistant-test, dut-board]
+    expect: >
+      las tres configuraciones de Discovery llegan retained y Home Assistant
+      muestra 1 dispositivo con 3 entidades (temperatura, humedad, punto de
+      rocío) sin duplicados
+    impl: null
+  - id: JRN-01.6
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-MED-01, FR-MQTT-01, FR-MQTT-03, FR-TIME-01]
+    needs: [bench-driver, bench-mqtt-broker, bench-ap-internet, sht41-wiring, dut-board]
+    expect: >
+      llega una medida válida de cada tópico y la siguiente 60 ± 1 s después;
+      una vez sincronizado el SNTP (hora_valida = true), ts no es nulo y
+      |ts − hora del broker| ≤ 2 s
+    impl: null
+  - id: JRN-01.7
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-CON-05, FR-CFG-01]
+    needs: [bench-driver, bench-operator-prompt, bench-serial-monitor, bench-mqtt-broker, bench-portal-driver, dut-board]
+    expect: >
+      el operador desenchufa el USB-C y lo vuelve a enchufar; el nodo arranca
+      con T01 y la misma zona, sin AP clima-* en el escaneo, y vuelve a publicar
+      la primera medida en ≤ 30 s
+    impl: null
+
+  # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
+  # aparte de JRN-01 porque necesita la salida a Internet del banco (bench+;
+  # alternativa field, FSD §22.0). Parte de un nodo que ha superado JRN-01.
+  - id: JRN-02.1
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [T17, T19, FR-OTA-02, FR-OTA-06]
+    needs: [bench-driver, bench-ap-internet, bench-mqtt-broker, github-test-releases, dut-board]
+    expect: >
+      comando OTA (no retained) con la URL releases/download/ota-test-*/ de la
+      versión B; status pasa por ota = en_curso y ota = ok, y fw = B en ≤ 120 s
+      desde el fin de la descarga
+    impl: null
+  - id: JRN-02.2
+    shape: workflow
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [FR-OTA-07]
+    needs: [bench-driver, bench-ap-internet, bench-mqtt-broker, github-test-releases, dut-board]
+    expect: >
+      comando OTA con la pre-release ota-test-* cuya imagen no alcanza OPERATIVO;
+      en ≤ 300 s desde su primer arranque el nodo vuelve a B y status muestra fw = B
+    impl: null
 
   - id: TC-SEC-01
     shape: atomic
