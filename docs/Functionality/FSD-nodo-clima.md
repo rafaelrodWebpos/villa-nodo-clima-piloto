@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.8.1
+fsd_version: 0.8.2
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -53,6 +53,8 @@ change_history:
     prohibido de destino (C10); fila bench del backoff MQTT en la Fase 2 (C11).
   - 0.8.1 (2026-10-31): FR-MQTT-09 admite publicar el cambio de `ota` al volver a OPERATIVO
     si no hay MQTT (T22); el timeout de FR-OTA-12 es 30 s sin datos (propietario).
+  - 0.8.2 (2026-10-31): el contrato de FR-OTA-04 publica el retained con el DUT desconectado
+    y reconecta cortando el AP (el broker no se reinicia y conserva el retained); E0 incluye T18.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -758,7 +760,7 @@ verification:
 | FR-OTA-02 | Dos comandos sucesivos con URLs `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/<tag>/<asset>` reales, a dos versiones distintas | Para cada uno, `status` con `ota` = `ok` y después `fw` = la versión de destino | `rechazado:host` en una URL legítima | bench⁺ · alt. field |
 | FR-OTA-11 | Política con `https://github.com/otro/repo/releases/download/v1/x.bin` y `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/archive/x` | `rechazado:ruta` en ambas | Descargar la release de otra cuenta | host |
 | FR-OTA-03 | Comando con la URL `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/<tag>/<asset>`; el DNS del banco resuelve `github.com` hacia un servidor HTTPS con certificado autofirmado | `ota: estado error:tls` sin ninguna línea `ota: <n> %` antes; `status` con `ota` = `error:tls` | Una línea `ota: <n> %` (escritura en el slot inactivo) | bench (`bench-dns-override`) |
-| FR-OTA-04 | Tras un arranque sin eventos OTA, publicar el comando OTA con retain; provocar 3 reconexiones parando y arrancando el broker | En cada reconexión, `ota: ignorado retained` (§18); `status` con `ota` = `ninguno`; ninguna línea `con: … (cmd_ota)` | Descarga (`ota: estado en_curso` o `ota: <n> %`); bucle de OTA en cada reconexión | bench |
+| FR-OTA-04 | DUT en OPERATIVO sin eventos OTA; apagar el AP del banco (el DUT pierde la conexión y el broker sigue en marcha); publicar con retain el comando OTA con una URL que cumple FR-OTA-02 y FR-OTA-11 (`…/releases/download/ota-test-b/<asset>`); encender el AP; repetir el corte del AP 2 veces más (3 reconexiones; el broker conserva el retained porque no se reinicia) | En cada reconexión, el broker entrega el comando con retain = 1 y el log muestra `ota: ignorado retained` (§18); `status` con `ota` = `ninguno`; ninguna línea `con: … (cmd_ota)` | Descarga (`ota: estado en_curso` o `ota: <n> %`); bucle de OTA en cada reconexión | bench |
 | FR-OTA-12 | Clasificador de fallos de descarga con: fallo de DNS, fallo de TCP, timeout, respuesta 404 y respuesta 500 | `error:red`, `error:red`, `error:red`, `error:http`, `error:http` | Otro motivo; `ok` | host |
 | FR-OTA-12 | Comando con la URL de un asset inexistente bajo `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/<tag>/` | `ota: estado error:http`; `status` con `ota` = `error:http` y `fw` sin cambio | Reinicio; una línea `ota: <n> %` | bench⁺ · alt. field |
 | FR-OTA-05 | Imagen para esp32 (no S3); imagen truncada; imagen con la misma versión | `error:imagen`, `error:imagen`, `rechazado:misma_version` | Cambio de slot; reinicio | bench⁺ · alt. field |
@@ -1169,7 +1171,7 @@ operativa, no secreta (§17).
 
 | Ref. | Línea | Cuándo se escribe |
 |---|---|---|
-| E0 | `con: <ESTADO> -> <ESTADO> (<evento>)` | En cada fila de §6.3, incluidas las autotransiciones T03, T07, T09, T10, T12, T13 y T21 |
+| E0 | `con: <ESTADO> -> <ESTADO> (<evento>)` | En cada fila de §6.3, incluidas las autotransiciones T03, T07, T09, T10, T12, T13, T18 y T21 |
 | E1 | `boot: <nodo> fw=<versión> reset=<causa> part=<ota_0\|ota_1> img=<pendiente\|valida>` | Una vez por arranque, antes de cualquier otra línea de la aplicación; `<causa>` toma los valores de `reset` de §9.3 y `part` es el slot en ejecución |
 | E2 | `cfg: zona=<zona>` | Al leer de la NVS una configuración válida, antes de T01 |
 | E3 | `med: T=<t> HR=<h> Td=<td\|->` · `med: invalida (<nack\|timeout\|crc>)` | En cada ciclo de medición, en cualquier estado; `Td=-` cuando no se calcula (FR-MED-04) |
