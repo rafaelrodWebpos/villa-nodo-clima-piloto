@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.7.2
+fsd_version: 0.7.3
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -34,6 +34,10 @@ change_history:
     estímulo de FR-OTA-08 la usa.
   - 0.7.2 (2026-10-31): resultados prohibidos de C-HW-06, NFR-SEN-01 y C-CFG-01; el contrato
     de C-CFG-01 nombra los 6 campos de cadena de §17 (propietario).
+  - 0.7.3 (2026-10-31): FR-CON-03/04 observan la llegada en vivo al broker en lugar de `ts`
+    (siguen en bench); FR-MED-06 y FR-TIME-02 (target) pasan a bench⁺; guardas de T17/T18
+    deterministas, con el orden de evaluación del comando y las comprobaciones de la descarga
+    en T20 (propietario).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -386,7 +390,7 @@ conectividad salvo ARRANQUE (§6).
 | FR-MED-03 | Tabla de 200 pares (T, HR) en la rejilla del rango, incluidos los extremos | \|Td − Td_ref\| ≤ 0,1 °C en todos | NaN o infinito para HR ∈ [1, 100] | host |
 | FR-MED-04 | Entrada con HR = 0 y entrada con T inválida | La salida es «no publicar punto_rocio» | Que se publique punto_rocio con 0, NaN, −273 o el valor anterior | host |
 | FR-MED-05 | Valores 21,45 · −0,05 · 21,449 · 99,96 | 21,5 · −0,1 · 21,4 · 100,0 | Más de 1 decimal en el JSON; `v` como string | host |
-| FR-MED-06 | Broker detenido 5 min; luego se restablece; suscriptor en `villa/#` con retained descartados | Tras reconectar llega exactamente 1 mensaje por medida, con `ts` ≤ 60 s anterior a la llegada | Ráfaga de mensajes con `ts` de la ventana sin conexión | bench |
+| FR-MED-06 | Broker detenido 5 min; luego se restablece; suscriptor en `villa/#` con retained descartados | Tras reconectar llega exactamente 1 mensaje por medida, con `ts` ≤ 60 s anterior a la llegada | Ráfaga de mensajes con `ts` de la ventana sin conexión | bench⁺ |
 
 ### 5.4 Algoritmo
 
@@ -445,10 +449,10 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T14 | CONECTANDO_BROKER | wifi_down | — | CONECTANDO_WIFI | Detener los intentos MQTT; programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
 | T15 | OPERATIVO | mqtt_down | — | CONECTANDO_BROKER | Programar un reintento MQTT | 1 s | Reiniciar el nodo; desconectar el Wi-Fi |
 | T16 | OPERATIVO | wifi_down | — | CONECTANDO_WIFI | Programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
-| T17 | OPERATIVO | cmd_ota | Cumple FR-OTA-02…05 (no retained) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
-| T18 | OPERATIVO | cmd_ota | Incumple alguna regla de §7 | OPERATIVO | Publicar `status` con `ota` = `rechazado:<motivo>` | 2 s | Descargar; cambiar de partición |
+| T17 | OPERATIVO | cmd_ota | Payload conforme a §12.1 (FR-OTA-09), URL inicial con esquema y host permitidos (FR-OTA-02) y con la ruta del repo (FR-OTA-11) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
+| T18 | OPERATIVO | cmd_ota | Incumple alguna regla de la guarda de T17, evaluadas en el orden payload → host → ruta; el motivo es la primera que falla | OPERATIVO | Publicar `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` | 2 s | Descargar; cambiar de partición |
 | T19 | OTA_DESCARGA | ota_ok | — | ARRANQUE (reinicio) | Publicar `status` con `ota` = `ok`, publicar `offline` y reiniciar en el nuevo slot | 5 s | Reiniciar sin cambiar de slot |
-| T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>`; conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
+| T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>` (redirecciones, FR-OTA-02; TLS, FR-OTA-03; imagen, FR-OTA-05), o `rechazado:misma_version` (FR-OTA-05); conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
 | T21 | OTA_DESCARGA | cmd_ota | — | OTA_DESCARGA | Publicar `ota` = `rechazado:ocupado` | 2 s | Abortar o reiniciar la descarga en curso |
 | T22 | OTA_DESCARGA | mqtt_down o wifi_down | — | CONECTANDO_BROKER o CONECTANDO_WIFI, según el evento | Abortar la descarga; conservar la imagen en ejecución | 2 s | Reiniciar; activar una imagen parcial |
 | T23 | (Validación) PENDIENTE | 300 s sin T11 desde el arranque | — | Reinicio → rollback | Reiniciar; el bootloader arranca la imagen anterior | 300 s | Seguir con la imagen no validada |
@@ -478,6 +482,11 @@ o T23.
 ⁵ No hay descarga en curso. ⁶ Se emite una sola vez por arranque.
 ⁷ Un temporizador residual se cancela al entrar en OPERATIVO; si dispara, se
 ignora.
+
+Un comando OTA entregado con el flag retain no genera el evento `cmd_ota`: se
+ignora y se registra (FR-OTA-04). Las redirecciones, el certificado y la imagen
+solo se pueden comprobar durante la descarga, y sus fallos llegan como
+`ota_err` (T20).
 
 ### 6.5 Requisitos adicionales de conectividad
 
@@ -537,7 +546,7 @@ verification:
     - Apagar el AP Wi-Fi 5 min (el backoff llega al techo); encender el AP.
   expected_observations:
     - Llega un mensaje válido de `temperatura` (JSON conforme a FR-MQTT-02).
-    - Su `ts` es posterior al restablecimiento del AP.
+    - Llega en vivo (retain = 0), con hora de llegada al broker posterior al restablecimiento del AP.
   timing: ≤ 90 s desde que el AP emite balizas hasta el mensaje
   tolerance: +5 s (arranque del AP del banco)
   prohibited_outcomes:
@@ -557,7 +566,7 @@ verification:
   stimulus:
     - Detener el broker 5 min; arrancarlo.
   expected_observations:
-    - Llega un mensaje válido de medida no retained con `ts` posterior al arranque del broker.
+    - Llega en vivo (retain = 0) un mensaje válido de medida, con hora de llegada al broker posterior a su arranque.
     - `rssi` aparece en el `status` posterior y la asociación Wi-Fi no se perdió (log sin desasociación).
   timing: ≤ 75 s desde que el broker acepta conexiones
   tolerance: +5 s
@@ -1008,7 +1017,7 @@ verification:
 |---|---|---|---|---|
 | FR-TIME-01 | SNTP accesible; `wifi_up` | `hora_valida` = true en ≤ 30 s (log y `status`) | Nunca sincronizar | bench⁺ |
 | FR-TIME-02 | Función de validez: (sincronizado = no, reloj = 2030), (sí, reloj = 1970), (sí, reloj = build − 1 s), (sí, reloj = build + 1 s) | No válida, no válida, no válida, válida | Considerar válido un reloj solo porque «parece reciente» | host |
-| FR-TIME-02 | Reinicio por software (`esp_restart`) tras una sincronización, con SNTP bloqueado | `hora_valida` = false tras el reinicio | Reutilizar sin resincronizar la hora del RTC del arranque anterior | target |
+| FR-TIME-02 | Reinicio por software (`esp_restart`) tras una sincronización, con SNTP bloqueado | `hora_valida` = false tras el reinicio | Reutilizar sin resincronizar la hora del RTC del arranque anterior | bench⁺ |
 | FR-TIME-04 | Hora válida; bloquear SNTP 2 h | `hora_valida` sigue en true; el log registra el intento fallido de resincronización | Pasar a `ts` = null | bench⁺ |
 | FR-TIME-05 | SNTP bloqueado desde el arranque | Primera medida en ≤ 30 s (FR-CON-05) con `ts` = null | Esperar a la hora para publicar | bench |
 
@@ -1180,7 +1189,7 @@ borrando la NVS para reaprovisionar (§19.1). Los pasos concretos están en
 | host | PC, compilador nativo, sin ESP-IDF | Validez de la hora, punto de rocío, redondeo, conversión y CRC del SHT41, serialización JSON, generador de Discovery, validación de §17, política OTA, parser de comandos, backoff, lógica de la tabla de transiciones, identificador |
 | target | ESP32-S3 real | Lectura I²C, NVS, servidor HTTP del portal, watchdog |
 | bench | DUT + AP Wi-Fi + broker + HA + operador | Recuperación, LWT, OTA y rollback, portal de extremo a extremo, ausencia de reinicios, exactitud |
-| bench⁺ | bench cuyo AP da salida a Internet | SNTP con `pool.ntp.org` (FR-TIME-01, -03, -04, FR-MQTT-03; Fase 2) y OTA contra releases reales de GitHub del repo (Fase 3) |
+| bench⁺ | bench cuyo AP da salida a Internet | SNTP con `pool.ntp.org` (FR-TIME-01…04, FR-MQTT-03, FR-MED-06; Fase 2) y OTA contra releases reales de GitHub del repo (Fase 3) |
 | field | El nodo instalado en la vivienda, con su router, su broker y su HA | Alternativa a bench⁺ para la OTA cuando el banco no da salida a Internet; solo se manda y se observa |
 | other | CI / revisión | Secretos en el repo y en las releases, C-CFG-01, C-LOG-01 |
 
