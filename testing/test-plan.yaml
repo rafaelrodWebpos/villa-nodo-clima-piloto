@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.8.2
+fsd_version: 0.8.3
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -224,7 +224,8 @@ tests:
     needs: [bench-driver, bench-portal-driver, bench-wifi-ap, bench-serial-monitor, dut-board]
     expect: >
       el banco envía por el portal el SSID y la clave de su AP, el broker y la
-      zona; el portal confirma, el log muestra nvs: config escrita y
+      zona (el banco no espera la respuesta del portal: tiene un solo radio y
+      vuelve a levantar su AP); el log muestra nvs: config escrita y
       con: VALIDANDO -> ARRANQUE (wifi_up), el AP clima-xxxxxx desaparece en
       ≤ 5 s desde esa línea y el nodo reinicia (boot:)
     impl: null
@@ -468,3 +469,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "el contrato de FR-OTA-04 no se puede montar: un retained publicado con el DUT suscrito llega con retain = 0, y reiniciar el broker lo pierde"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 0fddfef,
      findings: "solo la fila 1, que hereda la puerta 01"}
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 8aac765,
+     findings: "T23 no tiene una línea con: deducible de §18 y su límite se medía desde una línea inexistente"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 8aac765,
+     findings: "solo la fila 1, que hereda la puerta 01; nota: JRN-01.2 no puede observar la confirmación del portal (un solo radio)"}

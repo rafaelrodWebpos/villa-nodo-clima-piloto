@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.8.2
+fsd_version: 0.8.3
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -55,6 +55,9 @@ change_history:
     si no hay MQTT (T22); el timeout de FR-OTA-12 es 30 s sin datos (propietario).
   - 0.8.2 (2026-10-31): el contrato de FR-OTA-04 publica el retained con el DUT desconectado
     y reconecta cortando el AP (el broker no se reinicia y conserva el retained); E0 incluye T18.
+  - 0.8.3 (2026-10-31): T23 no emite `con:` (se observa con `ota: rollback`) y su límite se mide
+    desde el `boot:` de la imagen nueva; T22 escribe `ota: estado error:red` en el cambio; URL del
+    repo en el contrato host de FR-OTA-02; NFR-OTA-01 alterna A y B.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -493,7 +496,7 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T19 | OTA_DESCARGA | ota_ok | — | ARRANQUE (reinicio) | Publicar `status` con `ota` = `ok`, publicar `offline` y reiniciar en el nuevo slot | 5 s | Reiniciar sin cambiar de slot |
 | T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>` (redirecciones, FR-OTA-02; TLS, FR-OTA-03; imagen, FR-OTA-05; http y red, FR-OTA-12), `rechazado:host` (un salto de redirección a un host no permitido, FR-OTA-02) o `rechazado:misma_version` (FR-OTA-05); conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
 | T21 | OTA_DESCARGA | cmd_ota | — | OTA_DESCARGA | Publicar `ota` = `rechazado:ocupado` | 2 s | Abortar o reiniciar la descarga en curso |
-| T22 | OTA_DESCARGA | mqtt_down o wifi_down | — | CONECTANDO_BROKER o CONECTANDO_WIFI, según el evento | Abortar la descarga; conservar la imagen en ejecución; diagnóstico `ota` = `error:red` (FR-OTA-12), que se publica al volver a OPERATIVO | 2 s | Reiniciar; activar una imagen parcial |
+| T22 | OTA_DESCARGA | mqtt_down o wifi_down | — | CONECTANDO_BROKER o CONECTANDO_WIFI, según el evento | Abortar la descarga; conservar la imagen en ejecución; diagnóstico `ota` = `error:red` (FR-OTA-12; la línea `ota: estado error:red` se escribe en el momento del cambio y el `status` se publica al volver a OPERATIVO, FR-MQTT-09) | 2 s | Reiniciar; activar una imagen parcial |
 | T23 | (Validación) PENDIENTE | 300 s sin T11 desde el arranque | — | Reinicio → rollback | Reiniciar; el bootloader arranca la imagen anterior | 300 s | Seguir con la imagen no validada |
 
 **Acciones globales.** Si salta el watchdog de tareas (NFR-WDT-01), el nodo se
@@ -630,12 +633,13 @@ verification:
 | FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP; esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
 | T01–T23 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
 | T01–T16, T18 | Una prueba por fila con el portal, el AP y el broker reales del banco | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento`, `mqtt: intento`, `sntp:`, `ota: estado` y `nvs: config escrita` (§18) o con `status`, dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
-| T17, T19, T20 (imagen, misma_version, redirecciones, http), T21, T23 | Comandos OTA con releases y pre-releases `ota-test-*` reales del repo (§22.0) | La línea `con:` de la fila y su acción (`ota: estado`, `ota: imagen validada`, `ota: rollback`, `boot:`), dentro del límite; en T17 (descarga abortada por un reset) y T20, un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de la fila | bench⁺ · alt. field |
+| T17, T19, T20 (imagen, misma_version, redirecciones, http), T21, T23 | Comandos OTA con releases y pre-releases `ota-test-*` reales del repo (§22.0) | La línea `con:` de la fila (en T23, `ota: rollback`) y su acción (`ota: estado`, `ota: imagen validada`, `ota: rollback`, `boot:`), dentro del límite; en T17 (descarga abortada por un reset) y T20, un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de la fila | bench⁺ · alt. field |
 | T20 (tls) | Como el contrato de FR-OTA-03 | `con: OTA_DESCARGA -> OPERATIVO (ota_err)` y `ota: estado error:tls` | Lo indicado en la columna «No debe ocurrir» de T20 | bench (`bench-dns-override`) |
-| T22 | Como el contrato de FR-OTA-08, y la misma prueba deteniendo el broker en lugar del AP | `con: OTA_DESCARGA -> CONECTANDO_WIFI (wifi_down)` o `con: OTA_DESCARGA -> CONECTANDO_BROKER (mqtt_down)`; al volver a OPERATIVO, `ota: estado error:red`; un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de T22 | bench⁺ (sin alternativa field) |
+| T22 | Como el contrato de FR-OTA-08, y la misma prueba deteniendo el broker en lugar del AP | `con: OTA_DESCARGA -> CONECTANDO_WIFI (wifi_down)` o `con: OTA_DESCARGA -> CONECTANDO_BROKER (mqtt_down)` seguida de `ota: estado error:red`; el primer `status` al volver a OPERATIVO lleva `ota` = `error:red`; un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de T22 | bench⁺ (sin alternativa field) |
 
-Los límites de T03–T23 se miden desde la línea `con:` de la fila; los de T01 y T02,
-desde la línea `boot:`. Donde la acción es «programar un reintento», se observa el
+Los límites de T03–T22 se miden desde la línea `con:` de la fila; los de T01 y T02,
+desde la línea `boot:`, y el de T23, desde la línea `boot:` de la imagen nueva
+(como FR-OTA-07). Donde la acción es «programar un reintento», se observa el
 intento siguiente (`wifi: intento <n>` o `mqtt: intento <n>`) en ≤ backoff vigente + 1 s
 desde la línea `con:` de la fila.
 
@@ -756,7 +760,7 @@ verification:
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-OTA-02 | Política con `http://github.com/x`, `https://evil.example/x`, `https://github.com/x` → redirección a `objects.githubusercontent.com`, y una cadena de 4 redirecciones | `rechazado:host` en las tres primeras; `error:redirecciones` en la cuarta | Aceptar alguna; que la política devuelva «seguir» para un salto no permitido | host (política) |
+| FR-OTA-02 | Política con `http://github.com/x`, `https://evil.example/x`, `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/v1/x.bin` → redirección a `objects.githubusercontent.com`, y una cadena de 4 redirecciones | `rechazado:host` en las tres primeras; `error:redirecciones` en la cuarta | Aceptar alguna; que la política devuelva «seguir» para un salto no permitido | host (política) |
 | FR-OTA-02 | Dos comandos sucesivos con URLs `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/<tag>/<asset>` reales, a dos versiones distintas | Para cada uno, `status` con `ota` = `ok` y después `fw` = la versión de destino | `rechazado:host` en una URL legítima | bench⁺ · alt. field |
 | FR-OTA-11 | Política con `https://github.com/otro/repo/releases/download/v1/x.bin` y `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/archive/x` | `rechazado:ruta` en ambas | Descargar la release de otra cuenta | host |
 | FR-OTA-03 | Comando con la URL `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/<tag>/<asset>`; el DNS del banco resuelve `github.com` hacia un servidor HTTPS con certificado autofirmado | `ota: estado error:tls` sin ninguna línea `ota: <n> %` antes; `status` con `ota` = `error:tls` | Una línea `ota: <n> %` (escritura en el slot inactivo) | bench (`bench-dns-override`) |
@@ -766,7 +770,7 @@ verification:
 | FR-OTA-05 | Imagen para esp32 (no S3); imagen truncada; imagen con la misma versión | `error:imagen`, `error:imagen`, `rechazado:misma_version` | Cambio de slot; reinicio | bench⁺ · alt. field |
 | FR-OTA-06 | Comando con la release B válida | `status` con `fw` = B en ≤ 120 s desde el `status` con `ota` = `ok` | En los 310 s siguientes, un `status` con `fw` ≠ B o con `uptime_s` decreciente (rollback de una imagen buena) | bench⁺ · alt. field |
 | FR-OTA-10 | Segundo comando durante una descarga | `ota` pasa por `en_curso` → `rechazado:ocupado` → `ok`, y después `fw` = B | Aborto de la primera | bench⁺ · alt. field |
-| NFR-OTA-01 | OTA de B, repetida hasta reunir ≥ 3 intervalos entre lecturas con un extremo dentro de OTA_DESCARGA | Bench⁺: esos intervalos, medidos entre líneas `med:` (§18), en [55, 65] s. Field: Δ`lecturas` = ⌊Δ`uptime_s`/60⌋ ± 1 entre el último `status` previo al comando y el `status` con `ota` = `ok` | Ciclo perdido sin conexión caída | bench⁺ · alt. field |
+| NFR-OTA-01 | OTA alternando entre B y A (A → B, B → A, …, para no caer en `rechazado:misma_version`) hasta reunir ≥ 3 intervalos entre lecturas con un extremo dentro de OTA_DESCARGA | Bench⁺: esos intervalos, medidos entre líneas `med:` (§18), en [55, 65] s. Field: Δ`lecturas` = ⌊Δ`uptime_s`/60⌋ ± 1 entre el último `status` previo al comando y el `status` con `ota` = `ok` | Ciclo perdido sin conexión caída | bench⁺ · alt. field |
 
 ---
 
@@ -1171,7 +1175,7 @@ operativa, no secreta (§17).
 
 | Ref. | Línea | Cuándo se escribe |
 |---|---|---|
-| E0 | `con: <ESTADO> -> <ESTADO> (<evento>)` | En cada fila de §6.3, incluidas las autotransiciones T03, T07, T09, T10, T12, T13, T18 y T21 |
+| E0 | `con: <ESTADO> -> <ESTADO> (<evento>)` | En cada fila de §6.3, incluidas las autotransiciones T03, T07, T09, T10, T12, T13, T18 y T21, salvo T23: es de la región de validación de imagen, no del gestor de conectividad, y se observa con `ota: rollback` (E9) |
 | E1 | `boot: <nodo> fw=<versión> reset=<causa> part=<ota_0\|ota_1> img=<pendiente\|valida>` | Una vez por arranque, antes de cualquier otra línea de la aplicación; `<causa>` toma los valores de `reset` de §9.3 y `part` es el slot en ejecución |
 | E2 | `cfg: zona=<zona>` | Al leer de la NVS una configuración válida, antes de T01 |
 | E3 | `med: T=<t> HR=<h> Td=<td\|->` · `med: invalida (<nack\|timeout\|crc>)` | En cada ciclo de medición, en cualquier estado; `Td=-` cuando no se calcula (FR-MED-04) |
