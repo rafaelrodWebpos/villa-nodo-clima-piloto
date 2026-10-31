@@ -441,3 +441,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "«No debe ocurrir» vacío en C-HW-06, NFR-SEN-01 y C-CFG-01; contrato de C-CFG-01 ambiguo (5 frente a 6 campos)"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: b54b95e,
      findings: "solo la fila 1, que hereda la puerta 01; ninguna edición de puerta sin registrar"}
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 566a790,
+     findings: "FR-MED-06, FR-CON-03, FR-CON-04 y FR-TIME-02 (target) observan ts sin declarar bench⁺; las guardas de T17 y T18 se solapan y no cubren FR-OTA-09/11"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 566a790,
+     findings: "solo la fila 1, que hereda la puerta 01; ninguna edición de puerta sin registrar"}
