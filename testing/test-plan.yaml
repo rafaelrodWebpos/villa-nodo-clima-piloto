@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.7.1
+fsd_version: 0.7.2
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -370,7 +370,10 @@ gate_changes:
       lo aprobó después y pidió que ninguna puerta se cambie sin preguntar antes
   - gate: 03-dut-ready
     row: 5
-    change: DUT ready solo exige cerradas las filas 1–3 de la agenda
+    commit: 18cb6fb
+    change: >
+      DUT ready solo exige cerradas las filas 1–3 de la agenda; su
+      comprobación mecánica cuenta solo esas filas
     reason: >
       las filas 4–6 (Home Assistant, termohigrómetro, pre-releases ota-test-*)
       solo las necesitan tests de las Fases 2 y 3; se cierran antes de su
@@ -407,10 +410,21 @@ gate_changes:
     note: aplicado antes de preguntar; aprobado después
   - gate: 03-dut-ready
     row: 3
+    commit: cead232
     change: >
       basta con ver el marcador de arranque en la consola del slot; la parte
       «en ambos devnodes» de C-HW-08 queda fuera de DUT ready
     reason: el banco proxifica un solo devnode por slot (bench-dual-console en no)
+    approved_by: propietario
+    date: 2026-10-31
+  - gate: 02-ai-harnessed
+    row: comprobaciones mecánicas (CI verde, fila 9)
+    change: >
+      busca el último run verde de cada uno de los tres workflows en main, en
+      lugar de los 10 últimos runs
+    reason: >
+      «devcontainer image builds» solo se lanza cuando cambian sus rutas y su
+      run verde se sale de los 10 últimos
     approved_by: propietario
     date: 2026-10-31
 
@@ -423,3 +437,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "FR-OTA-08: el estímulo «log ≥ 30 % descargado» no es observable (§18 no define una línea de progreso)"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: 18cb6fb,
      findings: "fila 1 hereda la puerta 01; las ediciones de 9da59ad a la puerta 02 no constan en gate_changes; comprobación de comportamiento superada"}
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: b54b95e,
+     findings: "«No debe ocurrir» vacío en C-HW-06, NFR-SEN-01 y C-CFG-01; contrato de C-CFG-01 ambiguo (5 frente a 6 campos)"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-10-31, commit: b54b95e,
+     findings: "solo la fila 1, que hereda la puerta 01; ninguna edición de puerta sin registrar"}

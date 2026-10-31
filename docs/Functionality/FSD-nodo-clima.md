@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.7.1
+fsd_version: 0.7.2
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -32,6 +32,8 @@ change_history:
     (target) se observa en el log.
   - 0.7.1 (2026-10-31): §18 añade la línea de progreso OTA `ota: <n> %` (propietario), y el
     estímulo de FR-OTA-08 la usa.
+  - 0.7.2 (2026-10-31): resultados prohibidos de C-HW-06, NFR-SEN-01 y C-CFG-01; el contrato
+    de C-CFG-01 nombra los 6 campos de cadena de §17 (propietario).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -159,7 +161,7 @@ defecto.
 | C-HW-01, C-HW-02 | `esptool flash-id` sobre la placa del banco; inspeccionar la cabecera de la imagen de build | El chip informa de 8 MB; la cabecera declara un tamaño de flash de 8 MB | Cabecera con «detect» o con 4 MB | target + other (CI) |
 | C-HW-03 | Build con la PSRAM deshabilitada; arrancar | Llega a T01 o T02 sin errores de memoria | Arranque fallido o un panic | target |
 | C-HW-04, C-HW-05 | Escaneo del bus I²C desde el firmware de prueba | Responde 0x44 en GPIO8/9 a 100 kHz | Ningún ACK; otros pines configurados | target |
-| C-HW-06 | Revisión del montaje | Alimentación por el USB de 5 V | — | other (revisión) |
+| C-HW-06 | Revisión del montaje | Alimentación por el USB de 5 V | Alimentación externa por los pines 5V o 3V3 | other (revisión) |
 | C-HW-07 | Revisión de las configuraciones de GPIO en el código (lista de pines usados) | Ningún pin de la lista prohibida | Uso de GPIO0/3/19/20/38/43/44/45/46/48 | other (revisión + CI con grep) |
 | C-HW-08 | Revisar `sdkconfig.defaults`; arrancar y leer los dos devnodes del slot | Consola primaria UART0 y secundaria USB-Serial/JTAG; el marcador de arranque aparece en ambos | Log solo en uno de los dos; consola primaria en USB-Serial/JTAG | other (revisión) + target |
 | C-BLD-01 | `gen_esp32part.py` sobre la tabla de la imagen | Coincide fila a fila con la tabla de §2.2 | Tabla por defecto del toolchain | other (CI) |
@@ -752,7 +754,7 @@ verification:
 | FR-SEN-01 | Vectores crudos (S_T, S_RH) = (0, 0), (65535, 65535) y (0x6666, 0x8000) | T = −45,00 / 130,00 / 25,00 °C; HR = 0 (recortada) / 100 (recortada) / 56,50 % | HR fuera de [0, 100] | host |
 | FR-SEN-02 | Trama con el CRC de T alterado; trama con el CRC de HR alterado | Lectura inválida en ambos casos | Que una mitad válida se publique sola | host |
 | FR-SEN-01 | DUT con el sensor conectado, 3 ciclos | 3 lecturas válidas en el log, T ∈ [0, 50] °C | Alguna lectura inválida en el log | target |
-| NFR-SEN-01 | Comparar 10 lecturas con la referencia tras 30 min | Diferencias medias dentro de la tolerancia | — | bench (manual, con instrumento de referencia) |
+| NFR-SEN-01 | Comparar 10 lecturas con la referencia tras 30 min | Diferencias medias dentro de la tolerancia | Diferencia media > 0,5 °C o > 3 %HR; comparar contra un instrumento no contrastado con los sobres de 33 % y 75 %HR | bench (manual, con instrumento de referencia) |
 
 ## 9. Publicador MQTT
 
@@ -1073,7 +1075,7 @@ través de §7, §9 y §12.
 |---|---|---|---|---|
 | FR-CFG-01 | Nodo configurado; 5 cortes de alimentación | El log serie muestra cada vez T01 con la misma zona | Abrir el portal | bench |
 | FR-CFG-01 | Nodo configurado; OTA A → B (Fase 3) | B publica en los mismos tópicos `villa/<zona>/…` | Abrir el portal | bench |
-| C-CFG-01 | Revisar `sdkconfig.defaults`, Kconfig y el código fuente | Sin valores por defecto para los 5 campos de cadena | — | other (revisión + CI) |
+| C-CFG-01 | Revisar `sdkconfig.defaults`, Kconfig y el código fuente | Los 6 campos de cadena de §17 (`wifi_ssid`, `wifi_pass`, `mqtt_host`, `mqtt_user`, `mqtt_pass`, `zona`) arrancan en «ninguno» o en cadena vacía | Un literal no vacío como valor inicial de cualquiera de ellos (SSID, IP, host, usuario, clave o zona) en `sdkconfig.defaults`, Kconfig o el código | other (revisión + CI) |
 
 ## 18. Observabilidad
 

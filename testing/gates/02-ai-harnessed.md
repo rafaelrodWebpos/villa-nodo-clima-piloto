@@ -44,9 +44,9 @@ for e in /api/info /api/devices /api/udplog /api/wifi/ap_status /api/wifi/events
 test ! -d components
 grep -q 'CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y' sdkconfig.defaults
 ! grep -q '^CONFIG_NODO_UDP_LOG=y' sdkconfig.defaults
-gh run list -R rafaelrodWebpos/villa-nodo-clima-piloto -b main -L 10 --json workflowName,conclusion \
-  --jq '[.[]|select(.conclusion=="success")|.workflowName]|unique'
-#   debe incluir: "Build Firmware", "host tests + secret scan", "devcontainer image builds"
+for w in "Build Firmware" "host tests + secret scan" "devcontainer image builds"; do
+  echo "$w: $(gh run list -R rafaelrodWebpos/villa-nodo-clima-piloto -w "$w" -b main --status success -L 1 --json headSha --jq '.[0].headSha // "NINGUNO"')"
+done   # cada workflow debe tener al menos un run verde en main (ninguno en NINGUNO)
 ```
 
 ## Comprobación de comportamiento (la que decide)
