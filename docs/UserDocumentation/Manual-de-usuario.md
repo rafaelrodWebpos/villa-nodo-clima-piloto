@@ -19,7 +19,7 @@ se llenan a medida que cada fase del FSD (§3) se completa.
 
 ## 1. Qué necesitas
 
-- ESP32-S3-DevKitC-1 **N8R8** y un breakout SHT41 (dirección 0x44).
+- Waveshare ESP32-S3-DEV-KIT-N8R8 y un breakout SHT41 (dirección 0x44).
 - Cable USB-C de datos y un PC con el entorno del proyecto (devcontainer).
 - Un broker MQTT en la LAN (p. ej., el add-on Mosquitto de Home Assistant) con
   usuario y contraseña. Las credenciales las guardas tú y nunca van al
@@ -27,7 +27,7 @@ se llenan a medida que cada fase del FSD (§3) se completa.
 
 ## 2. Montaje
 
-SHT41 → DevKitC-1: VDD → 3V3, GND → GND, SDA → GPIO8, SCL → GPIO9 (FSD C-HW-04). Separa el sensor al menos 5 cm de la placa: el
+SHT41 → placa: VDD → 3V3, GND → GND, SDA → GPIO8, SCL → GPIO9 (FSD C-HW-04). Separa el sensor al menos 5 cm de la placa: el
 calor del ESP32 falsea la temperatura.
 
 ## 3. Primer flasheo

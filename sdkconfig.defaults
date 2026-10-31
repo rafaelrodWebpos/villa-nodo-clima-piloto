@@ -16,3 +16,7 @@ CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
 # C-LOG-01 / FR-LOG-01: sin log UDP en producción
 # CONFIG_NODO_UDP_LOG is not set
 # CONFIG_NODO_BENCH_BUILD is not set
+
+# C-HW-08: consola primaria en UART0 (CH343) y copia por USB-Serial/JTAG
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+CONFIG_ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG=y

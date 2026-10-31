@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.5.0
+fsd_version: 0.6.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -10,7 +10,7 @@ author: Rafael Rodriguez
 reviewers: []
 approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11)
 created: 2026-10-11
-last_updated: 2026-10-11
+last_updated: 2026-10-31
 change_history:
   - 0.1.0 (2026-10-11): versión inicial; incluye sincronización SNTP (FR-TIME-*) y lista OTA
     verificada contra la cadena de redirección real de GitHub Releases.
@@ -20,6 +20,9 @@ change_history:
   - 0.4.0 (2026-10-11): supuestos confirmados por el propietario; Fase 0 cerrada (Load defined).
   - 0.5.0 (2026-10-11): log UDP hacia el banco (FR-LOG-01…03, C-LOG-01), desactivado en
     producción; nivel field y pruebas OTA contra releases reales de GitHub (§22.0).
+  - 0.6.0 (2026-10-31): la placa es la Waveshare ESP32-S3-DEV-KIT-N8R8 (C-HW-01, C-HW-06);
+    consola primaria en UART0 por el CH343 con copia por USB-Serial/JTAG (C-HW-08, §18);
+    GPIO43/44 añadidos a los pines reservados (C-HW-07).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -114,13 +117,14 @@ el publicador no está conectado, la lectura se descarta (§5, FR-MED-06).
 
 | ID | Restricción | Procedencia |
 |---|---|---|
-| C-HW-01 [Must] | La placa debe ser una ESP32-S3-DevKitC-1 con módulo ESP32-S3-WROOM-1 **N8R8**: 8 MB de flash y 8 MB de PSRAM. | [user] |
+| C-HW-01 [Must] | La placa debe ser una **Waveshare ESP32-S3-DEV-KIT-N8R8** con módulo ESP32-S3-WROOM-1 **N8R8** (8 MB de flash y 8 MB de PSRAM): un solo USB-C con un hub interno que expone a la vez el USB-Serial/JTAG nativo (`303a:1001`) y un puente CH343 a UART0 (`1a86:55d3`). | [user] |
 | C-HW-02 [Must] | Una unidad con menos de 8 MB de flash no puede ejecutar este firmware; el build debe fijar `esptool` a 8 MB y no autodetectar. | [derived] |
 | C-HW-03 [Must] | El firmware no debe requerir PSRAM; debe arrancar y funcionar con la PSRAM deshabilitada. | [derived] (D22) |
 | C-HW-04 [Must] | El SHT41 debe conectarse por I²C a **SDA = GPIO8** y **SCL = GPIO9** (D1), con alimentación de 3V3, en la dirección **0x44** (variante SHT41-AD1B). | [user] sensor; pines D1 |
 | C-HW-05 [Must] | El bus I²C debe operar a **100 kHz** (D1), con resistencias pull-up en SDA y SCL (las del breakout o externas de 4,7–10 kΩ). | [derived] |
-| C-HW-06 [Must] | La alimentación debe ser de 5 V por el USB de la DevKitC-1. | [user] |
-| C-HW-07 [Must] | El firmware no debe usar GPIO0, GPIO3, GPIO45, GPIO46 (strapping), GPIO19/20 (USB) ni el LED RGB integrado (GPIO38/48, según revisión), para dejarlos libres de efectos de arranque. | [derived] |
+| C-HW-06 [Must] | La alimentación debe ser de 5 V por el USB-C de la placa. | [user] |
+| C-HW-07 [Must] | El firmware no debe usar GPIO0, GPIO3, GPIO45, GPIO46 (strapping), GPIO19/20 (USB), GPIO43/44 (UART0, consola de C-HW-08) ni el LED RGB integrado (GPIO38/48, según revisión), para dejarlos libres de efectos de arranque. | [derived] |
+| C-HW-08 [Must] | La consola serie primaria debe ser UART0 (a través del CH343), con copia de la salida por USB-Serial/JTAG como consola secundaria. | [user] |
 
 **Tabla de particiones (normativa).** El build debe usar exactamente esta
 tabla. Cualquier otra, incluida la que el toolchain aplica por defecto, es un
@@ -147,7 +151,8 @@ defecto.
 | C-HW-03 | Build con la PSRAM deshabilitada; arrancar | Llega a T01 o T02 sin errores de memoria | Arranque fallido o un panic | target |
 | C-HW-04, C-HW-05 | Escaneo del bus I²C desde el firmware de prueba | Responde 0x44 en GPIO8/9 a 100 kHz | Ningún ACK; otros pines configurados | target |
 | C-HW-06 | Revisión del montaje | Alimentación por el USB de 5 V | — | other (revisión) |
-| C-HW-07 | Revisión de las configuraciones de GPIO en el código (lista de pines usados) | Ningún pin de la lista prohibida | Uso de GPIO0/3/19/20/38/45/46/48 | other (revisión + CI con grep) |
+| C-HW-07 | Revisión de las configuraciones de GPIO en el código (lista de pines usados) | Ningún pin de la lista prohibida | Uso de GPIO0/3/19/20/38/43/44/45/46/48 | other (revisión + CI con grep) |
+| C-HW-08 | Revisar `sdkconfig.defaults`; arrancar y leer los dos devnodes del slot | Consola primaria UART0 y secundaria USB-Serial/JTAG; el marcador de arranque aparece en ambos | Log solo en uno de los dos; consola primaria en USB-Serial/JTAG | other (revisión) + target |
 | C-BLD-01 | `gen_esp32part.py` sobre la tabla de la imagen | Coincide fila a fila con la tabla de §2.2 | Tabla por defecto del toolchain | other (CI) |
 | C-BLD-02 | Build de una imagen de 3 MB + 1 byte (prueba de la regla) | El build falla con un mensaje de tamaño | Que la imagen se genere | other (CI) |
 | C-BLD-03 | Log de la CI | ESP-IDF v6.x, target esp32s3 | Otra versión mayor | other (CI) |
@@ -218,7 +223,7 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02, FR-CON-06,
   NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-01…03 y las filas T01–T07, T09 y T10. Todo se verifica por
   host, target, log serie y escaneo Wi-Fi; nada requiere MQTT.
-- **Dependencias.** Hardware (DevKitC-1 N8R8 y SHT41) y el harness del
+- **Dependencias.** Hardware (Waveshare ESP32-S3-DEV-KIT-N8R8 y SHT41) y el harness del
   proyecto (`/harness`). No depende de ninguna fase anterior.
 
 ### 3.2 Fase 2 — Telemetría: MQTT y Home Assistant
@@ -262,7 +267,7 @@ reservados ni tópicos de comando definidos para él.
 
 | Riesgo | Prob. | Impacto | Mitigación |
 |---|---|---|---|
-| El autocalentamiento de la placa sesga la temperatura | Alta | Medio | Montar el SHT41 separado de la DevKitC-1 (manual §2); NFR-SEN-01 lo detecta |
+| El autocalentamiento de la placa sesga la temperatura | Alta | Medio | Montar el SHT41 separado de la placa (manual §2); NFR-SEN-01 lo detecta |
 | Al pasar el AP al canal del router durante la prueba de unión, el teléfono se desconecta y no ve la página de resultado | Media | Bajo | Si la unión tiene éxito, el AP desaparece y el nodo reinicia, lo que ya indica éxito; si falla, el AP sigue y la página de error se ve al recargar (§11) |
 | GitHub cambia los hosts de redirección de los assets de release (ya migró de `objects.` a `release-assets.githubusercontent.com`) | Media | Medio | La OTA se rechaza de forma segura con `rechazado:host` (FR-OTA-02), lo que hace visible el cambio; la lista se amplía con un delta del FSD y se flashea por USB una vez |
 | Una cuenta de GitHub comprometida publica un firmware malicioso | Baja | Alto | Riesgo aceptado: no hay firma de imagen (§19) |
@@ -835,7 +840,7 @@ Tópico `homeassistant/sensor/<nodo>/<medida>/config`, retain, QoS 1:
  "availability_template":"{{ value_json.estado }}",
  "payload_available":"online","payload_not_available":"offline",
  "device":{"identifiers":["clima-a1b2c3"],"name":"Clima zona1",
-           "model":"ESP32-S3-DevKitC-1 + SHT41","sw_version":"0.3.0"}}
+           "model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.3.0"}}
 ```
 
 `humedad`: `device_class` = `humidity`, unidad `%`. `punto_rocio`:
@@ -1057,7 +1062,7 @@ través de §7, §9 y §12.
 
 ## 18. Observabilidad
 
-El log serie (USB-Serial/JTAG) registra cada transición de §6.3 como
+El log serie (UART0 por el CH343, con copia por USB-Serial/JTAG; C-HW-08) registra cada transición de §6.3 como
 `con: <ESTADO> -> <ESTADO> (<evento>)`, cada ciclo de medición y cada decisión
 OTA. Los tests consumen ese formato de log; cambiarlo es un cambio de
 interfaz. El diagnóstico remoto es `status` (§9.3).
