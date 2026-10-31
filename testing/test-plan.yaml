@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.6.1
+fsd_version: 0.7.0
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -104,11 +104,12 @@ capabilities:
   bench-ap-internet:
     what: el AP del banco da salida a Internet (github.com, release-assets.githubusercontent.com, pool.ntp.org) — nivel bench+
     available: no
-    reason: el banco no reporta salida a Internet desde su AP
+    reason: el banco no reporta salida a Internet desde su AP — petición CR-TB-01 (testing/testbench-change-requests.md)
     consequence: >
-      las pruebas OTA pasan a field (FSD §22.0) salvo TC-OTA-03 y TC-OTA-08,
-      que quedan bloqueadas; JRN-01.6 (ts no nulo tras SNTP con pool.ntp.org) y
-      todo JRN-02 quedan bloqueados hasta que el banco la reporte
+      dependencia de las Fases 2 y 3 (FSD §3.2, §3.3). Hasta que el banco la
+      reporte quedan bloqueados JRN-01.6, los contratos de hora en bench+
+      (FR-TIME-01/03/04, FR-MQTT-03) y todo JRN-02; las pruebas OTA pueden
+      pasar a field (FSD §22.0) salvo TC-OTA-03 y TC-OTA-08
   bench-sntp-block:
     what: bloquear y desbloquear UDP/123 hacia fuera desde la red del banco
     available: no
@@ -263,7 +264,7 @@ tests:
     kind: standard
     wave: 1
     phase: 2
-    tier: bench
+    tier: bench+   # SNTP con pool.ntp.org necesita la salida a Internet del banco
     verifies: [FR-MED-01, FR-MQTT-01, FR-MQTT-03, FR-TIME-01]
     needs: [bench-driver, bench-mqtt-broker, bench-ap-internet, sht41-wiring, dut-board]
     expect: >
@@ -350,6 +351,32 @@ tier_checks:
     proves: el nivel host compila y ejecuta en CI
   - impl: .github/workflows/devcontainer.yml
     proves: el devcontainer (toolchain, pytest, runner) se construye
+
+# Cambios en las puertas. Solo con la aprobación del propietario, y cada uno
+# queda registrado aquí.
+gate_changes:
+  - gate: 02-ai-harnessed
+    row: 2
+    change: >
+      release-verification y bench-driver pueden seguir en «no» con su motivo,
+      además de hosted-ci en «yes»
+    reason: >
+      el registro del runner es una autorización del propietario y
+      TestbenchDriver lo instala /commission; la puerta 03 ya lo admitía
+    approved_by: propietario
+    date: 2026-10-31
+    note: >
+      lo aplicó el asistente antes de preguntar (commit 0c58e88); el propietario
+      lo aprobó después y pidió que ninguna puerta se cambie sin preguntar antes
+  - gate: 03-dut-ready
+    row: 5
+    change: DUT ready solo exige cerradas las filas 1–3 de la agenda
+    reason: >
+      las filas 4–6 (Home Assistant, termohigrómetro, pre-releases ota-test-*)
+      solo las necesitan tests de las Fases 2 y 3; se cierran antes de su
+      primer test (columna «se cierra antes de» de la agenda)
+    approved_by: propietario
+    date: 2026-10-31
 
 gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
   - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
