@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.6.1
+fsd_version: 0.7.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -25,6 +25,11 @@ change_history:
     GPIO43/44 añadidos a los pines reservados (C-HW-07).
   - 0.6.1 (2026-10-31): FR-LOG-01 y FR-LOG-03 pasan a los criterios de salida de la Fase 2:
     sus contratos necesitan OPERATIVO y publicaciones MQTT, que la Fase 1 no entrega.
+  - 0.7.0 (2026-10-31): límites y resultados prohibidos de T04, T08, T09, T10, T12, T13 y T17
+    (propietario); la Fase 2 depende de la salida a Internet del banco (SNTP con
+    pool.ntp.org) y sus contratos de hora pasan a bench⁺; nota del NTP del hub local en la
+    instalación definitiva; §18 en lugar de §9.3 en el contrato de T01–T23; FR-SEN-01
+    (target) se observa en el log.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -239,7 +244,9 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   FR-SEN-03, NFR-SEN-01, FR-CON-01, -03, -04 y -05, FR-TIME-*, NFR-WDT-01,
   FR-SEC-03, FR-LOG-01, FR-LOG-03 y las filas T08 y T11–T16.
 - **Dependencias.** Fase 1: la configuración del broker llega por el portal y
-  la conexión, por el Wi-Fi de la Fase 1.
+  la conexión, por el Wi-Fi de la Fase 1. Además, salida a Internet desde la
+  red de prueba para SNTP con `pool.ntp.org` (FR-TIME-*, FR-MQTT-03; §22.0,
+  capacidad `bench-ap-internet`): es la misma que necesita la Fase 3.
 
 ### 3.3 Fase 3 — Actualización OTA
 
@@ -421,20 +428,20 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T01 | ARRANQUE | fin_arranque | Configuración válida en NVS | CONECTANDO_WIFI | Arrancar el STA y el ciclo de medición | 2 s (D21) | Abrir el AP |
 | T02 | ARRANQUE | fin_arranque | No hay configuración válida | PORTAL | Arrancar el AP, el DNS, el HTTP y el ciclo de medición | 10 s (D21) | Intentar el STA |
 | T03 | PORTAL | envío | Algún campo inválido (§17) | PORTAL | Responder con un error por campo | 1 s | Escribir en la NVS |
-| T04 | PORTAL | envío | Todos los campos válidos | VALIDANDO | Probar la unión STA (AP+STA) con los datos del formulario | — | Escribir en la NVS |
+| T04 | PORTAL | envío | Todos los campos válidos | VALIDANDO | Probar la unión STA (AP+STA) con los datos del formulario | 1 s hasta iniciar la prueba de unión | Escribir en la NVS |
 | T05 | VALIDANDO | wifi_up | — | ARRANQUE (reinicio) | Persistir la configuración, responder con éxito y reiniciar | 5 s | Reiniciar sin haber persistido |
 | T06 | VALIDANDO | wifi_down o 20 s sin IP | — | PORTAL | Responder «no se pudo conectar» y descartar los datos | 20 s | Persistir; apagar el AP |
 | T07 | VALIDANDO | envío | — | VALIDANDO | Responder «ocupado» | 1 s | Iniciar una segunda prueba |
-| T08 | CONECTANDO_WIFI | wifi_up | — | CONECTANDO_BROKER | Reiniciar el backoff de Wi-Fi; arrancar SNTP y el cliente MQTT | 1 s | — |
-| T09 | CONECTANDO_WIFI | wifi_down (intento fallido) | — | CONECTANDO_WIFI | Programar un reintento con el backoff (FR-CON-02) | — | Reiniciar el nodo; abrir el AP |
-| T10 | CONECTANDO_WIFI | backoff | — | CONECTANDO_WIFI | Lanzar un intento de unión | — | — |
+| T08 | CONECTANDO_WIFI | wifi_up | — | CONECTANDO_BROKER | Reiniciar el backoff de Wi-Fi; arrancar SNTP y el cliente MQTT | 1 s | Publicar por MQTT antes de T11; abrir el AP |
+| T09 | CONECTANDO_WIFI | wifi_down (intento fallido) | — | CONECTANDO_WIFI | Programar un reintento con el backoff (FR-CON-02) | 1 s para programarlo; el intento, al vencer el backoff de FR-CON-02 (±10 %) | Reiniciar el nodo; abrir el AP |
+| T10 | CONECTANDO_WIFI | backoff | — | CONECTANDO_WIFI | Lanzar un intento de unión | ≤ 1 s tras vencer el backoff | Dos intentos de unión a la vez; abrir el AP |
 | T11 | CONECTANDO_BROKER | mqtt_up | — | OPERATIVO | Publicar `status` online, luego Discovery, luego las medidas más recientes; reiniciar el backoff MQTT; si la imagen está PENDIENTE, marcarla VÁLIDA | 5 s | Publicar medidas antes que `status` |
-| T12 | CONECTANDO_BROKER | mqtt_down (intento fallido) | — | CONECTANDO_BROKER | Programar un reintento con el backoff | — | Reiniciar el nodo; desconectar el Wi-Fi |
-| T13 | CONECTANDO_BROKER | backoff | — | CONECTANDO_BROKER | Lanzar un intento de conexión MQTT | — | — |
+| T12 | CONECTANDO_BROKER | mqtt_down (intento fallido) | — | CONECTANDO_BROKER | Programar un reintento con el backoff | 1 s para programarlo; el intento, al vencer el backoff MQTT de FR-CON-02 (±10 %) | Reiniciar el nodo; desconectar el Wi-Fi |
+| T13 | CONECTANDO_BROKER | backoff | — | CONECTANDO_BROKER | Lanzar un intento de conexión MQTT | ≤ 1 s tras vencer el backoff MQTT | Dos conexiones MQTT a la vez; desconectar el Wi-Fi |
 | T14 | CONECTANDO_BROKER | wifi_down | — | CONECTANDO_WIFI | Detener los intentos MQTT; programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
 | T15 | OPERATIVO | mqtt_down | — | CONECTANDO_BROKER | Programar un reintento MQTT | 1 s | Reiniciar el nodo; desconectar el Wi-Fi |
 | T16 | OPERATIVO | wifi_down | — | CONECTANDO_WIFI | Programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
-| T17 | OPERATIVO | cmd_ota | Cumple FR-OTA-02…05 (no retained) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | — |
+| T17 | OPERATIVO | cmd_ota | Cumple FR-OTA-02…05 (no retained) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
 | T18 | OPERATIVO | cmd_ota | Incumple alguna regla de §7 | OPERATIVO | Publicar `status` con `ota` = `rechazado:<motivo>` | 2 s | Descargar; cambiar de partición |
 | T19 | OTA_DESCARGA | ota_ok | — | ARRANQUE (reinicio) | Publicar `status` con `ota` = `ok`, publicar `offline` y reiniciar en el nuevo slot | 5 s | Reiniciar sin cambiar de slot |
 | T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>`; conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
@@ -565,7 +572,7 @@ verification:
 | FR-CON-02 | AP apagado 5 min; marcas de tiempo de los intentos en el log | Intervalos dentro de ±10 % de la secuencia | Intentos en ráfaga (< 1 s) | bench |
 | FR-CON-05 | Cortar y devolver la alimentación a un DUT configurado | Primera medida en ≤ 30 s | Que pase por PORTAL | bench |
 | FR-CON-06 | Configurar con un SSID que deja de existir; esperar 15 min | El DUT sigue en CONECTANDO_WIFI; el AP del portal no aparece en el escaneo | AP `clima-*` visible | bench |
-| T01–T23 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción observables (log de transición, §9.3) dentro del límite | Lo indicado en la columna «No debe ocurrir» | host (lógica de la tabla) + bench (filas con Wi-Fi/MQTT reales) |
+| T01–T23 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción observables (log de transición, §18) dentro del límite | Lo indicado en la columna «No debe ocurrir» | host (lógica de la tabla) + bench (filas con Wi-Fi/MQTT reales) |
 
 ## 7. Política OTA
 
@@ -742,7 +749,7 @@ verification:
 |---|---|---|---|---|
 | FR-SEN-01 | Vectores crudos (S_T, S_RH) = (0, 0), (65535, 65535) y (0x6666, 0x8000) | T = −45,00 / 130,00 / 25,00 °C; HR = 0 (recortada) / 100 (recortada) / 56,50 % | HR fuera de [0, 100] | host |
 | FR-SEN-02 | Trama con el CRC de T alterado; trama con el CRC de HR alterado | Lectura inválida en ambos casos | Que una mitad válida se publique sola | host |
-| FR-SEN-01 | DUT con el sensor conectado, 3 ciclos | 3 lecturas válidas en el log, T ∈ [0, 50] °C | `err_sensor` > 0 | target |
+| FR-SEN-01 | DUT con el sensor conectado, 3 ciclos | 3 lecturas válidas en el log, T ∈ [0, 50] °C | Alguna lectura inválida en el log | target |
 | NFR-SEN-01 | Comparar 10 lecturas con la referencia tras 30 min | Diferencias medias dentro de la tolerancia | — | bench (manual, con instrumento de referencia) |
 
 ## 9. Publicador MQTT
@@ -815,7 +822,7 @@ al conectar.
 |---|---|---|---|---|
 | FR-MQTT-01 | OPERATIVO, zona `zona1`; suscribirse a `villa/#` | Exactamente los 3 tópicos de medida bajo `villa/zona1/clima-xxxxxx/` | Tópicos con mayúsculas, espacios o `//` | bench |
 | FR-MQTT-02 | Serializador con T = 21,4 y ts = 1760184000; con ts ausente | `{"v":21.4,"u":"°C","ts":1760184000}` y `…"ts":null}` | Claves adicionales; `v` como string | host |
-| FR-MQTT-03 | SNTP bloqueado y luego desbloqueado (contrato de FR-TIME-03) | `ts` = null antes; tras la sincronización, \|ts − hora del broker\| ≤ 2 s | `ts` = 0, 1970 o anterior al build | bench |
+| FR-MQTT-03 | SNTP bloqueado y luego desbloqueado (contrato de FR-TIME-03) | `ts` = null antes; tras la sincronización, \|ts − hora del broker\| ≤ 2 s | `ts` = 0, 1970 o anterior al build | bench⁺ |
 | FR-MQTT-04 | Suscriptor nuevo tras una publicación | Recibe el último valor de cada medida con retain = 1 | Retain ausente | bench |
 | FR-MQTT-05 | OPERATIVO; cortar la alimentación del DUT | `{"estado":"offline"}` retained en ≤ 100 s | Que el último `status` retained siga diciendo online pasado ese tiempo | bench |
 | FR-MQTT-06 | Capturar los primeros mensajes tras una reconexión | El primero es `status` online | Medidas antes que `status` | bench |
@@ -966,6 +973,10 @@ se prueba en host.
 - **FR-TIME-05** [Must] [user]: la falta de hora válida no deberá retrasar ni
   impedir la medición ni la publicación.
 
+> **Nota [user] (no normativa en esta versión):** en la instalación definitiva,
+> el servidor NTP será el hub local. Esta versión usa `pool.ntp.org`
+> (FR-TIME-01). El cambio se hará con un delta del FSD cuando el hub exista.
+
 ### 13.2 Contratos de verificación
 
 ```yaml
@@ -984,17 +995,17 @@ verification:
     - Cualquier ts < fecha de build del firmware (incluidos 0 y 1970).
     - Que falte una publicación por no tener hora (viola FR-TIME-05).
     - Que la clave ts desaparezca del JSON (viola FR-MQTT-02).
-  tier: bench
+  tier: bench⁺
   evidence: [todos los mensajes de medida y status de la ventana, instantes de bloqueo y desbloqueo]
   cleanup: [SNTP desbloqueado]
 ```
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-TIME-01 | SNTP accesible; `wifi_up` | `hora_valida` = true en ≤ 30 s (log y `status`) | Nunca sincronizar | bench |
+| FR-TIME-01 | SNTP accesible; `wifi_up` | `hora_valida` = true en ≤ 30 s (log y `status`) | Nunca sincronizar | bench⁺ |
 | FR-TIME-02 | Función de validez: (sincronizado = no, reloj = 2030), (sí, reloj = 1970), (sí, reloj = build − 1 s), (sí, reloj = build + 1 s) | No válida, no válida, no válida, válida | Considerar válido un reloj solo porque «parece reciente» | host |
 | FR-TIME-02 | Reinicio por software (`esp_restart`) tras una sincronización, con SNTP bloqueado | `hora_valida` = false tras el reinicio | Reutilizar sin resincronizar la hora del RTC del arranque anterior | target |
-| FR-TIME-04 | Hora válida; bloquear SNTP 2 h | `hora_valida` sigue en true; el log registra el intento fallido de resincronización | Pasar a `ts` = null | bench |
+| FR-TIME-04 | Hora válida; bloquear SNTP 2 h | `hora_valida` sigue en true; el log registra el intento fallido de resincronización | Pasar a `ts` = null | bench⁺ |
 | FR-TIME-05 | SNTP bloqueado desde el arranque | Primera medida en ≤ 30 s (FR-CON-05) con `ts` = null | Esperar a la hora para publicar | bench |
 
 ## 14. Cliente MQTT y HTTPS OTA
@@ -1164,7 +1175,7 @@ borrando la NVS para reaprovisionar (§19.1). Los pasos concretos están en
 | host | PC, compilador nativo, sin ESP-IDF | Validez de la hora, punto de rocío, redondeo, conversión y CRC del SHT41, serialización JSON, generador de Discovery, validación de §17, política OTA, parser de comandos, backoff, lógica de la tabla de transiciones, identificador |
 | target | ESP32-S3 real | Lectura I²C, NVS, servidor HTTP del portal, watchdog |
 | bench | DUT + AP Wi-Fi + broker + HA + operador | Recuperación, LWT, OTA y rollback, portal de extremo a extremo, ausencia de reinicios, exactitud |
-| bench⁺ | bench cuyo AP da salida a Internet | OTA contra releases reales de GitHub del repo |
+| bench⁺ | bench cuyo AP da salida a Internet | SNTP con `pool.ntp.org` (FR-TIME-01, -03, -04, FR-MQTT-03; Fase 2) y OTA contra releases reales de GitHub del repo (Fase 3) |
 | field | El nodo instalado en la vivienda, con su router, su broker y su HA | Alternativa a bench⁺ para la OTA cuando el banco no da salida a Internet; solo se manda y se observa |
 | other | CI / revisión | Secretos en el repo y en las releases, C-CFG-01, C-LOG-01 |
 
