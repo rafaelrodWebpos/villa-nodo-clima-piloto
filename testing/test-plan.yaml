@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.6.0
+fsd_version: 0.6.1
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -53,9 +53,19 @@ capabilities:
     reported_by: /api/devices — SLOT1 presente e idle, sin sesión de depuración (debugging false)
     exercised: no — es un POST que reinicia el DUT; la Fase 1 no lo toca, lo usa /commission
   bench-serial-monitor:
-    what: leer la consola del DUT (UART0 por el CH343 y USB-Serial/JTAG, C-HW-08) con DTR/RTS en bajo
+    what: >
+      leer la consola del DUT por el devnode que el banco proxifica en el slot
+      (SLOT1: ttyACM0), con DTR/RTS en bajo. Con C-HW-08 el log sale por los
+      dos devnodes, así que cualquiera de los dos sirve para observarlo
     available: yes
-    reported_by: /api/devices — SLOT1 monitor_port 5001, devnodes ttyACM0 y ttyACM1
+    reported_by: /api/devices — SLOT1 devnode ttyACM0, monitor_port 5001 (devnodes ttyACM0 y ttyACM1)
+  bench-dual-console:
+    what: observar a la vez los dos devnodes del slot (UART0/CH343 y USB-Serial/JTAG) por separado (C-HW-08)
+    available: no
+    reason: >
+      el banco proxifica un solo devnode por slot (un RFC2217 y un monitor_port)
+      y no dice a qué interfaz USB corresponde; la parte «en ambos» del contrato
+      de C-HW-08 queda bloqueada en el banco (petición de cambio al testbench)
   bench-udp-log-receiver:
     what: receptor UDP 5555 del testbench con buffer de líneas
     available: yes
@@ -174,15 +184,15 @@ tests:
     wave: 1
     phase: 1
     tier: bench
-    verifies: [C-BLD-01, C-HW-02, C-HW-08]
+    verifies: [C-HW-02]
     needs: [bench-driver, hosted-ci, bench-flash, bench-serial-monitor, dut-board]
     procedure: gh workflow run build.yml -f variant=bench -f version=0.0.0 --ref main; artefacto firmware-v0.0.0-bench de ese run
     expect: >
       se graba en SLOT1 la imagen de banco (variant: bench) construida por la CI
       sobre el commit que se prueba (un push solo construye producción: la de
       banco se lanza con workflow_dispatch de build.yml), con los offsets de su
-      flash_args y la NVS borrada; la consola muestra NODO-BENCH-IMAGE y
-      «Init complete» en UART0 y en USB-Serial/JTAG
+      flash_args y la NVS borrada; con el monitor del slot ya esperando el
+      patrón, un reset muestra NODO-BENCH-IMAGE y «Init complete» (P-BOOT-CAPTURE)
     impl: null
   - id: JRN-01.1
     shape: workflow

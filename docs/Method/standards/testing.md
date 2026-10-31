@@ -111,6 +111,18 @@ asset de la imagen; publicar en `villa/zona1/<nodo>/cmd/ota` el payload
 sin retain. **Después:** el DUT vuelve a la imagen bajo prueba (OTA de vuelta o
 flasheo) antes del test siguiente.
 
+## P-BOOT-CAPTURE — capturar el arranque completo
+
+**Necesita** bench-serial-monitor. `Init complete` y el marcador de banco se
+emiten una sola vez por arranque, así que un monitor abierto después del
+flasheo los pierde. **Pasos:** `POST /api/serial/reset` con el slot, sin sesión
+de depuración. La respuesta trae el log de arranque como lista de líneas, y se
+comprueba que `method` no sea `jtag`, porque entonces la respuesta es de
+OpenOCD y no del DUT. Se busca el patrón en esas líneas. Si no aparece, se
+lanza `POST /api/serial/monitor` con el patrón y un timeout de 15 s, y con ese
+monitor ya esperando se repite el reset. **Después:** el log de arranque queda
+guardado como evidencia del test.
+
 ## P-NVS-ERASE — volver a PORTAL
 
 **Necesita** bench-flash. Borrar la partición `nvs` (0x9000, 0x6000). El DUT

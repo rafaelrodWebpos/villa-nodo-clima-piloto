@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.6.0
+fsd_version: 0.6.1
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -23,6 +23,8 @@ change_history:
   - 0.6.0 (2026-10-31): la placa es la Waveshare ESP32-S3-DEV-KIT-N8R8 (C-HW-01, C-HW-06);
     consola primaria en UART0 por el CH343 con copia por USB-Serial/JTAG (C-HW-08, §18);
     GPIO43/44 añadidos a los pines reservados (C-HW-07).
+  - 0.6.1 (2026-10-31): FR-LOG-01 y FR-LOG-03 pasan a los criterios de salida de la Fase 2:
+    sus contratos necesitan OPERATIVO y publicaciones MQTT, que la Fase 1 no entrega.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -221,7 +223,7 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   60 s.
 - **Criterios de salida.** Pasan FR-SEN-01, FR-SEN-02, FR-MED-03…05, FR-ID-01,
   FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02, FR-CON-06,
-  NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-01…03 y las filas T01–T07, T09 y T10. Todo se verifica por
+  NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-02 y las filas T01–T07, T09 y T10. Todo se verifica por
   host, target, log serie y escaneo Wi-Fi; nada requiere MQTT.
 - **Dependencias.** Hardware (Waveshare ESP32-S3-DEV-KIT-N8R8 y SHT41) y el harness del
   proyecto (`/harness`). No depende de ninguna fase anterior.
@@ -235,7 +237,7 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   solas tras cortes.
 - **Criterios de salida.** Pasan FR-MQTT-01…08, FR-HA-*, FR-MED-01, -02 y -06,
   FR-SEN-03, NFR-SEN-01, FR-CON-01, -03, -04 y -05, FR-TIME-*, NFR-WDT-01,
-  FR-SEC-03 y las filas T08 y T11–T16.
+  FR-SEC-03, FR-LOG-01, FR-LOG-03 y las filas T08 y T11–T16.
 - **Dependencias.** Fase 1: la configuración del broker llega por el portal y
   la conexión, por el Wi-Fi de la Fase 1.
 
