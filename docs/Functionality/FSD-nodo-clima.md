@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.7.0
+fsd_version: 0.7.1
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -30,6 +30,8 @@ change_history:
     pool.ntp.org) y sus contratos de hora pasan a bench⁺; nota del NTP del hub local en la
     instalación definitiva; §18 en lugar de §9.3 en el contrato de T01–T23; FR-SEN-01
     (target) se observa en el log.
+  - 0.7.1 (2026-10-31): §18 añade la línea de progreso OTA `ota: <n> %` (propietario), y el
+    estímulo de FR-OTA-08 la usa.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -664,7 +666,7 @@ verification:
   preconditions:
     - DUT en OPERATIVO con la versión A; release B válida de ≥ 1 MB.
   stimulus:
-    - Publicar el comando OTA de B; cuando el log indique ≥ 30 % descargado,
+    - Publicar el comando OTA de B; cuando el log muestre `ota: 30 %` (§18),
       apagar el AP Wi-Fi 30 s y volver a encenderlo.
   expected_observations:
     - El log registra el aborto de la descarga.
@@ -1077,7 +1079,8 @@ través de §7, §9 y §12.
 
 El log serie (UART0 por el CH343, con copia por USB-Serial/JTAG; C-HW-08) registra cada transición de §6.3 como
 `con: <ESTADO> -> <ESTADO> (<evento>)`, cada ciclo de medición y cada decisión
-OTA. Los tests consumen ese formato de log; cambiarlo es un cambio de
+OTA. Durante una descarga OTA registra además el progreso como `ota: <n> %`
+cada vez que lo descargado cruza un múltiplo de 10 % (10, 20 … 100) [user]. Los tests consumen ese formato de log; cambiarlo es un cambio de
 interfaz. El diagnóstico remoto es `status` (§9.3).
 
 ### 18.1 Log por UDP hacia el banco [user]

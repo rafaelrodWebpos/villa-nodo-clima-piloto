@@ -377,6 +377,42 @@ gate_changes:
       primer test (columna «se cierra antes de» de la agenda)
     approved_by: propietario
     date: 2026-10-31
+  - gate: 02-ai-harnessed
+    rows: [exclusión, 2, 3, comprobaciones mecánicas, trampas]
+    commit: 9da59ad
+    change: >
+      la exclusión admite respuestas GET del banco (dirección en .env); la fila 2
+      pasa de «todo el banco en no, banco pendiente» a «cada bench-* en yes con
+      reported_by cuyo endpoint responde ok»; la fila 3 enumera JRN-01.0–7 y
+      JRN-02; comprobaciones mecánicas y trampas adaptadas
+    reason: el banco ya existe, la placa cambió y el journey quedó definido
+    approved_by: propietario
+    date: 2026-10-31
+    note: aplicado antes de preguntar; aprobado después
+  - gate: 03-dut-ready
+    row: 3
+    commit: 9da59ad
+    change: la placa pasa de DevKitC-1 a Waveshare ESP32-S3-DEV-KIT-N8R8 (FSD 0.6.0)
+    reason: delta del FSD por la placa real
+    approved_by: propietario
+    date: 2026-10-31
+    note: aplicado antes de preguntar; aprobado después
+  - gate: 03-dut-ready
+    row: 1
+    commit: 0c58e88
+    change: la comprobación usa el endpoint de reported_by y exige que ninguna capacidad siga con exercised no
+    reason: el banco no reporta capacidades en /api/info
+    approved_by: propietario
+    date: 2026-10-31
+    note: aplicado antes de preguntar; aprobado después
+  - gate: 03-dut-ready
+    row: 3
+    change: >
+      basta con ver el marcador de arranque en la consola del slot; la parte
+      «en ambos devnodes» de C-HW-08 queda fuera de DUT ready
+    reason: el banco proxifica un solo devnode por slot (bench-dual-console en no)
+    approved_by: propietario
+    date: 2026-10-31
 
 gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
   - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,

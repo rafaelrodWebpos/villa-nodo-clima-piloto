@@ -8,7 +8,7 @@ tests que la necesitan aparecen bloqueados.
 
 | ID | Capacidad del plan | Qué se pide | Por qué lo necesita este proyecto | Estado |
 |---|---|---|---|---|
-| CR-TB-01 | `bench-ap-internet` | Que el SoftAP del banco dé salida a Internet por NAT, al menos hacia `pool.ntp.org` (UDP/123), `github.com` y `release-assets.githubusercontent.com` (HTTPS), y que el banco reporte esa capacidad en su API | Fase 2: SNTP (FR-TIME-01, -03, -04, FR-MQTT-03; JRN-01.6). Fase 3: OTA contra releases reales de GitHub (JRN-02, FR-OTA-*). FSD §3.2, §3.3 y §22.0 | pedida por el propietario el 2026-10-31; pendiente de registrar en el repo del testbench |
+| CR-TB-01 | `bench-ap-internet` | Que el SoftAP del banco dé salida a Internet por NAT, al menos hacia `pool.ntp.org` (UDP/123), `github.com` y `release-assets.githubusercontent.com` (HTTPS), y que el banco reporte esa capacidad en su API | Fase 2: SNTP (FR-TIME-01, -03, -04, FR-MQTT-03; JRN-01.6). Fase 3: OTA contra releases reales de GitHub (JRN-02, FR-OTA-*). FSD §3.2, §3.3 y §22.0 | pedida por el propietario el 2026-10-31; la registra él en el repo del testbench |
 
 Hay otras capacidades en `no` que se convertirán en peticiones cuando un test
 de la ola que toque las necesite. Hasta entonces no se piden: `bench-sntp-block`
