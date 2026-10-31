@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl ca-certificates jq gh sudo python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Nivel bench (pytest). TestbenchDriver se instala en /commission, cuando el
-# banco exista (testing/test-plan.yaml, capacidad bench-driver).
+# Nivel bench (pytest). TestbenchDriver lo añade /commission desde el repo del
+# testbench, fijado a un commit (testing/test-plan.yaml, capacidad bench-driver).
 # Venv propio, separado del Python de ESP-IDF (que solo existe tras export.sh).
 COPY tests/bench/requirements.txt /tmp/bench-requirements.txt
 RUN python3 -m venv /opt/bench-venv \

@@ -18,7 +18,7 @@ dut:
   target: esp32s3
   flash: 8MB (C-HW-02)
   slot: SLOT1   # el banco lo lista presente e idle (2026-10-31); la identidad del chip la verifica /commission
-  test_partner_slot: SLOT2   # segunda Waveshare N8R8, presente e idle; su uso lo fija /commission
+  test_partner_slot: SLOT2   # segunda Waveshare N8R8, presente e idle; ningún test del plan la necesita todavía
   boot_marker: "Init complete"      # última línea de app_main (contrato del testbench)
   bench_image_marker: NODO-BENCH-IMAGE   # solo en la imagen de banco (C-LOG-01)
 
@@ -37,8 +37,9 @@ testbench:
 tiers: [host, target, bench, bench+, field, other]   # FSD §22.0
 
 # ---------------------------------------------------------------------------
-# Capacidades. Banco: available: no hasta /commission (no existe). Proyecto:
-# unproven hasta verlas funcionar aquí; cada unproven es un punto de la agenda.
+# Capacidades. Banco: copiadas de lo que reporta; un proyecto no las prueba.
+# Proyecto: unproven hasta verlas funcionar aquí; cada unproven que necesita un
+# test de banco es un punto de la agenda (field-site se prueba al instalar).
 # ---------------------------------------------------------------------------
 capabilities:
   # --- banco: copiadas de lo que reporta (2026-10-31); un proyecto no las prueba ---
@@ -46,6 +47,11 @@ capabilities:
     what: flashear el DUT a través del testbench (/api/flash, offsets de flash_args)
     available: yes
     reported_by: /api/devices — SLOT1 presente, running, RFC2217 en el puerto 4001
+  bench-chip-info:
+    what: leer chip, revisión, MAC y tamaño de flash del DUT (POST /api/chip/info, esptool flash_id en el Pi; reinicia el DUT)
+    available: yes
+    reported_by: /api/devices — SLOT1 presente e idle, sin sesión de depuración (debugging false)
+    exercised: no — es un POST que reinicia el DUT; la Fase 1 no lo toca, lo usa /commission
   bench-serial-monitor:
     what: leer la consola del DUT (UART0 por el CH343 y USB-Serial/JTAG, C-HW-08) con DTR/RTS en bajo
     available: yes
@@ -61,11 +67,13 @@ capabilities:
   bench-wifi-ap-outage:
     what: apagar y encender el AP del banco bajo demanda
     available: yes
-    reported_by: /api/wifi/ap_status — el AP se arranca y se para por API
+    reported_by: /api/wifi/ap_status responde ok
+    exercised: no — arrancar y parar son POST de la misma API; los ejerce /commission
   bench-portal-driver:
     what: el banco se une al AP del DUT y maneja el portal (GET/POST, escaneo de SSID)
     available: yes
-    reported_by: /api/wifi/events responde ok (modo estación y relé HTTP de la misma API)
+    reported_by: /api/wifi/events responde ok
+    exercised: no — modo estación y relé HTTP son POST de la misma API; los ejerce /commission
   bench-mqtt-broker:
     what: broker mosquitto del banco en la red de su AP, puerto 1883
     available: yes
@@ -73,7 +81,8 @@ capabilities:
   bench-broker-outage:
     what: parar y arrancar el broker del banco bajo demanda
     available: yes
-    reported_by: /api/mqtt/status — start/stop por API
+    reported_by: /api/mqtt/status responde ok
+    exercised: no — start/stop son POST de la misma API; los ejerce /commission
   bench-mqtt-auth:
     what: broker MQTT del banco con autenticación por usuario y contraseña (FR-MQTT-07)
     available: no
@@ -112,7 +121,10 @@ capabilities:
   bench-driver:
     what: TestbenchDriver instalado en el devcontainer (nivel bench)
     available: no
-    reason: lo instala /commission en el devcontainer del proyecto (.devcontainer/Dockerfile)
+    reason: >
+      lo instala /commission en /opt/bench-venv del devcontainer, desde
+      pytest/testbench_driver.py de github.com/SensorsIot/Embedded-AI-Harness
+      (el repo del testbench), fijado a un commit
 
   # --- infraestructura propia ---
   hosted-ci:
@@ -145,6 +157,7 @@ capabilities:
   field-site:
     what: el nodo instalado en la vivienda con su router, broker y HA (nivel field)
     available: unproven
+    agenda: no — no la necesita ningún test de banco; se prueba al instalar el nodo (Ready for shipment)
 
 # ---------------------------------------------------------------------------
 # Tests. JRN = workflow (el recorrido estándar, en orden). TC = atómico.
@@ -163,9 +176,12 @@ tests:
     tier: bench
     verifies: [C-BLD-01, C-HW-02, C-HW-08]
     needs: [bench-driver, hosted-ci, bench-flash, bench-serial-monitor, dut-board]
+    procedure: gh workflow run build.yml -f variant=bench -f version=0.0.0 --ref main; artefacto firmware-v0.0.0-bench de ese run
     expect: >
-      se graba en SLOT1 la imagen de banco del último run verde de la CI (offsets
-      de flash_args, NVS borrada); la consola muestra NODO-BENCH-IMAGE y
+      se graba en SLOT1 la imagen de banco (variant: bench) construida por la CI
+      sobre el commit que se prueba (un push solo construye producción: la de
+      banco se lanza con workflow_dispatch de build.yml), con los offsets de su
+      flash_args y la NVS borrada; la consola muestra NODO-BENCH-IMAGE y
       «Init complete» en UART0 y en USB-Serial/JTAG
     impl: null
   - id: JRN-01.1
@@ -199,12 +215,12 @@ tests:
     wave: 1
     phase: 1
     tier: bench
-    verifies: [T01, T08, FR-LOG-02]
+    verifies: [T01, FR-LOG-02]
     needs: [bench-driver, bench-wifi-ap, bench-serial-monitor, bench-udp-log-receiver, dut-board]
     expect: >
-      tras el reinicio, T01 con la zona enviada; se une al AP del banco y obtiene
-      IP (CONECTANDO_WIFI -> CONECTANDO_BROKER en el log); el receptor UDP del
-      banco recibe líneas del nodo
+      tras el reinicio, T01 con la zona enviada; se une al AP del banco y el log
+      muestra la IP obtenida (wifi_up); el receptor UDP del banco recibe líneas
+      del nodo
     impl: null
   - id: JRN-01.4
     shape: workflow
