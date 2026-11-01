@@ -173,16 +173,24 @@ capabilities:
       camino de ida en commissioning.forward_path; agenda fila 1 cerrada
   sht41-wiring:
     what: SHT41 en GPIO8/9, 100 kHz, dirección 0x44, con pull-ups (C-HW-04/05)
-    available: unproven
+    available: yes
     observed: >
-      2026-11-01, tests/target/i2c_probe en SLOT1 — reposo sda=1 scl=1 con y
-      sin pull interno; escaneo solo con pull-ups externos: timeout en todas
-      las direcciones, ack=ninguno; con pull-up interno: NACK en todas,
-      ack=ninguno, también con SDA y SCL cruzados. Ningún dispositivo responde
-      en GPIO8/9, coherente con el montaje: el propietario confirma que el
-      SHT41 aún no estaba montado. La sonda queda validada como instrumento
-      (bus vacío → ack=ninguno, sin bloqueo). Siguiente: repetir el escaneo con
-      el sensor montado
+      2026-11-01, tests/target/i2c_probe en SLOT1, tras montar el propietario
+      el SHT41 (3V3, GND, SDA=GPIO8, SCL=GPIO9; continuidad comprobada). El
+      escaneo que cuenta, solo con pull-ups externos, da
+      «i2c: scan sda=8 scl=9 hz=100000 ack=0x44», con SDA y SCL cruzados
+      ack=ninguno. Las lecturas tienen CRC válido, T ≈ 30,4 °C (en [0, 50]) y
+      HR ≈ 63–64 %: 9 seguidas en un monitor de 13 s y 3 de 3 en cada uno de
+      3 arranques. Antes de montarlo, el bus vacío daba ack=ninguno (sonda
+      validada como instrumento)
+    consequence: >
+      la primera lectura tras el arranque salía «med: invalida (nack)» en 3 de
+      3 arranques. Causa en la sonda: a 100 Hz, vTaskDelay(pdMS_TO_TICKS(10))
+      es un tick y puede durar casi 0 ms, así que el SHT41 aún estaba
+      convirtiendo. Con «+ 1» tick, 3 de 3 arranques salen válidos desde la
+      primera lectura. El driver real (§8, L1) tiene que esperar ≥ 10 ms
+      reales: si no, FR-SEN-01 (target) falla con «med: invalida» en el primer
+      ciclo
   sda-disconnect:
     what: interrumpir SDA del SHT41 bajo demanda — el operador desconecta el Dupont de SDA en la protoboard (no hay conmutador)
     available: unproven

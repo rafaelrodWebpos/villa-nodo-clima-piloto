@@ -85,7 +85,10 @@ static void read_once(void)
     uint8_t cmd = SHT41_MEASURE_HIGH, rx[6];
     esp_err_t e = i2c_master_transmit(sht41, &cmd, 1, XFER_TIMEOUT_MS);
     if (e == ESP_OK) {
-        vTaskDelay(pdMS_TO_TICKS(10));
+        /* ≥ 10 ms reales de conversión (§8.1). A 100 Hz, pdMS_TO_TICKS(10) es
+         * un tick y puede durar casi 0 ms si la tarea está a mitad de tick:
+         * el SHT41 aún convierte y responde NACK. Un tick más lo garantiza. */
+        vTaskDelay(pdMS_TO_TICKS(10) + 1);
         e = i2c_master_receive(sht41, rx, sizeof rx, XFER_TIMEOUT_MS);
     }
     if (e != ESP_OK) {
