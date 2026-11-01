@@ -17,7 +17,17 @@ dut:
   usb: un USB-C con hub — USB-Serial/JTAG 303a:1001 + CH343 1a86:55d3 (consola primaria UART0, C-HW-08)
   target: esp32s3
   flash: 8MB (C-HW-02)
-  slot: SLOT1   # el banco lo lista presente e idle (2026-10-31); la identidad del chip la verifica /commission
+  slot: SLOT1
+  identity:   # observado por /commission el 2026-11-01 (agenda, fila 1)
+    chip: ESP32-S3 (QFN56), revisión v0.2
+    features: Wi-Fi, BT 5 (LE), Dual Core + LP Core, 240MHz, Embedded PSRAM 8MB (AP_3v3)
+    flash: 8MB detectados (fabricante c8, dispositivo 4017; quad por eFuse, 3,3 V)
+    mac: 3c:0f:02:f3:c6:d4
+    read_by: >
+      esptool flash_id por RFC2217 desde la imagen del devcontainer
+      (nodo-clima-piloto-dev, IDF v6.0.2), contrastado con POST /api/chip/info
+      del banco: misma MAC, chip, revisión, PSRAM y flash
+    matches: C-HW-01, C-HW-02
   test_partner_slot: SLOT2   # segunda Waveshare N8R8, presente e idle; ningún test del plan la necesita todavía
   boot_marker: "Init complete"      # última línea de app_main (contrato del testbench)
   bench_image_marker: NODO-BENCH-IMAGE   # solo en la imagen de banco (C-LOG-01)
@@ -27,6 +37,7 @@ testbench:
   hostname: testbench-b99c
   address: no se versiona — el repo es público; se descubre en cada sesión o
     se lee de un fichero ignorado por git (.env)
+  last_seen: 2026-11-01   # /api/info responde: hostname testbench-b99c, 4 slots configurados, 2 en marcha; no reporta versión del portal
   reported: 2026-10-31   # lecturas GET de /api/info, /api/devices, /api/wifi/*,
                          # /api/mqtt/status, /api/udplog, /api/human/status
   note: >
@@ -51,7 +62,7 @@ capabilities:
     what: leer chip, revisión, MAC y tamaño de flash del DUT (POST /api/chip/info, esptool flash_id en el Pi; reinicia el DUT)
     available: yes
     reported_by: /api/devices — SLOT1 presente e idle, sin sesión de depuración (debugging false)
-    exercised: no — es un POST que reinicia el DUT; la Fase 1 no lo toca, lo usa /commission
+    exercised: 2026-11-01 — POST /api/chip/info sobre SLOT1 devolvió ok con chip, MAC y flash (dut.identity)
   bench-serial-monitor:
     what: >
       leer la consola del DUT por el devnode que el banco proxifica en el slot
@@ -156,10 +167,22 @@ capabilities:
   # --- equipo y pares del proyecto (unproven hasta verlos funcionar aquí) ---
   dut-board:
     what: la Waveshare ESP32-S3-DEV-KIT-N8R8 del SLOT1, identificada como la unidad del FSD (chip, flash 8 MB, PSRAM)
-    available: unproven
+    available: yes
+    observed: >
+      2026-11-01, commit 05735b7 — identidad en dut.identity (C-HW-01/02);
+      camino de ida en commissioning.forward_path; agenda fila 1 cerrada
   sht41-wiring:
     what: SHT41 en GPIO8/9, 100 kHz, dirección 0x44, con pull-ups (C-HW-04/05)
     available: unproven
+    observed: >
+      2026-11-01, tests/target/i2c_probe en SLOT1 — reposo sda=1 scl=1 con y
+      sin pull interno; escaneo solo con pull-ups externos: timeout en todas
+      las direcciones, ack=ninguno; con pull-up interno: NACK en todas,
+      ack=ninguno, también con SDA y SCL cruzados. Ningún dispositivo responde
+      en GPIO8/9, coherente con el montaje: el propietario confirma que el
+      SHT41 aún no estaba montado. La sonda queda validada como instrumento
+      (bus vacío → ack=ninguno, sin bloqueo). Siguiente: repetir el escaneo con
+      el sensor montado
   sda-disconnect:
     what: interrumpir SDA del SHT41 bajo demanda — el operador desconecta el Dupont de SDA en la protoboard (no hay conmutador)
     available: unproven
@@ -181,6 +204,25 @@ capabilities:
 # Tests. JRN = workflow (el recorrido estándar, en orden). TC = atómico.
 # Ola 1 escribe solo standard; deviation y negative quedan bloqueados por ola.
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Commissioning (Fase 2). Registros observados, no tests: interrogan el montaje.
+# ---------------------------------------------------------------------------
+commissioning:
+  forward_path:
+    status: successful
+    date: 2026-11-01
+    commit: 05735b7
+    ci_run: 41307192774   # build.yml, workflow_dispatch variant=bench version=0.0.0, ref main
+    artifact: firmware-v0.0.0-bench
+    flash_offsets_from: coldflash/flash_args del artefacto
+    flash_offsets: {bootloader.bin: "0x0", partition-table.bin: "0x8000", ota_data_initial.bin: "0xf000", nodo_clima.bin: "0x20000"}
+    flash: POST /api/flash SLOT1 esp32s3 460800 — returncode 0, hash verificado en las cuatro imágenes
+    observed: >
+      POST /api/serial/reset SLOT1 (P-BOOT-CAPTURE): «App version: 0.0.0-bench»,
+      «nodo: NODO-BENCH-IMAGE» y «nodo: Init complete» en la consola del slot;
+      el bootloader carga la app de 0x20000 con la tabla de partitions.csv
+    note: la NVS no se borró — el esqueleto no la usa; JRN-01.0 la borra como parte de su expect
+
 tests:
   # JRN-01 — el recorrido ordinario de principio a fin (pregunta 2 del harness,
   # respondida por el propietario el 2026-10-31). Los pasos se ejecutan en orden
