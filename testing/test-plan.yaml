@@ -19,6 +19,7 @@ dut:
   flash: 8MB (C-HW-02)
   slot: SLOT1
   identity:   # observado por /commission el 2026-11-01 (agenda, fila 1)
+    recorded_in: ae08e7b   # firmware observado: 05735b7 (commissioning.forward_path)
     chip: ESP32-S3 (QFN56), revisión v0.2
     features: Wi-Fi, BT 5 (LE), Dual Core + LP Core, 240MHz, Embedded PSRAM 8MB (AP_3v3)
     flash: 8MB detectados (fabricante c8, dispositivo 4017; quad por eFuse, 3,3 V)
@@ -28,7 +29,7 @@ dut:
       (nodo-clima-piloto-dev, IDF v6.0.2), contrastado con POST /api/chip/info
       del banco: misma MAC, chip, revisión, PSRAM y flash
     matches: C-HW-01, C-HW-02
-  test_partner_slot: SLOT2   # segunda Waveshare N8R8, presente e idle; ningún test del plan la necesita todavía
+  test_partner_slot: SLOT2   # segunda Waveshare N8R8; presente e idle el 2026-10-31, ausente (state absent) el 2026-11-01; ningún test del plan la necesita todavía
   boot_marker: "Init complete"      # última línea de app_main (contrato del testbench)
   bench_image_marker: NODO-BENCH-IMAGE   # solo en la imagen de banco (C-LOG-01)
 
@@ -37,7 +38,7 @@ testbench:
   hostname: testbench-b99c
   address: no se versiona — el repo es público; se descubre en cada sesión o
     se lee de un fichero ignorado por git (.env)
-  last_seen: 2026-11-01   # /api/info responde: hostname testbench-b99c, 4 slots configurados, 2 en marcha; no reporta versión del portal
+  last_seen: 2026-11-01   # /api/info: hostname testbench-b99c, 4 slots configurados; 2 en marcha por la mañana, 1 por la tarde (SLOT2 absent); no reporta versión del portal
   reported: 2026-10-31   # lecturas GET de /api/info, /api/devices, /api/wifi/*,
                          # /api/mqtt/status, /api/udplog, /api/human/status
   note: >
@@ -154,12 +155,14 @@ capabilities:
       tráfico — petición CR-TB-04 (testing/testbench-change-requests.md)
   bench-serial-write:
     what: escribir en la consola del DUT por el slot (comandos de la imagen de banco, FSD §18 E13)
-    available: yes
-    reported_by: POST /api/serial/write (escribe por el proxy del slot con DTR/RTS en bajo)
-    exercised: >
-      2026-11-01 — POST /api/serial/write SLOT1 con una línea vacía → ok,
-      written 2; sin reset del DUT. El efecto aún no se puede observar: el
-      firmware no lee la consola hasta los comandos E13 de la imagen de banco
+    available: no
+    reason: >
+      el banco no la reporta por GET (GET /api/serial/write → 404), y lo que el
+      banco no reporta queda en no (nota de testbench). Evidencia de que
+      existe: POST /api/serial/write SLOT1 con una línea vacía el 2026-11-01 →
+      ok, written 2, sin reset del DUT (por el proxy del slot, con DTR/RTS en
+      bajo). Ningún test la necesita todavía; si uno la necesita, se pide al
+      banco que la reporte (petición al testbench)
   bench-power-cycle:
     what: cortar y devolver la alimentación del DUT por instrumento
     available: no
@@ -542,6 +545,7 @@ gate_changes:
       las necesita un test de la ola 1 (JRN-01.5, JRN-02.1, JRN-02.2): las dos
       filas se contradecían
     approved_by: propietario (opción a, con la condición)
+    commit: f9580ed
     date: 2026-11-01
     note: propuesto por el asistente y aprobado por el propietario antes de aplicarlo
 
@@ -582,3 +586,5 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "sin bloqueantes; no bloqueantes: §22.0 describe FR-OTA-04 con el broker reiniciado; ventana de FR-MED-06/FR-CON-04 ajustada; inicio de la ventana de FR-CON-06; C-HW-*/C-BLD-* fuera de los criterios de fase"}
   - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-10-31, commit: 552d9f3,
      findings: "sin bloqueantes; no bloqueante: el reported_by de bench-flash dice running y el banco reporta idle"}
+  - {gate: 03-dut-ready, verdict: SHUT, date: 2026-11-01, commit: f9580ed,
+     findings: "fila 1: bench-serial-write en yes con reported_by «POST /api/serial/write», que no responde a un GET (404); la nota del plan dice que lo que el banco no reporta queda en no. Filas 2–7 cumplen. No bloqueantes: SLOT2 ausente en vivo (el plan dice presente e idle; slots_running 1); dut.identity sin commit propio; gate_changes fila 6 sin commit; ola 1 bloqueada por CR-TB-06"}

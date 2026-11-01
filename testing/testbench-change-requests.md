@@ -17,5 +17,6 @@ tests que la necesitan aparecen bloqueados.
 
 Hay otras capacidades en `no` que no se piden todavía: `bench-dual-console`
 (C-HW-08, fila bench; no está en los criterios de salida de ninguna fase),
-`bench-power-cycle` (el operador lo cubre). `bench-serial-write` ya no está
-en `no`: el banco la ofrece (`POST /api/serial/write`, ejercida el 2026-11-01).
+`bench-power-cycle` (el operador lo cubre) y `bench-serial-write` (existe
+`POST /api/serial/write`, ejercida el 2026-11-01, pero el banco no la reporta
+por GET; se pide cuando un test la necesite).
