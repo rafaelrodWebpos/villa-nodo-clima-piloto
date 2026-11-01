@@ -193,7 +193,20 @@ capabilities:
       ciclo
   sda-disconnect:
     what: interrumpir SDA del SHT41 bajo demanda — el operador desconecta el Dupont de SDA en la protoboard (no hay conmutador)
-    available: unproven
+    available: yes
+    observed: >
+      2026-11-01, tests/target/i2c_probe en SLOT1. Aviso bloqueante del banco
+      «desconecta SDA», confirmado por el operador en 27 s: las 3 lecturas
+      siguientes salen «med: invalida (nack)», «(nack)» y «(crc)». Aviso
+      «reconecta SDA», confirmado: la primera lectura sale válida
+      (T=30.69 HR=63.13) y las siguientes también. El contador de tiempo sube
+      sin saltos y no hay ninguna línea rst:, así que no hubo reinicio ni
+      bloqueo del bus. Lo observa el log del DUT, no el operador
+    consequence: >
+      con SDA suelto, la línea flota y puede devolver tramas con CRC
+      incorrecto en lugar de NACK; el driver real tiene que tratar las dos
+      como inválidas (FR-SEN-02, ya en su contrato host). Un primer aviso con
+      180 s de plazo caducó sin confirmación; para esta acción se usan 300 s
   home-assistant-test:
     what: instancia de Home Assistant con integración MQTT apuntando al broker de prueba (Pi del banco o PC con Docker; lo decide /commission)
     available: unproven
