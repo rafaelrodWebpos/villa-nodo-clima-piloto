@@ -39,7 +39,7 @@ testbench:
   address: no se versiona — el repo es público; se descubre en cada sesión o
     se lee de un fichero ignorado por git (.env)
   last_seen: 2026-11-01   # /api/info: hostname testbench-b99c, 4 slots configurados; 2 en marcha por la mañana, 1 por la tarde (SLOT2 absent); no reporta versión del portal
-  reported: 2026-10-31   # lecturas GET de /api/info, /api/devices, /api/wifi/*,
+  reported: 2026-11-01   # releídas en vivo por /commission y por los checkers de la puerta 03 (antes: 2026-10-31); lecturas GET de /api/info, /api/devices, /api/wifi/*,
                          # /api/mqtt/status, /api/udplog, /api/human/status
   note: >
     Las capacidades del banco se copian de lo que el banco reporta y se
@@ -54,7 +54,7 @@ tiers: [host, target, bench, bench+, field, other]   # FSD §22.0
 # test de banco es un punto de la agenda (field-site se prueba al instalar).
 # ---------------------------------------------------------------------------
 capabilities:
-  # --- banco: copiadas de lo que reporta (2026-10-31); un proyecto no las prueba ---
+  # --- banco: copiadas de lo que reporta (2026-10-31; releídas el 2026-11-01); un proyecto no las prueba ---
   bench-flash:
     what: flashear el DUT a través del testbench (/api/flash, offsets de flash_args)
     available: yes
@@ -103,7 +103,11 @@ capabilities:
     exercised: >
       2026-11-01 — ap_stop → inactivo; ap_start → activo otra vez en el canal 6;
       ap_stop final → inactivo. El estado del banco quedó igual que antes (modo
-      wifi-testing, AP inactivo, broker parado, mismos slots y host_ip)
+      wifi-testing, AP inactivo, broker parado, mismos slots y host_ip).
+      Rutas del Pi tras el ejercicio, comprobadas por el propietario en el Pi
+      (el banco no las expone por la API): `ip route` muestra solo la ruta por
+      defecto por eth0 (metric 100) y la red local por eth0, ninguna por
+      wlan0; rfkill sigue con Wireless LAN «Soft blocked: no»
   bench-portal-driver:
     what: el banco se une al AP del DUT y maneja el portal (GET/POST, escaneo de SSID)
     available: yes
@@ -202,7 +206,7 @@ capabilities:
     what: SHT41 en GPIO8/9, 100 kHz, dirección 0x44, con pull-ups (C-HW-04/05)
     available: yes
     observed: >
-      2026-11-01, tests/target/i2c_probe en SLOT1, tras montar el propietario
+      2026-11-01, commit fd2dbf7, tests/target/i2c_probe en SLOT1, tras montar el propietario
       el SHT41 (3V3, GND, SDA=GPIO8, SCL=GPIO9; continuidad comprobada). El
       escaneo que cuenta, solo con pull-ups externos, da
       «i2c: scan sda=8 scl=9 hz=100000 ack=0x44», con SDA y SCL cruzados
@@ -222,7 +226,7 @@ capabilities:
     what: interrumpir SDA del SHT41 bajo demanda — el operador desconecta el Dupont de SDA en la protoboard (no hay conmutador)
     available: yes
     observed: >
-      2026-11-01, tests/target/i2c_probe en SLOT1. Aviso bloqueante del banco
+      2026-11-01, commit 1587098, tests/target/i2c_probe en SLOT1. Aviso bloqueante del banco
       «desconecta SDA», confirmado por el operador en 27 s: las 3 lecturas
       siguientes salen «med: invalida (nack)», «(nack)» y «(crc)». Aviso
       «reconecta SDA», confirmado: la primera lectura sale válida
@@ -595,3 +599,5 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "sin bloqueantes; no bloqueante: el reported_by de bench-flash dice running y el banco reporta idle"}
   - {gate: 03-dut-ready, verdict: SHUT, date: 2026-11-01, commit: f9580ed,
      findings: "fila 1: bench-serial-write en yes con reported_by «POST /api/serial/write», que no responde a un GET (404); la nota del plan dice que lo que el banco no reporta queda en no. Filas 2–7 cumplen. No bloqueantes: SLOT2 ausente en vivo (el plan dice presente e idle; slots_running 1); dut.identity sin commit propio; gate_changes fila 6 sin commit; ola 1 bloqueada por CR-TB-06"}
+  - {gate: 03-dut-ready, verdict: OPEN, date: 2026-11-01, commit: 0c2efff,
+     findings: "sin bloqueantes. No bloqueantes: bench-driver en no (TestbenchDriver sin instalar; bloquea todo JRN de la ola 1); filas 2 y 3 de la agenda y observed de sht41-wiring/sda-disconnect sin commit (fd2dbf7, 1587098); testbench.reported sigue en 2026-10-31; /api/info sin versión del portal; pendiente en JRN-01.1 que sta_join no desplace la ruta de eth0"}
