@@ -84,32 +84,36 @@ capabilities:
     reported_by: /api/udplog responde ok
   bench-wifi-ap:
     what: SoftAP del testbench al que se une el DUT
-    available: no
-    reported_by: /api/wifi/ap_status responde ok (inactivo) — pero el AP no arranca
-    reason: >
-      el 2026-11-01, POST /api/wifi/ap_start (sin internet) devolvió
-      «hostapd failed to start: rfkill: WLAN soft blocked»: la radio WiFi del
-      Pi está bloqueada por rfkill. install.sh desbloquea el Bluetooth pero no
-      la WiFi. Petición CR-TB-06 (testing/testbench-change-requests.md). El
-      estado del banco quedó igual que antes (AP inactivo, modo wifi-testing)
+    available: yes
+    reported_by: /api/wifi/ap_status responde ok (inactivo)
+    exercised: >
+      2026-11-01, tras desbloquear el propietario la radio del Pi (rfkill,
+      CR-TB-06): POST /api/wifi/ap_start con un SSID desechable, canal 6 y sin
+      internet → ok, ip 192.168.4.1; ap_status active, canal 6. Un primer
+      intento, con la radio bloqueada, había fallado con «rfkill: WLAN soft
+      blocked»
     consequence: >
-      bloquea JRN-01.2 en adelante (todo paso que necesita bench-wifi-ap)
-      hasta que el banco desbloquee la radio; JRN-01.0 y 01.1 no la necesitan
+      canal 1–11: el hostapd del banco fija country_code=CH y en RD solo se
+      permiten los canales 1–11 (CR-TB-07). Los tests y el portal usan un
+      canal de ese rango
   bench-wifi-ap-outage:
     what: apagar y encender el AP del banco bajo demanda
-    available: no
-    reason: >
-      mismo motivo que bench-wifi-ap (radio bloqueada por rfkill, CR-TB-06);
-      ap_stop sí respondió ok
+    available: yes
+    reported_by: /api/wifi/ap_status responde ok
+    exercised: >
+      2026-11-01 — ap_stop → inactivo; ap_start → activo otra vez en el canal 6;
+      ap_stop final → inactivo. El estado del banco quedó igual que antes (modo
+      wifi-testing, AP inactivo, broker parado, mismos slots y host_ip)
   bench-portal-driver:
     what: el banco se une al AP del DUT y maneja el portal (GET/POST, escaneo de SSID)
-    available: no
+    available: yes
     reported_by: /api/wifi/events responde ok
-    reason: >
-      usa la misma radio wlan0, bloqueada por rfkill (CR-TB-06). Además, se
-      vuelve a declarar por decisión del propietario (2026-11-01): se ejerce
+    exercise: >
+      se vuelve a declarar por decisión del propietario (2026-11-01): se ejerce
       en JRN-01.1, porque hasta que exista el portal del DUT no hay AP al que
-      unirse
+      unirse. La radio que comparte con bench-wifi-ap ya está desbloqueada.
+      Pendiente de comprobar en JRN-01.1 que sta_join (dhcpcd en wlan0) no
+      desplaza la ruta por defecto de eth0
   bench-mqtt-broker:
     what: broker mosquitto del banco en la red de su AP, puerto 1883
     available: yes
@@ -427,10 +431,13 @@ tests:
     needs: [hosted-ci]
     expect: gitleaks sobre árbol e historial sin hallazgos; lista de patrones de la instalación sin coincidencias
     impl: .github/workflows/ci.yml#secret-scan
-    status: not done
-    reason: >
-      parcial — el paso de patrones de la instalación necesita el secreto
-      NODO_DENYLIST, que solo el propietario puede definir
+    status: successful
+    commit: f9580ed
+    date: 2026-11-01
+    evidence: >
+      run 41347926930 (ci.yml, push, f9580ed): gitleaks sin hallazgos; el paso
+      de patrones recibió NODO_DENYLIST (secreto del repo desde 2026-10-31) y
+      terminó con «sin patrones de la instalación»
   - id: TC-LOG-01
     shape: atomic
     kind: standard
