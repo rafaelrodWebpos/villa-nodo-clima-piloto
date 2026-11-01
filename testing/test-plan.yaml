@@ -83,18 +83,32 @@ capabilities:
     reported_by: /api/udplog responde ok
   bench-wifi-ap:
     what: SoftAP del testbench al que se une el DUT
-    available: yes
-    reported_by: /api/wifi/ap_status responde ok (inactivo)
+    available: no
+    reported_by: /api/wifi/ap_status responde ok (inactivo) — pero el AP no arranca
+    reason: >
+      el 2026-11-01, POST /api/wifi/ap_start (sin internet) devolvió
+      «hostapd failed to start: rfkill: WLAN soft blocked»: la radio WiFi del
+      Pi está bloqueada por rfkill. install.sh desbloquea el Bluetooth pero no
+      la WiFi. Petición CR-TB-06 (testing/testbench-change-requests.md). El
+      estado del banco quedó igual que antes (AP inactivo, modo wifi-testing)
+    consequence: >
+      bloquea JRN-01.2 en adelante (todo paso que necesita bench-wifi-ap)
+      hasta que el banco desbloquee la radio; JRN-01.0 y 01.1 no la necesitan
   bench-wifi-ap-outage:
     what: apagar y encender el AP del banco bajo demanda
-    available: yes
-    reported_by: /api/wifi/ap_status responde ok
-    exercised: no — arrancar y parar son POST de la misma API; los ejerce /commission
+    available: no
+    reason: >
+      mismo motivo que bench-wifi-ap (radio bloqueada por rfkill, CR-TB-06);
+      ap_stop sí respondió ok
   bench-portal-driver:
     what: el banco se une al AP del DUT y maneja el portal (GET/POST, escaneo de SSID)
-    available: yes
+    available: no
     reported_by: /api/wifi/events responde ok
-    exercised: no — modo estación y relé HTTP son POST de la misma API; los ejerce /commission
+    reason: >
+      usa la misma radio wlan0, bloqueada por rfkill (CR-TB-06). Además, se
+      vuelve a declarar por decisión del propietario (2026-11-01): se ejerce
+      en JRN-01.1, porque hasta que exista el portal del DUT no hay AP al que
+      unirse
   bench-mqtt-broker:
     what: broker mosquitto del banco en la red de su AP, puerto 1883
     available: yes
@@ -103,7 +117,9 @@ capabilities:
     what: parar y arrancar el broker del banco bajo demanda
     available: yes
     reported_by: /api/mqtt/status responde ok
-    exercised: no — start/stop son POST de la misma API; los ejerce /commission
+    exercised: >
+      2026-11-01 — POST /api/mqtt/start → ok, puerto 1883, status running;
+      POST /api/mqtt/stop → ok, status parado (igual que antes)
   bench-mqtt-auth:
     what: broker MQTT del banco con autenticación por usuario y contraseña (FR-MQTT-07)
     available: no
@@ -138,8 +154,12 @@ capabilities:
       tráfico — petición CR-TB-04 (testing/testbench-change-requests.md)
   bench-serial-write:
     what: escribir en la consola del DUT por el slot (comandos de la imagen de banco, FSD §18 E13)
-    available: no
-    reason: el banco no reporta escritura serie por GET — se confirma en /commission
+    available: yes
+    reported_by: POST /api/serial/write (escribe por el proxy del slot con DTR/RTS en bajo)
+    exercised: >
+      2026-11-01 — POST /api/serial/write SLOT1 con una línea vacía → ok,
+      written 2; sin reset del DUT. El efecto aún no se puede observar: el
+      firmware no lee la consola hasta los comandos E13 de la imagen de banco
   bench-power-cycle:
     what: cortar y devolver la alimentación del DUT por instrumento
     available: no
@@ -506,6 +526,24 @@ gate_changes:
       run verde se sale de los 10 últimos
     approved_by: propietario
     date: 2026-10-31
+  - gate: 03-dut-ready
+    row: 6
+    change: >
+      la fila 6 excluye las capacidades que cierran las filas 4–6 de la agenda
+      (home-assistant-test, reference-instrument, github-test-releases), en
+      coherencia con el cambio ya aprobado en la fila 5. Condición escrita en la
+      puerta: esas filas conservan su «se cierra antes de», y ningún test que
+      dependa de home-assistant-test o github-test-releases puede darse por
+      superado hasta que su fila de la agenda esté cerrada. Comprobaciones
+      mecánicas añadidas para las dos partes
+    reason: >
+      la fila 5 (aprobada el 2026-10-31) deja abiertas las filas 4–6 de la
+      agenda en DUT ready, pero la fila 6 exigía cerradas sus capacidades si
+      las necesita un test de la ola 1 (JRN-01.5, JRN-02.1, JRN-02.2): las dos
+      filas se contradecían
+    approved_by: propietario (opción a, con la condición)
+    date: 2026-11-01
+    note: propuesto por el asistente y aprobado por el propietario antes de aplicarlo
 
 gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
   - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
