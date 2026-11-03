@@ -74,6 +74,14 @@ def dut_slot():
 
 
 @pytest.fixture(scope="session")
+def dut_mac():
+    """MAC de la unidad del banco, leída de dut.identity (publicada, H-20)."""
+    m = re.search(r"^  identity:.*\n(?:    .*\n)*?    mac: (\S+)", PLAN.read_text(encoding="utf-8"), re.M)
+    assert m, "dut.identity.mac no está en el plan"
+    return m.group(1)
+
+
+@pytest.fixture(scope="session")
 def boot_marker():
     return _plan_scalar("dut", "boot_marker")
 

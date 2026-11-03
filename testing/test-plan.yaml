@@ -337,7 +337,7 @@ tests:
     expect: >
       arranca sin configuración: el log muestra ARRANQUE -> PORTAL y el escaneo
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
-    impl: null
+    impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config   # xfail(strict) hasta T02/FR-POR-01/FR-ID-01
   - id: JRN-01.2
     shape: workflow
     kind: standard
