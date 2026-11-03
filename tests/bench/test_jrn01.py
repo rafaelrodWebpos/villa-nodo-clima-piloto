@@ -206,6 +206,17 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
         t0 = time.time()
         rt = threading.Thread(target=lambda: reset_out.update(tb.serial_reset(dut_slot)))
         rt.start()
+        # El escaneo empieza cuando el DUT dice que entró en PORTAL: un escaneo
+        # lanzado a la vez que el reset barre el canal antes de que exista el AP.
+        # El tiempo se sigue midiendo desde t0 (cota superior).
+        t_portal = None
+        while time.time() - t0 < PORTAL_LIMIT_S:
+            if any("con: ARRANQUE -> PORTAL" in ln for ln in _lines(tb.serial_output(dut_slot, lines=300, since=t0))):
+                t_portal = time.time() - t0
+                break
+            time.sleep(0.3)
+        c.note(f"- `con: ARRANQUE -> PORTAL` en el buffer a los {t_portal:.1f} s" if t_portal
+               else f"- `con: ARRANQUE -> PORTAL` no apareció en {PORTAL_LIMIT_S} s; se escanea igualmente")
         found, scans = None, []
         while time.time() - t0 < PORTAL_LIMIT_S + 10:
             nets = tb.scan().get("networks") or []
@@ -234,7 +245,7 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
         assert any("con: ARRANQUE -> PORTAL (fin_arranque)" in ln for ln in boot), \
             "falta «con: ARRANQUE -> PORTAL (fin_arranque)» en el log (T02, E0)"
         assert not any("wifi: intento" in ln for ln in boot), "T02 prohíbe intentar el STA: hay «wifi: intento»"
-        ids = _boot_ids(boot)
+        ids = _boot_ids(boot)[:1]   # respuesta del reset y buffer se solapan: un arranque, un id
         assert ids and ids[0] == expected_id, f"boot: muestra {ids[:1]} en lugar de {expected_id} (FR-ID-01)"
 
         # Ejecución 3 — FR-ID-01 (bench): el id no cambia en 3 reinicios
