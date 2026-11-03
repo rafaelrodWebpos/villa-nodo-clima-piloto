@@ -310,6 +310,15 @@ tests:
       flash_args y la NVS borrada; con el monitor del slot ya esperando el
       patrón, un reset muestra NODO-BENCH-IMAGE y «Init complete» (P-BOOT-CAPTURE)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
+    status: successful
+    commit: 8885f9b
+    date: 2026-11-02
+    ci_run: 41559516575   # build.yml workflow_dispatch variant=bench sobre 8885f9b, artefacto firmware-v0.0.0-bench
+    evidence: test-results/20261103T012707Z-8885f9b/
+    observed: >
+      flash por /api/flash en SLOT1 (bootloader 0x0, tabla 0x8000, NVS en blanco
+      0x9000, otadata 0xf000, app 0x20000) ok, returncode 0; tras el último rst:
+      del reset, «nodo_clima 0.0.0-bench», NODO-BENCH-IMAGE e «Init complete»
   - id: JRN-01.1
     shape: workflow
     kind: standard
