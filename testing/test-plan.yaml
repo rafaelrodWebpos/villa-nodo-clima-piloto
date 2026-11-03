@@ -314,14 +314,18 @@ tests:
       NODO-BENCH-IMAGE si es de producción (C-LOG-01)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
     status: successful
-    commit: 8885f9b
+    commit: bbe0cc2
     date: 2026-11-02
-    ci_run: 41559516575   # build.yml workflow_dispatch variant=bench sobre 8885f9b, artefacto firmware-v0.0.0-bench
-    evidence: test-results/20261103T012707Z-8885f9b/
+    runs:
+      - {variant: bench, ci_run: 41561624338, evidence: test-results/20261103T014639Z-bbe0cc2/}
+      - {variant: production, ci_run: 41561334943, evidence: test-results/20261103T014326Z-bbe0cc2/}
     observed: >
       flash por /api/flash en SLOT1 (bootloader 0x0, tabla 0x8000, NVS en blanco
-      0x9000, otadata 0xf000, app 0x20000) ok, returncode 0; tras el último rst:
-      del reset, «nodo_clima 0.0.0-bench», NODO-BENCH-IMAGE e «Init complete»
+      0x9000, otadata 0xf000, app 0x20000) ok, returncode 0, con las dos
+      variantes. Tras el último rst: del reset: banco, «nodo_clima 0.0.0-bench»,
+      NODO-BENCH-IMAGE e «Init complete»; producción, «nodo_clima 0.0.0» e
+      «Init complete» sin NODO-BENCH-IMAGE. SLOT1 queda con la imagen de banco
+    history: primer successful sobre 8885f9b (solo banco, test-results/20261103T012707Z-8885f9b/)
   - id: JRN-01.1
     shape: workflow
     kind: standard
