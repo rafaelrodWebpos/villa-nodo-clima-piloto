@@ -337,7 +337,7 @@ tests:
     expect: >
       arranca sin configuración: el log muestra ARRANQUE -> PORTAL y el escaneo
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
-    impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config   # xfail(strict) hasta T02/FR-POR-01/FR-ID-01
+    impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
     status: not done
     reason: the feature is not implemented (xfail estricto confirmado en el banco)
     last_run: {commit: 0245ffb, date: 2026-11-02, outcome: xfail, evidence: test-results/20261103T015841Z-0245ffb/,

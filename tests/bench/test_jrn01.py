@@ -188,7 +188,6 @@ PORTAL_LIMIT_S = 10          # T02 / FR-POR-01 (D21)
 ID_RESETS = 3                # FR-ID-01 (bench): 3 reinicios
 
 
-@pytest.mark.xfail(strict=True, reason="T02/FR-POR-01/FR-ID-01 sin implementar: el firmware es el esqueleto")
 def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
     """JRN-01.1 — sin configuración: ARRANQUE -> PORTAL y AP abierto clima-xxxxxx en ≤ 10 s; id estable en 3 reinicios."""
     tb = testbench
