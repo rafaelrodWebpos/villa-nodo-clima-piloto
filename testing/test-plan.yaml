@@ -29,6 +29,12 @@ dut:
       (nodo-clima-piloto-dev, IDF v6.0.2), contrastado con POST /api/chip/info
       del banco: misma MAC, chip, revisión, PSRAM y flash
     matches: C-HW-01, C-HW-02
+    publication: >
+      la MAC queda publicada (H-20): la verificación de identidad del DUT la
+      necesita completa y ya está en el historial. Decisión del propietario
+      (2026-11-02): esta placa es unidad permanente del banco y nunca se
+      instalará en una propiedad real; las unidades que se instalen no
+      aparecerán en el repositorio público (NFR-SEC-01)
   test_partner_slot: SLOT2   # segunda Waveshare N8R8; presente e idle el 2026-10-31, ausente (state absent) el 2026-11-01; ningún test del plan la necesita todavía
   boot_marker: "Init complete"      # última línea de app_main (contrato del testbench)
   bench_image_marker: NODO-BENCH-IMAGE   # solo en la imagen de banco (C-LOG-01)
@@ -303,7 +309,7 @@ tests:
       banco se lanza con workflow_dispatch de build.yml), con los offsets de su
       flash_args y la NVS borrada; con el monitor del slot ya esperando el
       patrón, un reset muestra NODO-BENCH-IMAGE y «Init complete» (P-BOOT-CAPTURE)
-    impl: null
+    impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
   - id: JRN-01.1
     shape: workflow
     kind: standard
