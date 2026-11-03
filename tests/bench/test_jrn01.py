@@ -206,17 +206,11 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
         t0 = time.time()
         rt = threading.Thread(target=lambda: reset_out.update(tb.serial_reset(dut_slot)))
         rt.start()
-        # El escaneo empieza cuando el DUT dice que entró en PORTAL: un escaneo
-        # lanzado a la vez que el reset barre el canal antes de que exista el AP.
-        # El tiempo se sigue midiendo desde t0 (cota superior).
-        t_portal = None
-        while time.time() - t0 < PORTAL_LIMIT_S:
-            if any("con: ARRANQUE -> PORTAL" in ln for ln in _lines(tb.serial_output(dut_slot, lines=300, since=t0))):
-                t_portal = time.time() - t0
-                break
-            time.sleep(0.3)
-        c.note(f"- `con: ARRANQUE -> PORTAL` en el buffer a los {t_portal:.1f} s" if t_portal
-               else f"- `con: ARRANQUE -> PORTAL` no apareció en {PORTAL_LIMIT_S} s; se escanea igualmente")
+        # Un escaneo lanzado a la vez que el reset barre el canal antes de que
+        # exista el AP (el DUT lo levanta ~0,6 s tras su rst:). Esperar al
+        # buffer del banco tampoco sirve: va segundos por detrás. Se escanea
+        # desde t0 + 1 s; el tiempo se mide desde t0 (cota superior).
+        time.sleep(1.0)
         found, scans = None, []
         while time.time() - t0 < PORTAL_LIMIT_S + 10:
             nets = tb.scan().get("networks") or []
@@ -242,8 +236,15 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
         c.note(f"- `{expected_id}` visto a los {t_found:.1f} s (cota superior desde la petición de reset), auth {net['auth']}")
         assert net["auth"] == "OPEN", f"el AP del portal tiene seguridad {net['auth']} (FR-POR-01: abierto)"
         assert t_found <= PORTAL_LIMIT_S, f"SSID a los {t_found:.1f} s > {PORTAL_LIMIT_S} s (T02/FR-POR-01)"
-        assert any("con: ARRANQUE -> PORTAL (fin_arranque)" in ln for ln in boot), \
-            "falta «con: ARRANQUE -> PORTAL (fin_arranque)» en el log (T02, E0)"
+        con_ln = next((ln for ln in boot if "con: ARRANQUE -> PORTAL (fin_arranque)" in ln), None)
+        boot_ln = next((ln for ln in boot if re.search(r"boot: \S+ fw=", ln)), None)
+        assert con_ln, "falta «con: ARRANQUE -> PORTAL (fin_arranque)» en el log (T02, E0)"
+        assert boot_ln, "falta la línea boot: (E1)"
+        # T02: el límite se mide desde la línea boot: (FSD §6.6), en el reloj del DUT («I (<ms>)»)
+        ms = lambda ln: int(re.match(r"\w \((\d+)\)", ln).group(1))
+        t02_ms = ms(con_ln) - ms(boot_ln)
+        c.note(f"- T02 en el reloj del DUT: boot: → con: en {t02_ms} ms (límite {PORTAL_LIMIT_S * 1000} ms)")
+        assert 0 <= t02_ms <= PORTAL_LIMIT_S * 1000, f"T02 en {t02_ms} ms > {PORTAL_LIMIT_S} s"
         assert not any("wifi: intento" in ln for ln in boot), "T02 prohíbe intentar el STA: hay «wifi: intento»"
         ids = _boot_ids(boot)[:1]   # respuesta del reset y buffer se solapan: un arranque, un id
         assert ids and ids[0] == expected_id, f"boot: muestra {ids[:1]} en lugar de {expected_id} (FR-ID-01)"
