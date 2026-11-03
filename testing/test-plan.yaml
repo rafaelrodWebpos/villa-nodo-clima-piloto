@@ -314,18 +314,16 @@ tests:
       NODO-BENCH-IMAGE si es de producción (C-LOG-01)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
     status: successful
-    commit: bbe0cc2
+    commit: a0191b6
     date: 2026-11-02
     runs:
-      - {variant: bench, ci_run: 41561624338, evidence: test-results/20261103T014639Z-bbe0cc2/}
-      - {variant: production, ci_run: 41561334943, evidence: test-results/20261103T014326Z-bbe0cc2/}
+      - {variant: bench, ci_run: 41566752008, evidence: test-results/20261103T023521Z-a0191b6/}
+      - {variant: production, ci_run: 41561334943, evidence: test-results/20261103T014326Z-bbe0cc2/, commit: bbe0cc2}
     observed: >
-      flash por /api/flash en SLOT1 (bootloader 0x0, tabla 0x8000, NVS en blanco
-      0x9000, otadata 0xf000, app 0x20000) ok, returncode 0, con las dos
-      variantes. Tras el último rst: del reset: banco, «nodo_clima 0.0.0-bench»,
-      NODO-BENCH-IMAGE e «Init complete»; producción, «nodo_clima 0.0.0» e
-      «Init complete» sin NODO-BENCH-IMAGE. SLOT1 queda con la imagen de banco
-    history: primer successful sobre 8885f9b (solo banco, test-results/20261103T012707Z-8885f9b/)
+      flash por /api/flash en SLOT1 ok, returncode 0; tras el último rst: del
+      reset, «nodo_clima 0.0.0-bench», NODO-BENCH-IMAGE e «Init complete». La
+      variante de producción se ejecutó sobre bbe0cc2 (sin NODO-BENCH-IMAGE)
+    history: successful sobre 8885f9b (banco) y bbe0cc2 (banco y producción)
   - id: JRN-01.1
     shape: workflow
     kind: standard
@@ -338,10 +336,23 @@ tests:
       arranca sin configuración: el log muestra ARRANQUE -> PORTAL y el escaneo
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
     impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
-    status: not done
-    reason: the feature is not implemented (xfail estricto confirmado en el banco)
-    last_run: {commit: 0245ffb, date: 2026-11-02, outcome: xfail, evidence: test-results/20261103T015841Z-0245ffb/,
-               observed: "5 escaneos en 20 s sin clima-f3c6d4; el escaneo sí ve redes (control positivo)"}
+    status: successful
+    commit: a0191b6
+    date: 2026-11-02
+    evidence: test-results/20261103T023521Z-a0191b6/
+    observed: >
+      AP abierto clima-f3c6d4 en el escaneo del banco a los 5,6 s desde la
+      petición de reset (cota superior); T02 en 180 ms en el reloj del DUT
+      (boot: → con: ARRANQUE -> PORTAL (fin_arranque)); sin wifi: intento; el
+      mismo <nodo> en boot: en 3 arranques. bench-portal-driver ejercido (escaneo)
+    history: >
+      xfail estricto confirmado sobre 0245ffb (esqueleto); XPASS estricto en 3
+      de 3 sobre 24fd82c; antes, dos ejecuciones con defectos del test (8fff699:
+      id contado dos veces; e80cc0b: el escaneo empezaba a los 7,7 s y uno no vio
+      el AP). Evidencias en test-results/
+    note: >
+      T02 cumple su acción solo en parte: falta arrancar el DNS y el HTTP del
+      portal (FR-POR-02/03) y el ciclo de medición (FR-MED-*), cada uno con su test
   - id: JRN-01.2
     shape: workflow
     kind: standard
@@ -471,6 +482,10 @@ tests:
       identidad_desde_mac(24:0A:C4:A1:B2:C3) = clima-a1b2c3; sin mayúsculas ni
       otro prefijo; solo los 3 últimos bytes, con ceros a la izquierda
     impl: tests/host/test_identidad.c
+    status: successful
+    commit: a0191b6
+    date: 2026-11-02
+    ci_run: 41566436460   # host tests + secret scan
   - id: TC-CON-01
     shape: atomic
     kind: standard
@@ -484,6 +499,10 @@ tests:
       siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
       T02 no intenta el STA); nombres de estado y evento de la línea E0
     impl: tests/host/test_conectividad.c
+    status: successful
+    commit: a0191b6
+    date: 2026-11-02
+    ci_run: 41566436460   # host tests + secret scan
   - id: TC-SEC-01
     shape: atomic
     kind: security
