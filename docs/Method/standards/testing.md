@@ -55,6 +55,8 @@ aparece en ninguna captura» sí.
   desbloqueado y SDA conectado.
 - **Las credenciales del banco nunca entran en el repo.** Se leen de variables
   de entorno o del almacén de secretos del runner.
+- **Se añaden las rutas una por una** (`git add <ruta>`), nunca `git add -A` ni
+  `git add .`: la evidencia y las cachés que dejan los tests no entran sin revisarlas.
 
 ## Qué se aplica automáticamente
 
@@ -63,6 +65,7 @@ aparece en ninguna captura» sí.
 | `host tests + secret scan` (`ci.yml`) | push a `main` y PR | Nivel host completo; gitleaks sobre el árbol y el historial; patrones de la instalación (secreto `NODO_DENYLIST`) |
 | `Build Firmware` (`build.yml`) | push, tag `v*.*.*`, manual | Build en `espressif/idf:v6.0.2`; marcador de banco ausente en producción y presente en la imagen de banco; con un tag, el journey en el banco antes de publicar |
 | `devcontainer image builds` | cambios en `.devcontainer/` | La imagen se construye con toolchain, pytest y runner |
+| `scripts/git-hooks/pre-push` (local; se activa con `git config core.hooksPath scripts/git-hooks`) | cada `git push` | gitleaks fijado (la misma versión que `ci.yml`) y los valores de `.env`, con el host de cada URL, sobre los commits que se suben; si encuentra algo, bloquea el push |
 
 Los niveles target, bench, bench+ y field no los cubre ningún runner alojado.
 
