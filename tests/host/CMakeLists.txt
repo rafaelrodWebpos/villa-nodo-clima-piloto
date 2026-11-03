@@ -3,7 +3,19 @@
 cmake_minimum_required(VERSION 3.22)
 project(nodo_clima_host_tests C)
 enable_testing()
+set(COMP ${CMAKE_CURRENT_SOURCE_DIR}/../../components)
+add_compile_options(-Wall -Wextra -Werror)
 
 # Comprueba que el nivel host funciona; no verifica ningún requisito del FSD.
 add_executable(tier_smoke tier_smoke.c)
 add_test(NAME tier_smoke COMMAND tier_smoke)
+
+# TC-ID-01 · FR-ID-01
+add_executable(test_identidad test_identidad.c ${COMP}/identidad/identidad.c)
+target_include_directories(test_identidad PRIVATE ${COMP}/identidad/include)
+add_test(NAME TC-ID-01 COMMAND test_identidad)
+
+# TC-CON-01 · T01, T02 (filas de la tabla §6.3 implementadas)
+add_executable(test_conectividad test_conectividad.c ${COMP}/conectividad/conectividad.c)
+target_include_directories(test_conectividad PRIVATE ${COMP}/conectividad/include)
+add_test(NAME TC-CON-01 COMMAND test_conectividad)

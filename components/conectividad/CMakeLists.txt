@@ -1,0 +1,2 @@
+# L2 conectividad (FSD §6). Tabla pura; también la compila tests/host.
+idf_component_register(SRCS "conectividad.c" INCLUDE_DIRS "include")

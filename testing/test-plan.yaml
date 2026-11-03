@@ -338,6 +338,10 @@ tests:
       arranca sin configuración: el log muestra ARRANQUE -> PORTAL y el escaneo
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
     impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config   # xfail(strict) hasta T02/FR-POR-01/FR-ID-01
+    status: not done
+    reason: the feature is not implemented (xfail estricto confirmado en el banco)
+    last_run: {commit: 0245ffb, date: 2026-11-02, outcome: xfail, evidence: test-results/20261103T015841Z-0245ffb/,
+               observed: "5 escaneos en 20 s sin clima-f3c6d4; el escaneo sí ve redes (control positivo)"}
   - id: JRN-01.2
     shape: workflow
     kind: standard
@@ -455,6 +459,31 @@ tests:
       muestra fw = B
     impl: null
 
+  - id: TC-ID-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-ID-01]
+    needs: [hosted-ci]
+    expect: >
+      identidad_desde_mac(24:0A:C4:A1:B2:C3) = clima-a1b2c3; sin mayúsculas ni
+      otro prefijo; solo los 3 últimos bytes, con ceros a la izquierda
+    impl: tests/host/test_identidad.c
+  - id: TC-CON-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [T01, T02]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    needs: [hosted-ci]
+    expect: >
+      por fila: desde el estado de origen y con el evento y la guarda, el estado
+      siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
+      T02 no intenta el STA); nombres de estado y evento de la línea E0
+    impl: tests/host/test_conectividad.c
   - id: TC-SEC-01
     shape: atomic
     kind: security
