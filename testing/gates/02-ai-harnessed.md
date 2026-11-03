@@ -11,7 +11,7 @@ Repositorio: `rafaelrodWebpos/villa-nodo-clima-piloto`. Plan: `testing/test-plan
 | # | Debe ser cierto | Dónde mirar | Evidencia |
 |---|---|---|---|
 | 1 | La puerta Load defined sigue abierta para la versión actual del FSD | `01-load-defined.md` | Sus comprobaciones mecánicas pasan |
-| 2 | El plan declara capacidades. Cada `bench-*` en `yes` lleva un `reported_by` con el endpoint del banco que la respalda. Cada `bench-*` en `no` lleva su motivo y ninguna dice «banco pendiente». Las del proyecto están en `unproven`, salvo `hosted-ci` (`yes`) y las que esperan una autorización del propietario o una instalación de `/commission` (`release-verification`, `bench-driver`), que están en `no` con su motivo. Cada `exercised: no` dice qué fase lo ejerce | `testing/test-plan.yaml` → `capabilities`; `curl $TESTBENCH_URL/api/…` | El endpoint de cada `reported_by` responde `ok` en vivo. Ninguna capacidad de proyecto tiene `observed:` |
+| 2 | El plan declara capacidades. Cada `bench-*` del banco en `yes` lleva un `reported_by` con el endpoint del banco que la respalda. Cada `bench-*` en `no` lleva su motivo y ninguna dice «banco pendiente». `bench-driver` es una instalación del proyecto, no del banco: está en `no` con su motivo, o en `yes` con `pinned` y con `installed_by.run` = un run verde de «devcontainer image builds» cuya comprobación importa TestbenchDriver y lee el commit fijado. Las del proyecto están en `unproven`, salvo `hosted-ci` (`yes`), `release-verification` (`no` con su motivo) y las que ya observó el commissioning: esas pueden estar en `yes` con un `observed:` que cita un commit, solo si la puerta 03 consta `OPEN` en `gate_verdicts`. Cada `exercised: no` dice qué fase lo ejerce | `testing/test-plan.yaml` → `capabilities`, `gate_verdicts`; `curl $TESTBENCH_URL/api/…`; `gh run view` | El endpoint de cada `reported_by` responde `ok` en vivo. El run de `installed_by.run` es `success` y su log contiene `TestbenchDriver OK` y el commit de `pinned`. Ninguna capacidad de proyecto tiene `observed:` sin commit, ni antes de que la puerta 03 conste `OPEN` |
 | 3 | El journey está sembrado: `JRN-01.0`…`JRN-01.7` (grabar el artefacto de la CI → portal → aprovisionar → Wi-Fi → broker/status → HA → dos medidas con ts → corte de alimentación) y `JRN-02.*` (OTA y rollback, bench+), cada uno con `verifies` (IDs que existen en el FSD), `needs` (capacidades declaradas), `expect`, `kind: standard`, `wave: 1` | `testing/test-plan.yaml` → `tests` | Pasos consecutivos. Ningún paso de OTA dentro de JRN-01 |
 | 4 | Existe la agenda de depuración y cada punto tiene «sin probar porque» y «se prueba con»; el testbench no figura como punto | `testing/debugging-agenda.md` | Tabla |
 | 5 | Existe el estándar de pruebas, en un solo fichero, con reglas de ejecución y procedimientos compartidos | `docs/Method/standards/testing.md` | Secciones «Reglas para cualquier ejecución» y `P-*` |
@@ -30,12 +30,20 @@ ls .github/workflows/build.yml .github/workflows/ci.yml
 python3 -c "import yaml,sys; p=yaml.safe_load(open('testing/test-plan.yaml')); \
   j=[t for t in p['tests'] if t['id'].startswith('JRN-')]; \
   caps=p['capabilities']; \
-  bad=[k for k,c in caps.items() if k.startswith('bench-') and c['available'] is True and not c.get('reported_by')]; \
+  bad=[k for k,c in caps.items() if k.startswith('bench-') and k!='bench-driver' and c['available'] is True and not c.get('reported_by')]; \
+  d=caps['bench-driver']; drv=[] if d['available'] is not True else [x for x in ('pinned','installed_by') if not d.get(x)]+([] if (d.get('installed_by') or {}).get('run') else ['installed_by.run']); \
+  g3=any(v['gate']=='03-dut-ready' and v['verdict']=='OPEN' for v in p.get('gate_verdicts',[])); \
+  import re; obs=[k for k,c in caps.items() if not k.startswith('bench-') and c.get('observed') and not (g3 and re.search(r'\\b[0-9a-f]{7,40}\\b',str(c['observed'])))]; \
   pend=[k for k,c in caps.items() if 'banco pendiente' in str(c.get('reason',''))]; \
   undef=[(t['id'],n) for t in p['tests'] for n in t['needs'] if n not in caps]; \
-  print('journey',len(j),'yes-sin-reporte',bad,'pendiente',pend,'needs-sin-capacidad',undef); \
-  sys.exit(0 if j and not bad and not pend and not undef else 1)"
+  print('journey',len(j),'yes-sin-reporte',bad,'pendiente',pend,'needs-sin-capacidad',undef,'bench-driver-falta',drv,'observed-sin-commit-o-sin-puerta03',obs); \
+  sys.exit(0 if j and not bad and not pend and not undef and not drv and not obs else 1)"
 # YAML lee `yes` como booleano: compara con True, no con 'yes'
+# bench-driver en yes: su run de installed_by es verde y prueba el import y el commit fijado
+python3 -c "import yaml; d=yaml.safe_load(open('testing/test-plan.yaml'))['capabilities']['bench-driver']; print(d['installed_by']['run'], d['pinned'])" | { read run pin; \
+  test "$(gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --json conclusion,workflowName --jq '.workflowName+" "+.conclusion')" = "devcontainer image builds success" && \
+  gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --log | grep -q 'TestbenchDriver OK' && \
+  gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --log | grep -q "$pin" && echo "bench-driver ok ($run)" || echo "FALLA bench-driver ($run)"; }
 grep -oP '(?<![A-Z])((FR|NFR|C)-[A-Z]+-[0-9]+|T[0-9]{2})(?![0-9])' testing/test-plan.yaml | sort -u | \
   while read id; do grep -q -- "$id" docs/Functionality/FSD-nodo-clima.md || echo "ID no está en el FSD: $id"; done
 set -a; . ./.env; set +a
@@ -52,15 +60,17 @@ done   # cada workflow debe tener al menos un run verde en main (ninguno en NING
 ## Comprobación de comportamiento (la que decide)
 
 Abre una sesión `/build` con solo el repositorio. ¿Puede decir, sin preguntar
-nada: la fase (2 · Commissioning, porque la agenda tiene puntos abiertos), el
-siguiente punto de la agenda y cómo probarlo? Si tiene que preguntar algo, la
-información que le falta es el hallazgo.
+nada, la posición derivada del estado y el siguiente acto con cómo hacerlo?
+La posición es 2 · Commissioning mientras la agenda tenga abierta alguna fila
+que exige DUT ready o la puerta 03 no conste `OPEN`; si no, 3 · Build con su
+ola y lo que espera su puerta. Si tiene que preguntar algo, la información que
+le falta es el hallazgo.
 
 ## Trampas de este proyecto
 
 - Capacidades del banco en `yes` copiadas de la documentación del testbench, sin un endpoint del banco que las reporte. Ejemplos: salida a Internet, bloqueo de SNTP, DNS propio, corte de alimentación, autenticación del broker.
 - La dirección IP del banco escrita en un fichero versionado. Solo puede estar en `.env`.
-- Evidencia del tipo `observed:` que solo podría venir de la placa: la Fase 1 no toca el DUT.
+- Evidencia del tipo `observed:` que solo podría venir de la placa, sin commit o antes de que la puerta 03 conste `OPEN`: la Fase 1 no toca el DUT; el commissioning sí, y deja su commit.
 - El log UDP activado en la configuración de producción (choca con C-LOG-01).
 - El patrón `build/` del `.gitignore` excluyendo `.claude/skills/build/` (ya pasó).
 - El job verify con un trigger de pull request (repositorio público + runner self-hosted).

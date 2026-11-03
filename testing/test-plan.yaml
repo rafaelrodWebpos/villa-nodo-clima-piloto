@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.0
+fsd_version: 0.9.1
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -39,7 +39,7 @@ testbench:
   address: no se versiona — el repo es público; se descubre en cada sesión o
     se lee de un fichero ignorado por git (.env)
   last_seen: 2026-11-02   # TestbenchDriver.info()/get_devices(): SLOT1 idle, SLOT2 absent (desconectada a propósito). Antes, 2026-11-01 /api/info: hostname testbench-b99c, 4 slots configurados; 2 en marcha por la mañana, 1 por la tarde (SLOT2 absent); no reporta versión del portal
-  reported: 2026-11-01   # releídas en vivo por /commission y por los checkers de la puerta 03 (antes: 2026-10-31); lecturas GET de /api/info, /api/devices, /api/wifi/*,
+  reported: 2026-11-02   # releídas en vivo por /build el 2026-11-02, los 7 endpoints ok (antes: 2026-11-01, /commission y checkers de la puerta 03); lecturas GET de /api/info, /api/devices, /api/wifi/*,
                          # /api/mqtt/status, /api/udplog, /api/human/status
   note: >
     Las capacidades del banco se copian de lo que el banco reporta y se
@@ -183,7 +183,10 @@ capabilities:
     available: yes
     pinned: db6a0933075bb9ff5a99bb8e307a54b6a01af57d   # testbench, PR #42 (2026-10-09)
     sha256: 8ed154118de9d0130d7ac3a25a1c32d550bd832e3b09c5961fca2a85414691bb
-    installed_by: .devcontainer/Dockerfile (ARG TESTBENCH_COMMIT / TESTBENCH_DRIVER_SHA256), en el site-packages de /opt/bench-venv
+    installed_by:
+      source: .devcontainer/Dockerfile (ARG TESTBENCH_COMMIT / TESTBENCH_DRIVER_SHA256), en el site-packages de /opt/bench-venv
+      check: .github/workflows/devcontainer.yml#image/Toolchain and bench tier present — importa TestbenchDriver («TestbenchDriver OK») y lee /opt/bench-venv/TESTBENCH_COMMIT
+      run: 41552251499   # devcontainer image builds, success, commit fdf4cf2; el log contiene «TestbenchDriver OK» y db6a0933…
     observed: >
       2026-11-02, desde la imagen nodo-clima-piloto-dev reconstruida:
       TestbenchDriver(TESTBENCH_URL).info() → hostname testbench-b99c;
@@ -565,6 +568,26 @@ gate_changes:
     date: 2026-11-01
     note: propuesto por el asistente y aprobado por el propietario antes de aplicarlo
 
+  - gate: 02-ai-harnessed
+    rows: [2, comprobaciones mecánicas (capacidades y bench-driver), comprobación de comportamiento, trampas]
+    change: >
+      la fila 2 admite capacidades del proyecto en yes con un observed: que cita
+      un commit, solo si la puerta 03 consta OPEN; bench-driver puede estar en yes
+      con pinned e installed_by.run, un run verde de «devcontainer image builds»
+      cuyo log contiene «TestbenchDriver OK» y el commit fijado (comprobación
+      mecánica nueva con gh run view); la comprobación de comportamiento pide la
+      posición derivada del estado en lugar de «Fase 2» fija
+    reason: >
+      la puerta describía el repo al cerrar la Fase 1; tras DUT ready (puerta 03
+      OPEN) y la instalación de TestbenchDriver, el checker del 2026-11-02 sobre
+      71fbee3 dio SHUT por evidencia legítima de la Fase 2
+    condition: >
+      installed_by de bench-driver apunta a evidencia verificable: la comprobación
+      del workflow «devcontainer image builds» que importa TestbenchDriver y lee
+      el commit fijado
+    approved_by: propietario (opción a, con la condición)
+    date: 2026-11-02
+    note: propuesto por el asistente y aprobado por el propietario antes de aplicarlo
 gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
   - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
      findings: "T08/T10/T13/T17 sin «No debe ocurrir» y T04/T09/T10/T12/T13 sin límite; la Fase 2 necesita salida a Internet (FR-TIME-*, FR-MQTT-03) y no la declara"}
@@ -606,3 +629,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "fila 1: bench-serial-write en yes con reported_by «POST /api/serial/write», que no responde a un GET (404); la nota del plan dice que lo que el banco no reporta queda en no. Filas 2–7 cumplen. No bloqueantes: SLOT2 ausente en vivo (el plan dice presente e idle; slots_running 1); dut.identity sin commit propio; gate_changes fila 6 sin commit; ola 1 bloqueada por CR-TB-06"}
   - {gate: 03-dut-ready, verdict: OPEN, date: 2026-11-01, commit: 0c2efff,
      findings: "sin bloqueantes. No bloqueantes: bench-driver en no (TestbenchDriver sin instalar; bloquea todo JRN de la ola 1); filas 2 y 3 de la agenda y observed de sht41-wiring/sda-disconnect sin commit (fd2dbf7, 1587098); testbench.reported sigue en 2026-10-31; /api/info sin versión del portal; pendiente en JRN-01.1 que sta_join no desplace la ruta de eth0"}
+  - {gate: 01-load-defined, verdict: OPEN, date: 2026-11-02, commit: 71fbee3,
+     findings: "FSD 0.9.0 (multi-sitio); sin bloqueantes. No bloqueantes: D23 fuera de approval_status y de su orden; §22.0 describía FR-OTA-04 parando el broker; testing.md P-BASE sin sitio; 00-Overview sin sitio en la regla de ejemplos; C-HW-*/C-BLD-* fuera de los criterios de salida de §3"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-11-02, commit: 71fbee3,
+     findings: "fila 2: bench-driver en yes sin reported_by (comprobación mecánica 3, exit 1); dut-board, sht41-wiring y sda-disconnect en yes con observed: (evidencia de la Fase 2 que la puerta no admitía). La comprobación de comportamiento esperaba Fase 2; el checker derivó Fase 3 ola 1 sin preguntar"}

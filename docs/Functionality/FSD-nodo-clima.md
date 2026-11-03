@@ -2,13 +2,13 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.0
+fsd_version: 0.9.1
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
 author: Rafael Rodriguez
 reviewers: []
-approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11)
+approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11); D23 aceptada por el propietario (2026-11-02)
 created: 2026-10-11
 last_updated: 2026-11-02
 change_history:
@@ -67,6 +67,8 @@ change_history:
     sitio (FR-HA-02). Portal con 8 campos (FR-POR-03/04); E2 = `cfg: sitio=<sitio> zona=<zona>`.
     El repo `villa-nodo-clima-piloto` se mantiene por D20 (nombre del repo del piloto, no un
     sitio). Las alertas son de Home Assistant: el firmware no emite ninguna.
+  - 0.9.1 (2026-11-02): D23 en su orden (tras D22), en §4.4 y en `approval_status`; §22.0
+    describe FR-OTA-04 como su contrato (corta y restablece el AP; el broker no se reinicia).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -372,7 +374,7 @@ reservados ni tópicos de comando definidos para él.
 
 ### 4.4 Decisiones de valores
 
-D1–D22 están **aceptadas** por el propietario y son normativas. No hay
+D1–D23 están **aceptadas** por el propietario y son normativas. No hay
 decisiones abiertas.
 
 | # | Valor | Requisitos |
@@ -388,7 +390,6 @@ decisiones abiertas.
 | D9 | Plazos: arranque → 1.ª publicación ≤ 30 s; vuelta del Wi-Fi → ≤ 90 s; vuelta del broker → ≤ 75 s | FR-CON-03, -04, -05 |
 | D10 | Identificador `clima-` + 3 últimos bytes de la MAC STA | FR-ID-01 |
 | D11 | Validación de campos del portal (§17) y regex de zona `^[a-z0-9_-]{1,32}$` | FR-POR-04 |
-| D23 | Identificador de sitio configurable `sitio`, regex `^[a-z0-9_-]{1,32}$`, sin valor por defecto, primer nivel de los tópicos; `device.name` de Discovery = «Clima <sitio> <zona>»; `unique_id` sin el sitio [user] (2026-11-02) | FR-MQTT-01, FR-HA-02, FR-POR-03, C-CFG-01 |
 | D12 | Prueba de unión del portal ≤ 20 s; reinicio tras guardar ≤ 5 s | FR-POR-05, FR-POR-06 |
 | D13 | `expire_after` = 180 s en Discovery | FR-HA-03 |
 | D14 | Hosts OTA permitidos: `github.com` y `release-assets.githubusercontent.com` (verificados contra la cadena real, §7.3); máximo 3 redirecciones | FR-OTA-02 |
@@ -400,6 +401,7 @@ decisiones abiertas.
 | D20 | `ota_repo` = `rafaelrodWebpos/villa-nodo-clima-piloto`. Es público y no identifica el lugar de instalación | FR-OTA-11 |
 | D21 | Límites de T01 (configuración → STA en ≤ 2 s) y de T02 (sin configuración → AP en ≤ 10 s) | T01, T02 |
 | D22 | El firmware no requiere PSRAM (permite usar la variante N8) | C-HW-03 |
+| D23 | Identificador de sitio configurable `sitio`, regex `^[a-z0-9_-]{1,32}$`, sin valor por defecto, primer nivel de los tópicos; `device.name` de Discovery = «Clima <sitio> <zona>»; `unique_id` sin el sitio [user] (2026-11-02) | FR-MQTT-01, FR-HA-02, FR-POR-03, C-CFG-01 |
 
 ---
 
@@ -1330,8 +1332,8 @@ otro chip, imagen truncada), fuera del espacio de nombres de las releases. Se
 ejecutan en bench⁺. Si el banco no puede dar salida a Internet, pasan a field
 solo los contratos marcados «alt. field». No valen en field y quedan bloqueados
 en bench⁺ FR-OTA-08 y T22 (cortan el AP o el broker durante la descarga). No
-necesitan Internet y se quedan en bench FR-OTA-01, FR-OTA-04 (para y arranca el
-broker) y FR-OTA-03 con T20 (tls), que usan el DNS del banco
+necesitan Internet y se quedan en bench FR-OTA-01, FR-OTA-04 (corta y
+restablece el AP del banco; el broker sigue en marcha) y FR-OTA-03 con T20 (tls), que usan el DNS del banco
 (`bench-dns-override`) y un servidor HTTPS con certificado autofirmado. Los
 contratos de hora en bench⁺ (FR-TIME-01…04, FR-MQTT-03, FR-MED-06) no tienen
 alternativa field.

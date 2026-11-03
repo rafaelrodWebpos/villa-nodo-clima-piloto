@@ -79,8 +79,8 @@ a través del orden de ejecución.
 **Necesita** bench-flash, bench-wifi-ap, bench-mqtt-broker, bench-portal-driver,
 bench-serial-monitor. **Antes:** imagen de producción del commit bajo prueba
 flasheada con los offsets de `flash_args`; NVS borrada. **Pasos:** aprovisionar
-por el portal con las credenciales del banco (`NODO_TEST_*` del entorno) y la
-zona `zona1`; esperar `status` con `estado` = `online`. **Después:** el DUT está
+por el portal con las credenciales del banco (`NODO_TEST_*` del entorno), el
+sitio `sitio1` y la zona `zona1`; esperar `status` con `estado` = `online`. **Después:** el DUT está
 en OPERATIVO, el broker sin mensajes retained ajenos a la prueba y el log serie
 capturado desde el arranque.
 

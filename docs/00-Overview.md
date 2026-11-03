@@ -57,5 +57,5 @@ La única excepción es el bloque de metadatos del FSD.
 enlazan a él.
 
 **Repositorio público.** Ningún plano contiene credenciales, SSIDs, direcciones
-de la instalación, nombres de zona reales ni datos que identifiquen el lugar
-(FSD NFR-SEC-01). Los ejemplos usan `zona1` y `clima-a1b2c3`.
+de la instalación, nombres de zona o de sitio reales ni datos que identifiquen el lugar
+(FSD NFR-SEC-01). Los ejemplos usan `sitio1`, `zona1` y `clima-a1b2c3`.
