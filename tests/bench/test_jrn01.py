@@ -111,8 +111,8 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
     except pytest.skip.Exception as e:
         result, detail = "SKIP", str(e)
         raise
-    except AssertionError as e:
-        detail = str(e)
+    except Exception as e:
+        detail = f"{type(e).__name__}: {e}"
         raise
     finally:
         tb.test_result(tid, name, result, detail[:200])
