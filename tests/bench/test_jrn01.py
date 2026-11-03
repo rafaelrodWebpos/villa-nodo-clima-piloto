@@ -13,12 +13,18 @@ pytestmark = pytest.mark.journey
 
 
 def _parse_flash_args(coldflash: pathlib.Path) -> dict:
-    """{offset: ruta} de coldflash/flash_args (líneas «0x... fichero»)."""
+    """{offset: ruta} de coldflash/flash_args (líneas «0x... fichero»).
+
+    flash_args nombra cada imagen con su ruta en build/ (p. ej.
+    bootloader/bootloader.bin); build.yml las copia planas a coldflash/."""
     images = {}
     for line in (coldflash / "flash_args").read_text().splitlines():
         parts = line.split()
         if len(parts) == 2 and parts[0].startswith("0x"):
-            images[parts[0]] = str(coldflash / parts[1])
+            f = coldflash / pathlib.PurePosixPath(parts[1]).name
+            assert f.is_file(), f"{parts[1]} de flash_args no está en coldflash/"
+            images[parts[0]] = str(f)
+    assert images, "flash_args sin imágenes"
     return images
 
 
