@@ -304,11 +304,14 @@ tests:
     needs: [bench-driver, hosted-ci, bench-flash, bench-serial-monitor, dut-board]
     procedure: gh workflow run build.yml -f variant=bench -f version=0.0.0 --ref main; artefacto firmware-v0.0.0-bench de ese run
     expect: >
-      se graba en SLOT1 la imagen de banco (variant: bench) construida por la CI
-      sobre el commit que se prueba (un push solo construye producción: la de
-      banco se lanza con workflow_dispatch de build.yml), con los offsets de su
-      flash_args y la NVS borrada; con el monitor del slot ya esperando el
-      patrón, un reset muestra NODO-BENCH-IMAGE y «Init complete» (P-BOOT-CAPTURE)
+      se graba en SLOT1 la imagen construida por la CI sobre el commit que se
+      prueba (en una sesión de /build, la de banco: un push solo construye
+      producción y la de banco se lanza con workflow_dispatch de build.yml; en
+      el job verify, la de producción del tag, --firmware-dir), con los offsets
+      de su flash_args y la NVS borrada; tras el último rst: de un reset
+      (P-BOOT-CAPTURE) aparecen la versión de la imagen e «Init complete», y
+      NODO-BENCH-IMAGE si la imagen es de banco o ninguna línea con
+      NODO-BENCH-IMAGE si es de producción (C-LOG-01)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
     status: successful
     commit: 8885f9b
@@ -479,6 +482,30 @@ tests:
     commit: 221be30
     date: 2026-10-11
     evidence: "runs 38164183233 (producción, push) y 38164188670 (banco, workflow_dispatch) en el mismo commit"
+
+# El journey en el job verify (build.yml) corre sobre la imagen de PRODUCCIÓN
+# del tag (opción a, propietario, 2026-11-02). Pasos que usan algo que solo
+# tiene la imagen de banco, y cómo se tratan allí. Revisar antes del primer tag.
+release_verify:
+  image: producción del tag (--firmware-dir fw)
+  steps_with_bench_only_features:
+    - step: JRN-01.0
+      feature: marcador NODO-BENCH-IMAGE (C-LOG-01)
+      in_verify: se exige su ausencia en el arranque (implementado en el test)
+    - step: JRN-01.3
+      feature: log UDP (FR-LOG-02, E11), solo con CONFIG_NODO_UDP_LOG=y
+      in_verify: >
+        la parte UDP pasa a su contraparte de producción: el receptor UDP del
+        banco no recibe nada del DUT durante los 3 ciclos. FR-LOG-01 completo
+        sigue sin verificar hasta bench-traffic-capture (CR-TB-04). Se
+        implementa al escribir JRN-01.3
+  not_in_journey:
+    - feature: comandos serie E13 (wdt-test, reiniciar; C-LOG-02)
+      used_by: [NFR-WDT-01, FR-TIME-02]
+      note: ningún paso del journey los usa; se verifican fuera de verify, con la imagen de banco
+  ota_note: >
+    JRN-02.* parten de la imagen de producción grabada y hacen OTA a las
+    pre-releases ota-test-*; ninguna depende de funciones de banco
 
 # Comprobaciones de que cada nivel funciona. No verifican el FSD y no son tests
 # del plan; se listan para que la reconciliación no las tome por huérfanas.

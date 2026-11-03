@@ -68,7 +68,7 @@ def _boot_capture(tb, slot: str, pattern: str) -> list:
 
 def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
                                  bench_image_marker, commit_under_test, run_dir, tmp_path):
-    """JRN-01.0 · C-HW-02 — la imagen de banco de la CI arranca en SLOT1 con la NVS borrada."""
+    """JRN-01.0 · C-HW-02 — la imagen de la CI arranca en SLOT1 con la NVS borrada; el marcador de banco, según la variante."""
     tb, tid, name = testbench, "JRN-01.0", "Grabar la imagen de la CI"
     repo = pathlib.Path(__file__).resolve().parents[2]
     tb.test_start("JRN-01 villa-nodo-clima-piloto", "Fase 1", total=1)
@@ -82,8 +82,6 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
         slot = tb.get_slot(dut_slot)
         if not slot.get("present"):
             pytest.skip(f"not done: {dut_slot} no presente (state {slot.get('state')})")
-        assert firmware["variant"] == "bench", \
-            f"JRN-01.0 graba la imagen de banco; llegó la variante {firmware['variant']}"
 
         # --- Ejecución: flasheo con los offsets de flash_args + NVS borrada (P-NVS-ERASE)
         images = _parse_flash_args(firmware["dir"] / "coldflash")
@@ -114,10 +112,14 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
                      f"- `{bench_image_marker}`: {'sí' if has_marker else 'NO'}",
                      f"- `{boot_marker}`: {'sí' if has_init else 'NO'}",
                      f"- versión en el log: `{ver.strip()}`", ""]
-        assert has_marker, f"{bench_image_marker} no aparece en el arranque"
+        if firmware["variant"] == "bench":
+            assert has_marker, f"{bench_image_marker} no aparece en el arranque de la imagen de banco"
+        else:  # verify: imagen de producción del tag (release_verify en el plan)
+            assert not has_marker, f"{bench_image_marker} aparece en la imagen de producción (C-LOG-01)"
         assert has_init, f"«{boot_marker}» no aparece en el arranque"
         assert firmware["version"] in ver, f"el log no muestra la versión {firmware['version']}"
-        result, detail = "PASS", f"{firmware['version']} arranca: {bench_image_marker} + {boot_marker}"
+        mk = bench_image_marker if firmware["variant"] == "bench" else f"sin {bench_image_marker}"
+        result, detail = "PASS", f"{firmware['version']} arranca: {mk} + {boot_marker}"
     except pytest.skip.Exception as e:
         result, detail = "SKIP", str(e)
         raise
