@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.8.4
+fsd_version: 0.9.0
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -10,7 +10,7 @@ author: Rafael Rodriguez
 reviewers: []
 approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11)
 created: 2026-10-11
-last_updated: 2026-10-31
+last_updated: 2026-11-02
 change_history:
   - 0.1.0 (2026-10-11): versión inicial; incluye sincronización SNTP (FR-TIME-*) y lista OTA
     verificada contra la cadena de redirección real de GitHub Releases.
@@ -60,6 +60,13 @@ change_history:
     repo en el contrato host de FR-OTA-02; NFR-OTA-01 alterna A y B.
   - 0.8.4 (2026-10-31): el caso «redirecciones» de T20 queda solo en host (con releases reales
     GitHub da un único salto); FR-OTA-04 fija la sesión MQTT limpia.
+  - 0.9.0 (2026-11-02): multi-sitio (propietario). Nuevo campo de configuración `sitio`
+    (§17, D23), por el portal, sin valor por defecto; los tópicos pasan de `villa/<zona>/…` a
+    `<sitio>/<zona>/…` (§9.2, FR-MQTT-01, §12) y el firmware no fija ningún prefijo de sitio
+    (C-CFG-01). Discovery: `device.name` = «Clima <sitio> <zona>»; `unique_id` no depende del
+    sitio (FR-HA-02). Portal con 8 campos (FR-POR-03/04); E2 = `cfg: sitio=<sitio> zona=<zona>`.
+    El repo `villa-nodo-clima-piloto` se mantiene por D20 (nombre del repo del piloto, no un
+    sitio). Las alertas son de Home Assistant: el firmware no emite ninguna.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -96,7 +103,9 @@ related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /b
 
 ### 1.1 Propósito
 
-Nodo de sensado climático interior para una vivienda con Home Assistant. Un
+Nodo de sensado climático interior para una vivienda con Home Assistant. El
+mismo firmware sirve en varias propiedades: cada nodo se configura con el
+identificador de su sitio (§17) [user]. Un
 ESP32-S3 mide temperatura y humedad relativa con un SHT41, calcula el punto de
 rocío y publica las tres magnitudes por MQTT cada 60 s. Se configura sin
 herramientas mediante un portal cautivo y se actualiza por OTA. Es un piloto:
@@ -379,6 +388,7 @@ decisiones abiertas.
 | D9 | Plazos: arranque → 1.ª publicación ≤ 30 s; vuelta del Wi-Fi → ≤ 90 s; vuelta del broker → ≤ 75 s | FR-CON-03, -04, -05 |
 | D10 | Identificador `clima-` + 3 últimos bytes de la MAC STA | FR-ID-01 |
 | D11 | Validación de campos del portal (§17) y regex de zona `^[a-z0-9_-]{1,32}$` | FR-POR-04 |
+| D23 | Identificador de sitio configurable `sitio`, regex `^[a-z0-9_-]{1,32}$`, sin valor por defecto, primer nivel de los tópicos; `device.name` de Discovery = «Clima <sitio> <zona>»; `unique_id` sin el sitio [user] (2026-11-02) | FR-MQTT-01, FR-HA-02, FR-POR-03, C-CFG-01 |
 | D12 | Prueba de unión del portal ≤ 20 s; reinicio tras guardar ≤ 5 s | FR-POR-05, FR-POR-06 |
 | D13 | `expire_after` = 180 s en Discovery | FR-HA-03 |
 | D14 | Hosts OTA permitidos: `github.com` y `release-assets.githubusercontent.com` (verificados contra la cadena real, §7.3); máximo 3 redirecciones | FR-OTA-02 |
@@ -434,7 +444,7 @@ conectividad salvo ARRANQUE (§6).
 | FR-MED-03 | Tabla de 200 pares (T, HR) en la rejilla del rango, incluidos los extremos | \|Td − Td_ref\| ≤ 0,1 °C en todos | NaN o infinito para HR ∈ [1, 100] | host |
 | FR-MED-04 | Entrada con HR = 0 y entrada con T inválida | La salida es «no publicar punto_rocio» | Que se publique punto_rocio con 0, NaN, −273 o el valor anterior | host |
 | FR-MED-05 | Entradas en float32: 21,45 · −0,05 · 21,449 · 99,96 | 21,5 · −0,1 · 21,4 · 100,0 | Más de 1 decimal en el JSON; `v` como string | host |
-| FR-MED-06 | Broker detenido 5 min; luego se restablece; suscriptor en `villa/#` con retained descartados | En la ventana [`status` online de la reconexión, +5 s] llega exactamente 1 mensaje por medida, con `ts` ≤ 60 s anterior a la llegada | Ráfaga de mensajes con `ts` de la ventana sin conexión | bench⁺ |
+| FR-MED-06 | Broker detenido 5 min; luego se restablece; suscriptor en `<sitio>/#` con retained descartados | En la ventana [`status` online de la reconexión, +5 s] llega exactamente 1 mensaje por medida, con `ts` ≤ 60 s anterior a la llegada | Ráfaga de mensajes con `ts` de la ventana sin conexión | bench⁺ |
 
 ### 5.4 Algoritmo
 
@@ -588,7 +598,7 @@ verification:
 id: FR-CON-03
 verification:
   preconditions:
-    - DUT en OPERATIVO; suscriptor en villa/<zona>/<nodo>/# sin retained.
+    - DUT en OPERATIVO; suscriptor en <sitio>/<zona>/<nodo>/# sin retained.
   stimulus:
     - Apagar el AP Wi-Fi 5 min (el backoff llega al techo); encender el AP.
   expected_observations:
@@ -846,13 +856,14 @@ al conectar.
 
 | Tópico | Dirección | Payload | QoS | Retain |
 |---|---|---|---|---|
-| `villa/<zona>/<nodo>/temperatura` | nodo → broker | `{"v":21.4,"u":"°C","ts":1791720000}` | 0 | sí |
-| `villa/<zona>/<nodo>/humedad` | nodo → broker | `{"v":48.2,"u":"%","ts":1791720000}` | 0 | sí |
-| `villa/<zona>/<nodo>/punto_rocio` | nodo → broker | `{"v":10.0,"u":"°C","ts":1791720000}` | 0 | sí |
-| `villa/<zona>/<nodo>/status` | nodo → broker | Diagnóstico (§9.3), o LWT `{"estado":"offline"}` | 1 | sí |
-| `villa/<zona>/<nodo>/cmd/ota` | broker → nodo | `{"url":"https://…"}` (§12) | 1 | no (FR-OTA-04) |
+| `<sitio>/<zona>/<nodo>/temperatura` | nodo → broker | `{"v":21.4,"u":"°C","ts":1791720000}` | 0 | sí |
+| `<sitio>/<zona>/<nodo>/humedad` | nodo → broker | `{"v":48.2,"u":"%","ts":1791720000}` | 0 | sí |
+| `<sitio>/<zona>/<nodo>/punto_rocio` | nodo → broker | `{"v":10.0,"u":"°C","ts":1791720000}` | 0 | sí |
+| `<sitio>/<zona>/<nodo>/status` | nodo → broker | Diagnóstico (§9.3), o LWT `{"estado":"offline"}` | 1 | sí |
+| `<sitio>/<zona>/<nodo>/cmd/ota` | broker → nodo | `{"url":"https://…"}` (§12) | 1 | no (FR-OTA-04) |
 
-`<zona>` sale de la configuración (§17); `<nodo>` es el identificador de §16.
+`<sitio>` y `<zona>` salen de la configuración (§17); `<nodo>` es el identificador de §16.
+El firmware no contiene ningún prefijo de tópico fijo (C-CFG-01).
 
 ### 9.3 Diagnóstico en `status` [pack:esp32]
 
@@ -876,7 +887,7 @@ al conectar.
 ### 9.4 Requisitos
 
 - **FR-MQTT-01** [Must] [user]: el nodo deberá publicar cada medida en
-  `villa/<zona>/<nodo>/<medida>`, con `<medida>` ∈ {**`temperatura`,
+  `<sitio>/<zona>/<nodo>/<medida>`, con `<medida>` ∈ {**`temperatura`,
   `humedad`, `punto_rocio`**}.
 - **FR-MQTT-02** [Must] [user]: el payload de medida deberá ser un objeto JSON
   con exactamente las claves `v` (número), `u` (string: **`°C`, `%`, `°C`**) y `ts` (entero o `null`).
@@ -904,7 +915,7 @@ al conectar.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-MQTT-01 | OPERATIVO, zona `zona1`; suscribirse a `villa/#` durante 2 ciclos (≥ 120 s) | Sin contar `status` ni Discovery, exactamente los 3 tópicos de medida bajo `villa/zona1/clima-xxxxxx/` | Tópicos con mayúsculas, espacios o `//` | bench |
+| FR-MQTT-01 | OPERATIVO, sitio `sitio1`, zona `zona1`; suscribirse a `#` durante 2 ciclos (≥ 120 s) | Sin contar `status` ni Discovery, exactamente los 3 tópicos de medida bajo `sitio1/zona1/clima-xxxxxx/` | Tópicos con mayúsculas, espacios o `//`; algún tópico del nodo fuera de `sitio1/` (p. ej., `villa/…`) | bench |
 | FR-MQTT-02 | Serializador con T = 21,4 y ts = 1791720000; con ts ausente | `{"v":21.4,"u":"°C","ts":1791720000}` y `…"ts":null}` | Claves adicionales; `v` como string | host |
 | FR-MQTT-03 | SNTP bloqueado y luego desbloqueado (contrato de FR-TIME-03) | `ts` = null antes; tras la sincronización, \|ts − hora de llegada al suscriptor\| ≤ 2 s, con el reloj del suscriptor sincronizado por NTP | `ts` = 0, 1970 o anterior al build | bench⁺ |
 | FR-MQTT-04 | Suscriptor nuevo tras una publicación | Recibe el último valor de cada medida con retain = 1 | Retain ausente | bench |
@@ -927,13 +938,13 @@ Tópico `homeassistant/sensor/<nodo>/<medida>/config`, retain, QoS 1:
 
 ```json
 {"name":"Temperatura","unique_id":"clima-a1b2c3_temperatura",
- "state_topic":"villa/zona1/clima-a1b2c3/temperatura",
+ "state_topic":"sitio1/zona1/clima-a1b2c3/temperatura",
  "value_template":"{{ value_json.v }}","unit_of_measurement":"°C",
  "device_class":"temperature","state_class":"measurement","expire_after":180,
- "availability_topic":"villa/zona1/clima-a1b2c3/status",
+ "availability_topic":"sitio1/zona1/clima-a1b2c3/status",
  "availability_template":"{{ value_json.estado }}",
  "payload_available":"online","payload_not_available":"offline",
- "device":{"identifiers":["clima-a1b2c3"],"name":"Clima zona1",
+ "device":{"identifiers":["clima-a1b2c3"],"name":"Clima sitio1 zona1",
            "model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.3.0"}}
 ```
 
@@ -956,7 +967,7 @@ Tópico `homeassistant/sensor/<nodo>/<medida>/config`, retain, QoS 1:
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
 | FR-HA-01 | Broker limpio; conectar el DUT | 3 tópicos `…/config` retained, en orden status → config → medidas | Configuraciones tras las medidas | bench |
-| FR-HA-02 | Generador de configuración con nodo `clima-a1b2c3`, zona `zona1` y fw `0.3.0` | JSON idéntico campo a campo a §10.2 | `unique_id` dependiente de la zona | host |
+| FR-HA-02 | Generador de configuración con nodo `clima-a1b2c3`, sitio `sitio1`, zona `zona1` y fw `0.3.0` | JSON idéntico campo a campo a §10.2 | `unique_id` dependiente de la zona o del sitio | host |
 | FR-HA-01/02 | Home Assistant real con la integración MQTT; parar y arrancar el broker una vez y reiniciar el DUT una vez | Aparece 1 dispositivo con 3 entidades y valores en °C/% | Entidades duplicadas tras reconectar | bench |
 | FR-HA-03 | DUT en OPERATIVO; desconectar SDA del SHT41 > 180 s (`status` sigue online) | HA marca las 3 entidades como no disponibles en ≤ 190 s desde el último mensaje de medida | Valor obsoleto mostrado como actual | bench |
 
@@ -977,7 +988,7 @@ consulta A.
   `http://192.168.4.1/`, y el DNS deberá resolver cualquier nombre a
   `192.168.4.1`.
 - **FR-POR-03** [Must] [user]: `GET /` deberá servir un formulario con los
-  siete campos de §17 que se configuran por el portal.
+  ocho campos de §17 que se configuran por el portal.
 - **FR-POR-04** [Must] [derived]: un envío con algún campo fuera de las reglas
   de validación de §17 deberá responderse con el error del
   campo y no deberá modificar la NVS.
@@ -994,26 +1005,26 @@ consulta A.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-POR-01 | NVS borrada; arrancar | SSID `clima-xxxxxx` abierto en el escaneo en ≤ 10 s | AP con contraseña; SSID con la zona | bench |
+| FR-POR-01 | NVS borrada; arrancar | SSID `clima-xxxxxx` abierto en el escaneo en ≤ 10 s | AP con contraseña; SSID con la zona o el sitio | bench |
 | FR-POR-02 | Unido al AP, por el relé HTTP del banco: `GET /generate_204` y `GET http://example.com/` | 302 a `http://192.168.4.1/` en el primero; 302 a `http://192.168.4.1/` o el formulario de §17 en el segundo | 204 (el teléfono no mostraría el portal); una respuesta que no venga del portal | bench |
-| FR-POR-03 | `GET /` | HTML con los 7 campos nombrados en §17 | Campos rellenos con secretos | bench |
-| FR-POR-04 | Validador con cada caso límite de §17 (longitud 0, máximo y máximo + 1; `zona` con `/`, `+`, `#`, mayúsculas o espacio) | Rechazo con el campo nombrado; en el DUT, tras el envío por el portal, un reset muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` (§18) | Aceptar un valor inválido; escribir en la NVS (una línea `nvs: config escrita`) | host + bench |
+| FR-POR-03 | `GET /` | HTML con los 8 campos nombrados en §17 | Campos rellenos con secretos | bench |
+| FR-POR-04 | Validador con cada caso límite de §17 (longitud 0, máximo y máximo + 1; `zona` y `sitio` con `/`, `+`, `#`, mayúsculas o espacio) | Rechazo con el campo nombrado; en el DUT, tras el envío por el portal, un reset muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` (§18) | Aceptar un valor inválido; escribir en la NVS (una línea `nvs: config escrita`) | host + bench |
 | FR-POR-05 | Envío con una contraseña Wi-Fi errónea | «no se pudo conectar» en ≤ 20 s (+ 5 s de tolerancia por el cambio de canal); el AP sigue visible; tras el caso, un reset muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` | Persistir; reiniciar | bench |
-| FR-POR-06 | Envío con datos correctos | El AP desaparece en ≤ 5 s desde `con: VALIDANDO -> ARRANQUE (wifi_up)`; el log serie muestra, en orden, `boot:`, `cfg: zona=<zona enviada>`, `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` y `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` (§18) | Volver a PORTAL tras reiniciar | bench |
+| FR-POR-06 | Envío con datos correctos | El AP desaparece en ≤ 5 s desde `con: VALIDANDO -> ARRANQUE (wifi_up)`; el log serie muestra, en orden, `boot:`, `cfg: sitio=<sitio enviado> zona=<zona enviada>`, `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` y `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` (§18) | Volver a PORTAL tras reiniciar | bench |
 | FR-POR-07 | DUT configurado (CONECTANDO_WIFI o posterior); escaneo y `GET http://<ip-dut>/` | Ningún SSID `clima-*`; conexión rechazada | Respuesta HTTP | bench |
 
 ## 12. Receptor de comandos OTA
 
 ### 12.1 Esquema
 
-Tópico `villa/<zona>/<nodo>/cmd/ota`. Payload `{"url":"<string, 1–512 bytes>"}`.
+Tópico `<sitio>/<zona>/<nodo>/cmd/ota`. Payload `{"url":"<string, 1–512 bytes>"}`.
 Un payload que no sea JSON, que no tenga `url` o que tenga claves extra se
 rechaza con `rechazado:payload`.
 
 ### 12.2 Requisitos
 
 - **FR-OTA-01** [Must] [user]: en OPERATIVO, el nodo deberá aceptar comandos
-  OTA en `villa/<zona>/<nodo>/cmd/ota` con el esquema de §12.1 y entregarlos a
+  OTA en `<sitio>/<zona>/<nodo>/cmd/ota` con el esquema de §12.1 y entregarlos a
   la política de §7.
 - **FR-OTA-09** [Must] [derived]: un payload que no cumpla §12.1 deberá
   rechazarse con `rechazado:payload` sin descargar nada.
@@ -1145,6 +1156,7 @@ través de §7, §9 y §12.
 | `mqtt_user` | string | vacío | 0–64 bytes | NVS | operativa | portal | reinicio | se borra con la NVS |
 | `mqtt_pass` | string | vacío | 0–64 bytes | NVS | **secreto** | portal | reinicio | se borra con la NVS |
 | `zona` | string | ninguno | `^[a-z0-9_-]{1,32}$` | NVS | operativa (puede identificar la vivienda) | portal | reinicio | se borra con la NVS |
+| `sitio` | string | ninguno | `^[a-z0-9_-]{1,32}$` (D23) | NVS | operativa (identifica la propiedad) | portal | reinicio | se borra con la NVS |
 | Hosts OTA permitidos | lista | §7 | — | firmware | pública | build | nueva imagen | — |
 | Servidor SNTP | string | `pool.ntp.org` | — | firmware | pública | build | nueva imagen | — |
 | `ota_repo` | string | `rafaelrodWebpos/villa-nodo-clima-piloto` | `owner/repo` de GitHub | firmware | pública | build | nueva imagen | — |
@@ -1160,9 +1172,9 @@ través de §7, §9 y §12.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-CFG-01 | Nodo configurado; 5 cortes de alimentación | El log serie muestra cada vez `cfg: zona=<zona>` con la misma zona y `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` (§18) | Abrir el portal | bench |
-| FR-CFG-01 | Nodo configurado; OTA A → B (Fase 3) | B publica en los mismos tópicos `villa/<zona>/…` | Abrir el portal | bench⁺ · alt. field |
-| C-CFG-01 | Revisar `sdkconfig.defaults`, Kconfig y el código fuente | Los 6 campos de cadena de §17 (`wifi_ssid`, `wifi_pass`, `mqtt_host`, `mqtt_user`, `mqtt_pass`, `zona`) arrancan en «ninguno» o en cadena vacía | Un literal no vacío como valor inicial de cualquiera de ellos (SSID, IP, host, usuario, clave o zona) en `sdkconfig.defaults`, Kconfig o el código | other (revisión + CI) |
+| FR-CFG-01 | Nodo configurado; 5 cortes de alimentación | El log serie muestra cada vez `cfg: sitio=<sitio> zona=<zona>` con el mismo sitio y la misma zona y `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` (§18) | Abrir el portal | bench |
+| FR-CFG-01 | Nodo configurado; OTA A → B (Fase 3) | B publica en los mismos tópicos `<sitio>/<zona>/…` | Abrir el portal | bench⁺ · alt. field |
+| C-CFG-01 | Revisar `sdkconfig.defaults`, Kconfig y el código fuente | Los 7 campos de cadena de §17 (`wifi_ssid`, `wifi_pass`, `mqtt_host`, `mqtt_user`, `mqtt_pass`, `zona`, `sitio`) arrancan en «ninguno» o en cadena vacía, y los tópicos se construyen solo a partir de `sitio`, `zona` y el identificador del nodo | Un literal no vacío como valor inicial de cualquiera de ellos (SSID, IP, host, usuario, clave, zona o sitio) en `sdkconfig.defaults`, Kconfig o el código; un prefijo de tópico literal (p. ej., `villa/`) | other (revisión + CI) |
 
 ## 18. Observabilidad
 
@@ -1172,14 +1184,14 @@ OTA. Durante una descarga OTA registra además el progreso como `ota: <n> %`
 cada vez que lo descargado cruza un múltiplo de 10 % (10, 20 … 100) [user]. Los tests consumen ese formato de log; cambiarlo es un cambio de
 interfaz. El diagnóstico remoto es `status` (§9.3).
 
-Además, estas líneas son normativas [user]. Ninguna escribe secretos; `zona` es
-operativa, no secreta (§17).
+Además, estas líneas son normativas [user]. Ninguna escribe secretos; `sitio` y `zona` son
+operativos, no secretos (§17).
 
 | Ref. | Línea | Cuándo se escribe |
 |---|---|---|
 | E0 | `con: <ESTADO> -> <ESTADO> (<evento>)` | En cada fila de §6.3, incluidas las autotransiciones T03, T07, T09, T10, T12, T13, T18 y T21, salvo T23: es de la región de validación de imagen, no del gestor de conectividad, y se observa con `ota: rollback` (E9) |
 | E1 | `boot: <nodo> fw=<versión> reset=<causa> part=<ota_0\|ota_1> img=<pendiente\|valida>` | Una vez por arranque, antes de cualquier otra línea de la aplicación; `<causa>` toma los valores de `reset` de §9.3 y `part` es el slot en ejecución |
-| E2 | `cfg: zona=<zona>` | Al leer de la NVS una configuración válida, antes de T01 |
+| E2 | `cfg: sitio=<sitio> zona=<zona>` | Al leer de la NVS una configuración válida, antes de T01 |
 | E3 | `med: T=<t> HR=<h> Td=<td\|->` · `med: invalida (<nack\|timeout\|crc>)` | En cada ciclo de medición, en cualquier estado; `Td=-` cuando no se calcula (FR-MED-04) |
 | E4 | `wifi: intento <n>` | Al lanzar cada intento de unión STA; `<n>` vuelve a 1 tras cada conexión lograda |
 | E5 | `mqtt: intento <n>` | Al lanzar cada intento de conexión MQTT; `<n>` vuelve a 1 tras cada conexión lograda |
@@ -1265,10 +1277,10 @@ cuenta de GitHub comprometida puede distribuir firmware.
 
 - **NFR-SEC-01** [Must] [user]: el repositorio no deberá contener
   credenciales, SSIDs, direcciones de broker o IP de la instalación, nombres de
-  zona reales ni datos que identifiquen el lugar de instalación, en ningún
+  zona o de sitio reales ni datos que identifiquen el lugar de instalación, en ningún
   fichero ni en el historial de git.
 - **NFR-SEC-02** [Must] [derived]: las imágenes de firmware publicadas no
-  deberán contener SSIDs, contraseñas, hosts de broker ni zonas.
+  deberán contener SSIDs, contraseñas, hosts de broker, zonas ni sitios.
 - **FR-SEC-03** [Must] [derived]: el nodo no deberá emitir `wifi_pass` ni
   `mqtt_pass` por el log serie, por el log UDP, por MQTT ni por HTTP.
 - Las reglas OTA de seguridad son FR-OTA-02, FR-OTA-03 y FR-OTA-04 (§7).

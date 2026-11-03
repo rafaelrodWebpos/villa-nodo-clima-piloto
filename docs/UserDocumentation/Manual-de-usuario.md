@@ -38,7 +38,7 @@ calor del ESP32 falsea la temperatura.
 
 *Pendiente (Fase 1).* Resumen del comportamiento: un nodo sin configuración
 emite el Wi-Fi abierto `clima-xxxxxx`; al unirte, el teléfono abre el portal.
-Introduce el Wi-Fi, el broker y la zona (minúsculas, cifras, `_` o `-`). Si el
+Introduce el Wi-Fi, el broker, el sitio (la propiedad) y la zona (minúsculas, cifras, `_` o `-`; los tópicos quedan `<sitio>/<zona>/<nodo>/…`). Si el
 nodo consigue unirse, el Wi-Fi `clima-xxxxxx` desaparece; si no, vuelve a
 mostrar el formulario con el error.
 
@@ -60,7 +60,7 @@ mostrar el formulario con el error.
 
 - **Automática.** Los cortes de Wi-Fi o de broker se recuperan solos, sin
   reiniciar el nodo. Una OTA mala vuelve sola a la versión anterior en ≤ 5 min.
-- **Manual: reaprovisionar** (cambio de Wi-Fi, broker o zona). Borra la NVS por
+- **Manual: reaprovisionar** (cambio de Wi-Fi, broker, sitio o zona). Borra la NVS por
   USB (comando pendiente, Fase 1); el nodo vuelve a abrir el portal.
 
 ---

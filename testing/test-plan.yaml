@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.8.4
+fsd_version: 0.9.0
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -322,8 +322,8 @@ tests:
     verifies: [T04, T05, FR-POR-06]
     needs: [bench-driver, bench-portal-driver, bench-wifi-ap, bench-serial-monitor, dut-board]
     expect: >
-      el banco envía por el portal el SSID y la clave de su AP, el broker y la
-      zona (el banco no espera la respuesta del portal: tiene un solo radio y
+      el banco envía por el portal el SSID y la clave de su AP, el broker, el
+      sitio y la zona (valores ficticios sitio1/zona1, NFR-SEC-01) (el banco no espera la respuesta del portal: tiene un solo radio y
       vuelve a levantar su AP); el log muestra nvs: config escrita y
       con: VALIDANDO -> ARRANQUE (wifi_up), el AP clima-xxxxxx desaparece en
       ≤ 5 s desde esa línea y el nodo reinicia (boot:)
@@ -337,7 +337,7 @@ tests:
     verifies: [T01, FR-LOG-02]
     needs: [bench-driver, bench-wifi-ap, bench-serial-monitor, bench-udp-log-receiver, dut-board]
     expect: >
-      tras el reinicio, el log muestra boot:, cfg: zona=<zona enviada> y
+      tras el reinicio, el log muestra boot:, cfg: sitio=<sitio enviado> zona=<zona enviada> y
       con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque); se une al AP del banco
       (con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)); el receptor UDP del
       banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
@@ -394,7 +394,7 @@ tests:
     needs: [bench-driver, bench-wifi-ap, bench-operator-prompt, bench-serial-monitor, bench-mqtt-broker, bench-portal-driver, dut-board]
     expect: >
       el operador desenchufa el USB-C y lo vuelve a enchufar; el log muestra
-      cfg: zona=<misma zona> y con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque),
+      cfg: sitio=<mismo sitio> zona=<misma zona> y con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque),
       sin AP clima-* en el escaneo, y la primera medida en vivo llega en ≤ 30 s
       desde la primera línea del arranque en la consola (bootloader o boot:)
     impl: null

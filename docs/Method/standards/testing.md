@@ -106,7 +106,7 @@ alimentación al DUT. **Después:** desbloquear siempre.
 
 **Necesita** github-test-releases y bench-ap-internet (bench+), o field-site
 (field). **Pasos:** usar la pre-release `ota-test-<nombre>` del repo con el
-asset de la imagen; publicar en `villa/zona1/<nodo>/cmd/ota` el payload
+asset de la imagen; publicar en `sitio1/zona1/<nodo>/cmd/ota` el payload
 `{"url":"https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/ota-test-<nombre>/<asset>"}`
 sin retain. **Después:** el DUT vuelve a la imagen bajo prueba (OTA de vuelta o
 flasheo) antes del test siguiente.
