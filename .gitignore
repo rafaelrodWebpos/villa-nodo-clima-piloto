@@ -10,3 +10,7 @@
 # Secretos locales del banco: nunca en el repo (NFR-SEC-01)
 .env
 *.env
+
+# Cachés del nivel bench
+.pytest_cache/
+__pycache__/

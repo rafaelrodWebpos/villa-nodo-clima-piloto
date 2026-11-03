@@ -40,9 +40,9 @@ def _plan_scalar(section: str, key: str) -> str:
     text = PLAN.read_text(encoding="utf-8")
     block = re.search(rf"^{section}:\n((?:[ #].*\n|\n)+)", text, re.M)
     assert block, f"{section} no está en el plan"
-    m = re.search(rf"^  {key}:\s*(\S+)", block.group(1), re.M)
+    m = re.search(rf'^  {key}:\s*(?:"([^"]*)"|(\S+))', block.group(1), re.M)
     assert m, f"{section}.{key} no está en el plan"
-    return m.group(1)
+    return m.group(1) if m.group(1) is not None else m.group(2)
 
 
 def _git(*args) -> str:
@@ -75,7 +75,7 @@ def dut_slot():
 
 @pytest.fixture(scope="session")
 def boot_marker():
-    return _plan_scalar("dut", "boot_marker").strip('"')
+    return _plan_scalar("dut", "boot_marker")
 
 
 @pytest.fixture(scope="session")

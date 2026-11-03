@@ -42,6 +42,13 @@ def _lines(resp: dict) -> list:
     return [o.get("text", "") if isinstance(o, dict) else str(o) for o in out]
 
 
+def _after_last_reset(lines: list) -> list:
+    """Solo lo que el DUT escribió tras su último «rst:» de ROM: la respuesta
+    del reset puede traer antes la cola del arranque anterior."""
+    idx = [i for i, ln in enumerate(lines) if ln.startswith("rst:")]
+    return lines[idx[-1]:] if idx else []
+
+
 def _boot_capture(tb, slot: str, pattern: str) -> list:
     """P-BOOT-CAPTURE: el reset trae su propio log; si el patrón no está,
     monitor esperando (15 s) y segundo reset."""
@@ -98,10 +105,13 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
         evidence += ["## Arranque", "", f"- log: `{tid}-boot.log` ({len(lines)} líneas)", ""]
 
         # --- Resultado
-        has_marker = any(bench_image_marker in ln for ln in lines)
-        has_init = any(boot_marker in ln for ln in lines)
-        ver = next((ln for ln in lines if re.search(r"nodo_clima \S+", ln)), "")
-        evidence += [f"- `{bench_image_marker}`: {'sí' if has_marker else 'NO'}",
+        boot = _after_last_reset(lines)
+        assert boot, "la captura no contiene ninguna línea rst: (el reset no se vio)"
+        has_marker = any(bench_image_marker in ln for ln in boot)
+        has_init = any(boot_marker in ln for ln in boot)
+        ver = next((ln for ln in boot if re.search(r"nodo_clima \S+", ln)), "")
+        evidence += [f"- tras el último `rst:` ({len(boot)} líneas):",
+                     f"- `{bench_image_marker}`: {'sí' if has_marker else 'NO'}",
                      f"- `{boot_marker}`: {'sí' if has_init else 'NO'}",
                      f"- versión en el log: `{ver.strip()}`", ""]
         assert has_marker, f"{bench_image_marker} no aparece en el arranque"
