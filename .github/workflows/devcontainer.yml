@@ -21,4 +21,6 @@ jobs:
         run: |
           docker run --rm nodo-clima-dev bash -lc '. $IDF_PATH/export.sh >/dev/null && idf.py --version'
           docker run --rm nodo-clima-dev /opt/bench-venv/bin/python -m pytest --version
+          docker run --rm nodo-clima-dev /opt/bench-venv/bin/python -c 'from testbench_driver import TestbenchDriver; print("TestbenchDriver OK")'
+          docker run --rm nodo-clima-dev cat /opt/bench-venv/TESTBENCH_COMMIT
           docker run --rm nodo-clima-dev test -x /opt/actions-runner/config.sh

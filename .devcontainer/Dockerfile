@@ -10,12 +10,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl ca-certificates jq gh sudo python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
-# Nivel bench (pytest). TestbenchDriver lo añade /commission desde el repo del
-# testbench, fijado a un commit (testing/test-plan.yaml, capacidad bench-driver).
-# Venv propio, separado del Python de ESP-IDF (que solo existe tras export.sh).
+# Nivel bench (pytest). Venv propio, separado del Python de ESP-IDF (que solo
+# existe tras export.sh).
 COPY tests/bench/requirements.txt /tmp/bench-requirements.txt
 RUN python3 -m venv /opt/bench-venv \
     && /opt/bench-venv/bin/pip install --no-cache-dir -r /tmp/bench-requirements.txt
+
+# TestbenchDriver (capacidad bench-driver del plan): pytest/testbench_driver.py
+# del repo del testbench, fijado a un commit y a su sha256. Solo usa la
+# biblioteca estándar. Cambiar de commit = cambiar las dos líneas a la vez.
+ARG TESTBENCH_REPO=SensorsIot/Embedded-AI-Harness
+ARG TESTBENCH_COMMIT=db6a0933075bb9ff5a99bb8e307a54b6a01af57d
+ARG TESTBENCH_DRIVER_SHA256=8ed154118de9d0130d7ac3a25a1c32d550bd832e3b09c5961fca2a85414691bb
+RUN site=$(/opt/bench-venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
+    && curl -sSfL -o "$site/testbench_driver.py" \
+       "https://raw.githubusercontent.com/${TESTBENCH_REPO}/${TESTBENCH_COMMIT}/pytest/testbench_driver.py" \
+    && echo "${TESTBENCH_DRIVER_SHA256}  $site/testbench_driver.py" | sha256sum -c - \
+    && echo "${TESTBENCH_COMMIT}" > /opt/bench-venv/TESTBENCH_COMMIT
 # El entrypoint de IDF antepone su propio Python: el nivel bench se invoca
 # siempre como /opt/bench-venv/bin/python.
 

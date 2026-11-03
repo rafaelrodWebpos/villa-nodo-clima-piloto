@@ -38,7 +38,7 @@ testbench:
   hostname: testbench-b99c
   address: no se versiona — el repo es público; se descubre en cada sesión o
     se lee de un fichero ignorado por git (.env)
-  last_seen: 2026-11-01   # /api/info: hostname testbench-b99c, 4 slots configurados; 2 en marcha por la mañana, 1 por la tarde (SLOT2 absent); no reporta versión del portal
+  last_seen: 2026-11-02   # TestbenchDriver.info()/get_devices(): SLOT1 idle, SLOT2 absent (desconectada a propósito). Antes, 2026-11-01 /api/info: hostname testbench-b99c, 4 slots configurados; 2 en marcha por la mañana, 1 por la tarde (SLOT2 absent); no reporta versión del portal
   reported: 2026-11-01   # releídas en vivo por /commission y por los checkers de la puerta 03 (antes: 2026-10-31); lecturas GET de /api/info, /api/devices, /api/wifi/*,
                          # /api/mqtt/status, /api/udplog, /api/human/status
   note: >
@@ -180,11 +180,16 @@ capabilities:
       USB-C (bench-operator-prompt)
   bench-driver:
     what: TestbenchDriver instalado en el devcontainer (nivel bench)
-    available: no
-    reason: >
-      lo instala /commission en /opt/bench-venv del devcontainer, desde
-      pytest/testbench_driver.py de github.com/SensorsIot/Embedded-AI-Harness
-      (el repo del testbench), fijado a un commit
+    available: yes
+    pinned: db6a0933075bb9ff5a99bb8e307a54b6a01af57d   # testbench, PR #42 (2026-10-09)
+    sha256: 8ed154118de9d0130d7ac3a25a1c32d550bd832e3b09c5961fca2a85414691bb
+    installed_by: .devcontainer/Dockerfile (ARG TESTBENCH_COMMIT / TESTBENCH_DRIVER_SHA256), en el site-packages de /opt/bench-venv
+    observed: >
+      2026-11-02, desde la imagen nodo-clima-piloto-dev reconstruida:
+      TestbenchDriver(TESTBENCH_URL).info() → hostname testbench-b99c;
+      get_devices() → SLOT1 idle, SLOT2/3/4 absent; ap_status() → active false.
+      Ojo: serial_reset/serial_output/serial_monitor tienen SLOT2 por defecto;
+      los tests pasan siempre slot=dut.slot (SLOT1)
 
   # --- infraestructura propia ---
   hosted-ci:
