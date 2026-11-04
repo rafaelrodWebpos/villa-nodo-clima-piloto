@@ -316,10 +316,10 @@ tests:
       NODO-BENCH-IMAGE si es de producción (C-LOG-01)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
     status: successful
-    commit: 52f23f0
+    commit: b92347c
     date: 2026-11-03
     runs:
-      - {variant: bench, ci_run: 41749670564, evidence: test-results/20261104T005216Z-52f23f0/}
+      - {variant: bench, ci_run: 41752373738, evidence: test-results/20261104T011448Z-b92347c/}
       - {variant: production, ci_run: 41561334943, evidence: test-results/20261103T014326Z-bbe0cc2/, commit: bbe0cc2}
     observed: >
       flash por /api/flash en SLOT1 ok, returncode 0; tras el último rst: del
@@ -339,9 +339,9 @@ tests:
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
     impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
     status: successful
-    commit: 52f23f0
+    commit: b92347c
     date: 2026-11-03
-    evidence: test-results/20261104T005216Z-52f23f0/
+    evidence: test-results/20261104T011448Z-b92347c/
     observed: >
       AP abierto clima-f3c6d4 en el escaneo del banco a los 5,6 s desde la
       petición de reset (cota superior); T02 en 180 ms en el reloj del DUT
@@ -520,9 +520,9 @@ tests:
       ningún recurso externo; valores escapados; 0 si no cabe (nunca truncado)
     impl: tests/host/test_portal_form.c
     status: successful
-    commit: 52f23f0
+    commit: b92347c
     date: 2026-11-03
-    ci_run: 41749289320   # host tests + secret scan
+    ci_run: 41752000980   # host tests + secret scan
   - id: TC-POR-02
     shape: atomic
     kind: standard
@@ -538,12 +538,12 @@ tests:
       sta_join (ruta de eth0 intacta)
     impl: tests/bench/test_por.py::test_tc_por_02_get_form
     status: successful
-    commit: 52f23f0
+    commit: b92347c
     date: 2026-11-03
-    evidence: test-results/20261104T005216Z-52f23f0/
+    evidence: test-results/20261104T011448Z-b92347c/
     observed: >
-      sta_join al AP abierto clima-f3c6d4; GET http://192.168.4.1/ → 200, 2853
-      bytes, 8 <input> con los name de §17, wifi_pass y mqtt_pass password y
+      sta_join al AP abierto clima-f3c6d4; GET http://192.168.4.1/ → 200, 3087
+      bytes (textos H-37), 8 <input> con los name de §17, wifi_pass y mqtt_pass password y
       vacíos; la API del banco responde tras sta_join
     history: >
       xfail estricto confirmado sobre 20dbae8 (test-results/20261104T004409Z-20dbae8/): sta_join al AP del DUT
