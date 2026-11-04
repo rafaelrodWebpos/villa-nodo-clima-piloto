@@ -122,8 +122,10 @@ capabilities:
       se vuelve a declarar por decisión del propietario (2026-11-01): se ejerce
       en JRN-01.1, porque hasta que exista el portal del DUT no hay AP al que
       unirse. La radio que comparte con bench-wifi-ap ya está desbloqueada.
-      Pendiente de comprobar en JRN-01.1 que sta_join (dhcpcd en wlan0) no
-      desplaza la ruta por defecto de eth0
+    exercised: >
+      2026-11-02, JRN-01.1 sobre a0191b6 (escaneo) y TC-POR-02 sobre 20dbae8
+      (sta_join al AP abierto del DUT y relé HTTP). Tras sta_join la API del
+      banco sigue respondiendo: la ruta por defecto de eth0 no se desplaza
   bench-mqtt-broker:
     what: broker mosquitto del banco en la red de su AP, puerto 1883
     available: yes
@@ -530,7 +532,11 @@ tests:
       http://192.168.4.1/ devuelve 200 con los 8 campos de §17 (por su name) y
       sin ningún secreto relleno; la API del banco sigue respondiendo tras
       sta_join (ruta de eth0 intacta)
-    impl: tests/bench/test_por.py::test_tc_por_02_get_form   # xfail(strict) hasta GET /
+    impl: tests/bench/test_por.py::test_tc_por_02_get_form
+    history: >
+      xfail estricto confirmado sobre 20dbae8 (test-results/20261104T004409Z-20dbae8/): sta_join al AP del DUT
+      correcto, la API del banco sigue respondiendo (ruta de eth0 intacta) y
+      GET / da Connection refused (sin servidor HTTP)
   - id: TC-SEC-01
     shape: atomic
     kind: security

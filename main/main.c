@@ -3,9 +3,9 @@
  *
  * Crea los adaptadores y conecta los núcleos puros (components/). Implementado
  * hasta ahora: identidad (FR-ID-01), línea boot: (E1), guarda de configuración
- * y fila T02 de la tabla (AP abierto del portal). Pendiente, cada uno con su
- * test: DNS y HTTP del portal (FR-POR-02/03), ciclo de medición (FR-MED-*), T01
- * y el resto de filas de §6.3.
+ * y fila T02 de la tabla (AP abierto y HTTP del portal con GET /, FR-POR-01/03).
+ * Pendiente, cada uno con su test: POST / (FR-POR-04), DNS y redirecciones
+ * (FR-POR-02), ciclo de medición (FR-MED-*), T01 y el resto de filas de §6.3.
  */
 #include <string.h>
 #include "esp_app_desc.h"
@@ -22,9 +22,11 @@
 
 #include "conectividad.h"
 #include "identidad.h"
+#include "portal_http.h"
 
 static const char *TAG = "nodo";
 static char s_id[IDENTIDAD_LEN];
+static const char *s_version;
 
 #if CONFIG_NODO_BENCH_BUILD
 /* Marcador que la CI busca en el binario (FSD C-LOG-01). Solo existe en la
@@ -69,7 +71,8 @@ static bool config_valida(void)
     return hay;
 }
 
-/* Acción de T02 (parte implementada): AP Wi-Fi abierto con SSID = id (FR-POR-01). */
+/* Acción de T02 (parte implementada): AP Wi-Fi abierto con SSID = id (FR-POR-01)
+ * y servidor HTTP con el formulario (FR-POR-03). */
 static void arrancar_portal(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
@@ -90,6 +93,7 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap));
     ESP_ERROR_CHECK(esp_wifi_start());
+    ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version));
 }
 
 static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
@@ -110,6 +114,7 @@ void app_main(void)
     uint8_t mac[6];
     ESP_ERROR_CHECK(esp_read_mac(mac, ESP_MAC_WIFI_STA));
     identidad_desde_mac(mac, s_id);
+    s_version = app->version;
     log_boot(app->version);                       /* E1: la primera línea de la aplicación */
     ESP_LOGI(TAG, "nodo_clima %s", app->version);
 #if CONFIG_NODO_BENCH_BUILD

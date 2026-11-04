@@ -27,7 +27,6 @@ def _en_portal(tb, slot, c):
     return ids[0]
 
 
-@pytest.mark.xfail(strict=True, reason="FR-POR-03 sin implementar: el portal aún no sirve HTTP")
 def test_tc_por_02_get_form(testbench, dut_slot, run_dir):
     """TC-POR-02 · FR-POR-03 (bench) — GET / sirve los 8 campos de §17, sin secretos rellenos."""
     tb = testbench
