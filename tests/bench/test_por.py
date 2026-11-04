@@ -74,7 +74,6 @@ ENVIOS_INVALIDOS = [
 ]
 
 
-@pytest.mark.xfail(strict=True, reason="FR-POR-04 sin implementar en el DUT: el portal aún no acepta POST /")
 def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir):
     """TC-POR-05 · FR-POR-04 (bench) — un envío inválido se responde con el error del campo y no toca la NVS."""
     from urllib.parse import urlencode

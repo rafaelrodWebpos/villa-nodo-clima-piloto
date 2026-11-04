@@ -3,9 +3,10 @@
  *
  * Crea los adaptadores y conecta los núcleos puros (components/). Implementado
  * hasta ahora: identidad (FR-ID-01), línea boot: (E1), guarda de configuración
- * y fila T02 de la tabla (AP abierto y HTTP del portal con GET /, FR-POR-01/03).
- * Pendiente, cada uno con su test: POST / (FR-POR-04), DNS y redirecciones
- * (FR-POR-02), ciclo de medición (FR-MED-*), T01 y el resto de filas de §6.3.
+ * y filas T02 y T03 de la tabla (AP abierto y HTTP del portal: GET / y la
+ * validación del envío, FR-POR-01/03/04). Pendiente, cada uno con su test: T04
+ * (prueba de unión), DNS y redirecciones (FR-POR-02), ciclo de medición
+ * (FR-MED-*), T01 y el resto de filas de §6.3.
  */
 #include <string.h>
 #include "esp_app_desc.h"
@@ -27,6 +28,9 @@
 static const char *TAG = "nodo";
 static char s_id[IDENTIDAD_LEN];
 static const char *s_version;
+static con_estado_t s_estado = CON_ARRANQUE;
+
+static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t);
 
 #if CONFIG_NODO_BENCH_BUILD
 /* Marcador que la CI busca en el binario (FSD C-LOG-01). Solo existe en la
@@ -71,6 +75,17 @@ static bool config_valida(void)
     return hay;
 }
 
+/* Evento «envío» del portal (hilo del servidor HTTP): T03 si es inválido. */
+static void al_enviar(bool valido)
+{
+    con_estado_t origen = s_estado;
+    con_transicion_t t = con_transicion(origen, CON_EV_ENVIO, (con_guardas_t){.envio_valido = valido});
+    if (t.fila) {
+        s_estado = t.siguiente;
+        ejecutar(origen, CON_EV_ENVIO, t);
+    }
+}
+
 /* Acción de T02 (parte implementada): AP Wi-Fi abierto con SSID = id (FR-POR-01)
  * y servidor HTTP con el formulario (FR-POR-03). */
 static void arrancar_portal(void)
@@ -93,7 +108,7 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap));
     ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version));
+    ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version, al_enviar));
 }
 
 static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
@@ -130,10 +145,11 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(err);
 
-    con_estado_t estado = CON_ARRANQUE;
-    con_transicion_t t = con_transicion(estado, CON_EV_FIN_ARRANQUE,
+    con_estado_t origen = s_estado;
+    con_transicion_t t = con_transicion(origen, CON_EV_FIN_ARRANQUE,
                                         (con_guardas_t){.config_valida = config_valida()});
-    ejecutar(estado, CON_EV_FIN_ARRANQUE, t);
+    s_estado = t.siguiente;   /* antes de la acción: el portal ya puede recibir envíos */
+    ejecutar(origen, CON_EV_FIN_ARRANQUE, t);
 
     /* Marcador de arranque del contrato del testbench: última línea de app_main. */
     ESP_LOGI(TAG, "Init complete");

@@ -25,3 +25,7 @@ typedef struct {
 /* Escribe el HTML del formulario en buf (con NUL). Devuelve la longitud, o 0
  * si no cabe en cap. */
 size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f);
+
+/* Página corta con un mensaje (pantallas de FR-POR-05/06 y la temporal de
+ * envío válido). Misma cabecera y estilo que el formulario; sin campos. */
+size_t portal_mensaje_html(char *buf, size_t cap, const char *id, const char *version, const char *mensaje);

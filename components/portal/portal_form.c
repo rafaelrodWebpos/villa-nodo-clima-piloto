@@ -93,12 +93,10 @@ static void bloque(sal_t *s, const char *titulo, const def_campo_t *d, size_t n,
     put(s, "</fieldset>");
 }
 
-size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
+static void cabecera(sal_t *s0, const char *id, const char *version)
 {
-    sal_t s = {buf, cap, 0, 0};
-    if (!buf || cap == 0) return 0;
-    buf[0] = 0;
-    put(&s,
+    sal_t *sp = s0;
+    put(sp,
         "<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\">"
         "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
         "<title>%s</title><style>"
@@ -115,10 +113,18 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
         "button[type=submit]{width:100%%;font-size:1.05rem;padding:.8rem;border:0;border-radius:10px;background:#1f6feb;color:#fff}"
         "</style></head><body>",
         TX_TITULO);
-    put(&s, "<h1>%s</h1><p class=\"sub\">", TX_TITULO);
-    put_escapado(&s, f->id);
-    put(&s, " &middot; %s ", TX_FIRMWARE);
-    put_escapado(&s, f->version);
+    put(sp, "<h1>%s</h1><p class=\"sub\">", TX_TITULO);
+    put_escapado(sp, id);
+    put(sp, " &middot; %s ", TX_FIRMWARE);
+    put_escapado(sp, version);
+}
+
+size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
+{
+    sal_t s = {buf, cap, 0, 0};
+    if (!buf || cap == 0) return 0;
+    buf[0] = 0;
+    cabecera(&s, f->id, f->version);
     put(&s, "</p>");
     int hay_errores = 0;
     for (int i = 0; i < PORTAL_N_CAMPOS; i++) if (f->error[i]) hay_errores = 1;
@@ -130,6 +136,17 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
     put(&s, "<button type=\"submit\">%s</button></form>", TX_GUARDAR);
     put(&s, "<script>function o(i){var e=document.getElementById(i);e.type=e.type==='password'?'text':'password'}</script>"
             "</body></html>");
+    if (s.lleno) { buf[0] = 0; return 0; }
+    return s.len;
+}
+
+size_t portal_mensaje_html(char *buf, size_t cap, const char *id, const char *version, const char *mensaje)
+{
+    sal_t s = {buf, cap, 0, 0};
+    if (!buf || cap == 0) return 0;
+    buf[0] = 0;
+    cabecera(&s, id, version);
+    put(&s, "</p><p class=\"mensaje\" role=\"status\">%s</p></body></html>", mensaje);
     if (s.lleno) { buf[0] = 0; return 0; }
     return s.len;
 }

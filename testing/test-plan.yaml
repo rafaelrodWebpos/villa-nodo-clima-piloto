@@ -603,7 +603,10 @@ tests:
       ningún secreto; el log muestra una con: PORTAL -> PORTAL (envío) por envío
       y ninguna nvs: config escrita; un reset vuelve a
       con: ARRANQUE -> PORTAL (fin_arranque)
-    impl: tests/bench/test_por.py::test_tc_por_05_invalid_submit   # xfail(strict) hasta POST /
+    impl: tests/bench/test_por.py::test_tc_por_05_invalid_submit
+    history: >
+      xfail estricto confirmado sobre e31180e (test-results/20261104T014345Z-e31180e/): POST / sin manejador en
+      el DUT, la petición del relé acaba en timeout
   - id: TC-SEC-01
     shape: atomic
     kind: security

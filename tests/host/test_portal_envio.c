@@ -61,6 +61,10 @@ int main(void)
     portal_form_html(html, sizeof html, &g);
     ESPERA(!strstr(html, "class=\"aviso\"") && !strstr(html, "id=\"err-"), "aviso o error sin errores");
 
+    /* Página de mensaje: el texto, sin campos ni formulario */
+    ESPERA(portal_mensaje_html(html, sizeof html, "clima-a1b2c3", "0.3.0", "MENSAJE-X") > 0, "mensaje no cabe");
+    ESPERA(strstr(html, "MENSAJE-X") && !strstr(html, "<input") && !strstr(html, "<form"), "página de mensaje con campos");
+
     printf("TC-POR-04 (FR-POR-04): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }
