@@ -9,7 +9,7 @@ static const char *const NOMBRE_ESTADO[CON_N_ESTADOS] = {
     "CONECTANDO_BROKER", "OPERATIVO", "OTA_DESCARGA",
 };
 static const char *const NOMBRE_EVENTO[CON_N_EVENTOS] = {
-    "fin_arranque",
+    "fin_arranque", "envío",
 };
 
 con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_guardas_t g)
@@ -19,6 +19,10 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
             ? (con_transicion_t){"T01", CON_CONECTANDO_WIFI, CON_ACC_ARRANCAR_STA}
             : (con_transicion_t){"T02", CON_PORTAL, CON_ACC_ARRANCAR_PORTAL};
     }
+    if (origen == CON_PORTAL && evento == CON_EV_ENVIO && !g.envio_valido) {
+        return (con_transicion_t){"T03", CON_PORTAL, CON_ACC_RESPONDER_ERRORES};
+    }
+    /* T04 (envío válido) llega con JRN-01.2 */
     return (con_transicion_t){NULL, origen, CON_ACC_NINGUNA};
 }
 

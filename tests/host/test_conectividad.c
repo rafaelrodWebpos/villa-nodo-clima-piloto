@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01, T02.
+/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01, T02, T03.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -26,12 +26,20 @@ int main(void)
     ESPERA(t.accion == CON_ACC_ARRANCAR_PORTAL, "acción %d", t.accion);
     ESPERA(t.accion != CON_ACC_ARRANCAR_STA, "T02 intenta el STA");
 
+    /* T03: PORTAL + envío, algún campo inválido -> PORTAL, responder con errores. No debe: escribir en la NVS */
+    t = con_transicion(CON_PORTAL, CON_EV_ENVIO, (con_guardas_t){.envio_valido = false});
+    ESPERA(t.fila && strcmp(t.fila, "T03") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_PORTAL, "siguiente %d", t.siguiente);
+    ESPERA(t.accion == CON_ACC_RESPONDER_ERRORES, "acción %d", t.accion);
+    ESPERA(t.accion != CON_ACC_PERSISTIR, "T03 escribe en la NVS");
+
     /* Nombres de la línea E0 (§18) */
+    ESPERA(strcmp(con_nombre_evento(CON_EV_ENVIO), "envío") == 0, "nombre envío");
     ESPERA(strcmp(con_nombre_estado(CON_ARRANQUE), "ARRANQUE") == 0, "nombre ARRANQUE");
     ESPERA(strcmp(con_nombre_estado(CON_PORTAL), "PORTAL") == 0, "nombre PORTAL");
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_WIFI), "CONECTANDO_WIFI") == 0, "nombre CONECTANDO_WIFI");
     ESPERA(strcmp(con_nombre_evento(CON_EV_FIN_ARRANQUE), "fin_arranque") == 0, "nombre fin_arranque");
 
-    printf("TC-CON-01 (T01, T02): %s\n", fallos ? "FALLO" : "ok");
+    printf("TC-CON-01 (T01, T02, T03): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

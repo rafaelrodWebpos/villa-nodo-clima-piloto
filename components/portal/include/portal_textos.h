@@ -38,8 +38,9 @@
 #define TX_NO_CONECTA       "No se pudo conectar…"
 #define TX_CONECTADO        "Conectado. El nodo se reinicia…"
 
-/* Mensaje bajo cada campo inválido (FR-POR-04). BORRADOR del asistente: H-36
- * fija el aviso general pero no estos textos; pendientes de revisión. */
+/* Mensaje bajo cada campo inválido (FR-POR-04). Redactados por el asistente y
+ * aprobados tal cual por el propietario el 2026-11-03 (H-36 fija el aviso
+ * general; estos completan el diseño). */
 #define TX_ERR_WIFI_SSID    "Escribe el nombre de la red (1 a 32 caracteres)."
 #define TX_ERR_WIFI_PASS    "Déjala vacía si la red es abierta, o usa de 8 a 63 caracteres sin acentos ni ñ."
 #define TX_ERR_MQTT_HOST    "Escribe un nombre (letras, números, . y -) o una dirección IP, hasta 63 caracteres."

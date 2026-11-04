@@ -494,7 +494,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    verifies: [T01, T02, T03]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
@@ -572,7 +572,38 @@ tests:
     note: >
       interpretación de «nombre de host o IPv4 decimal» (§17): si el valor solo
       tiene cifras y puntos, tiene que ser una IPv4 a.b.c.d con partes 0–255; si
-      no, basta el juego de caracteres. Se consulta a /define si hace falta más
+      no, basta el juego de caracteres (letras, números, . y -). Aprobada por el
+      propietario el 2026-11-03; el FSD no cambia
+  - id: TC-POR-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-POR-04]
+    needs: [hosted-ci]
+    expect: >
+      el cuerpo urlencoded se decodifica ('+', %XX; la primera aparición
+      cuenta; %XX mal formado literal); con errores, el formulario lleva el aviso
+      general y, debajo de cada campo inválido y solo de ellos, un
+      id=err-<name>; conserva los valores no secretos y nunca los secretos
+    impl: tests/host/test_portal_envio.c
+  - id: TC-POR-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-POR-04]
+    needs: [bench-driver, bench-serial-monitor, bench-portal-driver, dut-board]
+    expect: >
+      con el DUT en PORTAL y valores ficticios, dos POST / inválidos (zona
+      Zona#1; wifi_pass de 7) responden 200 con el error solo en su campo
+      (err-<name>), el aviso general, los valores no secretos conservados y
+      ningún secreto; el log muestra una con: PORTAL -> PORTAL (envío) por envío
+      y ninguna nvs: config escrita; un reset vuelve a
+      con: ARRANQUE -> PORTAL (fin_arranque)
+    impl: tests/bench/test_por.py::test_tc_por_05_invalid_submit   # xfail(strict) hasta POST /
   - id: TC-SEC-01
     shape: atomic
     kind: security

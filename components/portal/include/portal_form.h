@@ -18,6 +18,8 @@ typedef struct {
     const char *version;                     /* versión del firmware en ejecución */
     const char *valores[PORTAL_N_CAMPOS];    /* valores a conservar; NULL = por defecto.
                                                 Los secretos se ignoran siempre. */
+    const char *error[PORTAL_N_CAMPOS];      /* mensaje bajo el campo (FR-POR-04), o NULL.
+                                                Con alguno, el aviso general va arriba. */
 } portal_form_t;
 
 /* Escribe el HTML del formulario en buf (con NUL). Devuelve la longitud, o 0

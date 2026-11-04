@@ -71,6 +71,7 @@ static void campo(sal_t *s, const def_campo_t *d, const portal_form_t *f)
     put(s, "<label for=\"%s\">%s</label>", n, d->etiqueta);
     if (d->secreto) put(s, "<div class=\"ojo\">");
     put(s, "<input id=\"%s\" name=\"%s\" type=\"%s\" %s", n, n, d->tipo, d->extra);
+    if (f->error[d->campo]) put(s, " aria-invalid=\"true\" aria-describedby=\"err-%s\"", n);
     if (d->ejemplo) put(s, " placeholder=\"%s\"", d->ejemplo);
     /* Los secretos nunca vuelven rellenos (FR-POR-03, «No debe ocurrir») */
     const char *v = d->secreto ? NULL : f->valores[d->campo];
@@ -81,6 +82,8 @@ static void campo(sal_t *s, const def_campo_t *d, const portal_form_t *f)
         put(s, "<button type=\"button\" aria-label=\"%s\" title=\"%s\" onclick=\"o('%s')\">&#128065;</button></div>",
             TX_MOSTRAR_CLAVE, TX_MOSTRAR_CLAVE, n);
     if (d->ayuda) put(s, "<small class=\"ayuda\">%s</small>", d->ayuda);
+    /* FR-POR-04: el error del campo, debajo de él; el test lo busca por id=err-<name> */
+    if (f->error[d->campo]) put(s, "<small class=\"error\" id=\"err-%s\">%s</small>", n, f->error[d->campo]);
 }
 
 static void bloque(sal_t *s, const char *titulo, const def_campo_t *d, size_t n, const portal_form_t *f)
@@ -103,6 +106,9 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
         "h1{font-size:1.4rem;margin:0}.sub{color:#5b6475;margin:.2rem 0 1rem;font-size:.9rem}"
         "fieldset{border:1px solid #d5d9e0;border-radius:10px;background:#fff;margin:0 0 1rem;padding:.6rem 1rem 1rem}"
         ".ayuda{display:block;color:#6b7280;font-size:.8rem;margin-top:.25rem}"
+        ".error{display:block;color:#b42318;font-size:.85rem;margin-top:.25rem}"
+        "input[aria-invalid]{border-color:#b42318}"
+        ".aviso{background:#fef3f2;border:1px solid #fda29b;color:#912018;border-radius:10px;padding:.7rem 1rem;margin:0 0 1rem}"
         "legend{font-weight:600;padding:0 .3rem}label{display:block;margin:.7rem 0 .25rem;font-size:.95rem}"
         "input{box-sizing:border-box;width:100%%;font-size:1rem;padding:.6rem;border:1px solid #b9c0cc;border-radius:8px}"
         ".ojo{display:flex;gap:.4rem}.ojo button{flex:none;width:3rem;font-size:1.2rem;border:1px solid #b9c0cc;border-radius:8px;background:#fff}"
@@ -113,7 +119,11 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
     put_escapado(&s, f->id);
     put(&s, " &middot; %s ", TX_FIRMWARE);
     put_escapado(&s, f->version);
-    put(&s, "</p><form method=\"post\" action=\"/\">");
+    put(&s, "</p>");
+    int hay_errores = 0;
+    for (int i = 0; i < PORTAL_N_CAMPOS; i++) if (f->error[i]) hay_errores = 1;
+    if (hay_errores) put(&s, "<p class=\"aviso\" role=\"alert\">%s</p>", TX_AVISO_ERRORES);
+    put(&s, "<form method=\"post\" action=\"/\">");
     bloque(&s, TX_BLOQUE_WIFI, WIFI, sizeof WIFI / sizeof *WIFI, f);
     bloque(&s, TX_BLOQUE_MQTT, MQTT, sizeof MQTT / sizeof *MQTT, f);
     bloque(&s, TX_BLOQUE_UBICACION, UBICACION, sizeof UBICACION / sizeof *UBICACION, f);

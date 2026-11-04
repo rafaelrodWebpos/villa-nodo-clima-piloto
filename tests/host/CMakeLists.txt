@@ -29,3 +29,8 @@ add_test(NAME TC-POR-01 COMMAND test_portal_form)
 add_executable(test_portal_validar test_portal_validar.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_validar PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-POR-03 COMMAND test_portal_validar)
+
+# TC-POR-04 · FR-POR-04 (respuesta a un envío inválido)
+add_executable(test_portal_envio test_portal_envio.c ${COMP}/portal/portal_urlenc.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
+target_include_directories(test_portal_envio PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-POR-04 COMMAND test_portal_envio)

@@ -101,6 +101,8 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     switch (t.accion) {
     case CON_ACC_ARRANCAR_PORTAL: arrancar_portal(); break;
     case CON_ACC_ARRANCAR_STA:    /* T01: llega con JRN-01.3 */ break;
+    case CON_ACC_RESPONDER_ERRORES: /* T03: la respuesta la da el adaptador del portal */ break;
+    case CON_ACC_PERSISTIR:       /* T05: llega con JRN-01.2 */ break;
     case CON_ACC_NINGUNA:         break;
     }
     /* E0 */

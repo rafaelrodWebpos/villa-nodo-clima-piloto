@@ -10,17 +10,21 @@ typedef enum {
 } con_estado_t;
 
 typedef enum {
-    CON_EV_FIN_ARRANQUE, CON_N_EVENTOS   /* el resto de §6.4 llega con sus filas */
+    CON_EV_FIN_ARRANQUE, CON_EV_ENVIO,
+    CON_N_EVENTOS                        /* el resto de §6.4 llega con sus filas */
 } con_evento_t;
 
 typedef enum {
     CON_ACC_NINGUNA,
     CON_ACC_ARRANCAR_STA,      /* T01: arrancar el STA y el ciclo de medición */
     CON_ACC_ARRANCAR_PORTAL,   /* T02: arrancar el AP, el DNS, el HTTP y el ciclo de medición */
+    CON_ACC_RESPONDER_ERRORES, /* T03: responder con un error por campo */
+    CON_ACC_PERSISTIR,         /* T05: persistir la configuración (llega con su fila) */
 } con_accion_t;
 
 typedef struct {
     bool config_valida;        /* guarda de T01/T02: configuración válida en NVS */
+    bool envio_valido;         /* guarda de T03/T04: todos los campos válidos (§17) */
 } con_guardas_t;
 
 typedef struct {
