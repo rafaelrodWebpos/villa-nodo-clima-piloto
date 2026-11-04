@@ -19,3 +19,8 @@ add_test(NAME TC-ID-01 COMMAND test_identidad)
 add_executable(test_conectividad test_conectividad.c ${COMP}/conectividad/conectividad.c)
 target_include_directories(test_conectividad PRIVATE ${COMP}/conectividad/include)
 add_test(NAME TC-CON-01 COMMAND test_conectividad)
+
+# TC-POR-01 · FR-POR-03 (generador del formulario)
+add_executable(test_portal_form test_portal_form.c ${COMP}/portal/portal_form.c)
+target_include_directories(test_portal_form PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-POR-01 COMMAND test_portal_form)

@@ -503,6 +503,34 @@ tests:
     commit: a0191b6
     date: 2026-11-02
     ci_run: 41566436460   # host tests + secret scan
+  - id: TC-POR-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-POR-03]
+    needs: [hosted-ci]
+    expect: >
+      el generador del formulario produce exactamente 8 <input> con los name de
+      §17; wifi_pass y mqtt_pass son password y nunca llevan value aunque se les
+      pase uno; mqtt_port = 1883 por defecto; POST a /; id y versión visibles;
+      ningún recurso externo; valores escapados; 0 si no cabe (nunca truncado)
+    impl: tests/host/test_portal_form.c
+  - id: TC-POR-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-POR-03]
+    needs: [bench-driver, bench-serial-monitor, bench-portal-driver, dut-board]
+    expect: >
+      con el DUT en PORTAL, el banco se une a su AP abierto y GET
+      http://192.168.4.1/ devuelve 200 con los 8 campos de §17 (por su name) y
+      sin ningún secreto relleno; la API del banco sigue respondiendo tras
+      sta_join (ruta de eth0 intacta)
+    impl: tests/bench/test_por.py::test_tc_por_02_get_form   # xfail(strict) hasta GET /
   - id: TC-SEC-01
     shape: atomic
     kind: security
