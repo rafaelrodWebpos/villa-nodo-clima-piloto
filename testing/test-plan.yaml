@@ -565,6 +565,10 @@ tests:
       +, #, mayúsculas o espacio) y acepta el máximo; varios errores a la vez,
       cada uno en su campo
     impl: tests/host/test_portal_validar.c
+    status: successful
+    commit: 0c94255
+    date: 2026-11-03
+    ci_run: 41753584031   # host tests + secret scan
     note: >
       interpretación de «nombre de host o IPv4 decimal» (§17): si el valor solo
       tiene cifras y puntos, tiene que ser una IPv4 a.b.c.d con partes 0–255; si
