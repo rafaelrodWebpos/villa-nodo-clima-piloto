@@ -585,6 +585,7 @@ tests:
 # del tag (opción a, propietario, 2026-11-02). Pasos que usan algo que solo
 # tiene la imagen de banco, y cómo se tratan allí. Revisar antes del primer tag.
 release_verify:
+  first_tag: v0.0.1   # decisión del propietario (H-37, 2026-11-03): el primer tag de release; el tag lo crea él cuando /build anuncie Ready for shipment
   image: producción del tag (--firmware-dir fw)
   steps_with_bench_only_features:
     - step: JRN-01.0

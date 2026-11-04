@@ -1,5 +1,6 @@
 /* Portal cautivo — TODOS los textos visibles, en un solo lugar (diseño H-36,
- * aprobado como provisional por el propietario; no forma parte del FSD).
+ * aprobado como provisional por el propietario, con los cambios de H-37; no
+ * forma parte del FSD).
  * Cambiar un texto aquí no cambia ningún test: los tests verifican los
  * atributos name de §17, no las etiquetas. Ningún ejemplo es un valor real. */
 #pragma once
@@ -14,13 +15,16 @@
 #define TX_BLOQUE_MQTT      "Servidor MQTT"
 #define TX_SERVIDOR         "Servidor"
 #define TX_PUERTO           "Puerto"
-#define TX_USUARIO          "Usuario"
+#define TX_USUARIO_OPC      "Usuario (opcional)"
+#define TX_CLAVE_OPC        "Contraseña (opcional)"
 
 #define TX_BLOQUE_UBICACION "Ubicación"
 #define TX_SITIO            "Sitio"
 #define TX_ZONA             "Zona"
+#define TX_AYUDA_ID         "minúsculas, números, - y _"   /* bajo Sitio y Zona */
 
-/* Ejemplos genéricos (placeholder) */
+/* Ejemplos genéricos (placeholder); nunca un valor real (C-CFG-01) */
+#define TX_EJ_RED           "nombre de tu Wi-Fi"
 #define TX_EJ_SERVIDOR      "homeassistant.local"
 #define TX_EJ_SITIO         "sitio1"
 #define TX_EJ_ZONA          "zona1"
