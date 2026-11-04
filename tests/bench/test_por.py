@@ -6,7 +6,7 @@ import time
 
 import pytest
 
-from benchlib import _after_last_reset, _boot_capture, _boot_ids, case
+from benchlib import _after_last_reset, _boot_capture, _boot_ids, case, unirse_al_portal
 
 PORTAL_IP = "192.168.4.1"          # FSD §11.1: el servidor del portal
 NAMES_17 = {"wifi_ssid", "wifi_pass", "mqtt_host", "mqtt_port",
@@ -34,12 +34,10 @@ def test_tc_por_02_get_form(testbench, dut_slot, run_dir):
         ssid = _en_portal(tb, dut_slot, c)
         assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
         time.sleep(2)
-        c.step(f"El banco se une al AP abierto {ssid}")
         joined = False
         try:
-            j = tb.sta_join(ssid, timeout=20)
+            unirse_al_portal(tb, ssid, c)
             joined = True
-            c.note(f"- sta_join: ip del banco en la red del portal `{j.get('ip', '?')}`")
             # bench-portal-driver: unirse no debe desplazar la ruta de eth0 (la API sigue respondiendo)
             tb.info()
             c.note("- la API del banco sigue respondiendo tras sta_join (ruta de eth0 intacta)")
@@ -84,10 +82,9 @@ def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir):
         assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
         time.sleep(2)
         t_envio = time.time()
-        c.step(f"El banco se une al AP abierto {ssid}")
         joined, respuestas = False, []
         try:
-            tb.sta_join(ssid, timeout=20)
+            unirse_al_portal(tb, ssid, c)
             joined = True
             for i, (desc, cambios, esperados) in enumerate(ENVIOS_INVALIDOS, 1):
                 form = dict(BASE_FORM, **cambios)

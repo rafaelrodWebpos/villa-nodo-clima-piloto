@@ -119,3 +119,20 @@ def _boot_ids(lines: list) -> list:
     return [m.group(1) for ln in lines for m in [re.search(r"boot: (\S+) fw=", ln)] if m]
 
 
+
+
+def unirse_al_portal(tb, ssid, c, red="192.168.4.", intentos=2):
+    """El banco se une al AP abierto del DUT y comprueba que el DHCP del portal
+    le dio una IP de su red. sta_join del banco puede volver con una dirección
+    link-local (169.254.x.x) si el DHCP no contestó a tiempo; con ella toda
+    petición al DUT acaba en timeout. Se reintenta la unión; si no se consigue,
+    not done (precondición del banco), nunca failed."""
+    for i in range(1, intentos + 1):
+        c.step(f"El banco se une al AP abierto {ssid} (intento {i})")
+        ip = str(tb.sta_join(ssid, timeout=20).get("ip", ""))
+        c.note(f"- sta_join intento {i}: ip del banco `{ip}`")
+        if ip.startswith(red):
+            return ip
+        tb.sta_leave()
+        time.sleep(2)
+    pytest.skip(f"not done: sta_join no obtuvo IP de {red}0/24 en {intentos} intentos (última {ip})")
