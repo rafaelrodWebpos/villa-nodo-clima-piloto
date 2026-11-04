@@ -37,3 +37,13 @@
 #define TX_PROBANDO         "Probando la conexión…"
 #define TX_NO_CONECTA       "No se pudo conectar…"
 #define TX_CONECTADO        "Conectado. El nodo se reinicia…"
+
+/* Mensaje bajo cada campo inválido (FR-POR-04). BORRADOR del asistente: H-36
+ * fija el aviso general pero no estos textos; pendientes de revisión. */
+#define TX_ERR_WIFI_SSID    "Escribe el nombre de la red (1 a 32 caracteres)."
+#define TX_ERR_WIFI_PASS    "Déjala vacía si la red es abierta, o usa de 8 a 63 caracteres sin acentos ni ñ."
+#define TX_ERR_MQTT_HOST    "Escribe un nombre (letras, números, . y -) o una dirección IP, hasta 63 caracteres."
+#define TX_ERR_MQTT_PORT    "Escribe un número entre 1 y 65535."
+#define TX_ERR_MQTT_USER    "Hasta 64 caracteres."
+#define TX_ERR_MQTT_PASS    "Hasta 64 caracteres."
+#define TX_ERR_ID           "De 1 a 32 caracteres: minúsculas, números, - y _."

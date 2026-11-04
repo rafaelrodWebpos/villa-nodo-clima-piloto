@@ -549,6 +549,26 @@ tests:
       xfail estricto confirmado sobre 20dbae8 (test-results/20261104T004409Z-20dbae8/): sta_join al AP del DUT
       correcto, la API del banco sigue respondiendo (ruta de eth0 intacta) y
       GET / da Connection refused (sin servidor HTTP)
+  - id: TC-POR-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-POR-04]
+    needs: [hosted-ci]
+    expect: >
+      el validador de §17 rechaza, nombrando solo ese campo, cada caso límite
+      inválido (longitud 0 y máximo + 1 de cada campo; wifi_pass de 1–7 o no
+      ASCII imprimible; mqtt_host fuera de [A-Za-z0-9.-] o IPv4 decimal
+      inválida; mqtt_port fuera de 1–65535 o no numérico; sitio y zona con /,
+      +, #, mayúsculas o espacio) y acepta el máximo; varios errores a la vez,
+      cada uno en su campo
+    impl: tests/host/test_portal_validar.c
+    note: >
+      interpretación de «nombre de host o IPv4 decimal» (§17): si el valor solo
+      tiene cifras y puntos, tiene que ser una IPv4 a.b.c.d con partes 0–255; si
+      no, basta el juego de caracteres. Se consulta a /define si hace falta más
   - id: TC-SEC-01
     shape: atomic
     kind: security
