@@ -162,7 +162,6 @@ def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir, tmp_path):
         c.passed("/generate_204 y /hotspot-detect.html terminan en el formulario del portal")
 
 
-@pytest.mark.xfail(strict=True, reason="T04/T06 sin implementar: un envío válido aún no prueba la conexión")
 def test_tc_por_09_wrong_password(testbench, dut_slot, run_dir, tmp_path):
     """TC-POR-09 · FR-POR-05, T06 (bench) — clave Wi-Fi errónea: «no se pudo conectar» en ≤ 20 s (+5),
     el AP sigue visible y la NVS sin cambios."""
@@ -172,6 +171,7 @@ def test_tc_por_09_wrong_password(testbench, dut_slot, run_dir, tmp_path):
     mala = ap_clave + "x"
     secretos = [(mala, "<clave-erronea>"), (ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
     with case(tb, "TC-POR-09", "Clave Wi-Fi errónea", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
+        c.secretos = secretos
         ssid = _en_portal(tb, dut_slot, c, tmp_path)
         assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
         time.sleep(2)

@@ -1,0 +1,16 @@
+# JRN-01.2 — Aprovisionar por el portal
+
+- AP desechable del banco con SSID y clave aleatorios de esta ejecución (redactados en la evidencia)
+- broker `broker.local`, sitio `sitio1`, zona `zona1` (ficticios, NFR-SEC-01)
+
+- Precondiciones: AP del banco apagado; el DUT sigue en PORTAL (JRN-01.1)
+- El banco se une al AP abierto clima-f3c6d4 (intento 1)
+- sta_join intento 1: ip del banco `169.254.138.107`
+- El banco se une al AP abierto clima-f3c6d4 (intento 2)
+- sta_join intento 2: ip del banco `192.168.4.2`
+- POST / con los datos del AP desechable
+- respuesta al envío: HTTP 200, probando=False
+
+**Resultado: FAIL** — AssertionError: el envío válido no responde «Probando la conexión…»
+assert (200 == 200 and False)
+ +  where 200 = Response(status_code=200, headers={'Content-Type': 'text/html; charset=utf-8', 'Content-Length': '1515', 'Cache-Control': 'no-store'}, _body_bytes=b'<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Nodo clima</title><style>body{font-family:system-ui,sans-serif;margin:0;padding:16px;max-width:28rem;margin-inline:auto;background:#f6f7f9;color:#1d2330}h1{font-size:1.4rem;margin:0}.sub{color:#5b6475;margin:.2rem 0 1rem;font-size:.9rem}fieldset{border:1px solid #d5d9e0;border-radius:10px;background:#fff;margin:0 0 1rem;padding:.6rem 1rem 1rem}.ayuda{display:block;color:#6b7280;font-size:.8rem;margin-top:.25rem}.error{display:block;color:#b42318;font-size:.85rem;margin-top:.25rem}input[aria-invalid]{border-color:#b42318}.aviso{background:#fef3f2;border:1px solid #fda29b;color:#912018;border-radius:10px;padding:.7rem 1rem;margin:0 0 1rem}legend{font-weight:600;padding:0 .3rem}label{display:block;margin:.7rem 0 .25rem;font-size:.95rem}input{box-sizing:border-box;width:100%;font-size:1rem;padding:.6rem;border:1px solid #b9c0cc;border-radius:8px}.ojo{display:flex;gap:.4rem}.ojo button{flex:none;width:3rem;font-size:1.2rem;border:1px solid #b9c0cc;border-radius:8px;background:#fff}button[type=submit]{width:100%;font-size:1.05rem;padding:.8rem;border:0;border-radius:10px;background:#1f6feb;color:#fff}</style></head><body><h1>Nodo clima</h1><p class="sub">clima-f3c6d4 &middot; firmware 0.0.0-bench</p><p class="mensaje" id="estado-pendiente" role="status">Datos v\xc3\xa1lidos, pero esta versi\xc3\xb3n del firmware a\xc3\xban no prueba la conexi\xc3\xb3n. No se guard\xc3\xb3 nada.</p></body></html>').status_code

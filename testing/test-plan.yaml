@@ -380,7 +380,10 @@ tests:
       vuelve a levantar su AP); el log muestra nvs: config escrita y
       con: VALIDANDO -> ARRANQUE (wifi_up), el AP clima-xxxxxx desaparece en
       ≤ 5 s desde esa línea y el nodo reinicia (boot:)
-    impl: tests/bench/test_jrn01.py::test_jrn_01_2_provision   # xfail(strict) hasta T04/T05
+    impl: tests/bench/test_jrn01.py::test_jrn_01_2_provision
+    history: >
+      xfail estricto confirmado sobre 17161d3 (test-results/20261105T010500Z-17161d3/), con el envío válido
+      respondido por la página temporal (sin prueba de unión)
   - id: JRN-01.3
     shape: workflow
     kind: standard
@@ -716,7 +719,10 @@ tests:
       muestra el aviso no-conecta con la red conservada y la clave vacía; un
       reset vuelve a con: ARRANQUE -> PORTAL (fin_arranque). SSID y clave
       aleatorios por ejecución, redactados en la evidencia
-    impl: tests/bench/test_por.py::test_tc_por_09_wrong_password   # xfail(strict) hasta T04/T06
+    impl: tests/bench/test_por.py::test_tc_por_09_wrong_password
+    history: >
+      xfail estricto confirmado sobre 17161d3 (test-results/20261105T010500Z-17161d3/), con el envío válido
+      respondido por la página temporal (sin prueba de unión)
   - id: TC-POR-10
     shape: atomic
     kind: standard

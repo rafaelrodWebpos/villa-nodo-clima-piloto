@@ -37,9 +37,9 @@
 #define TX_PROBANDO         "Probando la conexión…"
 #define TX_NO_CONECTA       "No se pudo conectar…"
 #define TX_CONECTADO        "Conectado. El nodo se reinicia…"
-/* TEMPORAL hasta T04 (JRN-01.2): respuesta a un envío válido mientras no
- * existe la prueba de conexión. Se borra cuando llegue «Probando la conexión…». */
-#define TX_PENDIENTE        "Datos válidos, pero esta versión del firmware aún no prueba la conexión. No se guardó nada."
+/* T07: un envío mientras ya se prueba una conexión. BORRADOR del asistente,
+ * pendiente de revisión del propietario (H-36 no lo fija). */
+#define TX_OCUPADO          "Ya se está probando una conexión. Espera unos segundos."
 
 /* Mensaje bajo cada campo inválido (FR-POR-04). Redactados por el asistente y
  * aprobados tal cual por el propietario el 2026-11-03 (H-36 fija el aviso

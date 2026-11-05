@@ -158,7 +158,6 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
 REINICIO_LIMIT_S = 5          # T05 / FR-POR-06: desde con: VALIDANDO -> ARRANQUE (wifi_up)
 
 
-@pytest.mark.xfail(strict=True, reason="T04/T05 sin implementar: un envío válido aún no prueba la conexión")
 def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
     """JRN-01.2 — el banco aprovisiona por el portal con su AP desechable: T04, T05 y el reinicio en ≤ 5 s."""
     from urllib.parse import urlencode
@@ -168,6 +167,7 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
     secretos = [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
     ssid = "clima-" + dut_mac.replace(":", "").lower()[-6:]
     with case(tb, "JRN-01.2", "Aprovisionar por el portal", run_dir, requires="JRN-01.1") as c:
+        c.secretos = secretos
         c.note("- AP desechable del banco con SSID y clave aleatorios de esta ejecución (redactados en la evidencia)",
                "- broker `broker.local`, sitio `sitio1`, zona `zona1` (ficticios, NFR-SEC-01)", "")
         c.step("Precondiciones: AP del banco apagado; el DUT sigue en PORTAL (JRN-01.1)")

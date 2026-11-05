@@ -1,7 +1,7 @@
-/* L1 portal — adaptador HTTP (esp_http_server). Implementado: GET / con el
- * formulario de §17 (FR-POR-03), POST / con la validación (FR-POR-04, T03) y
- * 302 a http://192.168.4.1/ para cualquier otra ruta GET (FR-POR-02).
- * Pendiente, con su test: la prueba de unión de un envío válido (T04). */
+/* L1 portal — adaptador HTTP (esp_http_server): GET / según la vista (el
+ * formulario de §17, «Probando la conexión…», «No se pudo conectar…» o
+ * «Conectado…»), POST / con la validación y la respuesta de T03/T04/T07, y 302
+ * a http://192.168.4.1/ para cualquier otra ruta GET (FR-POR-02..06). */
 #include <stdlib.h>
 #include <string.h>
 #include "esp_http_server.h"
@@ -19,6 +19,15 @@
 static const char *TAG = "portal";
 static const char *s_id, *s_version;
 static portal_envio_cb_t s_al_enviar;
+static volatile portal_vista_t s_vista = PORTAL_VISTA_FORMULARIO;
+
+/* Valores no secretos del último envío válido, para volver a mostrarlos tras
+ * T06 (FR-POR-05). Los secretos no se guardan aquí nunca. */
+static char s_ultimo[PORTAL_N_CAMPOS][65];
+
+void portal_http_vista(portal_vista_t v) { s_vista = v; }
+
+static int es_secreto(int i) { return i == PORTAL_WIFI_PASS || i == PORTAL_MQTT_PASS; }
 
 static esp_err_t enviar_html(httpd_req_t *req, const char *html, size_t n)
 {
@@ -31,8 +40,25 @@ static esp_err_t get_raiz(httpd_req_t *req)
 {
     char *html = malloc(HTML_MAX);
     if (!html) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
-    portal_form_t f = {.id = s_id, .version = s_version};
-    size_t n = portal_form_html(html, HTML_MAX, &f);
+    size_t n;
+    switch (s_vista) {
+    case PORTAL_VISTA_PROBANDO:
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PROBANDO, "estado-probando", 2);
+        break;
+    case PORTAL_VISTA_CONECTADO:
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_CONECTADO, "estado-conectado", 0);
+        break;
+    case PORTAL_VISTA_NO_CONECTA: {
+        portal_form_t f = {.id = s_id, .version = s_version, .aviso = TX_NO_CONECTA, .aviso_id = "no-conecta"};
+        for (int i = 0; i < PORTAL_N_CAMPOS; i++) if (!es_secreto(i)) f.valores[i] = s_ultimo[i];
+        n = portal_form_html(html, HTML_MAX, &f);
+        break;
+    }
+    default: {
+        portal_form_t f = {.id = s_id, .version = s_version};
+        n = portal_form_html(html, HTML_MAX, &f);
+    }
+    }
     esp_err_t r = n ? enviar_html(req, html, n) : httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
     free(html);
     return r;
@@ -69,18 +95,25 @@ static esp_err_t post_raiz(httpd_req_t *req)
     portal_decodificar(body, v);
     portal_validacion_t val;
     portal_validar(v, &val);
-    if (s_al_enviar) s_al_enviar(val.n_errores == 0);
+    portal_resp_t resp = s_al_enviar ? s_al_enviar(v, val.n_errores == 0) : PORTAL_RESP_ERRORES;
 
     size_t n;
-    if (val.n_errores) {
+    if (resp == PORTAL_RESP_PROBANDO) {
+        /* T04: se responde enseguida y la página se recarga hasta el resultado */
+        for (int i = 0; i < PORTAL_N_CAMPOS; i++) {
+            s_ultimo[i][0] = '\0';
+            if (!es_secreto(i) && v[i]) strlcpy(s_ultimo[i], v[i], sizeof s_ultimo[i]);
+        }
+        s_vista = PORTAL_VISTA_PROBANDO;
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PROBANDO, "estado-probando", 2);
+    } else if (resp == PORTAL_RESP_OCUPADO) {
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_OCUPADO, "estado-ocupado", 2);
+    } else {
         /* T03: el formulario con el error de cada campo; la NVS no se toca */
         portal_form_t f = {.id = s_id, .version = s_version};
         memcpy(f.valores, v, sizeof f.valores);
         memcpy(f.error, val.error, sizeof f.error);
         n = portal_form_html(html, HTML_MAX, &f);
-    } else {
-        /* T04 llega con JRN-01.2: por ahora, aviso temporal y nada se guarda */
-        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PENDIENTE, "estado-pendiente", 0);
     }
     r = n ? enviar_html(req, html, n) : httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
 fin:

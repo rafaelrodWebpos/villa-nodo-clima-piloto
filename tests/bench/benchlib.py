@@ -22,6 +22,7 @@ class Case:
         self.tb, self.tid, self.name, self.run_dir = tb, tid, name, run_dir
         self.lines = [f"# {tid} — {name}", ""]
         self.result, self.detail = "FAIL", ""
+        self.secretos = []        # [(valor, marca)]: se redactan en todo lo que se guarda
 
     def step(self, text):
         self.tb.test_step(self.tid, self.name, text)   # antes de la acción, nunca después
@@ -30,8 +31,14 @@ class Case:
     def note(self, *text):
         self.lines += list(text)
 
+    def _r(self, texto):
+        for valor, marca in self.secretos:
+            if valor:
+                texto = texto.replace(valor, marca)
+        return texto
+
     def save_log(self, suffix, lines):
-        (self.run_dir / f"{self.tid}-{suffix}.log").write_text("\n".join(lines) + "\n")
+        (self.run_dir / f"{self.tid}-{suffix}.log").write_text(self._r("\n".join(lines) + "\n"))
         self.lines += [f"- log: `{self.tid}-{suffix}.log` ({len(lines)} líneas)"]
 
     def passed(self, detail):
@@ -54,10 +61,11 @@ def case(tb, tid, name, run_dir, requires=None, spec="JRN-01 villa-nodo-clima-pi
         c.detail = f"{type(e).__name__}: {e}"
         raise
     finally:
+        c.detail = c._r(c.detail)
         tb.test_result(tid, name, c.result, c.detail[:200])
         tb.test_end()
         c.lines += ["", f"**Resultado: {c.result}** — {c.detail}", ""]
-        (run_dir / f"{tid}.md").write_text("\n".join(c.lines))
+        (run_dir / f"{tid}.md").write_text(c._r("\n".join(c.lines)))
 
 
 def _parse_flash_args(coldflash: pathlib.Path) -> dict:
