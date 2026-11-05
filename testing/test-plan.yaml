@@ -422,6 +422,18 @@ tests:
       banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
       del log serie en ≤ 1 s
     impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # xfail(strict): T08 (/define), log UDP y ciclo de medición
+    status: not done
+    reason: the feature is not implemented (T08 pendiente de /define; log UDP y ciclo de medición)
+    last_run:
+      commit: b19c553
+      date: 2026-11-05
+      outcome: xfail
+      evidence: test-results/20261105T205517Z-b19c553/
+      observed: >
+        T01 ya cumple: boot:, cfg: sitio=sitio1 zona=zona1, wifi:mode solo sta (sin
+        softAP), wifi: intento 1 a los 200 ms de boot: (límite 2000 ms) y con:
+        ARRANQUE -> CONECTANDO_WIFI (fin_arranque); el DUT se une al AP desechable
+        y obtiene IP de la red de prueba. Falla, como se esperaba, en la línea de T08
   - id: JRN-01.4
     shape: workflow
     kind: standard
