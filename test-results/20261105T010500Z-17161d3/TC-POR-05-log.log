@@ -1,7 +1,7 @@
 I (5968) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
-I (5978) wifi:station: 88:a2:9e:ef:b9:9c join, AID=1, bgn, 20
-I (6078) wifi:<ba-add>idx:2 (ifx:1, 88:a2:9e:ef:b9:9c), tid:7, ssn:0, winSize:64
-I (6428) wifi:<ba-add>idx:3 (ifx:1, 88:a2:9e:ef:b9:9c), tid:0, ssn:0, winSize:64
+I (5978) wifi:station: <mac> join, AID=1, bgn, 20
+I (6078) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6428) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
 I (7118) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
 I (12948) nodo: con: PORTAL -> PORTAL (envío)
 I (13008) nodo: con: PORTAL -> PORTAL (envío)

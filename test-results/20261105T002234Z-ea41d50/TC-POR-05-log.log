@@ -1,17 +1,17 @@
 I (2718) wifi:new:<1,0>, old:<1,1>, ap:<1,0>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
-I (2718) wifi:station: 9e:26:b3:f8:41:c2 join, AID=1, bgn, 20
+I (2718) wifi:station: <mac> join, AID=1, bgn, 20
 I (2848) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
-I (3398) wifi:<ba-add>idx:2 (ifx:1, 9e:26:b3:f8:41:c2), tid:0, ssn:0, winSize:64
-I (5958) wifi:station: 88:a2:9e:ef:b9:9c join, AID=2, bgn, 20
-I (6078) wifi:<ba-add>idx:3 (ifx:1, 88:a2:9e:ef:b9:9c), tid:7, ssn:0, winSize:64
-I (6628) wifi:<ba-add>idx:4 (ifx:1, 88:a2:9e:ef:b9:9c), tid:0, ssn:0, winSize:64
+I (3398) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (5958) wifi:station: <mac> join, AID=2, bgn, 20
+I (6078) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6628) wifi:<ba-add>idx:4 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
 I (12548) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.5
-I (18618) wifi:station: 88:a2:9e:ef:b9:9c leave, AID = 2, reason = 8, bss_flags is 33721443, bss:0x3fca3b30
+I (18618) wifi:station: <mac> leave, AID = 2, reason = 8, bss_flags is 33721443, bss:0x3fca3b30
 I (18628) wifi:<ba-del>idx:4, tid:0
 I (18628) wifi:<ba-del>idx:3, tid:7
-I (24288) wifi:station: 88:a2:9e:ef:b9:9c join, AID=2, bgn, 20
-I (24398) wifi:<ba-add>idx:3 (ifx:1, 88:a2:9e:ef:b9:9c), tid:7, ssn:0, winSize:64
-I (25158) wifi:<ba-add>idx:4 (ifx:1, 88:a2:9e:ef:b9:9c), tid:0, ssn:0, winSize:64
+I (24288) wifi:station: <mac> join, AID=2, bgn, 20
+I (24398) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (25158) wifi:<ba-add>idx:4 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
 I (25278) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.5
 I (31068) nodo: con: PORTAL -> PORTAL (envío)
 I (31118) nodo: con: PORTAL -> PORTAL (envío)

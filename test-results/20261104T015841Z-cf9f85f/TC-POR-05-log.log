@@ -1,8 +1,8 @@
 I (1637) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
-I (2117) wifi:<ba-add>idx:2 (ifx:1, 9e:26:b3:f8:41:c2), tid:0, ssn:0, winSize:64
-I (5967) wifi:station: 88:a2:9e:ef:b9:9c join, AID=2, bgn, 20
-I (6067) wifi:<ba-add>idx:3 (ifx:1, 88:a2:9e:ef:b9:9c), tid:7, ssn:0, winSize:64
-I (6567) wifi:<ba-add>idx:4 (ifx:1, 88:a2:9e:ef:b9:9c), tid:0, ssn:0, winSize:64
+I (2117) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (5967) wifi:station: <mac> join, AID=2, bgn, 20
+I (6067) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6567) wifi:<ba-add>idx:4 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
 I (12747) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.5
 I (18977) nodo: con: PORTAL -> PORTAL (envío)
 I (19027) nodo: con: PORTAL -> PORTAL (envío)
