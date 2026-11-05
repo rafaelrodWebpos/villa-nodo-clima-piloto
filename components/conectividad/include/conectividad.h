@@ -10,7 +10,7 @@ typedef enum {
 } con_estado_t;
 
 typedef enum {
-    CON_EV_FIN_ARRANQUE, CON_EV_ENVIO,
+    CON_EV_FIN_ARRANQUE, CON_EV_ENVIO, CON_EV_WIFI_UP, CON_EV_WIFI_DOWN,
     CON_N_EVENTOS                        /* el resto de §6.4 llega con sus filas */
 } con_evento_t;
 
@@ -19,7 +19,10 @@ typedef enum {
     CON_ACC_ARRANCAR_STA,      /* T01: arrancar el STA y el ciclo de medición */
     CON_ACC_ARRANCAR_PORTAL,   /* T02: arrancar el AP, el DNS, el HTTP y el ciclo de medición */
     CON_ACC_RESPONDER_ERRORES, /* T03: responder con un error por campo */
-    CON_ACC_PERSISTIR,         /* T05: persistir la configuración (llega con su fila) */
+    CON_ACC_PROBAR_UNION,      /* T04: probar la unión STA (AP+STA) con los datos del formulario */
+    CON_ACC_PERSISTIR,         /* T05: persistir la configuración, responder con éxito y reiniciar */
+    CON_ACC_RESPONDER_NO_CONECTA, /* T06: responder «no se pudo conectar» y descartar los datos */
+    CON_ACC_RESPONDER_OCUPADO, /* T07: responder «ocupado» */
 } con_accion_t;
 
 typedef struct {

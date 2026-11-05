@@ -9,7 +9,7 @@ static const char *const NOMBRE_ESTADO[CON_N_ESTADOS] = {
     "CONECTANDO_BROKER", "OPERATIVO", "OTA_DESCARGA",
 };
 static const char *const NOMBRE_EVENTO[CON_N_EVENTOS] = {
-    "fin_arranque", "envío",
+    "fin_arranque", "envío", "wifi_up", "wifi_down",
 };
 
 con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_guardas_t g)
@@ -19,10 +19,19 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
             ? (con_transicion_t){"T01", CON_CONECTANDO_WIFI, CON_ACC_ARRANCAR_STA}
             : (con_transicion_t){"T02", CON_PORTAL, CON_ACC_ARRANCAR_PORTAL};
     }
-    if (origen == CON_PORTAL && evento == CON_EV_ENVIO && !g.envio_valido) {
-        return (con_transicion_t){"T03", CON_PORTAL, CON_ACC_RESPONDER_ERRORES};
+    if (origen == CON_PORTAL && evento == CON_EV_ENVIO) {
+        return g.envio_valido
+            ? (con_transicion_t){"T04", CON_VALIDANDO, CON_ACC_PROBAR_UNION}
+            : (con_transicion_t){"T03", CON_PORTAL, CON_ACC_RESPONDER_ERRORES};
     }
-    /* T04 (envío válido) llega con JRN-01.2 */
+    if (origen == CON_VALIDANDO) {
+        switch (evento) {
+        case CON_EV_WIFI_UP:   return (con_transicion_t){"T05", CON_ARRANQUE, CON_ACC_PERSISTIR};
+        case CON_EV_WIFI_DOWN: return (con_transicion_t){"T06", CON_PORTAL, CON_ACC_RESPONDER_NO_CONECTA};
+        case CON_EV_ENVIO:     return (con_transicion_t){"T07", CON_VALIDANDO, CON_ACC_RESPONDER_OCUPADO};
+        default: break;
+        }
+    }
     return (con_transicion_t){NULL, origen, CON_ACC_NINGUNA};
 }
 

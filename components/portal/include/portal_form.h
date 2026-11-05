@@ -20,6 +20,8 @@ typedef struct {
                                                 Los secretos se ignoran siempre. */
     const char *error[PORTAL_N_CAMPOS];      /* mensaje bajo el campo (FR-POR-04), o NULL.
                                                 Con alguno, el aviso general va arriba. */
+    const char *aviso;                       /* otro aviso arriba (p. ej., FR-POR-05), o NULL */
+    const char *aviso_id;                    /* su marca (atributo id) */
 } portal_form_t;
 
 /* Escribe el HTML del formulario en buf (con NUL). Devuelve la longitud, o 0
@@ -28,4 +30,5 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f);
 
 /* Página corta con un mensaje (pantallas de FR-POR-05/06 y la temporal de
  * envío válido). Misma cabecera y estilo que el formulario; sin campos. */
-size_t portal_mensaje_html(char *buf, size_t cap, const char *id, const char *version, const char *mensaje);
+size_t portal_mensaje_html(char *buf, size_t cap, const char *id, const char *version, const char *mensaje,
+                           const char *marca, int refresco_s);   /* marca = atributo id; refresco 0 = no */

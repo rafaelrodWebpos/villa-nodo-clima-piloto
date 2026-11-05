@@ -93,12 +93,15 @@ static void bloque(sal_t *s, const char *titulo, const def_campo_t *d, size_t n,
     put(s, "</fieldset>");
 }
 
-static void cabecera(sal_t *s0, const char *id, const char *version)
+static void cabecera(sal_t *s0, const char *id, const char *version, int refresco_s)
 {
     sal_t *sp = s0;
     put(sp,
         "<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\">"
         "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+        );
+    if (refresco_s > 0) put(sp, "<meta http-equiv=\"refresh\" content=\"%d;url=/\">", refresco_s);
+    put(sp,
         "<title>%s</title><style>"
         "body{font-family:system-ui,sans-serif;margin:0;padding:16px;max-width:28rem;margin-inline:auto;background:#f6f7f9;color:#1d2330}"
         "h1{font-size:1.4rem;margin:0}.sub{color:#5b6475;margin:.2rem 0 1rem;font-size:.9rem}"
@@ -124,11 +127,12 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
     sal_t s = {buf, cap, 0, 0};
     if (!buf || cap == 0) return 0;
     buf[0] = 0;
-    cabecera(&s, f->id, f->version);
+    cabecera(&s, f->id, f->version, 0);
     put(&s, "</p>");
     int hay_errores = 0;
     for (int i = 0; i < PORTAL_N_CAMPOS; i++) if (f->error[i]) hay_errores = 1;
-    if (hay_errores) put(&s, "<p class=\"aviso\" role=\"alert\">%s</p>", TX_AVISO_ERRORES);
+    if (hay_errores) put(&s, "<p class=\"aviso\" id=\"errores\" role=\"alert\">%s</p>", TX_AVISO_ERRORES);
+    else if (f->aviso) put(&s, "<p class=\"aviso\" id=\"%s\" role=\"alert\">%s</p>", f->aviso_id ? f->aviso_id : "aviso", f->aviso);
     put(&s, "<form method=\"post\" action=\"/\">");
     bloque(&s, TX_BLOQUE_WIFI, WIFI, sizeof WIFI / sizeof *WIFI, f);
     bloque(&s, TX_BLOQUE_MQTT, MQTT, sizeof MQTT / sizeof *MQTT, f);
@@ -140,13 +144,14 @@ size_t portal_form_html(char *buf, size_t cap, const portal_form_t *f)
     return s.len;
 }
 
-size_t portal_mensaje_html(char *buf, size_t cap, const char *id, const char *version, const char *mensaje)
+size_t portal_mensaje_html(char *buf, size_t cap, const char *id, const char *version, const char *mensaje,
+                           const char *marca, int refresco_s)
 {
     sal_t s = {buf, cap, 0, 0};
     if (!buf || cap == 0) return 0;
     buf[0] = 0;
-    cabecera(&s, id, version);
-    put(&s, "</p><p class=\"mensaje\" role=\"status\">%s</p></body></html>", mensaje);
+    cabecera(&s, id, version, refresco_s);
+    put(&s, "</p><p class=\"mensaje\" id=\"%s\" role=\"status\">%s</p></body></html>", marca ? marca : "mensaje", mensaje);
     if (s.lleno) { buf[0] = 0; return 0; }
     return s.len;
 }

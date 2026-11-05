@@ -131,7 +131,10 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_ARRANCAR_PORTAL: arrancar_portal(); break;
     case CON_ACC_ARRANCAR_STA:    /* T01: llega con JRN-01.3 */ break;
     case CON_ACC_RESPONDER_ERRORES: /* T03: la respuesta la da el adaptador del portal */ break;
-    case CON_ACC_PERSISTIR:       /* T05: llega con JRN-01.2 */ break;
+    case CON_ACC_PROBAR_UNION:    /* T04: llega en el commit siguiente */ break;
+    case CON_ACC_PERSISTIR:       /* T05: llega en el commit siguiente */ break;
+    case CON_ACC_RESPONDER_NO_CONECTA: /* T06: idem */ break;
+    case CON_ACC_RESPONDER_OCUPADO: /* T07: idem */ break;
     case CON_ACC_NINGUNA:         break;
     }
     /* E0 */

@@ -380,7 +380,7 @@ tests:
       vuelve a levantar su AP); el log muestra nvs: config escrita y
       con: VALIDANDO -> ARRANQUE (wifi_up), el AP clima-xxxxxx desaparece en
       ≤ 5 s desde esa línea y el nodo reinicia (boot:)
-    impl: null
+    impl: tests/bench/test_jrn01.py::test_jrn_01_2_provision   # xfail(strict) hasta T04/T05
   - id: JRN-01.3
     shape: workflow
     kind: standard
@@ -505,7 +505,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    verifies: [T01, T02, T03, T04, T05, T06, T07]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
@@ -597,7 +597,10 @@ tests:
       el cuerpo urlencoded se decodifica ('+', %XX; la primera aparición
       cuenta; %XX mal formado literal); con errores, el formulario lleva el aviso
       general y, debajo de cada campo inválido y solo de ellos, un
-      id=err-<name>; conserva los valores no secretos y nunca los secretos
+      id=err-<name>; conserva los valores no secretos y nunca los secretos;
+      las páginas de estado llevan su marca (estado-probando con recarga a «/»,
+      estado-conectado sin ella) y el formulario puede llevar el aviso
+      no-conecta (FR-POR-05) con los valores no secretos
     impl: tests/host/test_portal_envio.c
     status: successful
     commit: ea41d50
@@ -696,6 +699,37 @@ tests:
       apagados y la red olvidada; al unirse a clima-f3c6d4 la ventana del portal
       apareció sola, y http://example.com mostró el formulario «Nodo clima».
       Evidencia manual: no sustituye al test del banco, que sigue en not done
+  - id: TC-POR-09
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-POR-05, T06]
+    needs: [bench-driver, bench-serial-monitor, bench-portal-driver, bench-wifi-ap, bench-flash, dut-board]
+    expect: >
+      con el DUT en PORTAL (P-NVS-ERASE si hace falta), un POST / válido con el SSID
+      del AP desechable del banco y una clave errónea responde «Probando la
+      conexión…»; con el AP del banco levantado, con: VALIDANDO -> PORTAL
+      (wifi_down) llega en ≤ 20 s (+ 5 s) desde con: PORTAL -> VALIDANDO (envío),
+      sin nvs: config escrita; el banco vuelve a unirse al AP del DUT y GET /
+      muestra el aviso no-conecta con la red conservada y la clave vacía; un
+      reset vuelve a con: ARRANQUE -> PORTAL (fin_arranque). SSID y clave
+      aleatorios por ejecución, redactados en la evidencia
+    impl: tests/bench/test_por.py::test_tc_por_09_wrong_password   # xfail(strict) hasta T04/T06
+  - id: TC-POR-10
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-POR-06]
+    needs: [hosted-ci]
+    expect: >
+      valores válidos con los máximos de §17 → registro de configuración →
+      valores: idénticos y siguen siendo válidos; un valor que no cabe o un
+      puerto no numérico se rechaza (nunca se trunca)
+    impl: tests/host/test_portal_config.c
   - id: TC-SEC-01
     shape: atomic
     kind: security

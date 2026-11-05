@@ -39,3 +39,8 @@ add_test(NAME TC-POR-04 COMMAND test_portal_envio)
 add_executable(test_portal_cautivo test_portal_cautivo.c ${COMP}/portal/portal_cautivo.c)
 target_include_directories(test_portal_cautivo PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-POR-06 COMMAND test_portal_cautivo)
+
+# TC-POR-10 · FR-POR-06 (los datos del formulario se guardan tal cual)
+add_executable(test_portal_config test_portal_config.c ${COMP}/portal/portal_config.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
+target_include_directories(test_portal_config PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-POR-10 COMMAND test_portal_config)

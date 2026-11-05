@@ -6,7 +6,8 @@ import time
 
 import pytest
 
-from benchlib import _after_last_reset, _boot_capture, _boot_ids, case, unirse_al_portal
+from benchlib import (_after_last_reset, _boot_capture, _boot_ids, _lines, borrar_nvs, case,
+                      credenciales_desechables, esperar_lineas, primera, redactar, unirse_al_portal)
 
 PORTAL_IP = "192.168.4.1"          # FSD §11.1: el servidor del portal
 NAMES_17 = {"wifi_ssid", "wifi_pass", "mqtt_host", "mqtt_port",
@@ -14,24 +15,28 @@ NAMES_17 = {"wifi_ssid", "wifi_pass", "mqtt_host", "mqtt_port",
 SECRETOS = {"wifi_pass", "mqtt_pass"}
 
 
-def _en_portal(tb, slot, c):
-    """Precondición: el DUT arranca en PORTAL (NVS sin configuración). Si no,
-    not done: el resultado no diría nada del portal."""
+def _en_portal(tb, slot, c, tmp_dir=None):
+    """Precondición: el DUT arranca en PORTAL. Si arranca configurado (p. ej., tras
+    JRN-01.2), se establece con P-NVS-ERASE y otro reset. Si aun así no, not done."""
     c.step("Precondiciones: reset; el DUT debe arrancar en PORTAL")
     boot = _after_last_reset(_boot_capture(tb, slot, "con: ARRANQUE -> PORTAL"))
+    if tmp_dir and not any("con: ARRANQUE -> PORTAL" in ln for ln in boot):
+        c.step("Precondiciones: el DUT tiene configuración; P-NVS-ERASE y reset")
+        borrar_nvs(tb, slot, tmp_dir)
+        boot = _after_last_reset(_boot_capture(tb, slot, "con: ARRANQUE -> PORTAL"))
     ids = _boot_ids(boot)
     fw = next((m.group(1) for ln in boot for m in [re.search(r"boot: \S+ fw=(\S+)", ln)] if m), "?")
     if not any("con: ARRANQUE -> PORTAL" in ln for ln in boot) or not ids:
-        pytest.skip("not done: el DUT no arrancó en PORTAL (¿NVS con configuración?); P-NVS-ERASE primero")
+        pytest.skip("not done: el DUT no arrancó en PORTAL ni tras P-NVS-ERASE")
     c.note(f"- DUT en PORTAL: `{ids[0]}`, fw `{fw}`")
     return ids[0]
 
 
-def test_tc_por_02_get_form(testbench, dut_slot, run_dir):
+def test_tc_por_02_get_form(testbench, dut_slot, run_dir, tmp_path):
     """TC-POR-02 · FR-POR-03 (bench) — GET / sirve los 8 campos de §17, sin secretos rellenos."""
     tb = testbench
     with case(tb, "TC-POR-02", "GET / sirve el formulario", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
-        ssid = _en_portal(tb, dut_slot, c)
+        ssid = _en_portal(tb, dut_slot, c, tmp_path)
         assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
         time.sleep(2)
         joined = False
@@ -72,13 +77,12 @@ ENVIOS_INVALIDOS = [
 ]
 
 
-def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir):
+def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir, tmp_path):
     """TC-POR-05 · FR-POR-04 (bench) — un envío inválido se responde con el error del campo y no toca la NVS."""
     from urllib.parse import urlencode
-    from benchlib import _lines
     tb = testbench
     with case(tb, "TC-POR-05", "Envío inválido por el portal", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
-        ssid = _en_portal(tb, dut_slot, c)
+        ssid = _en_portal(tb, dut_slot, c, tmp_path)
         assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
         time.sleep(2)
         t_envio = time.time()
@@ -126,7 +130,7 @@ def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir):
         c.passed(f"{len(ENVIOS_INVALIDOS)} envíos inválidos: error en su campo, sin NVS; reset → PORTAL")
 
 
-def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir):
+def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir, tmp_path):
     """TC-POR-07 · FR-POR-02 (bench, parte HTTP) — /generate_204 y /hotspot-detect.html llevan al portal.
 
     El relé del banco sigue las redirecciones (urllib), así que el 302 no se ve:
@@ -134,7 +138,7 @@ def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir):
     El Location exacto lo verifica TC-POR-06 (host)."""
     tb = testbench
     with case(tb, "TC-POR-07", "Redirecciones del portal cautivo", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
-        ssid = _en_portal(tb, dut_slot, c)
+        ssid = _en_portal(tb, dut_slot, c, tmp_path)
         assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
         time.sleep(2)
         joined, respuestas = False, []
@@ -156,3 +160,68 @@ def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir):
             assert r.status_code != 204, f"{ruta}: 204 (el teléfono no mostraría el portal)"
             assert r.status_code == 200 and names == NAMES_17, f"{ruta}: la respuesta final no es el formulario del portal (HTTP {r.status_code})"
         c.passed("/generate_204 y /hotspot-detect.html terminan en el formulario del portal")
+
+
+@pytest.mark.xfail(strict=True, reason="T04/T06 sin implementar: un envío válido aún no prueba la conexión")
+def test_tc_por_09_wrong_password(testbench, dut_slot, run_dir, tmp_path):
+    """TC-POR-09 · FR-POR-05, T06 (bench) — clave Wi-Fi errónea: «no se pudo conectar» en ≤ 20 s (+5),
+    el AP sigue visible y la NVS sin cambios."""
+    from urllib.parse import urlencode
+    tb = testbench
+    ap_ssid, ap_clave = credenciales_desechables()
+    mala = ap_clave + "x"
+    secretos = [(mala, "<clave-erronea>"), (ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+    with case(tb, "TC-POR-09", "Clave Wi-Fi errónea", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
+        ssid = _en_portal(tb, dut_slot, c, tmp_path)
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        time.sleep(2)
+        form = dict(BASE_FORM, wifi_ssid=ap_ssid, wifi_pass=mala)
+        t_envio = time.time()
+        joined, ap_on = False, False
+        try:
+            unirse_al_portal(tb, ssid, c)
+            joined = True
+            c.step("POST / válido con la clave errónea del AP desechable del banco")
+            r = tb.http_request("POST", f"http://{PORTAL_IP}/", headers={"Content-Type": "application/x-www-form-urlencoded"},
+                                body=urlencode(form).encode(), timeout=10)
+            probando = 'id="estado-probando"' in r.text
+            c.note(f"- respuesta al envío: HTTP {r.status_code}, probando={probando}")
+            assert r.status_code == 200 and 'id="estado-probando"' in r.text, "el envío válido no responde «Probando la conexión…»"
+            tb.sta_leave(); joined = False
+            c.step("El banco levanta su AP desechable (canal 1) con la clave correcta")
+            tb.ap_start(ap_ssid, ap_clave, channel=1); ap_on = True
+            vistas = esperar_lineas(tb, dut_slot, t_envio, ["con: VALIDANDO -> PORTAL (wifi_down)"], timeout=35)
+        finally:
+            if ap_on:
+                tb.ap_stop()
+            if joined:
+                tb.sta_leave()
+        textos = [e["text"] for e in vistas]
+        ini = primera(vistas, "con: PORTAL -> VALIDANDO (envío)")
+        fin = primera(vistas, "con: VALIDANDO -> PORTAL (wifi_down)")
+        assert ini, "falta con: PORTAL -> VALIDANDO (envío) (T04)"
+        assert fin, "falta con: VALIDANDO -> PORTAL (wifi_down) en 35 s (T06)"
+        dt = fin["ts"] - ini["ts"]
+        c.note(f"- T06 a los {dt:.1f} s de T04 (límite 20 s + 5 s por el cambio de canal)")
+        assert dt <= 25, f"«no se pudo conectar» a los {dt:.1f} s"
+        assert not any("nvs: config escrita" in t for t in textos), "T06 persistió la configuración"
+
+        c.step("El AP del portal sigue visible: el banco vuelve a unirse y pide /")
+        time.sleep(2)
+        try:
+            unirse_al_portal(tb, ssid, c); joined = True
+            g = tb.http_get(f"http://{PORTAL_IP}/", timeout=10)
+        finally:
+            if joined:
+                tb.sta_leave()
+        (run_dir / "TC-POR-09-get.html").write_text(redactar(g.text, secretos))
+        no_conecta = 'id="no-conecta"' in g.text
+        c.note(f"- GET / tras T06: HTTP {g.status_code}, no-conecta={no_conecta}")
+        assert g.status_code == 200 and 'id="no-conecta"' in g.text, "la página no muestra «No se pudo conectar…»"
+        assert f'value="{ap_ssid}"' in g.text, "no conserva la red"
+        assert mala not in g.text, "la clave vuelve rellena"
+        c.step("Reset: la NVS sigue sin configuración")
+        tras = _after_last_reset(_boot_capture(tb, dut_slot, "con: ARRANQUE -> PORTAL"))
+        c.save_log("log", [redactar(t, secretos) for t in textos + ["--- reset ---"] + tras])
+        assert any("con: ARRANQUE -> PORTAL (fin_arranque)" in ln for ln in tras), "tras el reset no vuelve a PORTAL"
+        c.passed(f"clave errónea: T06 a los {dt:.1f} s, AP visible, «no se pudo conectar», NVS sin cambios")

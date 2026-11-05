@@ -80,7 +80,7 @@ static esp_err_t post_raiz(httpd_req_t *req)
         n = portal_form_html(html, HTML_MAX, &f);
     } else {
         /* T04 llega con JRN-01.2: por ahora, aviso temporal y nada se guarda */
-        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PENDIENTE);
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PENDIENTE, "estado-pendiente", 0);
     }
     r = n ? enviar_html(req, html, n) : httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
 fin:

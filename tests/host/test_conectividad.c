@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01, T02, T03.
+/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T07.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -33,13 +33,45 @@ int main(void)
     ESPERA(t.accion == CON_ACC_RESPONDER_ERRORES, "acción %d", t.accion);
     ESPERA(t.accion != CON_ACC_PERSISTIR, "T03 escribe en la NVS");
 
+    /* T04: PORTAL + envío, todos válidos -> VALIDANDO, probar la unión. No debe: escribir en la NVS */
+    t = con_transicion(CON_PORTAL, CON_EV_ENVIO, (con_guardas_t){.envio_valido = true});
+    ESPERA(t.fila && strcmp(t.fila, "T04") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_VALIDANDO && t.accion == CON_ACC_PROBAR_UNION, "T04: %d/%d", t.siguiente, t.accion);
+    ESPERA(t.accion != CON_ACC_PERSISTIR, "T04 escribe en la NVS");
+
+    /* T05: VALIDANDO + wifi_up -> ARRANQUE (reinicio), persistir */
+    t = con_transicion(CON_VALIDANDO, CON_EV_WIFI_UP, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T05") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_ARRANQUE && t.accion == CON_ACC_PERSISTIR, "T05: %d/%d", t.siguiente, t.accion);
+
+    /* T06: VALIDANDO + wifi_down (o 20 s sin IP) -> PORTAL, «no se pudo conectar». No debe: persistir */
+    t = con_transicion(CON_VALIDANDO, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T06") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_PORTAL && t.accion == CON_ACC_RESPONDER_NO_CONECTA, "T06: %d/%d", t.siguiente, t.accion);
+    ESPERA(t.accion != CON_ACC_PERSISTIR, "T06 persiste");
+
+    /* T07: VALIDANDO + envío -> VALIDANDO, «ocupado». No debe: iniciar una segunda prueba */
+    for (int v = 0; v < 2; v++) {
+        t = con_transicion(CON_VALIDANDO, CON_EV_ENVIO, (con_guardas_t){.envio_valido = v});
+        ESPERA(t.fila && strcmp(t.fila, "T07") == 0, "fila %s", t.fila ? t.fila : "NULL");
+        ESPERA(t.siguiente == CON_VALIDANDO && t.accion == CON_ACC_RESPONDER_OCUPADO, "T07: %d/%d", t.siguiente, t.accion);
+        ESPERA(t.accion != CON_ACC_PROBAR_UNION, "T07 inicia una segunda prueba");
+    }
+
+    /* Fuera de VALIDANDO, wifi_up/wifi_down no tienen fila todavía (no se inventa) */
+    t = con_transicion(CON_PORTAL, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila == NULL && t.accion == CON_ACC_NINGUNA, "PORTAL + wifi_down tiene fila %s", t.fila ? t.fila : "NULL");
+
     /* Nombres de la línea E0 (§18) */
+    ESPERA(strcmp(con_nombre_evento(CON_EV_WIFI_UP), "wifi_up") == 0, "nombre wifi_up");
+    ESPERA(strcmp(con_nombre_evento(CON_EV_WIFI_DOWN), "wifi_down") == 0, "nombre wifi_down");
+    ESPERA(strcmp(con_nombre_estado(CON_VALIDANDO), "VALIDANDO") == 0, "nombre VALIDANDO");
     ESPERA(strcmp(con_nombre_evento(CON_EV_ENVIO), "envío") == 0, "nombre envío");
     ESPERA(strcmp(con_nombre_estado(CON_ARRANQUE), "ARRANQUE") == 0, "nombre ARRANQUE");
     ESPERA(strcmp(con_nombre_estado(CON_PORTAL), "PORTAL") == 0, "nombre PORTAL");
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_WIFI), "CONECTANDO_WIFI") == 0, "nombre CONECTANDO_WIFI");
     ESPERA(strcmp(con_nombre_evento(CON_EV_FIN_ARRANQUE), "fin_arranque") == 0, "nombre fin_arranque");
 
-    printf("TC-CON-01 (T01, T02, T03): %s\n", fallos ? "FALLO" : "ok");
+    printf("TC-CON-01 (T01–T07): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

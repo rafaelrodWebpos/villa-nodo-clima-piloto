@@ -150,3 +150,65 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
         c.note(f"- ids en {ID_RESETS} arranques: {ids}")
         assert len(ids) == ID_RESETS and set(ids) == {expected_id}, f"id inestable o ausente: {ids} (FR-ID-01)"
         c.passed(f"PORTAL en {t_found:.1f} s, {expected_id} abierto, id estable en {ID_RESETS} arranques")
+
+
+# --------------------------------------------------------------------------
+# JRN-01.2 · T04, T05, FR-POR-06
+# --------------------------------------------------------------------------
+REINICIO_LIMIT_S = 5          # T05 / FR-POR-06: desde con: VALIDANDO -> ARRANQUE (wifi_up)
+
+
+@pytest.mark.xfail(strict=True, reason="T04/T05 sin implementar: un envío válido aún no prueba la conexión")
+def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
+    """JRN-01.2 — el banco aprovisiona por el portal con su AP desechable: T04, T05 y el reinicio en ≤ 5 s."""
+    from urllib.parse import urlencode
+    from benchlib import credenciales_desechables, esperar_lineas, primera, redactar, unirse_al_portal
+    tb = testbench
+    ap_ssid, ap_clave = credenciales_desechables()
+    secretos = [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+    ssid = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    with case(tb, "JRN-01.2", "Aprovisionar por el portal", run_dir, requires="JRN-01.1") as c:
+        c.note("- AP desechable del banco con SSID y clave aleatorios de esta ejecución (redactados en la evidencia)",
+               "- broker `broker.local`, sitio `sitio1`, zona `zona1` (ficticios, NFR-SEC-01)", "")
+        c.step("Precondiciones: AP del banco apagado; el DUT sigue en PORTAL (JRN-01.1)")
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": "broker.local", "mqtt_port": "1883",
+                "mqtt_user": "", "mqtt_pass": "", "sitio": "sitio1", "zona": "zona1"}
+        t_envio = time.time()
+        joined, ap_on = False, False
+        try:
+            unirse_al_portal(tb, ssid, c)
+            joined = True
+            c.step("POST / con los datos del AP desechable")
+            r = tb.http_request("POST", "http://192.168.4.1/", headers={"Content-Type": "application/x-www-form-urlencoded"},
+                                body=urlencode(form).encode(), timeout=10)
+            probando = 'id="estado-probando"' in r.text
+            c.note(f"- respuesta al envío: HTTP {r.status_code}, probando={probando}")
+            assert r.status_code == 200 and probando, "el envío válido no responde «Probando la conexión…»"
+            # Un solo radio: el banco no espera el resultado del portal, deja el AP del DUT y levanta el suyo
+            tb.sta_leave(); joined = False
+            c.step("El banco levanta su AP desechable (canal 1); el DUT debe unirse, guardar y reiniciar")
+            tb.ap_start(ap_ssid, ap_clave, channel=1); ap_on = True
+            vistas = esperar_lineas(tb, dut_slot, t_envio, ["con: VALIDANDO -> ARRANQUE (wifi_up)", "boot: "], timeout=40)
+            time.sleep(3)
+            vistas = esperar_lineas(tb, dut_slot, t_envio, ["con: VALIDANDO -> ARRANQUE (wifi_up)"], timeout=1)
+        finally:
+            if ap_on:
+                tb.ap_stop()
+            if joined:
+                tb.sta_leave()
+        c.save_log("log", [redactar(e["text"], secretos) for e in vistas])
+        t04 = primera(vistas, "con: PORTAL -> VALIDANDO (envío)")
+        nvs = primera(vistas, "nvs: config escrita")
+        t05 = primera(vistas, "con: VALIDANDO -> ARRANQUE (wifi_up)")
+        assert t04, "falta con: PORTAL -> VALIDANDO (envío) (T04)"
+        assert not primera(vistas, "con: VALIDANDO -> PORTAL"), "T06: el DUT no se unió al AP del banco"
+        assert t05, "falta con: VALIDANDO -> ARRANQUE (wifi_up) (T05)"
+        assert nvs and nvs["ts"] <= t05["ts"], "T05 sin nvs: config escrita antes de reiniciar"
+        rst = primera(vistas, "rst:", desde_ts=t05["ts"])
+        boot = primera(vistas, "boot: ", desde_ts=t05["ts"])
+        assert rst and boot, "el DUT no reinició tras T05"
+        dt = rst["ts"] - t05["ts"]
+        c.note(f"- T04 → T05 en {t05['ts'] - t04['ts']:.1f} s; reinicio (rst:) a los {dt:.1f} s de T05 (límite {REINICIO_LIMIT_S} s)")
+        assert dt <= REINICIO_LIMIT_S, f"reinicio a los {dt:.1f} s de T05"
+        c.passed(f"aprovisionado: T04 → T05, nvs: config escrita, reinicio a los {dt:.1f} s")

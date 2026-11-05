@@ -136,3 +136,49 @@ def unirse_al_portal(tb, ssid, c, red="192.168.4.", intentos=2):
         tb.sta_leave()
         time.sleep(2)
     pytest.skip(f"not done: sta_join no obtuvo IP de {red}0/24 en {intentos} intentos (última {ip})")
+
+
+def credenciales_desechables():
+    """SSID y clave aleatorios para el AP del banco, distintos en cada ejecución.
+    Nunca se escriben en el repo ni en la evidencia (se redactan)."""
+    import secrets
+    ssid = "nodo-prueba-" + secrets.token_hex(3)
+    clave = secrets.token_urlsafe(12).replace("-", "a").replace("_", "b")
+    return ssid, clave
+
+
+def redactar(texto, secretos):
+    """Sustituye cada secreto (y el SSID desechable) por un marcador antes de guardar evidencia."""
+    for valor, marca in secretos:
+        if valor:
+            texto = texto.replace(valor, marca)
+    return texto
+
+
+def borrar_nvs(tb, slot, tmp_dir):
+    """P-NVS-ERASE: escribe 0xFF sobre la partición nvs (partitions.csv). El DUT
+    arranca después sin configuración (T02)."""
+    off, size = _nvs_partition()
+    blank = pathlib.Path(tmp_dir) / "nvs_blank.bin"
+    blank.write_bytes(b"\xff" * size)
+    res = tb.flash(slot, {off: str(blank)}, chip="esp32s3")
+    assert res.get("ok") and res.get("returncode", 0) == 0, f"P-NVS-ERASE falló: {res.get('error') or res}"
+
+
+def esperar_lineas(tb, slot, since, patrones, timeout):
+    """Lee el buffer del slot desde since hasta que aparezcan todos los patrones o
+    venza timeout. Devuelve las entradas [{text, ts}] vistas."""
+    fin = time.time() + timeout
+    vistas = []
+    while True:
+        out = tb.serial_output(slot, lines=500, since=since)
+        vistas = [e if isinstance(e, dict) else {"text": str(e), "ts": 0} for e in (out.get("lines") or [])]
+        textos = [e.get("text", "") for e in vistas]
+        if all(any(p in t for t in textos) for p in patrones) or time.time() > fin:
+            return vistas
+        time.sleep(1)
+
+
+def primera(entradas, patron, desde_ts=0):
+    """Primera entrada con patron y ts ≥ desde_ts, o None."""
+    return next((e for e in entradas if patron in e.get("text", "") and e.get("ts", 0) >= desde_ts), None)

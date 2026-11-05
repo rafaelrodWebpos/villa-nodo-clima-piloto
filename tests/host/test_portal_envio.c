@@ -61,9 +61,24 @@ int main(void)
     portal_form_html(html, sizeof html, &g);
     ESPERA(!strstr(html, "class=\"aviso\"") && !strstr(html, "id=\"err-"), "aviso o error sin errores");
 
-    /* Página de mensaje: el texto, sin campos ni formulario */
-    ESPERA(portal_mensaje_html(html, sizeof html, "clima-a1b2c3", "0.3.0", "MENSAJE-X") > 0, "mensaje no cabe");
+    /* Página de mensaje: el texto y su marca (id), sin campos ni formulario;
+     * con refresco, se recarga sola hacia «/» (pantalla «Probando la conexión…») */
+    ESPERA(portal_mensaje_html(html, sizeof html, "clima-a1b2c3", "0.3.0", "MENSAJE-X", "estado-probando", 2) > 0, "mensaje no cabe");
     ESPERA(strstr(html, "MENSAJE-X") && !strstr(html, "<input") && !strstr(html, "<form"), "página de mensaje con campos");
+    ESPERA(strstr(html, "id=\"estado-probando\""), "sin la marca de la página");
+    ESPERA(strstr(html, "http-equiv=\"refresh\" content=\"2;url=/\""), "sin recarga automática");
+    portal_mensaje_html(html, sizeof html, "clima-a1b2c3", "0.3.0", "MENSAJE-Y", "estado-conectado", 0);
+    ESPERA(strstr(html, "id=\"estado-conectado\"") && !strstr(html, "http-equiv"), "página sin refresco con recarga");
+
+    /* FR-POR-05: el formulario con el aviso «no se pudo conectar» (marca no-conecta),
+     * los valores no secretos conservados y sin errores por campo */
+    portal_form_t h = {.id = "clima-a1b2c3", .version = "0.3.0", .aviso = "AVISO-NC", .aviso_id = "no-conecta"};
+    h.valores[PORTAL_WIFI_SSID] = "red-de-prueba";
+    h.valores[PORTAL_WIFI_PASS] = "clave-mala-123";
+    portal_form_html(html, sizeof html, &h);
+    ESPERA(strstr(html, "id=\"no-conecta\"") && strstr(html, "AVISO-NC"), "sin el aviso no-conecta");
+    ESPERA(strstr(html, "value=\"red-de-prueba\"") && !strstr(html, "clave-mala-123"), "no conserva la red o devuelve la clave");
+    ESPERA(!strstr(html, "id=\"err-"), "errores por campo en el aviso no-conecta");
 
     printf("TC-POR-04 (FR-POR-04): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
