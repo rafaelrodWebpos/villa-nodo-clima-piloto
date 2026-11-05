@@ -805,6 +805,20 @@ tests:
     commit: 9c382b9
     date: 2026-11-04
     ci_run: 41951228893   # host tests + secret scan
+  - id: TC-LOG-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-LOG-02]
+    needs: [hosted-ci]
+    expect: >
+      el ensamblador del log UDP entrega cada línea una vez, completa y en orden,
+      aunque llegue en trozos, sin \r\n y sin líneas vacías; una línea demasiado
+      larga sale cortada con la marca « [cortada]» y lo que sobra no contamina la
+      siguiente
+    impl: tests/host/test_udplog_lineas.c
   - id: TC-SEC-01
     shape: atomic
     kind: security

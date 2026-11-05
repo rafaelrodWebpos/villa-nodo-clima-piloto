@@ -32,6 +32,7 @@
 #include "portal_dns.h"
 #include "portal_http.h"
 #include "portal_validar.h"
+#include "udplog.h"
 
 static const char *TAG = "nodo";
 static char s_id[IDENTIDAD_LEN];
@@ -279,6 +280,7 @@ static void wifi_base(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+    ESP_ERROR_CHECK(udplog_iniciar());   /* FR-LOG-02 en la imagen de banco; nada en producción */
 }
 
 static void wifi_iniciar(void)

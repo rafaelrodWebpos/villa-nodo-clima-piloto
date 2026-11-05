@@ -49,3 +49,8 @@ add_test(NAME TC-POR-10 COMMAND test_portal_config)
 add_executable(test_log_ruta test_log_ruta.c ${COMP}/portal/portal_cautivo.c)
 target_include_directories(test_log_ruta PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-SEC-02 COMMAND test_log_ruta)
+
+# TC-LOG-02 · FR-LOG-02 (ensamblado de líneas del log UDP)
+add_executable(test_udplog_lineas test_udplog_lineas.c ${COMP}/udplog/udplog_lineas.c)
+target_include_directories(test_udplog_lineas PRIVATE ${COMP}/udplog/include)
+add_test(NAME TC-LOG-02 COMMAND test_udplog_lineas)
