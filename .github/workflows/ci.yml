@@ -21,6 +21,15 @@ jobs:
           cmake --build build-host
           ctest --test-dir build-host --output-on-failure
 
+  test-plan:            # un plan que no carga pone la CI en rojo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load testing/test-plan.yaml
+        run: |
+          python3 -m pip install --quiet pyyaml==6.0.2
+          python3 scripts/ci/plan_check.py testing/test-plan.yaml
+
   secret-scan:          # FSD NFR-SEC-01 (repositorio público)
     runs-on: ubuntu-latest
     env:
