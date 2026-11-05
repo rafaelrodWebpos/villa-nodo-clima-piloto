@@ -856,6 +856,86 @@ tests:
       revisión de sdkconfig.defaults, Kconfig y el código: los 7 campos de cadena
       de §17 arrancan en «ninguno» o vacíos y ningún prefijo de tópico es literal
     impl: null   # declarado 2026-11-05 (H-43); el portal ya usa solo ejemplos genéricos
+  - id: TC-SEN-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-SEN-01]
+    needs: [hosted-ci]
+    expect: >
+      tramas (S_T, S_RH) = (0, 0), (65535, 65535) y (0x6666, 0x8000) con su CRC dan T = −45 / 130 / 25,00 °C y HR = 0 / 100 (recortadas) / 56,50 %; CRC(0xBEEF) = 0x92; ninguna HR fuera de [0, 100]
+    impl: tests/host/test_sht41.c (sen01)
+  - id: TC-SEN-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-SEN-02]
+    needs: [hosted-ci]
+    expect: >
+      una trama con el CRC de T o el de HR alterado, o con un dato alterado, es inválida (crc) y no escribe ninguna de las dos medidas
+    impl: tests/host/test_sht41.c (sen02)
+  - id: TC-MED-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-MED-03]
+    needs: [hosted-ci]
+    expect: >
+      200 pares (T, HR) en una rejilla de 20 × 10 sobre T ∈ [−10, 50] °C y HR ∈ [1, 100] %, extremos incluidos: |Td − Td_ref| ≤ 0,1 °C con la referencia en doble de §5.4; ningún NaN ni infinito
+    impl: tests/host/test_medicion.c (med03)
+  - id: TC-MED-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-MED-04]
+    needs: [hosted-ci]
+    expect: >
+      HR = 0 y una lectura inválida dan «no publicar punto_rocio» (Td=- en E3, «med: invalida (…)»), también después de una lectura con Td
+    impl: tests/host/test_medicion.c (med04)
+  - id: TC-MED-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-MED-05]
+    needs: [hosted-ci]
+    expect: >
+      21,45 · −0,05 · 21,449 · 99,96 (float32) → 21,5 · −0,1 · 21,4 · 100,0; −0,04 → 0,0 sin signo; la línea E3 usa los valores redondeados con 1 decimal
+    impl: tests/host/test_medicion.c (med05)
+  - id: TC-SEN-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: target
+    verifies: [FR-SEN-01]
+    needs: [bench-driver, bench-flash, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      DUT con el sensor conectado, 3 ciclos: 3 líneas «med: T=<t> HR=<h> Td=<td>»
+      (E3) con T ∈ [0, 50] °C, la primera ya tras el arranque, y ninguna
+      «med: invalida (…)»
+    impl: tests/bench/test_sen.py::test_tc_sen_03_three_cycles
+  - id: TC-HW-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-HW-04, C-HW-05]
+    needs: [hosted-ci]
+    expect: >
+      revisión + grep en la CI: SDA = GPIO8, SCL = GPIO9 y 100 kHz en la única
+      configuración del bus I²C (components/sht41/sht41.c)
+    impl: null   # declarado 2026-11-05 al escribir el driver (fila 6 de la puerta 02)
   - id: TC-SEC-01
     shape: atomic
     kind: security

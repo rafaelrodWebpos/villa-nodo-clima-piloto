@@ -7,8 +7,9 @@
  * cautivo, HTTP, validación del envío) y la prueba de unión con su resultado
  * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
  * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
- * test: T08 (pendiente de /define), T09/T10 (backoff), el ciclo de medición
- * (FR-MED-*) y el resto de §6.3.
+ * test: T08 (fila de la Fase 1), T09/T10 (backoff) y el resto de §6.3. El
+ * ciclo de medición (FSD §5.4) lee el SHT41 cada 60 s en cualquier estado y
+ * escribe E3; la publicación por MQTT es de la Fase 2.
  */
 #include <string.h>
 #include "esp_app_desc.h"
@@ -22,12 +23,15 @@
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
+#include "freertos/task.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "sdkconfig.h"
 
 #include "conectividad.h"
 #include "identidad.h"
+#include "medicion.h"
+#include "sht41.h"
 #include "portal_config.h"
 #include "portal_dns.h"
 #include "portal_http.h"
@@ -358,6 +362,31 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
              con_nombre_estado(t.siguiente), con_nombre_evento(ev));
 }
 
+/* Ciclo de medición (FSD §5.4; FR-MED-01/02): cada 60 s con el reloj
+ * monotónico del planificador, en cualquier estado. Los contadores son los de
+ * `status` (§9.3, Fase 2). */
+#define PERIODO_MEDIDA_MS 60000
+static uint32_t s_lecturas, s_err_sensor;
+
+static void tarea_medicion(void *arg)
+{
+    (void)arg;
+    esp_err_t e = sht41_iniciar();
+    if (e != ESP_OK) ESP_LOGE(TAG, "sht41: bus no iniciado (%s)", esp_err_to_name(e));
+    TickType_t ultimo = xTaskGetTickCount();
+    for (;;) {
+        float t = 0, hr = 0;
+        sht41_resultado_t r = sht41_leer(&t, &hr);
+        med_lectura_t m = med_procesar(r == SHT41_OK, t, hr);
+        if (m.valida) s_lecturas++; else s_err_sensor++;      /* FR-SEN-02 */
+        char linea[MED_LINEA_MAX];
+        med_linea(linea, sizeof linea, &m, sht41_motivo(r));
+        if (m.valida) ESP_LOGI(TAG, "%s", linea);             /* E3 */
+        else          ESP_LOGW(TAG, "%s", linea);
+        vTaskDelayUntil(&ultimo, pdMS_TO_TICKS(PERIODO_MEDIDA_MS));
+    }
+}
+
 void app_main(void)
 {
     const esp_app_desc_t *app = esp_app_get_description();
@@ -378,6 +407,9 @@ void app_main(void)
         err = nvs_flash_init();
     }
     ESP_ERROR_CHECK(err);
+
+    /* FR-MED-02: el ciclo corre en todos los estados, desde el arranque */
+    xTaskCreate(tarea_medicion, "medicion", 4096, NULL, 5, NULL);
 
     transicion(CON_EV_FIN_ARRANQUE, (con_guardas_t){.config_valida = config_valida()});
 
