@@ -660,7 +660,8 @@ tests:
       relé terminan en el formulario del portal (200, los 8 campos de §17) y
       nunca en 204. El relé sigue las redirecciones, así que el 302 en sí no se
       observa aquí (lo cubre TC-POR-06)
-    impl: tests/bench/test_por.py::test_tc_por_07_captive_redirects   # xfail(strict) hasta FR-POR-02
+    impl: tests/bench/test_por.py::test_tc_por_07_captive_redirects
+    history: xfail estricto confirmado sobre d44c9f7 (test-results/20261105T000716Z-d44c9f7/): /generate_204 → 404
   - id: TC-POR-08
     shape: atomic
     kind: standard

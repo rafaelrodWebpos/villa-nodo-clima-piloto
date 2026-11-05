@@ -1,11 +1,12 @@
 /* L1 portal — adaptador HTTP (esp_http_server). Implementado: GET / con el
- * formulario de §17 (FR-POR-03) y POST / con la validación (FR-POR-04, T03).
- * Pendientes, cada uno con su test: la prueba de unión de un envío válido
- * (T04, JRN-01.2) y las redirecciones y el DNS cautivo (FR-POR-02). */
+ * formulario de §17 (FR-POR-03), POST / con la validación (FR-POR-04, T03) y
+ * 302 a http://192.168.4.1/ para cualquier otra ruta GET (FR-POR-02).
+ * Pendiente, con su test: la prueba de unión de un envío válido (T04). */
 #include <stdlib.h>
 #include <string.h>
 #include "esp_http_server.h"
 #include "esp_log.h"
+#include "portal_cautivo.h"
 #include "portal_form.h"
 #include "portal_http.h"
 #include "portal_textos.h"
@@ -35,6 +36,16 @@ static esp_err_t get_raiz(httpd_req_t *req)
     esp_err_t r = n ? enviar_html(req, html, n) : httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
     free(html);
     return r;
+}
+
+/* FR-POR-02: /generate_204, /hotspot-detect.html y cualquier otra ruta GET -> 302 al portal */
+static esp_err_t get_otra(httpd_req_t *req)
+{
+    if (!portal_redirige(req->uri)) return get_raiz(req);
+    httpd_resp_set_status(req, "302 Found");
+    httpd_resp_set_hdr(req, "Location", PORTAL_URL);
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    return httpd_resp_send(req, NULL, 0);
 }
 
 static esp_err_t post_raiz(httpd_req_t *req)
@@ -85,6 +96,7 @@ esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_
     s_al_enviar = al_enviar;
     httpd_handle_t srv = NULL;
     httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
+    cfg.uri_match_fn = httpd_uri_match_wildcard;   /* el comodín recoge las rutas de detección */
     esp_err_t err = httpd_start(&srv, &cfg);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "httpd_start: %s", esp_err_to_name(err));
@@ -92,6 +104,9 @@ esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_
     }
     static const httpd_uri_t raiz_get = {.uri = "/", .method = HTTP_GET, .handler = get_raiz};
     static const httpd_uri_t raiz_post = {.uri = "/", .method = HTTP_POST, .handler = post_raiz};
+    static const httpd_uri_t otra_get = {.uri = "/*", .method = HTTP_GET, .handler = get_otra};
+    /* Orden: «/» exacta antes que el comodín */
     ESP_ERROR_CHECK(httpd_register_uri_handler(srv, &raiz_get));
-    return httpd_register_uri_handler(srv, &raiz_post);
+    ESP_ERROR_CHECK(httpd_register_uri_handler(srv, &raiz_post));
+    return httpd_register_uri_handler(srv, &otra_get);
 }

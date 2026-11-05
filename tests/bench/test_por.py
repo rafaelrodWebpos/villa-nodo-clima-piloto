@@ -126,7 +126,6 @@ def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir):
         c.passed(f"{len(ENVIOS_INVALIDOS)} envíos inválidos: error en su campo, sin NVS; reset → PORTAL")
 
 
-@pytest.mark.xfail(strict=True, reason="FR-POR-02 sin implementar en el DUT: /generate_204 da 404")
 def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir):
     """TC-POR-07 · FR-POR-02 (bench, parte HTTP) — /generate_204 y /hotspot-detect.html llevan al portal.
 

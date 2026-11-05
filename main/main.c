@@ -3,10 +3,10 @@
  *
  * Crea los adaptadores y conecta los núcleos puros (components/). Implementado
  * hasta ahora: identidad (FR-ID-01), línea boot: (E1), guarda de configuración
- * y filas T02 y T03 de la tabla (AP abierto y HTTP del portal: GET / y la
- * validación del envío, FR-POR-01/03/04). Pendiente, cada uno con su test: T04
- * (prueba de unión), DNS y redirecciones (FR-POR-02), ciclo de medición
- * (FR-MED-*), T01 y el resto de filas de §6.3.
+ * y filas T02 y T03 de la tabla (AP abierto, DNS cautivo y HTTP del portal:
+ * GET /, redirecciones y validación del envío, FR-POR-01/02/03/04). Pendiente,
+ * cada uno con su test: T04 (prueba de unión), ciclo de medición (FR-MED-*),
+ * T01 y el resto de filas de §6.3.
  */
 #include <string.h>
 #include "esp_app_desc.h"
@@ -23,6 +23,7 @@
 
 #include "conectividad.h"
 #include "identidad.h"
+#include "portal_dns.h"
 #include "portal_http.h"
 
 static const char *TAG = "nodo";
@@ -86,13 +87,25 @@ static void al_enviar(bool valido)
     }
 }
 
-/* Acción de T02 (parte implementada): AP Wi-Fi abierto con SSID = id (FR-POR-01)
- * y servidor HTTP con el formulario (FR-POR-03). */
+/* Opción DNS del servidor DHCP del AP (OFFER_DNS de lwip dhcpserver.h; el
+ * ejemplo wifi/softap_sta de ESP-IDF la define igual). */
+#define DHCPS_OFFER_DNS 0x02
+
+/* Acción de T02 (parte implementada): AP Wi-Fi abierto con SSID = id (FR-POR-01),
+ * DNS cautivo anunciado por DHCP (FR-POR-02) y servidor HTTP (FR-POR-02/03/04). */
 static void arrancar_portal(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_ap();
+    esp_netif_t *ap_netif = esp_netif_create_default_wifi_ap();
+    /* FR-POR-02: el DHCP del AP anuncia 192.168.4.1 como DNS, para que el
+     * teléfono pregunte al nodo y su detección de portal llegue aquí */
+    esp_netif_dns_info_t dns = {.ip = {.type = ESP_IPADDR_TYPE_V4, .u_addr.ip4.addr = ESP_IP4TOADDR(192, 168, 4, 1)}};
+    uint8_t oferta = DHCPS_OFFER_DNS;
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_dhcps_stop(ap_netif));
+    ESP_ERROR_CHECK(esp_netif_dhcps_option(ap_netif, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &oferta, sizeof oferta));
+    ESP_ERROR_CHECK(esp_netif_set_dns_info(ap_netif, ESP_NETIF_DNS_MAIN, &dns));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_dhcps_start(ap_netif));
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t ap = {
@@ -108,6 +121,7 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap));
     ESP_ERROR_CHECK(esp_wifi_start());
+    ESP_ERROR_CHECK(portal_dns_iniciar());
     ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version, al_enviar));
 }
 
