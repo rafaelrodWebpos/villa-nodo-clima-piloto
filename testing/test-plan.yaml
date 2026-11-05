@@ -327,10 +327,10 @@ tests:
       NODO-BENCH-IMAGE si es de producción (C-LOG-01)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
     runs:
-      - {variant: bench, ci_run: 41947591922, evidence: test-results/20261105T012042Z-e6a1bcd/}
+      - {variant: bench, ci_run: 41951568245, evidence: test-results/20261105T015612Z-9c382b9/}
       - {variant: production, ci_run: 41561334943, evidence: test-results/20261103T014326Z-bbe0cc2/, commit: bbe0cc2}
     observed: >
       flash por /api/flash en SLOT1 ok, returncode 0; tras el último rst: del
@@ -350,9 +350,9 @@ tests:
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
     impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    evidence: test-results/20261105T012042Z-e6a1bcd/
+    evidence: test-results/20261105T015612Z-9c382b9/
     observed: >
       AP abierto clima-f3c6d4 en el escaneo del banco a los 5,6 s desde la
       petición de reset (cota superior); T02 en 180 ms en el reloj del DUT
@@ -382,15 +382,15 @@ tests:
       ≤ 5 s desde esa línea y el nodo reinicia (boot:)
     impl: tests/bench/test_jrn01.py::test_jrn_01_2_provision
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    evidence: test-results/20261105T012042Z-e6a1bcd/
+    evidence: test-results/20261105T015612Z-9c382b9/
     observed: >
       POST / válido con el AP desechable del banco (SSID y clave aleatorios,
       redactados) → «Probando la conexión…»; con el AP del banco en el canal 1,
       con: PORTAL -> VALIDANDO (envío), nvs: config escrita y
-      con: VALIDANDO -> ARRANQUE (wifi_up) 7,1 s después; rst: a los 3,0 s de T05
-      (límite 5 s); tras el reinicio, boot: … reset=sw, cfg: sitio=sitio1
+      con: VALIDANDO -> ARRANQUE (wifi_up); rst: a los 4,0 s de T05 sobre
+      9c382b9 (límite 5 s; 3,0 s sobre e6a1bcd); tras el reinicio, boot: … reset=sw, cfg: sitio=sitio1
       zona=zona1 y con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque). Ninguna
       aparición de la clave en el log serie (FR-SEC-03)
     history: >
@@ -511,9 +511,9 @@ tests:
       otro prefijo; solo los 3 últimos bytes, con ceros a la izquierda
     impl: tests/host/test_identidad.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-CON-01
     shape: atomic
     kind: standard
@@ -528,9 +528,9 @@ tests:
       T02 no intenta el STA); nombres de estado y evento de la línea E0
     impl: tests/host/test_conectividad.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-POR-01
     shape: atomic
     kind: standard
@@ -546,9 +546,9 @@ tests:
       ningún recurso externo; valores escapados; 0 si no cabe (nunca truncado)
     impl: tests/host/test_portal_form.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-POR-02
     shape: atomic
     kind: standard
@@ -564,9 +564,9 @@ tests:
       sta_join (ruta de eth0 intacta)
     impl: tests/bench/test_por.py::test_tc_por_02_get_form
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    evidence: test-results/20261105T012042Z-e6a1bcd/
+    evidence: test-results/20261105T015612Z-9c382b9/
     observed: >
       sta_join al AP abierto clima-f3c6d4; GET http://192.168.4.1/ → 200, 3087
       bytes (textos H-37), 8 <input> con los name de §17, wifi_pass y mqtt_pass password y
@@ -592,9 +592,9 @@ tests:
       cada uno en su campo
     impl: tests/host/test_portal_validar.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
     note: >
       interpretación de «nombre de host o IPv4 decimal» (§17): si el valor solo
       tiene cifras y puntos, tiene que ser una IPv4 a.b.c.d con partes 0–255; si
@@ -618,9 +618,9 @@ tests:
       no-conecta (FR-POR-05) con los valores no secretos
     impl: tests/host/test_portal_envio.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-POR-05
     shape: atomic
     kind: standard
@@ -638,9 +638,9 @@ tests:
       con: ARRANQUE -> PORTAL (fin_arranque)
     impl: tests/bench/test_por.py::test_tc_por_05_invalid_submit
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    evidence: test-results/20261105T012042Z-e6a1bcd/
+    evidence: test-results/20261105T015612Z-9c382b9/
     observed: >
       dos POST / inválidos por el relé (zona Zona#1; wifi_pass de 7): 200 en
       0,05 s, error solo en err-zona y en err-wifi_pass, aviso general, valores
@@ -666,9 +666,9 @@ tests:
       las consultas inválidas o que no caben se descartan
     impl: tests/host/test_portal_cautivo.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-POR-07
     shape: atomic
     kind: standard
@@ -684,9 +684,9 @@ tests:
       observa aquí (lo cubre TC-POR-06)
     impl: tests/bench/test_por.py::test_tc_por_07_captive_redirects
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    evidence: test-results/20261105T012042Z-e6a1bcd/
+    evidence: test-results/20261105T015612Z-9c382b9/
     observed: >
       unido al AP del DUT (tras un primer sta_join link-local, reintento con
       192.168.4.3), GET /generate_204 y GET /hotspot-detect.html por el relé
@@ -737,9 +737,9 @@ tests:
       el propietario en H-41; el FSD no cambia)
     impl: tests/bench/test_por.py::test_tc_por_09_wrong_password
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    evidence: test-results/20261105T012042Z-e6a1bcd/
+    evidence: test-results/20261105T015612Z-9c382b9/
     observed: >
       POST / válido con clave errónea → «Probando la conexión…»; con: VALIDANDO
       -> PORTAL (wifi_down) a los 20,0 s de T04, sin nvs: config escrita; el banco
@@ -762,9 +762,9 @@ tests:
       puerto no numérico se rechaza (nunca se trunca)
     impl: tests/host/test_portal_config.c
     status: successful
-    commit: e6a1bcd
+    commit: 9c382b9
     date: 2026-11-04
-    ci_run: 41947227792   # host tests + secret scan
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-SEC-02
     shape: atomic
     kind: standard
@@ -778,6 +778,10 @@ tests:
       o #, sin consulta ni fragmento (nunca un dato del formulario), con los no
       imprimibles como _ y truncada a lo que cabe
     impl: tests/host/test_log_ruta.c
+    status: successful
+    commit: 9c382b9
+    date: 2026-11-04
+    ci_run: 41951228893   # host tests + secret scan
   - id: TC-SEC-01
     shape: atomic
     kind: security
