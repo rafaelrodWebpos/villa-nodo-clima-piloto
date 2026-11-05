@@ -421,9 +421,9 @@ tests:
       (con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)); el receptor UDP del
       banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
       del log serie en ≤ 1 s
-    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # xfail(strict): T08 (/define), log UDP y ciclo de medición
+    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # xfail(strict): T08 (fila de la Fase 1, FSD 0.9.2) y ciclo de medición; log UDP hecho (0d3da79)
     status: not done
-    reason: the feature is not implemented (T08 pendiente de /define; log UDP y ciclo de medición)
+    reason: the feature is not implemented (T08 de la Fase 1 y ciclo de medición)
     last_run:
       commit: b19c553
       date: 2026-11-05
@@ -819,6 +819,43 @@ tests:
       larga sale cortada con la marca « [cortada]» y lo que sobra no contamina la
       siguiente
     impl: tests/host/test_udplog_lineas.c
+  - id: TC-LOG-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-LOG-03]
+    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      imagen de banco con CONFIG_NODO_UDP_LOG_HOST en una IP sin uso de la red
+      del banco, 10 ciclos: en cada uno, 3 medidas en vivo y un status;
+      intervalos entre medidas en [59, 61] s; ningún uptime_s menor ni bloqueo
+    impl: null   # declarado 2026-11-05 (H-43, fila 6 de la puerta 02): udplog ya descarta si la cola está llena
+  - id: TC-LOG-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-LOG-01]
+    needs: [bench-driver, bench-wifi-ap, bench-traffic-capture, dut-board]
+    expect: >
+      imagen de producción en OPERATIVO, arranque y 3 ciclos con el tráfico UDP
+      capturado: solo DHCP, DNS y SNTP; ningún datagrama al 5555 ni a otro destino
+    impl: null   # bloqueado: bench-traffic-capture en no (CR-TB-04). Mientras, la contraparte de producción en verify (release_verify)
+  - id: TC-CFG-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-CFG-01]
+    needs: [hosted-ci]
+    expect: >
+      revisión de sdkconfig.defaults, Kconfig y el código: los 7 campos de cadena
+      de §17 arrancan en «ninguno» o vacíos y ningún prefijo de tópico es literal
+    impl: null   # declarado 2026-11-05 (H-43); el portal ya usa solo ejemplos genéricos
   - id: TC-SEC-01
     shape: atomic
     kind: security
@@ -999,6 +1036,27 @@ gate_changes:
     approved_by: propietario (opción a, con la condición)
     date: 2026-11-02
     note: propuesto por el asistente y aprobado por el propietario antes de aplicarlo
+  - gate: 02-ai-harnessed
+    rows: [6, comprobaciones mecánicas (fila 6 y bench-driver)]
+    change: >
+      la fila 6 exige el esqueleto solo mientras la puerta 03 no conste OPEN;
+      después, cada componente de components/ cita IDs del FSD, todos existen en
+      el FSD y cada uno está en el verifies de algún test del plan (comprobación
+      mecánica nueva en lugar de «test ! -d components»). La comprobación de
+      bench-driver lee el log por la API de jobs de GitHub en lugar de
+      «gh run view --log»
+    reason: >
+      el checker del 2026-11-05 sobre 69dea7c dio SHUT por la fila 6: la puerta
+      describía el repo al cerrar la Fase 1 y los componentes de la Fase 3 son
+      evidencia legítima; «gh run view --log» sale vacío con gh 2.46 aunque el
+      run es correcto
+    approved_by: propietario (H-43, opción a)
+    date: 2026-11-05
+    note: >
+      propuesto por el asistente y aprobado antes de aplicarlo. Al aplicarlo, la
+      comprobación encontró C-CFG-01, FR-LOG-01 y FR-LOG-03 citados en
+      components/ sin test declarado; se declararon TC-CFG-01, TC-LOG-04 y
+      TC-LOG-03 (not done)
 gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
   - {gate: 01-load-defined, verdict: SHUT, date: 2026-10-31, commit: 1e1b175,
      findings: "T08/T10/T13/T17 sin «No debe ocurrir» y T04/T09/T10/T12/T13 sin límite; la Fase 2 necesita salida a Internet (FR-TIME-*, FR-MQTT-03) y no la declara"}
@@ -1048,3 +1106,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "FSD 0.9.1; sin bloqueantes. No bloqueantes: C-HW-*/C-BLD-* fuera de los criterios de salida de §3; FR-POR-06 (Fase 1) espera la línea de T08 (Fase 2); la convención «valores con su Dnn» no se aplica de forma uniforme; D19 fuera de orden y D23 sin FR-POR-04; filas target y other de §22.0 incompletas; baseline_commit sin hash; MAC real de la placa del banco en el plan y la agenda (SSID de portal predecible si esa unidad se instala)"}
   - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-11-02, commit: 05e6ed2,
      findings: "sin bloqueantes; posición derivada sin preguntar: Fase 3, ola 1, siguiente el ejecutable de JRN-01.0. No bloqueantes: bench-driver.observed sin commit (lo cubre installed_by.run); dos gate_changes sin campo commit (566a790, 05e6ed2); build/SKILL.md «agenda con puntos abiertos → Fase 2» leído al pie de la letra; comentario de test-plan.yaml:57 con fecha 2026-11-01; verify invoca pytest -m journey --firmware-dir sin conftest todavía"}
+  - {gate: 01-load-defined, verdict: OPEN, date: 2026-11-05, commit: 69dea7c,
+     findings: "FSD 0.9.2; sin bloqueantes. No bloqueantes: la fila bench de T08 en §6.6 nombra el broker real (la Fase 1 se verifica sin él); el reinicio del backoff en la Fase 1 depende en la práctica de T14 (Fase 2); SNTP en el alcance de la Fase 1 sin criterio de salida; C-HW-*/C-BLD-* fuera de los criterios de salida; D19 fuera de orden; baseline_commit sin hash; JRN-01.3 aún dice «T08 pendiente de /define»"}
+  - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-11-05, commit: 69dea7c,
+     findings: "fila 6: «esqueleto, sin components/» (test ! -d components, rc 1) frente a los componentes de la Fase 3; la comprobación de bench-driver falla porque gh run view --log sale vacío con gh 2.46 (el run 41552251499 es correcto por la API de jobs)"}

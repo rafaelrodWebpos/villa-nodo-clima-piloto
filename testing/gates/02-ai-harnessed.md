@@ -15,7 +15,7 @@ Repositorio: `rafaelrodWebpos/villa-nodo-clima-piloto`. Plan: `testing/test-plan
 | 3 | El journey está sembrado: `JRN-01.0`…`JRN-01.7` (grabar el artefacto de la CI → portal → aprovisionar → Wi-Fi → broker/status → HA → dos medidas con ts → corte de alimentación) y `JRN-02.*` (OTA y rollback, bench+), cada uno con `verifies` (IDs que existen en el FSD), `needs` (capacidades declaradas), `expect`, `kind: standard`, `wave: 1` | `testing/test-plan.yaml` → `tests` | Pasos consecutivos. Ningún paso de OTA dentro de JRN-01 |
 | 4 | Existe la agenda de depuración y cada punto tiene «sin probar porque» y «se prueba con»; el testbench no figura como punto | `testing/debugging-agenda.md` | Tabla |
 | 5 | Existe el estándar de pruebas, en un solo fichero, con reglas de ejecución y procedimientos compartidos | `docs/Method/standards/testing.md` | Secciones «Reglas para cualquier ejecución» y `P-*` |
-| 6 | El firmware es un esqueleto: no hay ningún módulo que el FSD no pida y ningún requisito implementado | `main/`, `components/` | Solo `main/main.c` con el log de versión, el marcador de banco y `Init complete`; sin `components/` |
+| 6 | No hay código que el FSD no pida. Mientras la puerta 03 no conste `OPEN` en `gate_verdicts`, el firmware es un esqueleto: ningún módulo que el FSD no pida y ningún requisito implementado. Cuando la puerta 03 consta `OPEN`, cada componente de `components/` corresponde a requisitos del FSD con tests declarados en el plan: cita al menos un ID, todos los IDs que cita existen en el FSD y cada uno está en el `verifies` de algún test del plan | `main/`, `components/`, `testing/test-plan.yaml` → `gate_verdicts`, `tests` | Antes de la puerta 03: solo `main/main.c` con el log de versión, el marcador de banco y `Init complete`; sin `components/`. Después: ningún componente sin IDs, con un ID que no está en el FSD o con un ID sin test declarado |
 | 7 | Las restricciones de build del FSD están en la configuración | `sdkconfig.defaults`, `partitions.csv` | Flash de 8 MB; tabla idéntica a FSD §2.2; PSRAM no activada; `CONFIG_NODO_UDP_LOG` no activado |
 | 8 | La CI tiene build en cada push, release por tag y un job verify del que depende la release | `.github/workflows/build.yml` | `release.needs` contiene `verify`; verify solo con `refs/tags/v` |
 | 9 | La CI ha pasado en verde al menos una vez en `main` | GitHub | `gh run list` |
@@ -42,14 +42,28 @@ python3 -c "import yaml,sys; p=yaml.safe_load(open('testing/test-plan.yaml')); \
 # bench-driver en yes: su run de installed_by es verde y prueba el import y el commit fijado
 python3 -c "import yaml; d=yaml.safe_load(open('testing/test-plan.yaml'))['capabilities']['bench-driver']; print(d['installed_by']['run'], d['pinned'])" | { read run pin; \
   test "$(gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --json conclusion,workflowName --jq '.workflowName+" "+.conclusion')" = "devcontainer image builds success" && \
-  gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --log | grep -q 'TestbenchDriver OK' && \
-  gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --log | grep -q "$pin" && echo "bench-driver ok ($run)" || echo "FALLA bench-driver ($run)"; }
+  log=$(gh run view "$run" -R rafaelrodWebpos/villa-nodo-clima-piloto --json jobs --jq '.jobs[].databaseId' | \
+    while read j; do gh api "repos/rafaelrodWebpos/villa-nodo-clima-piloto/actions/jobs/$j/logs"; done) && \
+  printf '%s' "$log" | grep -q 'TestbenchDriver OK' && \
+  printf '%s' "$log" | grep -q "$pin" && echo "bench-driver ok ($run)" || echo "FALLA bench-driver ($run)"; }
+# el log se lee por la API de jobs: «gh run view --log» sale vacío con gh 2.46
 grep -oP '(?<![A-Z])((FR|NFR|C)-[A-Z]+-[0-9]+|T[0-9]{2})(?![0-9])' testing/test-plan.yaml | sort -u | \
   while read id; do grep -q -- "$id" docs/Functionality/FSD-nodo-clima.md || echo "ID no está en el FSD: $id"; done
 set -a; . ./.env; set +a
 for e in /api/info /api/devices /api/udplog /api/wifi/ap_status /api/wifi/events /api/mqtt/status /api/human/status; do \
   curl -s -m 5 "$TESTBENCH_URL$e" | grep -q '"ok": true' && echo "ok $e" || echo "FALLA $e"; done
-test ! -d components
+# fila 6: esqueleto antes de la puerta 03; después, cada componente con IDs del FSD y tests declarados
+python3 -c "import yaml,re,sys,pathlib; p=yaml.safe_load(open('testing/test-plan.yaml')); \
+  g3=any(v['gate']=='03-dut-ready' and v['verdict']=='OPEN' for v in p.get('gate_verdicts',[])); \
+  c=pathlib.Path('components'); \
+  sys.exit(0 if not c.exists() else 1) if not g3 else None; \
+  fsd=open('docs/Functionality/FSD-nodo-clima.md').read(); ver={v for t in p['tests'] for v in t.get('verifies',[])}; \
+  rx=re.compile(r'(?<![A-Z])((?:FR|NFR|C)-[A-Z]+-[0-9]+|T[0-9]{2})(?![0-9])'); mal=[]; \
+  [mal.append((d.name, 'sin IDs' if not ids else sorted(i for i in ids if i not in fsd or i not in ver))) \
+   for d in sorted(c.iterdir()) if d.is_dir() \
+   for ids in [set(x for f in d.rglob('*') if f.is_file() for x in rx.findall(f.read_text(errors='ignore')))] \
+   if not ids or any(i not in fsd or i not in ver for i in ids)]; \
+  print('componentes', sorted(d.name for d in c.iterdir() if d.is_dir()) if c.exists() else [], 'mal', mal); sys.exit(1 if mal else 0)"
 grep -q 'CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y' sdkconfig.defaults
 ! grep -q '^CONFIG_NODO_UDP_LOG=y' sdkconfig.defaults
 for w in "Build Firmware" "host tests + secret scan" "devcontainer image builds"; do
