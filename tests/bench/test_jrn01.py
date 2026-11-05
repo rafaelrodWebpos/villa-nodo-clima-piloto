@@ -156,6 +156,7 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
 # JRN-01.2 · T04, T05, FR-POR-06
 # --------------------------------------------------------------------------
 REINICIO_LIMIT_S = 5          # T05 / FR-POR-06: desde con: VALIDANDO -> ARRANQUE (wifi_up)
+AP_PRUEBA = {}                # SSID y clave del AP desechable que el DUT guardó en JRN-01.2 (solo en memoria)
 
 
 def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
@@ -164,6 +165,7 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
     from benchlib import credenciales_desechables, esperar_lineas, primera, redactar, unirse_al_portal
     tb = testbench
     ap_ssid, ap_clave = credenciales_desechables()
+    AP_PRUEBA.update(ssid=ap_ssid, clave=ap_clave)   # JRN-01.3 levanta este mismo AP
     secretos = [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
     ssid = "clima-" + dut_mac.replace(":", "").lower()[-6:]
     with case(tb, "JRN-01.2", "Aprovisionar por el portal", run_dir, requires="JRN-01.1") as c:
@@ -213,3 +215,85 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
         c.note(f"- T04 → T05 en {t05['ts'] - t04['ts']:.1f} s; reinicio (rst:) a los {dt:.1f} s de T05 (límite {REINICIO_LIMIT_S} s)")
         assert dt <= REINICIO_LIMIT_S, f"reinicio a los {dt:.1f} s de T05"
         c.passed(f"aprovisionado: T04 → T05, nvs: config escrita, reinicio a los {dt:.1f} s")
+
+
+# --------------------------------------------------------------------------
+# JRN-01.3 · T01, FR-LOG-02 (+ la línea de T08: ver /define)
+# --------------------------------------------------------------------------
+T01_LIMIT_MS = 2000           # T01 (D21): desde la línea boot:
+UDP_RETARDO_S = 1.0           # FR-LOG-02
+CICLO_S = 60                  # D3: periodo de medición
+CICLOS = 3                    # contrato de FR-LOG-02 (fila del receptor)
+
+
+def _ms(linea):
+    m = re.match(r"\w \((\d+)\)", linea)
+    return int(m.group(1)) if m else None
+
+
+@pytest.mark.xfail(strict=True, reason="T08 (pendiente de /define), log UDP (FR-LOG-02) y ciclo de medición sin implementar")
+def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
+    """JRN-01.3 — tras el reinicio, el nodo configurado arranca el STA (T01), se une al AP
+    del banco y copia su log por UDP al receptor del banco (FR-LOG-02) durante 3 ciclos."""
+    from benchlib import esperar_lineas, primera
+    tb = testbench
+    with case(tb, "JRN-01.3", "Unirse al Wi-Fi y log UDP", run_dir, requires="JRN-01.2") as c:
+        assert AP_PRUEBA, "JRN-01.2 no dejó las credenciales del AP desechable"
+        c.secretos = [(AP_PRUEBA["clave"], "<clave-de-prueba>"), (AP_PRUEBA["ssid"], "<ssid-de-prueba>")]
+        c.note("- el banco levanta el mismo AP desechable que el DUT guardó en JRN-01.2 (redactado)", "")
+        c.step("Precondiciones: AP del banco apagado; el DUT quedó configurado (JRN-01.2)")
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        ap_on = False
+        try:
+            c.step("El banco levanta su AP desechable (canal 1) y resetea el DUT")
+            tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
+            t0 = time.time()
+            tb.serial_reset(dut_slot)
+            vistas = esperar_lineas(tb, dut_slot, t0, ["con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)"], timeout=30)
+            t_ip = primera(vistas, "con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)")
+            udp = []
+            if t_ip:
+                c.step(f"Observando {CICLOS} ciclos de medición ({CICLOS * CICLO_S} s) en el log serie y en el receptor UDP")
+                time.sleep(CICLOS * CICLO_S + 5)
+                vistas = esperar_lineas(tb, dut_slot, t0, [], timeout=0)
+                udp = tb.udplog(limit=2000)
+        finally:
+            if ap_on:
+                tb.ap_stop()
+        textos = [e["text"] for e in vistas]
+        c.save_log("serie", textos)
+        c.save_log("udp", [str(u.get("text", u) if isinstance(u, dict) else u) for u in udp])
+
+        # T01: boot:, cfg:, con: ARRANQUE -> CONECTANDO_WIFI y el primer intento en ≤ 2 s; sin AP
+        boot = primera(vistas, "boot: clima-")
+        assert boot, "falta la línea boot:"
+        assert primera(vistas, "cfg: sitio=sitio1 zona=zona1"), "falta cfg: sitio=sitio1 zona=zona1 (E2)"
+        assert primera(vistas, "con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)"), "falta T01"
+        intento = primera(vistas, "wifi: intento 1")
+        assert intento, "falta wifi: intento 1 (E4): T01 no arrancó el STA"
+        t01 = _ms(intento["text"]) - _ms(boot["text"])
+        c.note(f"- T01: boot: → wifi: intento 1 en {t01} ms (límite {T01_LIMIT_MS} ms)")
+        assert 0 <= t01 <= T01_LIMIT_MS, f"T01 en {t01} ms"
+        assert not any("softAP" in t for t in textos if "wifi:mode" in t), "T01 abrió el AP (prohibido)"
+        assert not primera(vistas, "con: ARRANQUE -> PORTAL"), "el nodo configurado volvió a PORTAL"
+
+        # T08: la unión al AP del banco (ver la propuesta para /define sobre su fase)
+        assert t_ip, "falta con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up) en 30 s"
+
+        # FR-LOG-02: «UDP logging -> host:port» y cada línea serie en el receptor en ≤ 1 s
+        def txt(u): return str(u.get("text", "") if isinstance(u, dict) else u).strip()
+        def ts(u): return float(u.get("ts", 0)) if isinstance(u, dict) else 0.0
+        assert any("UDP logging -> " in txt(u) for u in udp), "el receptor UDP no recibió UDP logging -> <host>:<port> (E11)"
+        tras_ip = [e for e in vistas if e["ts"] >= t_ip["ts"] and e["text"].strip()]
+        perdidas, tarde = [], []
+        for e in tras_ip:
+            cuerpo = re.sub(r"^\w \(\d+\) ", "", e["text"].strip())
+            m = next((u for u in udp if cuerpo and cuerpo in txt(u)), None)
+            if not m: perdidas.append(cuerpo)
+            elif ts(m) - e["ts"] > UDP_RETARDO_S: tarde.append(cuerpo)
+        c.note(f"- {len(tras_ip)} líneas serie tras obtener IP; perdidas {len(perdidas)}, tarde {len(tarde)}")
+        assert not perdidas, f"{len(perdidas)} líneas serie sin copia UDP (FR-LOG-02)"
+        assert not tarde, f"{len(tarde)} líneas llegaron por UDP más de {UDP_RETARDO_S} s tarde"
+        meds = [t for t in textos if "nodo: med: " in t]
+        assert len(meds) >= CICLOS, f"solo {len(meds)} ciclos de medición en la ventana"
+        c.passed(f"T01 en {t01} ms, unido al AP del banco, log UDP completo en {CICLOS} ciclos")
