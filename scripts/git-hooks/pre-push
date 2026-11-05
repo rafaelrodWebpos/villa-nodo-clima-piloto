@@ -2,7 +2,9 @@
 # Pre-push local (NFR-SEC-01, repositorio público). Bloquea el push si los
 # commits que se van a subir contienen:
 #   1. un secreto según gitleaks (misma versión y sha256 que ci.yml), o
-#   2. un valor de .env (p. ej. la dirección del banco) o el host de una URL de .env.
+#   2. un valor de .env (p. ej. la dirección del banco) o el host de una URL de .env, o
+#   3. una MAC que no sea del DUT (dut.identity, publicada por H-20) ni la de
+#      ejemplo del FSD: la radio del banco o un teléfono no entran en el repo.
 # Los patrones se leen de .env en cada ejecución y nunca se escriben en disco.
 # Activación (una vez por clon):  git config core.hooksPath scripts/git-hooks
 set -euo pipefail
@@ -54,5 +56,10 @@ while read -r local_ref local_sha remote_ref remote_sha; do
       fail "un valor de .env aparece en los commits que se suben ($range)"
     fi
   fi
+  # MAC en las líneas añadidas, salvo las del DUT y la de ejemplo del FSD
+  pre=$(sed -n 's/^    mac: \([0-9a-fA-F:]\{14\}\).*/\1/p' "$ROOT/testing/test-plan.yaml" | head -1 | tr 'A-F' 'a-f')
+  ajenas=$(git log -p --format= $range | grep '^+' | grep -oiE '\b([0-9a-f]{2}:){5}[0-9a-f]{2}\b' | tr 'A-F' 'a-f' \
+           | grep -v '^24:0a:c4:a1:b2:c3$' | { [ -n "$pre" ] && grep -v "^$pre" || cat; } | sort -u | wc -l)
+  [ "$ajenas" -eq 0 ] || fail "$ajenas MAC ajena(s) al DUT en los commits que se suben ($range); redáctalas (<mac>)"
 done
 echo "pre-push: $checked commit(s) revisados — gitleaks y $(wc -l < "$patterns") patrón(es) de .env sin hallazgos" >&2

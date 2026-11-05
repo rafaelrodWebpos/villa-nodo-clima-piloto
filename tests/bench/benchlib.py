@@ -35,7 +35,7 @@ class Case:
         for valor, marca in self.secretos:
             if valor:
                 texto = texto.replace(valor, marca)
-        return texto
+        return redactar_macs(texto)
 
     def save_log(self, suffix, lines):
         (self.run_dir / f"{self.tid}-{suffix}.log").write_text(self._r("\n".join(lines) + "\n"))
@@ -144,6 +144,22 @@ def unirse_al_portal(tb, ssid, c, red="192.168.4.", intentos=2):
         tb.sta_leave()
         time.sleep(2)
     pytest.skip(f"not done: sta_join no obtuvo IP de {red}0/24 en {intentos} intentos (última {ip})")
+
+
+_MAC = re.compile(r"\b(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}\b")
+
+
+def _mac_permitida():
+    """Prefijo de las MAC que pueden quedar en la evidencia: la del DUT (dut.identity,
+    publicada por H-20) y las de sus interfaces (STA, softAP), que comparten los 5
+    primeros bytes. Cualquier otra (la radio del banco, un teléfono) se redacta."""
+    m = re.search(r"^    mac: (\S+)", (REPO / "testing" / "test-plan.yaml").read_text(encoding="utf-8"), re.M)
+    return m.group(1).lower()[:14] if m else None
+
+
+def redactar_macs(texto):
+    pre = _mac_permitida()
+    return _MAC.sub(lambda m: m.group(0) if pre and m.group(0).lower().startswith(pre) else "<mac>", texto)
 
 
 def credenciales_desechables():
