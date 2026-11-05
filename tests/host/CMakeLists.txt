@@ -44,3 +44,8 @@ add_test(NAME TC-POR-06 COMMAND test_portal_cautivo)
 add_executable(test_portal_config test_portal_config.c ${COMP}/portal/portal_config.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_config PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-POR-10 COMMAND test_portal_config)
+
+# TC-SEC-02 · FR-SEC-03 (el log de páginas no escribe la consulta de la URL)
+add_executable(test_log_ruta test_log_ruta.c ${COMP}/portal/portal_cautivo.c)
+target_include_directories(test_log_ruta PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-SEC-02 COMMAND test_log_ruta)

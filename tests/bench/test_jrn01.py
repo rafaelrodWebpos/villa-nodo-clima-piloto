@@ -202,6 +202,7 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
         nvs = primera(vistas, "nvs: config escrita")
         t05 = primera(vistas, "con: VALIDANDO -> ARRANQUE (wifi_up)")
         assert t04, "falta con: PORTAL -> VALIDANDO (envío) (T04)"
+        assert primera(vistas, "portal: POST / -> probando"), "el log no registra la página «probando» servida al envío"
         assert not primera(vistas, "con: VALIDANDO -> PORTAL"), "T06: el DUT no se unió al AP del banco"
         assert t05, "falta con: VALIDANDO -> ARRANQUE (wifi_up) (T05)"
         assert nvs and nvs["ts"] <= t05["ts"], "T05 sin nvs: config escrita antes de reiniciar"

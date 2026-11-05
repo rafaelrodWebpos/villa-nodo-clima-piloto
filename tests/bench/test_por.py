@@ -125,6 +125,9 @@ def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir, tmp_path):
         n_t03 = sum("con: PORTAL -> PORTAL (envío)" in ln for ln in buf)
         c.note(f"- `con: PORTAL -> PORTAL (envío)`: {n_t03} de {len(ENVIOS_INVALIDOS)} envíos")
         assert n_t03 == len(ENVIOS_INVALIDOS), f"{n_t03} líneas T03 para {len(ENVIOS_INVALIDOS)} envíos"
+        n_log = sum("portal: POST / -> errores" in ln for ln in buf)
+        c.note(f"- `portal: POST / -> errores`: {n_log} de {len(ENVIOS_INVALIDOS)}")
+        assert n_log == len(ENVIOS_INVALIDOS), f"{n_log} líneas de página servida para {len(ENVIOS_INVALIDOS)} envíos"
         assert not any("nvs: config escrita" in ln for ln in buf + tras), "nvs: config escrita tras un envío inválido"
         assert any("con: ARRANQUE -> PORTAL (fin_arranque)" in ln for ln in tras), "tras el reset no vuelve a PORTAL"
         c.passed(f"{len(ENVIOS_INVALIDOS)} envíos inválidos: error en su campo, sin NVS; reset → PORTAL")

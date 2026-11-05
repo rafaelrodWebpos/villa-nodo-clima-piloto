@@ -47,7 +47,7 @@ static esp_timer_handle_t s_t_reinicio;        /* T05: reinicio tras responder *
 static esp_timer_handle_t s_t_reintento;       /* T04: reintento de la unión dentro de los 20 s */
 
 #define VALIDACION_US   (20 * 1000 * 1000)     /* T06, D12: 20 s */
-#define REINICIO_US     (3 * 1000 * 1000)      /* T05: ≤ 5 s desde la línea con: (D12) */
+#define REINICIO_US     (4 * 1000 * 1000)      /* T05: ≤ 5 s desde la línea con: (D12); 4 s para que el teléfono vea «Conectado…» (H-41) */
 #define REINTENTO_US    (1 * 1000 * 1000)
 
 #if CONFIG_NODO_BENCH_BUILD
@@ -151,7 +151,8 @@ static portal_resp_t al_enviar(const char *const v[PORTAL_N_CAMPOS], bool valido
  * En VALIDANDO, un intento de unión fallido no es todavía wifi_down: FR-POR-05
  * da 20 s para obtener IP, así que se reintenta cada segundo y T06 llega al
  * vencer la ventana. Así sobrevive a un AP que tarda en aparecer (el banco,
- * de un solo radio, lo levanta después del envío) o a un rechazo puntual. */
+ * de un solo radio, lo levanta después del envío) o a un rechazo puntual.
+ * Interpretación aprobada por el propietario (H-41); el FSD no cambia. */
 static void al_evento(void *arg, esp_event_base_t base, int32_t id, void *datos)
 {
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {

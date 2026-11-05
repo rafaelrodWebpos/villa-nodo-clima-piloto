@@ -46,3 +46,12 @@ size_t portal_dns_respuesta(const uint8_t *q, size_t n, uint8_t *out, size_t cap
     }
     return largo;
 }
+
+void portal_ruta_log(const char *uri, char *out, size_t cap)
+{
+    if (!out || cap == 0) return;
+    size_t n = 0;
+    for (const char *p = uri; p && *p && *p != '?' && *p != '#' && n + 1 < cap; p++)
+        out[n++] = (*p > 0x20 && *p < 0x7f) ? *p : '_';
+    out[n] = '\0';
+}

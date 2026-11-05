@@ -16,3 +16,9 @@ int portal_redirige(const char *uri);
  * longitud escrita en out, o 0 si la consulta no es válida o no cabe (se
  * descarta sin responder). */
 size_t portal_dns_respuesta(const uint8_t *q, size_t n, uint8_t *out, size_t cap, const uint8_t ip[4]);
+
+/* Ruta para el log de páginas servidas: la de uri hasta el primer '?' o '#',
+ * solo caracteres imprimibles sin espacio (el resto, '_'), y como mucho
+ * cap - 1 bytes. Nunca escribe la consulta: ahí podría ir un dato del
+ * formulario (FR-SEC-03). */
+void portal_ruta_log(const char *uri, char *out, size_t cap);

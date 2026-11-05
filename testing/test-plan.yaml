@@ -731,6 +731,10 @@ tests:
       muestra el aviso no-conecta con la red conservada y la clave vacía; un
       reset vuelve a con: ARRANQUE -> PORTAL (fin_arranque). SSID y clave
       aleatorios por ejecución, redactados en la evidencia
+    note: >
+      T06 llega a los 20 s sin IP; los intentos fallidos dentro de la ventana se
+      reintentan cada segundo (interpretación apoyada en FR-POR-05, aprobada por
+      el propietario en H-41; el FSD no cambia)
     impl: tests/bench/test_por.py::test_tc_por_09_wrong_password
     status: successful
     commit: e6a1bcd
@@ -761,6 +765,19 @@ tests:
     commit: e6a1bcd
     date: 2026-11-04
     ci_run: 41947227792   # host tests + secret scan
+  - id: TC-SEC-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-SEC-03]
+    needs: [hosted-ci]
+    expect: >
+      la ruta que escribe el log de páginas del portal se corta en el primer ?
+      o #, sin consulta ni fragmento (nunca un dato del formulario), con los no
+      imprimibles como _ y truncada a lo que cabe
+    impl: tests/host/test_log_ruta.c
   - id: TC-SEC-01
     shape: atomic
     kind: security

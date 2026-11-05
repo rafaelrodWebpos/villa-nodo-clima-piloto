@@ -14,6 +14,7 @@
 #include "portal_validar.h"
 
 #define HTML_MAX 8192
+#define REFRESCO_S 1   /* «Probando…» se recarga cada segundo: «Conectado…» dura poco (T05) */
 #define BODY_MAX 1024      /* 8 campos de §17 con sus máximos, urlencoded, caben con holgura */
 
 static const char *TAG = "portal";
@@ -29,6 +30,16 @@ void portal_http_vista(portal_vista_t v) { s_vista = v; }
 
 static int es_secreto(int i) { return i == PORTAL_WIFI_PASS || i == PORTAL_MQTT_PASS; }
 
+/* Una línea por respuesta: «portal: <GET|POST> <ruta> -> <página>», sin datos
+ * del formulario (la ruta pasa por portal_ruta_log, TC-SEC-02). Sirve para
+ * saber qué vio el teléfono en cada momento. */
+static void log_pagina(httpd_req_t *req, const char *pagina)
+{
+    char ruta[41];
+    portal_ruta_log(req->uri, ruta, sizeof ruta);
+    ESP_LOGI(TAG, "%s %s -> %s", req->method == HTTP_POST ? "POST" : "GET", ruta, pagina);
+}
+
 static esp_err_t enviar_html(httpd_req_t *req, const char *html, size_t n)
 {
     httpd_resp_set_type(req, "text/html; charset=utf-8");
@@ -41,24 +52,30 @@ static esp_err_t get_raiz(httpd_req_t *req)
     char *html = malloc(HTML_MAX);
     if (!html) return httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
     size_t n;
+    const char *pagina;
     switch (s_vista) {
     case PORTAL_VISTA_PROBANDO:
-        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PROBANDO, "estado-probando", 2);
+        pagina = "probando";
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PROBANDO, "estado-probando", REFRESCO_S);
         break;
     case PORTAL_VISTA_CONECTADO:
+        pagina = "conectado";
         n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_CONECTADO, "estado-conectado", 0);
         break;
     case PORTAL_VISTA_NO_CONECTA: {
+        pagina = "no-conecta";
         portal_form_t f = {.id = s_id, .version = s_version, .aviso = TX_NO_CONECTA, .aviso_id = "no-conecta"};
         for (int i = 0; i < PORTAL_N_CAMPOS; i++) if (!es_secreto(i)) f.valores[i] = s_ultimo[i];
         n = portal_form_html(html, HTML_MAX, &f);
         break;
     }
     default: {
+        pagina = "formulario";
         portal_form_t f = {.id = s_id, .version = s_version};
         n = portal_form_html(html, HTML_MAX, &f);
     }
     }
+    log_pagina(req, pagina);
     esp_err_t r = n ? enviar_html(req, html, n) : httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL);
     free(html);
     return r;
@@ -68,6 +85,7 @@ static esp_err_t get_raiz(httpd_req_t *req)
 static esp_err_t get_otra(httpd_req_t *req)
 {
     if (!portal_redirige(req->uri)) return get_raiz(req);
+    log_pagina(req, "302");
     httpd_resp_set_status(req, "302 Found");
     httpd_resp_set_hdr(req, "Location", PORTAL_URL);
     httpd_resp_set_hdr(req, "Cache-Control", "no-store");
@@ -105,10 +123,13 @@ static esp_err_t post_raiz(httpd_req_t *req)
             if (!es_secreto(i) && v[i]) strlcpy(s_ultimo[i], v[i], sizeof s_ultimo[i]);
         }
         s_vista = PORTAL_VISTA_PROBANDO;
-        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PROBANDO, "estado-probando", 2);
+        log_pagina(req, "probando");
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_PROBANDO, "estado-probando", REFRESCO_S);
     } else if (resp == PORTAL_RESP_OCUPADO) {
-        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_OCUPADO, "estado-ocupado", 2);
+        log_pagina(req, "ocupado");
+        n = portal_mensaje_html(html, HTML_MAX, s_id, s_version, TX_OCUPADO, "estado-ocupado", REFRESCO_S);
     } else {
+        log_pagina(req, "errores");
         /* T03: el formulario con el error de cada campo; la NVS no se toca */
         portal_form_t f = {.id = s_id, .version = s_version};
         memcpy(f.valores, v, sizeof f.valores);
