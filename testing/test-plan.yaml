@@ -673,7 +673,9 @@ tests:
       unido al AP del DUT (tras un primer sta_join link-local, reintento con
       192.168.4.3), GET /generate_204 y GET /hotspot-detect.html por el relé
       terminan en el formulario del portal (200, 3502 bytes, los 8 campos)
-    history: xfail estricto confirmado sobre d44c9f7 (test-results/20261105T000716Z-d44c9f7/): /generate_204 → 404
+    history: >
+      xfail estricto confirmado sobre d44c9f7 (test-results/20261105T000716Z-d44c9f7/),
+      con /generate_204 → 404
   - id: TC-POR-08
     shape: atomic
     kind: standard
