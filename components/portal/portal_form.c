@@ -51,18 +51,18 @@ typedef struct {
 /* Orden y atributos de cada campo. Las longitudes son las de §17; la
  * validación que cuenta la hace el nodo (FR-POR-04), no el navegador. */
 static const def_campo_t WIFI[] = {
-    {PORTAL_WIFI_SSID, TX_RED,   "text",     TX_EJ_RED, "maxlength=\"32\" required autocapitalize=\"none\"", 0, NULL},
+    {PORTAL_WIFI_SSID, TX_RED,   "text",     TX_EJ_RED, "maxlength=\"32\" required autocapitalize=\"none\" autocorrect=\"off\" spellcheck=\"false\"", 0, NULL},
     {PORTAL_WIFI_PASS, TX_CLAVE, "password", NULL, "maxlength=\"63\" autocomplete=\"off\"", 1, NULL},
 };
 static const def_campo_t MQTT[] = {
-    {PORTAL_MQTT_HOST, TX_SERVIDOR, "text",     TX_EJ_SERVIDOR, "maxlength=\"63\" required autocapitalize=\"none\"", 0, NULL},
+    {PORTAL_MQTT_HOST, TX_SERVIDOR, "text",     TX_EJ_SERVIDOR, "maxlength=\"63\" required autocapitalize=\"none\" autocorrect=\"off\" spellcheck=\"false\"", 0, NULL},
     {PORTAL_MQTT_PORT, TX_PUERTO,   "number",   NULL,           "min=\"1\" max=\"65535\" required", 0, NULL},
-    {PORTAL_MQTT_USER, TX_USUARIO_OPC, "text",     NULL,           "maxlength=\"64\" autocapitalize=\"none\"", 0, NULL},
+    {PORTAL_MQTT_USER, TX_USUARIO_OPC, "text",     NULL,           "maxlength=\"64\" autocapitalize=\"none\" autocorrect=\"off\" spellcheck=\"false\"", 0, NULL},
     {PORTAL_MQTT_PASS, TX_CLAVE_OPC,   "password", NULL,           "maxlength=\"64\" autocomplete=\"off\"", 1, NULL},
 };
 static const def_campo_t UBICACION[] = {
-    {PORTAL_SITIO, TX_SITIO, "text", TX_EJ_SITIO, "maxlength=\"32\" required autocapitalize=\"none\"", 0, TX_AYUDA_ID},
-    {PORTAL_ZONA,  TX_ZONA,  "text", TX_EJ_ZONA,  "maxlength=\"32\" required autocapitalize=\"none\"", 0, TX_AYUDA_ID},
+    {PORTAL_SITIO, TX_SITIO, "text", TX_EJ_SITIO, "maxlength=\"32\" required autocapitalize=\"none\" autocorrect=\"off\" spellcheck=\"false\"", 0, TX_AYUDA_ID},
+    {PORTAL_ZONA,  TX_ZONA,  "text", TX_EJ_ZONA,  "maxlength=\"32\" required autocapitalize=\"none\" autocorrect=\"off\" spellcheck=\"false\"", 0, TX_AYUDA_ID},
 };
 
 static void campo(sal_t *s, const def_campo_t *d, const portal_form_t *f)

@@ -34,3 +34,8 @@ add_test(NAME TC-POR-03 COMMAND test_portal_validar)
 add_executable(test_portal_envio test_portal_envio.c ${COMP}/portal/portal_urlenc.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_envio PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-POR-04 COMMAND test_portal_envio)
+
+# TC-POR-06 · FR-POR-02 (redirección y DNS del portal cautivo)
+add_executable(test_portal_cautivo test_portal_cautivo.c ${COMP}/portal/portal_cautivo.c)
+target_include_directories(test_portal_cautivo PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-POR-06 COMMAND test_portal_cautivo)

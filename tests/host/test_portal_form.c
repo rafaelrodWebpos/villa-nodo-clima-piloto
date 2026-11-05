@@ -54,6 +54,12 @@ int main(void)
     }
     ESPERA(!strstr(html, "SECRETO-"), "un secreto sale relleno");
 
+    /* H-39: el teclado del teléfono no pone mayúsculas ni corrige en los campos de texto */
+    const char *texto[] = {"wifi_ssid", "mqtt_host", "mqtt_user", "sitio", "zona"};
+    for (int i = 0; i < 5; i++)
+        ESPERA(input_de(html, texto[i], tag, sizeof tag) && strstr(tag, "autocapitalize=\"none\"") &&
+               strstr(tag, "autocorrect=\"off\"") && strstr(tag, "spellcheck=\"false\""), "%s sin los atributos de H-39", texto[i]);
+
     /* Puerto por defecto 1883 (§17) */
     ESPERA(input_de(html, "mqtt_port", tag, sizeof tag) && strstr(tag, "value=\"1883\""), "mqtt_port sin 1883: %s", tag);
 

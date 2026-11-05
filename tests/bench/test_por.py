@@ -124,3 +124,36 @@ def test_tc_por_05_invalid_submit(testbench, dut_slot, run_dir):
         assert not any("nvs: config escrita" in ln for ln in buf + tras), "nvs: config escrita tras un envío inválido"
         assert any("con: ARRANQUE -> PORTAL (fin_arranque)" in ln for ln in tras), "tras el reset no vuelve a PORTAL"
         c.passed(f"{len(ENVIOS_INVALIDOS)} envíos inválidos: error en su campo, sin NVS; reset → PORTAL")
+
+
+@pytest.mark.xfail(strict=True, reason="FR-POR-02 sin implementar en el DUT: /generate_204 da 404")
+def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir):
+    """TC-POR-07 · FR-POR-02 (bench, parte HTTP) — /generate_204 y /hotspot-detect.html llevan al portal.
+
+    El relé del banco sigue las redirecciones (urllib), así que el 302 no se ve:
+    se observa que la respuesta final es el formulario del portal y nunca 204.
+    El Location exacto lo verifica TC-POR-06 (host)."""
+    tb = testbench
+    with case(tb, "TC-POR-07", "Redirecciones del portal cautivo", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
+        ssid = _en_portal(tb, dut_slot, c)
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
+        time.sleep(2)
+        joined, respuestas = False, []
+        try:
+            unirse_al_portal(tb, ssid, c)
+            joined = True
+            for ruta in ("/generate_204", "/hotspot-detect.html"):
+                c.step(f"GET http://{PORTAL_IP}{ruta}")
+                r = tb.http_get(f"http://{PORTAL_IP}{ruta}", timeout=10)
+                respuestas.append((ruta, r))
+                (run_dir / f"TC-POR-07{ruta.replace('/', '-').replace('.', '_')}.html").write_text(r.text)
+        finally:
+            if joined:
+                tb.sta_leave()
+        for ruta, r in respuestas:
+            names = {m.group(1) for t in re.findall(r"<input\b[^>]*>", r.text)
+                     for m in [re.search(r'\bname="([^"]+)"', t)] if m}
+            c.note(f"- {ruta}: respuesta final HTTP {r.status_code}, {len(r.text)} bytes, formulario={names == NAMES_17}")
+            assert r.status_code != 204, f"{ruta}: 204 (el teléfono no mostraría el portal)"
+            assert r.status_code == 200 and names == NAMES_17, f"{ruta}: la respuesta final no es el formulario del portal (HTTP {r.status_code})"
+        c.passed("/generate_204 y /hotspot-detect.html terminan en el formulario del portal")

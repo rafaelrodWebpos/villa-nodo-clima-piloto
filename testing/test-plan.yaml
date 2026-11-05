@@ -186,6 +186,17 @@ capabilities:
       el banco reporta EN/BOOT por GPIO (has_gpio, gpio_wired sin determinar),
       no corte de alimentación; el corte lo hace el operador desenchufando el
       USB-C (bench-operator-prompt)
+  bench-portal-dns:
+    what: >
+      que el relé HTTP del banco, unido al AP de un DUT, resuelva los nombres con
+      el DNS que le da el DHCP de esa red (o un endpoint que haga una consulta DNS
+      contra una IP dada), y que pueda no seguir redirecciones
+    available: no
+    reason: >
+      observado el 2026-11-04: con el banco unido al AP del DUT, GET
+      http://example.com/ por /api/wifi/http se resuelve con el DNS del Pi, sale
+      por eth0 y devuelve la página real (200, 577 bytes); y urllib sigue los
+      302. Pedido como CR-TB-09
   bench-driver:
     what: TestbenchDriver instalado en el devcontainer (nivel bench)
     available: yes
@@ -621,6 +632,48 @@ tests:
     history: >
       xfail estricto confirmado sobre e31180e (test-results/20261104T014345Z-e31180e/): POST / sin manejador en
       el DUT, la petición del relé acaba en timeout
+  - id: TC-POR-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-POR-02]
+    needs: [hosted-ci]
+    expect: >
+      toda ruta GET salvo «/» (incluidas /generate_204 y /hotspot-detect.html)
+      se redirige a http://192.168.4.1/; una consulta DNS A (o ANY) de clase IN de
+      cualquier nombre, con o sin EDNS, recibe una respuesta A con 192.168.4.1
+      (id y pregunta copiados, QR y RD, NOERROR); AAAA, NOERROR sin respuestas;
+      las consultas inválidas o que no caben se descartan
+    impl: tests/host/test_portal_cautivo.c
+  - id: TC-POR-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-POR-02]
+    needs: [bench-driver, bench-serial-monitor, bench-portal-driver, dut-board]
+    expect: >
+      unido al AP del DUT, GET /generate_204 y GET /hotspot-detect.html por el
+      relé terminan en el formulario del portal (200, los 8 campos de §17) y
+      nunca en 204. El relé sigue las redirecciones, así que el 302 en sí no se
+      observa aquí (lo cubre TC-POR-06)
+    impl: tests/bench/test_por.py::test_tc_por_07_captive_redirects   # xfail(strict) hasta FR-POR-02
+  - id: TC-POR-08
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-POR-02]
+    needs: [bench-driver, bench-portal-driver, bench-portal-dns, dut-board]
+    expect: >
+      unido al AP del DUT, GET http://example.com/ resuelto con el DNS del DUT
+      responde 302 a http://192.168.4.1/ o el formulario de §17, nunca una
+      respuesta que no venga del portal (la segunda mitad del contrato de FR-POR-02)
+    impl: null   # bloqueado: bench-portal-dns en no (CR-TB-09)
   - id: TC-SEC-01
     shape: atomic
     kind: security
