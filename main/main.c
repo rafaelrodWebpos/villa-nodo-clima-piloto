@@ -5,8 +5,10 @@
  * hasta ahora: identidad (FR-ID-01), línea boot: (E1), lectura de la
  * configuración (E2) y filas T02–T07 de la tabla: el portal (AP abierto, DNS
  * cautivo, HTTP, validación del envío) y la prueba de unión con su resultado
- * (guardar y reiniciar, o «no se pudo conectar»). Pendiente, cada uno con su
- * test: T01 (arrancar el STA), ciclo de medición (FR-MED-*) y el resto de §6.3.
+ * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
+ * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
+ * test: T08 (pendiente de /define), T09/T10 (backoff), el ciclo de medición
+ * (FR-MED-*) y el resto de §6.3.
  */
 #include <string.h>
 #include "esp_app_desc.h"
@@ -41,6 +43,8 @@ static con_estado_t s_estado = CON_ARRANQUE;
 static SemaphoreHandle_t s_lock;
 
 static portal_config_t s_pendiente;            /* datos del envío en prueba (T04..T06) */
+static portal_config_t s_cfg;                  /* configuración leída de la NVS (T01) */
+static int s_intento;                          /* E4: <n> del intento de unión en curso */
 static const char *const *s_envio;             /* valores del envío, solo durante al_enviar */
 static esp_timer_handle_t s_t_validacion;      /* T06: 20 s sin IP */
 static esp_timer_handle_t s_t_reinicio;        /* T05: reinicio tras responder */
@@ -114,8 +118,9 @@ static bool config_valida(void)
     portal_config_valores(&c, puerto, v);
     portal_validacion_t val;
     portal_validar(v, &val);
-    if (val.n_errores) return false;
+    if (val.n_errores) { memset(&c, 0, sizeof c); return false; }
     ESP_LOGI(TAG, "cfg: sitio=%s zona=%s", c.sitio, c.zona);   /* E2 */
+    s_cfg = c;                                                  /* para T01 */
     memset(&c, 0, sizeof c);                                    /* sin secretos en la pila */
     return true;
 }
@@ -162,14 +167,23 @@ static void al_evento(void *arg, esp_event_base_t base, int32_t id, void *datos)
         if (validando) esp_timer_start_once(s_t_reintento, REINTENTO_US);
         else transicion(CON_EV_WIFI_DOWN, (con_guardas_t){0});
     } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        s_intento = 0;
         transicion(CON_EV_WIFI_UP, (con_guardas_t){0});
     }
+}
+
+/* E4: cada intento de unión STA escribe «wifi: intento <n>»; <n> vuelve a 1
+ * tras cada conexión lograda. */
+static void intentar_union(void)
+{
+    ESP_LOGI(TAG, "wifi: intento %d", ++s_intento);
+    esp_wifi_connect();
 }
 
 static void al_reintentar(void *arg)
 {
     xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
-    if (s_estado == CON_VALIDANDO) esp_wifi_connect();
+    if (s_estado == CON_VALIDANDO) intentar_union();
     xSemaphoreGiveRecursive(s_lock);
 }
 
@@ -191,23 +205,34 @@ static void soltar_sta(void)
 }
 
 /* Acción de T04: prueba de unión STA (AP+STA) con los datos del formulario. */
+static void crear_sta(void)
+{
+    static bool creado;
+    if (!creado) { esp_netif_create_default_wifi_sta(); creado = true; }
+}
+
+static void configurar_sta(const portal_config_t *c)
+{
+    wifi_config_t sta = {0};
+    memcpy(sta.sta.ssid, c->wifi_ssid, strlen(c->wifi_ssid));
+    memcpy(sta.sta.password, c->wifi_pass, strlen(c->wifi_pass));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta));
+    memset(&sta, 0, sizeof sta);
+}
+
 static void probar_union(void)
 {
-    static bool sta_creado;
     if (portal_config_desde(s_envio, &s_pendiente) != 0) {   /* validado: no debería ocurrir */
         ESP_LOGE(TAG, "portal: envío válido que no cabe en el registro");
         esp_timer_start_once(s_t_validacion, 1);            /* sale por T06 */
         return;
     }
-    if (!sta_creado) { esp_netif_create_default_wifi_sta(); sta_creado = true; }
-    wifi_config_t sta = {0};
-    memcpy(sta.sta.ssid, s_pendiente.wifi_ssid, strlen(s_pendiente.wifi_ssid));
-    memcpy(sta.sta.password, s_pendiente.wifi_pass, strlen(s_pendiente.wifi_pass));
+    crear_sta();
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta));
-    memset(&sta, 0, sizeof sta);
+    configurar_sta(&s_pendiente);
     esp_timer_start_once(s_t_validacion, VALIDACION_US);
-    esp_wifi_connect();
+    s_intento = 0;
+    intentar_union();
 }
 
 /* Acción de T05: persistir, responder con éxito y reiniciar. */
@@ -249,19 +274,15 @@ static void no_conecta(void)
 
 /* Acción de T02 (parte implementada): AP Wi-Fi abierto con SSID = id (FR-POR-01),
  * DNS cautivo anunciado por DHCP (FR-POR-02) y servidor HTTP (FR-POR-02..06). */
-static void arrancar_portal(void)
+/* Pila Wi-Fi, eventos y temporizadores, comunes a T01 y T02 (una vez por arranque). */
+static void wifi_base(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_t *ap_netif = esp_netif_create_default_wifi_ap();
-    /* FR-POR-02: el DHCP del AP anuncia 192.168.4.1 como DNS, para que el
-     * teléfono pregunte al nodo y su detección de portal llegue aquí */
-    esp_netif_dns_info_t dns = {.ip = {.type = ESP_IPADDR_TYPE_V4, .u_addr.ip4.addr = ESP_IP4TOADDR(192, 168, 4, 1)}};
-    uint8_t oferta = DHCPS_OFFER_DNS;
-    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_dhcps_stop(ap_netif));
-    ESP_ERROR_CHECK(esp_netif_dhcps_option(ap_netif, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &oferta, sizeof oferta));
-    ESP_ERROR_CHECK(esp_netif_set_dns_info(ap_netif, ESP_NETIF_DNS_MAIN, &dns));
-    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_dhcps_start(ap_netif));
+}
+
+static void wifi_iniciar(void)
+{
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, al_evento, NULL));
@@ -272,6 +293,35 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_timer_create(&tv, &s_t_validacion));
     ESP_ERROR_CHECK(esp_timer_create(&tr, &s_t_reinicio));
     ESP_ERROR_CHECK(esp_timer_create(&ti, &s_t_reintento));
+}
+
+/* Acción de T01 (parte implementada): arrancar el STA con la configuración
+ * guardada y lanzar el primer intento (E4). Sin AP (T01, «No debe ocurrir»). */
+static void arrancar_sta(void)
+{
+    wifi_base();
+    crear_sta();
+    wifi_iniciar();
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    configurar_sta(&s_cfg);
+    ESP_ERROR_CHECK(esp_wifi_start());
+    s_intento = 0;
+    intentar_union();
+}
+
+static void arrancar_portal(void)
+{
+    wifi_base();
+    esp_netif_t *ap_netif = esp_netif_create_default_wifi_ap();
+    /* FR-POR-02: el DHCP del AP anuncia 192.168.4.1 como DNS, para que el
+     * teléfono pregunte al nodo y su detección de portal llegue aquí */
+    esp_netif_dns_info_t dns = {.ip = {.type = ESP_IPADDR_TYPE_V4, .u_addr.ip4.addr = ESP_IP4TOADDR(192, 168, 4, 1)}};
+    uint8_t oferta = DHCPS_OFFER_DNS;
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_dhcps_stop(ap_netif));
+    ESP_ERROR_CHECK(esp_netif_dhcps_option(ap_netif, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &oferta, sizeof oferta));
+    ESP_ERROR_CHECK(esp_netif_set_dns_info(ap_netif, ESP_NETIF_DNS_MAIN, &dns));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(esp_netif_dhcps_start(ap_netif));
+    wifi_iniciar();
     wifi_config_t ap = {
         .ap = {
             .channel = 1,
@@ -293,7 +343,7 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
 {
     switch (t.accion) {
     case CON_ACC_ARRANCAR_PORTAL:      arrancar_portal(); break;
-    case CON_ACC_ARRANCAR_STA:         /* T01: llega con JRN-01.3 */ break;
+    case CON_ACC_ARRANCAR_STA:         arrancar_sta(); break;
     case CON_ACC_RESPONDER_ERRORES:    /* T03: la respuesta la da el adaptador del portal */ break;
     case CON_ACC_PROBAR_UNION:         probar_union(); break;
     case CON_ACC_PERSISTIR:            persistir_y_reiniciar(); break;
