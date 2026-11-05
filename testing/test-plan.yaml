@@ -385,6 +385,17 @@ tests:
     commit: 9c382b9
     date: 2026-11-04
     evidence: test-results/20261105T015612Z-9c382b9/
+    manual_evidence: >
+      H-42, propietario, 2026-11-05, sobre 9c382b9 (ELF 877fe62b2…, run
+      41951568245), con el AP desechable del banco (<ssid-de-prueba>, canal 1) y un
+      iPhone: un solo POST. Log de SLOT1: 16:28:42 con: PORTAL -> VALIDANDO (envío) y
+      portal: POST / -> probando; 16:28:42 wifi:connected with <ssid-de-prueba>;
+      16:28:42–46 GET / -> probando (recarga cada segundo); 16:28:47 nvs: config
+      escrita y con: VALIDANDO -> ARRANQUE (wifi_up); 16:28:47 GET / -> conectado
+      (×2); 16:28:51 rst:0xc (RTC_SW_CPU_RST), boot: … reset=sw, cfg: sitio=sitio1
+      zona=zona1 y con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque). Las pruebas del
+      teléfono anteriores (2026-11-04) fallaron en la comprobación de la clave
+      (3 intentos, corte a los 3 s) sin datos guardados. JRN-01.2 cerrado (H-42)
     observed: >
       POST / válido con el AP desechable del banco (SSID y clave aleatorios,
       redactados) → «Probando la conexión…»; con el AP del banco en el canal 1,
