@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.1
+fsd_version: 0.9.2
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -10,7 +10,7 @@ author: Rafael Rodriguez
 reviewers: []
 approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11); D23 aceptada por el propietario (2026-11-02)
 created: 2026-10-11
-last_updated: 2026-11-02
+last_updated: 2026-11-05
 change_history:
   - 0.1.0 (2026-10-11): versión inicial; incluye sincronización SNTP (FR-TIME-*) y lista OTA
     verificada contra la cadena de redirección real de GitHub Releases.
@@ -69,6 +69,10 @@ change_history:
     sitio). Las alertas son de Home Assistant: el firmware no emite ninguna.
   - 0.9.1 (2026-11-02): D23 en su orden (tras D22), en §4.4 y en `approval_status`; §22.0
     describe FR-OTA-04 como su contrato (corta y restablece el AP; el broker no se reinicia).
+  - 0.9.2 (2026-11-05): T08 se reparte entre fases (propietario): la Fase 1 verifica su
+    transición, su línea `con:`, el reinicio del backoff y «no abrir el AP» (lo que ya piden
+    el contrato de FR-POR-06 y el journey de la Fase 1); la Fase 2, el arranque de SNTP y del
+    cliente MQTT y «no publicar antes de T11». Sin cambios en requisitos ni contratos.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -271,7 +275,8 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   60 s.
 - **Criterios de salida.** Pasan FR-SEN-01, FR-SEN-02, FR-MED-03…05, FR-ID-01,
   FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02 (host y Wi-Fi), FR-CON-06,
-  NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-02 (fila del receptor) y las filas T01–T07, T09 y T10.
+  NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-02 (fila del receptor), las filas T01–T07, T09 y T10, y T08 en su
+  transición, su línea `con:`, el reinicio del backoff y «no abrir el AP».
   Todo se verifica en host, en target, en bench sin broker ni salida a Internet (log serie, AP
   del banco y su corte, escaneo Wi-Fi y portal manejados por el banco, receptor UDP y avisos al
   operador) y en other (CI); nada requiere MQTT.
@@ -292,7 +297,8 @@ Cada fase se entra solo con lo que entregaron las anteriores.
 - **Criterios de salida.** Pasan FR-MQTT-01…08, FR-HA-*, FR-MED-01, -02 y -06,
   FR-SEN-03, NFR-SEN-01, FR-CON-01, FR-CON-02 (fila bench de MQTT), FR-CON-03, -04 y -05,
   FR-TIME-*, NFR-WDT-01, FR-SEC-03, FR-LOG-01, FR-LOG-02 (fila de captura), FR-LOG-03,
-  C-LOG-02 y las filas T08 y T11–T16.
+  C-LOG-02, la fila T08 en el arranque de SNTP y del cliente MQTT y «no publicar por MQTT
+  antes de T11», y las filas T11–T16.
 - **Dependencias.** Fase 1: la configuración del broker llega por el portal y
   la conexión, por el Wi-Fi de la Fase 1. Además, salida a Internet desde la
   red de prueba para SNTP con `pool.ntp.org` (FR-TIME-*, FR-MQTT-03; §22.0,
