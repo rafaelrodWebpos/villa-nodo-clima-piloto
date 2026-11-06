@@ -595,6 +595,20 @@ tests:
       intervalos 1,0 · 2,0 · 4,0 · 8,0 · 16,0 · 32,0 · 60,0 · 60,0 · 60,0 · 60,0 s
       en el reloj del DUT; sin AP ni reinicio. En la misma ejecución pasaron
       también TC-POR-02/05/07/09 y TC-SEN-03
+  - id: TC-CON-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-CON-06]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-serial-monitor, dut-board]
+    expect: >
+      aprovisionado contra un AP desechable del banco y con ese AP apagado desde
+      el arranque (Fase 1; el corte con el nodo ya conectado pasa por T14, Fase
+      2): en 15 min ninguna línea con: con destino distinto de CONECTANDO_WIFI y
+      el AP clima-* del DUT no aparece en 5 escaneos
+    impl: tests/bench/test_con.py::test_tc_con_06_never_portal
   - id: TC-POR-01
     shape: atomic
     kind: standard
@@ -1092,6 +1106,12 @@ fsd_pending:
       intervalos suman 303 s más la duración de cada intento
   - from: checker puerta 01, c3ed691 (no bloqueante 5, ya existía)
     issue: SNTP en el alcance de la Fase 1 sin criterio de salida
+  - from: /build, al escribir TC-CON-06 (2026-11-06)
+    issue: >
+      el contrato de FR-CON-06 (Fase 1) dice «aprovisionar y apagar ese AP»: con
+      el nodo ya conectado, el camino es T14 (Fase 2). En la Fase 1 se verifica
+      con el AP apagado desde el arranque (T09/T10), como la fila Wi-Fi de
+      FR-CON-02; aclararlo en el contrato o en §3.1
 tier_checks:
   - impl: tests/host/tier_smoke.c
     proves: el nivel host compila y ejecuta en CI
