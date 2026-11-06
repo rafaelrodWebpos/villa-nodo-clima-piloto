@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.5
+fsd_version: 0.9.6
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -52,7 +52,7 @@ testbench:
     declaran yes sin prueba propia. Lo que el banco no reporta queda en no con
     su motivo; si un test lo necesita, es una petición de cambio al testbench.
 
-tiers: [host, target, bench, bench+, field, other]   # FSD §22.0
+tiers: [host, target, bench, bench+, field, other, manual]   # FSD §22.0
 
 # ---------------------------------------------------------------------------
 # Capacidades. Banco: copiadas de lo que reporta; un proyecto no las prueba.
@@ -486,11 +486,12 @@ tests:
     verifies: [FR-CON-05, FR-CFG-01]
     needs: [bench-driver, bench-wifi-ap, bench-operator-prompt, bench-mqtt-broker, bench-portal-driver, dut-board]
     expect: >
-      el operador desenchufa el USB-C y lo vuelve a enchufar (FSD 0.9.5; la consola
-      del banco no captura el arranque tras el corte, CR-TB-10): el primer status
-      llega con reset = poweron y uptime_s ≤ 25 bajo <sitio>/<zona>/<nodo>/status con
-      el mismo sitio y la misma zona, sin AP clima-* en el escaneo, y la primera
-      medida en vivo llega ≤ 5 s después de ese status
+      suscriptor conectado desde antes del corte; el operador desenchufa el USB-C y
+      lo vuelve a enchufar (FSD 0.9.6; la consola del banco no captura el arranque,
+      CR-TB-10): el primer status en vivo (retain = 0) llega con reset = poweron
+      bajo <sitio>/<zona>/<nodo>/status con el mismo sitio y la misma zona, sin AP
+      clima-* en el escaneo, y la primera medida en vivo llega ≤ 30 s después del
+      encendido estimado (llegada del primer status − uptime_s − 2 s)
     impl: null
 
   # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
@@ -971,9 +972,10 @@ tests:
     needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-operator-prompt, dut-board]
     expect: >
       configurado (benchlib.aprovisionar), 5 cortes de alimentación hechos por el
-      operador al aviso del banco: tras cada uno, el primer status llega con
-      reset = poweron bajo <sitio>/<zona>/<nodo>/status con el sitio y la zona
-      configurados; nunca el portal (FSD 0.9.4)
+      operador al aviso del banco, con el suscriptor conectado desde antes: tras
+      cada uno, el primer status en vivo (retain = 0) llega con reset = poweron
+      bajo <sitio>/<zona>/<nodo>/status con el sitio y la zona configurados; nunca
+      el portal (FSD 0.9.6)
     impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # versión de consola; se reescribe sobre status en la Fase 2
     status: not done
     last_run:
@@ -1103,6 +1105,116 @@ tests:
       reloj del DUT), T = 30,1 °C, HR ≈ 72 %, Td = 24,4, ninguna inválida, la
       primera ya tras el arranque. La ejecución sobre 5f93e6d no cuenta: contó
       dos veces una línea repetida por el buffer del banco (corregido en 3ddee73)
+  - id: TC-HW-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-HW-01, C-HW-02]
+    needs: [hosted-ci]
+    expect: >
+      las cabeceras del bootloader y de la app de cada imagen de la CI declaran 8 MB de flash, nunca «detect» ni otro tamaño (FSD 0.9.6, criterio de la Fase 1)
+    impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+  - id: TC-HW-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: target
+    verifies: [C-HW-01, C-HW-02]
+    needs: [bench-driver, bench-chip-info, dut-board]
+    expect: >
+      esptool sobre la placa del banco (/api/chip/info): ESP32-S3, «Embedded PSRAM 8MB» (N8R8), «Detected flash size: 8MB» y las interfaces 303a:1001 y 1a86:55d3 del único USB-C
+    impl: tests/bench/test_hw.py::test_tc_hw_02_chip_reading
+  - id: TC-HW-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: target
+    verifies: [C-HW-03]
+    needs: [bench-driver, bench-flash, bench-serial-monitor, dut-board, hosted-ci]
+    expect: >
+      la imagen de la CI (PSRAM deshabilitada en su sdkconfig, build_checks.py) llega a con: ARRANQUE -> CONECTANDO_WIFI|PORTAL (fin_arranque) en ≤ 120 s desde el reset, sin Guru Meditation ni abort() y con un solo arranque
+    impl: tests/bench/test_hw.py::test_tc_hw_03_boots_without_psram
+  - id: TC-HW-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: target
+    verifies: [C-HW-04, C-HW-05]
+    needs: [bench-driver, bench-flash, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      la sonda tests/target/i2c_probe escanea GPIO8/9 a 100 kHz con solo los pull-ups externos: «i2c: scan sda=8 scl=9 hz=100000 ack=…» con 0x44; después se restaura la imagen de la CI
+    impl: tests/bench/test_hw.py::test_tc_hw_05_i2c_scan
+  - id: TC-HW-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-HW-06]
+    needs: [dut-board]
+    expect: >
+      revisión del montaje: la placa se alimenta solo por su USB-C de 5 V, sin alimentación externa por los pines 5V o 3V3
+    impl: review   # ver evidence
+  - id: TC-HW-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-HW-07]
+    needs: [hosted-ci]
+    expect: >
+      revisión + grep en la CI: los pines que usa el firmware (main/, components/) no incluyen GPIO0/3/19/20/38/43/44/45/46/48
+    impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_hw_07.py)   # detecta un GPIO_NUM_0 plantado
+  - id: TC-HW-08
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-HW-08]
+    needs: [hosted-ci]
+    expect: >
+      fila de revisión de C-HW-08: consola primaria UART0 y secundaria USB-Serial/JTAG en sdkconfig.defaults (config-checks) y en el sdkconfig de cada imagen (build_checks.py); la fila bench (bench-dual-console) queda fuera de la Fase 1
+    impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_hw_08.py) + build.yml#build/Verify build constraints
+  - id: TC-BLD-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-BLD-01]
+    needs: [hosted-ci]
+    expect: >
+      gen_esp32part.py sobre la tabla de cada imagen coincide fila a fila con la tabla de FSD §2.2 (leída del propio FSD)
+    impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+  - id: TC-BLD-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-BLD-02]
+    needs: [hosted-ci]
+    expect: >
+      check_sizes.py del build rechaza una app de 0x300001 bytes («too small») y acepta la app real (control)
+    impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+  - id: TC-BLD-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: other
+    verifies: [C-BLD-03]
+    needs: [hosted-ci]
+    expect: >
+      idf.py --version es v6.x y el sdkconfig de la imagen tiene CONFIG_IDF_TARGET="esp32s3"
+    impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
   - id: TC-HW-04
     shape: atomic
     kind: standard

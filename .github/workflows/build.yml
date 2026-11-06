@@ -84,6 +84,11 @@ jobs:
           idf.py $ARGS set-target esp32s3
           idf.py $ARGS build
 
+      - name: Verify build constraints   # C-HW-01/02/03/08, C-BLD-01/02/03 (TC-HW-01, TC-BLD-*)
+        run: |
+          . $IDF_PATH/export.sh >/dev/null
+          python3 scripts/ci/build_checks.py build "$APP_NAME"
+
       - name: Verify the image matches the variant asked for   # C-LOG-01
         if: env.MULTI_VARIANT == 'true'
         run: |

@@ -30,7 +30,7 @@ jobs:
           python3 -m pip install --quiet pyyaml==6.0.2
           python3 scripts/ci/plan_check.py testing/test-plan.yaml
 
-  config-checks:        # revisión + CI (nivel other): TC-CFG-01 · C-CFG-01, TC-HW-04 · C-HW-04/05
+  config-checks:        # revisión + CI (nivel other): TC-CFG-01 · C-CFG-01, TC-HW-04 · C-HW-04/05, TC-HW-07, TC-HW-08
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +38,10 @@ jobs:
         run: python3 scripts/ci/c_cfg_01.py
       - name: C-HW-04/05 bus I²C en GPIO8/9 a 100 kHz
         run: python3 scripts/ci/c_hw_04.py
+      - name: C-HW-07 ningún GPIO prohibido
+        run: python3 scripts/ci/c_hw_07.py
+      - name: C-HW-08 consola UART0 y copia por USB-Serial/JTAG
+        run: python3 scripts/ci/c_hw_08.py sdkconfig.defaults
 
   secret-scan:          # FSD NFR-SEC-01 (repositorio público)
     runs-on: ubuntu-latest
