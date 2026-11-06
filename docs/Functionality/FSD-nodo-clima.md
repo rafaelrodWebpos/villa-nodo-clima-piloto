@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.3
+fsd_version: 0.9.4
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -78,7 +78,20 @@ change_history:
     arranque de SNTP y MQTT de T08, T11–T16 y T18 con el broker (Fase 2). El reinicio del
     backoff de Wi-Fi de T08 se verifica en la Fase 2, junto con T14, que es donde se observa.
     La fila Wi-Fi de FR-CON-02 se verifica en la Fase 1 con el AP apagado desde el arranque
-    (T09/T10).
+    (T09/T10). (T18 no es de la Fase 2: corregido en 0.9.4.)
+  - 0.9.4 (2026-11-06): sin cambios en requisitos (propietario). (1) T18 sale de la fila
+    bench de la Fase 2 y tiene una fila propia de Fase 3 con el broker del banco. (2) En la
+    fila T01–T10, la Fase 1 observa de T08 solo la transición, su línea `con:` y que no abre
+    el AP. (3) El reinicio del backoff de T08 (Fase 2, tras T14) exige ≥ 3 fallos previos y se
+    mide desde la línea de T14 (≤ 2 s). (4) La fila Wi-Fi de FR-CON-02 deja el AP apagado hasta
+    observar los 10 intervalos. (5) SNTP pasa del alcance de la Fase 1 al de la Fase 2.
+    (6) FR-CON-06 por fase: AP apagado desde el arranque (Fase 1) o tras conectar (Fase 2).
+    (7) La fila de cortes de alimentación de FR-CFG-01 se observa con el primer `status` tras
+    cada corte y pasa a la Fase 2 (la consola del banco no captura el arranque tras un corte,
+    CR-TB-10). (8) `reset` añade `ext`, `usb`, `jtag`, `wdt` y `deepsleep`. (9) FR-POR-02 se
+    divide en dos filas; la de `http://example.com/` admite evidencia manual con un teléfono
+    real mientras CR-TB-09 siga abierta, válida solo para el código del commit anotado (§22.0);
+    H-40 la satisface para ea41d50.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -274,16 +287,19 @@ Cada fase se entra solo con lo que entregaron las anteriores.
 ### 3.1 Fase 1 — Fundación: medir y aprovisionar
 
 - **Alcance.** Driver SHT41, ciclo de medición, punto de rocío, identidad,
-  configuración en NVS, portal cautivo, Wi-Fi STA con backoff, SNTP y tabla de
+  configuración en NVS, portal cautivo, Wi-Fi STA con backoff y tabla de
   particiones.
 - **Entregables.** Un firmware que, sin configuración, abre el portal; una vez
   aprobado, se une al Wi-Fi y registra las tres medidas por consola serie cada
   60 s.
 - **Criterios de salida.** Pasan FR-SEN-01, FR-SEN-02, FR-MED-03…05, FR-ID-01,
-  FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02 (host, y la fila Wi-Fi con
-  el AP apagado desde el arranque), FR-CON-06,
+  FR-POR-* (la fila de FR-POR-02 con `http://example.com/` se cumple con la evidencia manual
+  de §22.0 mientras CR-TB-09 siga abierta; H-40 la satisface para su commit), FR-CON-02 (host,
+  y la fila Wi-Fi con el AP apagado desde el arranque), FR-CON-06 (con el AP apagado desde el
+  arranque),
   NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-02 (fila del receptor), las filas T01–T07, T09 y T10, y T08 en su
-  transición, su línea `con:` y «no abrir el AP».
+  transición, su línea `con:` y «no abrir el AP». La fila de cortes de alimentación de
+  FR-CFG-01 es de la Fase 2: se observa con `status` (CR-TB-10).
   Todo se verifica en host, en target, en bench sin broker ni salida a Internet (log serie, AP
   del banco y su corte, escaneo Wi-Fi y portal manejados por el banco, receptor UDP y avisos al
   operador) y en other (CI); nada requiere MQTT.
@@ -296,13 +312,15 @@ Cada fase se entra solo con lo que entregaron las anteriores.
 
 ### 3.2 Fase 2 — Telemetría: MQTT y Home Assistant
 
-- **Alcance.** Publicador MQTT, LWT, `status` con diagnóstico, Discovery,
+- **Alcance.** SNTP, publicador MQTT, LWT, `status` con diagnóstico, Discovery,
   recuperación de broker y Wi-Fi, watchdog y ausencia de reinicios por
   conectividad.
 - **Entregables.** Las tres entidades aparecen en Home Assistant y se recuperan
   solas tras cortes.
 - **Criterios de salida.** Pasan FR-MQTT-01…08, FR-HA-*, FR-MED-01, -02 y -06,
   FR-SEN-03, NFR-SEN-01, FR-CON-01, FR-CON-02 (fila bench de MQTT), FR-CON-03, -04 y -05,
+  FR-CON-06 (con el AP apagado después de conectar: pasa por T14), FR-CFG-01 (fila de cortes
+  de alimentación),
   FR-TIME-*, NFR-WDT-01, FR-SEC-03, FR-LOG-01, FR-LOG-02 (fila de captura), FR-LOG-03,
   C-LOG-02, la fila T08 en el arranque de SNTP y del cliente MQTT, en el reinicio del
   backoff de Wi-Fi (se observa tras T14) y en «no publicar por MQTT antes de T11», y las
@@ -655,13 +673,14 @@ verification:
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
 | FR-CON-02 | Función de backoff alimentada con 10 fallos y luego un éxito | 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s; tras el éxito, 1 s | Superar 60 s; no reiniciar a 1 s | host |
-| FR-CON-02 | Wi-Fi: AP apagado 5 min; se mide cada intervalo desde una línea `con: … -> CONECTANDO_WIFI (wifi_down)` hasta el siguiente inicio de intento, `con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)` o `wifi: intento <n>` (§18) | Los 10 primeros intervalos dentro de ±10 % de 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s | Intentos en ráfaga (< 1 s); un intervalo fuera de ±10 % | bench |
+| FR-CON-02 | Wi-Fi: AP apagado hasta observar los 10 intervalos (≈ 6 min); se mide cada intervalo desde una línea `con: … -> CONECTANDO_WIFI (wifi_down)` hasta el siguiente inicio de intento, `con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)` o `wifi: intento <n>` (§18) | Los 10 primeros intervalos dentro de ±10 % de 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s | Intentos en ráfaga (< 1 s); un intervalo fuera de ±10 % | bench |
 | FR-CON-02 | MQTT: broker detenido 5 min con el Wi-Fi activo; se mide cada intervalo desde una línea `con: … -> CONECTANDO_BROKER (mqtt_down)` hasta el siguiente inicio de intento, `con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)` o `mqtt: intento <n>` (§18) | Los 10 primeros intervalos dentro de ±10 % de 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s | Intentos en ráfaga (< 1 s); un intervalo fuera de ±10 % | bench |
 | FR-CON-05 | Cortar y devolver la alimentación a un DUT configurado | Primera medida en vivo (retain = 0) en ≤ 30 s desde la primera línea del bootloader en la consola o, si la consola no la captura tras el corte, desde la línea `boot:` | Que pase por PORTAL | bench |
-| FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP; esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
+| FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP (desde el arranque en la Fase 1; después de conectar, pasando por T14, en la Fase 2); esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
 | T01–T23 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
-| T01–T10 | Una prueba por fila con el portal y el AP reales del banco, sin broker (Fase 1); tras T08 el DUT queda en CONECTANDO_BROKER | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento` y `nvs: config escrita` (§18), dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita`; en T08, el AP `clima-*` no aparece en el escaneo | Lo indicado en la columna «No debe ocurrir» de la fila; en T08, «abrir el AP» (la parte MQTT es de la fila siguiente) | bench |
-| T08 (arranque de SNTP y MQTT), T11–T16, T18 | Una prueba por fila con el AP y el broker reales del banco (Fase 2) | La línea `con:` de la fila (§18) y su acción, observada con `mqtt: intento`, `sntp:`, `wifi: intento`, `med:` y `ota: estado` (§18) o con `status`, dentro del límite; en T08, `sntp:` y `mqtt: intento 1` tras su línea `con:`, y el siguiente `wifi: intento` tras T14 a 1 s (±10 %) | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
+| T01–T10 | Una prueba por fila con el portal y el AP reales del banco, sin broker (Fase 1); tras T08 el DUT queda en CONECTANDO_BROKER | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento` y `nvs: config escrita` (§18), dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita`; en T08, la Fase 1 observa solo la transición, su línea `con:` y que el AP `clima-*` no aparece en el escaneo; su acción se observa en la fila siguiente (Fase 2) | Lo indicado en la columna «No debe ocurrir» de la fila; en T08, «abrir el AP» (la parte MQTT es de la fila siguiente) | bench |
+| T08 (arranque de SNTP y MQTT), T11–T16 | Una prueba por fila con el AP y el broker reales del banco (Fase 2) | La línea `con:` de la fila (§18) y su acción, observada con `mqtt: intento`, `sntp:`, `wifi: intento`, `med:` y `ota: estado` (§18) o con `status`, dentro del límite; en T08, `sntp:` y `mqtt: intento 1` tras su línea `con:`; el reinicio de su backoff, con al menos 3 fallos de unión antes de T08 (backoff vigente ≥ 8 s): el siguiente `wifi: intento` llega en ≤ 2 s desde la línea `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (wifi_down)` de T14 | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
+| T18 | Comando OTA con un payload, un host o una ruta que incumplen la guarda de T17, por el broker del banco (Fase 3) | `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` y ninguna línea `con:` de descarga | Lo indicado en la columna «No debe ocurrir» de T18 | bench |
 | T17, T19, T20 (imagen, misma_version, http), T21, T23 | Comandos OTA con releases y pre-releases `ota-test-*` reales del repo (§22.0) | La línea `con:` de la fila (en T23, `ota: rollback`) y su acción (`ota: estado`, `ota: imagen validada`, `ota: rollback`, `boot:`), dentro del límite; en T17 (descarga abortada por un reset) y T20, un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de la fila | bench⁺ · alt. field |
 | T20 (tls) | Como el contrato de FR-OTA-03 | `con: OTA_DESCARGA -> OPERATIVO (ota_err)` y `ota: estado error:tls` | Lo indicado en la columna «No debe ocurrir» de T20 | bench (`bench-dns-override`) |
 | T22 | Como el contrato de FR-OTA-08, y la misma prueba deteniendo el broker en lugar del AP | `con: OTA_DESCARGA -> CONECTANDO_WIFI (wifi_down)` o `con: OTA_DESCARGA -> CONECTANDO_BROKER (mqtt_down)` seguida de `ota: estado error:red`; el primer `status` al volver a OPERATIVO lleva `ota` = `error:red`; un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de T22 | bench⁺ (sin alternativa field) |
@@ -894,7 +913,7 @@ El firmware no contiene ningún prefijo de tópico fijo (C-CFG-01).
 | `estado` | string | `online` (publicado por el nodo) · `offline` (LWT o salida ordenada) |
 | `fw` | string | Versión de la aplicación en ejecución (descriptor de la app) |
 | `rssi` | entero dBm | RSSI del AP en el momento de publicar |
-| `reset` | string | `poweron`, `sw`, `panic`, `task_wdt`, `int_wdt`, `brownout` u `otro` |
+| `reset` | string | `poweron`, `ext` (pin EN), `sw`, `panic`, `task_wdt`, `int_wdt`, `wdt` (otros watchdogs, p. ej. RTC), `deepsleep`, `brownout`, `usb` (reinicio por USB), `jtag` u `otro` (cualquier otra causa) |
 | `uptime_s` | entero | Segundos desde el arranque |
 | `lecturas` | entero | Lecturas válidas desde el arranque |
 | `err_sensor` | entero | Lecturas inválidas desde el arranque |
@@ -1023,7 +1042,8 @@ consulta A.
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
 | FR-POR-01 | NVS borrada; arrancar | SSID `clima-xxxxxx` abierto en el escaneo en ≤ 10 s | AP con contraseña; SSID con la zona o el sitio | bench |
-| FR-POR-02 | Unido al AP, por el relé HTTP del banco: `GET /generate_204` y `GET http://example.com/` | 302 a `http://192.168.4.1/` en el primero; 302 a `http://192.168.4.1/` o el formulario de §17 en el segundo | 204 (el teléfono no mostraría el portal); una respuesta que no venga del portal | bench |
+| FR-POR-02 | Unido al AP, por el relé HTTP del banco: `GET /generate_204` | 302 a `http://192.168.4.1/` | 204 (el teléfono no mostraría el portal); una respuesta que no venga del portal | bench |
+| FR-POR-02 | Unido al AP, un cliente del portal que resuelve con el DNS del nodo: `GET http://example.com/` | 302 a `http://192.168.4.1/` o el formulario de §17 | Una respuesta que no venga del portal | bench (`bench-portal-dns`) · alt. manual |
 | FR-POR-03 | `GET /` | HTML con los 8 campos nombrados en §17 | Campos rellenos con secretos | bench |
 | FR-POR-04 | Validador con cada caso límite de §17 (longitud 0, máximo y máximo + 1; `zona` y `sitio` con `/`, `+`, `#`, mayúsculas o espacio) | Rechazo con el campo nombrado; en el DUT, tras el envío por el portal, un reset muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` (§18) | Aceptar un valor inválido; escribir en la NVS (una línea `nvs: config escrita`) | host + bench |
 | FR-POR-05 | Envío con una contraseña Wi-Fi errónea | «no se pudo conectar» en ≤ 20 s (+ 5 s de tolerancia por el cambio de canal); el AP sigue visible; tras el caso, un reset muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` | Persistir; reiniciar | bench |
@@ -1189,7 +1209,7 @@ través de §7, §9 y §12.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
-| FR-CFG-01 | Nodo configurado; 5 cortes de alimentación | El log serie muestra cada vez `cfg: sitio=<sitio> zona=<zona>` con el mismo sitio y la misma zona y `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` (§18) | Abrir el portal | bench |
+| FR-CFG-01 | Nodo configurado; 5 cortes de alimentación (Fase 2; la consola del banco no captura el arranque tras un corte, CR-TB-10) | Tras cada corte, el primer `status` llega con `reset` = `poweron`, publicado bajo `<sitio>/<zona>/<nodo>/status` con el sitio y la zona configurados | Abrir el portal; un `status` con otro sitio o zona | bench |
 | FR-CFG-01 | Nodo configurado; OTA A → B (Fase 3) | B publica en los mismos tópicos `<sitio>/<zona>/…` | Abrir el portal | bench⁺ · alt. field |
 | C-CFG-01 | Revisar `sdkconfig.defaults`, Kconfig y el código fuente | Los 7 campos de cadena de §17 (`wifi_ssid`, `wifi_pass`, `mqtt_host`, `mqtt_user`, `mqtt_pass`, `zona`, `sitio`) arrancan en «ninguno» o en cadena vacía, y los tópicos se construyen solo a partir de `sitio`, `zona` y el identificador del nodo | Un literal no vacío como valor inicial de cualquiera de ellos (SSID, IP, host, usuario, clave, zona o sitio) en `sdkconfig.defaults`, Kconfig o el código; un prefijo de tópico literal (p. ej., `villa/`) | other (revisión + CI) |
 
@@ -1338,6 +1358,7 @@ borrando la NVS para reaprovisionar (§19.1). Los pasos concretos están en
 | bench⁺ | bench cuyo AP da salida a Internet | SNTP con `pool.ntp.org` (FR-TIME-01…04, FR-MQTT-03, FR-MED-06; Fase 2) y OTA contra releases reales de GitHub del repo (Fase 3) |
 | field | El nodo instalado en la vivienda, con su router, su broker y su HA | Alternativa a bench⁺ solo en los contratos marcados «alt. field» (OTA); solo se manda y se observa |
 | other | CI / revisión | Secretos en el repo y en las releases, C-CFG-01, C-LOG-01 |
+| manual | Un teléfono real unido al AP del nodo, con fecha, commit y pasos anotados | Solo como alternativa declarada en un contrato («alt. manual»: la fila de `http://example.com/` de FR-POR-02 mientras CR-TB-09 siga abierta). Vale solo para el commit anotado: si cambia el código del portal o de su DNS (`components/portal` o lo que sirva FR-POR-02), la prueba se repite antes de cerrar una fase o de publicar un release, y el plan la marca como vencida hasta entonces [user] |
 
 **OTA contra GitHub real.** Las pruebas OTA usan releases reales de este
 repositorio: los tags `v*.*.*` para versiones de producto, y pre-releases de
