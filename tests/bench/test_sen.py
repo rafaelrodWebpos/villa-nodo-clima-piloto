@@ -11,6 +11,18 @@ CICLO_S = 60
 MED = re.compile(r"med: T=(-?\d+\.\d) HR=(\d+\.\d) Td=(-?\d+\.\d|-)")
 
 
+def _distintas(vistas):
+    """Líneas med: distintas: el buffer del banco puede repetir una línea (misma
+    marca de tiempo del DUT, «I (508)»); se cuenta una vez por texto."""
+    vistas_texto, out = set(), []
+    for e in vistas:
+        t = e.get("text", "").strip()
+        if "med: " in t and t not in vistas_texto:
+            vistas_texto.add(t)
+            out.append(e)
+    return out
+
+
 def test_tc_sen_03_three_cycles(testbench, dut_slot, firmware, run_dir):
     """TC-SEN-03 · FR-SEN-01 (target) — 3 ciclos con el sensor conectado: 3 líneas med: con T ∈ [0, 50] °C."""
     tb = testbench
@@ -30,7 +42,7 @@ def test_tc_sen_03_three_cycles(testbench, dut_slot, firmware, run_dir):
         while time.time() < fin:
             out = tb.serial_output(dut_slot, lines=500, since=t0)
             vistas = [e if isinstance(e, dict) else {"text": str(e), "ts": 0} for e in (out.get("lines") or [])]
-            if sum("med: " in e.get("text", "") for e in vistas) >= CICLOS:
+            if len(_distintas(vistas)) >= CICLOS:
                 break
             time.sleep(2)
         lines = _lines(reset_out) + ["--- buffer del slot ---"] + [e.get("text", "") for e in vistas]
@@ -38,7 +50,7 @@ def test_tc_sen_03_three_cycles(testbench, dut_slot, firmware, run_dir):
 
         boot = _after_last_reset(_lines(reset_out))
         fw = next((ln for ln in boot + lines if "boot: " in ln and " fw=" in ln), "")
-        meds = [e for e in vistas if "med: " in e.get("text", "")]
+        meds = _distintas(vistas)
         c.note("", "## Resultado", "", f"- arranque: `{fw.strip()}`",
                *[f"- ts {e.get('ts', 0) - t0:+.1f} s: `{e['text'].strip()}`" for e in meds])
         if len(meds) >= 2:
