@@ -610,6 +610,12 @@ tests:
       «ocupado» (id estado-ocupado), con una línea con: VALIDANDO -> VALIDANDO
       (envío), un solo «wifi: intento 1» y sin escribir la NVS
     impl: tests/bench/test_con.py::test_tc_con_07_busy_while_validating
+    status: successful
+    commit: 324179c
+    date: 2026-11-06
+    ci_run: 42282560803   # build.yml, workflow_dispatch variant=bench version=0.0.0-324179c
+    evidence: >
+      test-results/20261106T194930Z-324179c/: 1.er POST «probando», 2.º «ocupado»; una línea T04, una T07, un solo «wifi: intento 1», T06 a los 20 s y sin escribir la NVS
   - id: TC-CON-06
     shape: atomic
     kind: standard
@@ -1115,6 +1121,12 @@ tests:
       banco, GET http://<ip-dut>/ sin respuesta HTTP, con el relé llegando a
       la red del AP (control positivo)
     impl: tests/bench/test_por.py::test_tc_por_11_no_portal_when_configured
+    status: successful
+    commit: 324179c
+    date: 2026-11-06
+    ci_run: 42282560803   # build.yml, workflow_dispatch variant=bench version=0.0.0-324179c
+    evidence: >
+      test-results/20261106T194930Z-324179c/: en CONECTANDO_WIFI 7 redes vistas y ningún clima-*; tras T08 (IP 192.168.4.11) GET http://<ip-dut>/ → «[Errno 111] Connection refused», con el relé llegando al banco por la red del AP (200)
   - id: TC-SEC-01
     shape: atomic
     kind: security

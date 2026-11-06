@@ -1,0 +1,59 @@
+I (489) pp: pp rom version: e7ae62f
+I (489) net80211: net80211 rom version: e7ae62f
+I (499) wifi:wifi driver task: 3fcac5b8, prio:23, stack:6656, core=0
+I (509) wifi:wifi firmware version: 00ad238
+I (509) wifi:wifi certification version: v7.0
+I (509) wifi:config NVS flash: enabled
+I (509) wifi:config nano formatting: disabled
+I (509) wifi:Init data frame dynamic rx buffer num: 32
+I (519) wifi:Init static rx mgmt buffer num: 5
+I (519) wifi:Init management short buffer num: 32
+I (519) wifi:Init dynamic tx buffer num: 32
+I (529) wifi:Init static tx FG buffer num: 2
+I (529) wifi:Init static rx buffer size: 1600
+I (539) wifi:Init static rx buffer num: 10
+I (539) wifi:Init dynamic rx buffer num: 32
+I (499) nodo: med: T=29.9 HR=75.0 Td=25.0
+I (549) wifi_init: rx ba win: 6
+I (549) wifi_init: accept mbox: 6
+I (549) wifi_init: tcpip mbox: 32
+I (559) wifi_init: udp mbox: 6
+I (559) wifi_init: tcp mbox: 6
+I (559) wifi_init: tcp tx win: 5760
+I (569) wifi_init: tcp rx win: 5760
+I (569) wifi_init: tcp mss: 1440
+I (569) wifi_init: WiFi IRAM OP enabled
+I (579) wifi_init: WiFi RX IRAM OP enabled
+I (589) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (629) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (629) wifi:Total power save buffer number: 16
+I (629) wifi:Init max length of beacon: 752/752
+I (639) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1
+I (649) nodo: con: ARRANQUE -> PORTAL (fin_arranque)
+I (649) nodo: Init complete
+I (649) main_task: Returned from app_main()
+I (5569) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
+I (5569) wifi:station: <mac> join, AID=1, bgn, 20
+I (5679) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6199) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (7949) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
+I (13899) wifi:mode : sta (3c:0f:02:f3:c6:d4) + softAP (3c:0f:02:f3:c6:d5)
+I (13899) wifi:enable tsf
+W (13899) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (13929) nodo: wifi: intento 1
+I (13929) nodo: con: PORTAL -> VALIDANDO (envío)
+I (13929) portal: POST / -> probando
+I (13969) nodo: con: VALIDANDO -> VALIDANDO (envío)
+I (13969) portal: POST / -> ocupado
+I (14039) wifi:station: <mac> leave, AID = 1, reason = 8, bss_flags is 33721443, bss:0x3fca4118
+I (14039) wifi:<ba-del>idx:3, tid:0
+I (14049) wifi:<ba-del>idx:2, tid:7
+I (14049) wifi:new:<1,1>, old:<1,0>, ap:<1,1>, sta:<0,0>, prof:1, snd_ch_cfg:0x0
+I (14059) wifi:scan in process, ignore set current channel
+I (17789) nodo: wifi: intento 2
+I (21639) nodo: wifi: intento 3
+I (25479) nodo: wifi: intento 4
+I (29329) nodo: wifi: intento 5
+I (33179) nodo: wifi: intento 6
+I (33929) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (33939) nodo: con: VALIDANDO -> PORTAL (wifi_down)
