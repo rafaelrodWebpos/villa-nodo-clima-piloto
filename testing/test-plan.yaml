@@ -1189,8 +1189,11 @@ tests:
       revisión documental: en el diagnóstico de TC-CFG-02 (test-results/20261106T190648Z-9bcc519-diag-corte/)
       desenchufar el único USB-C dejó el slot «absent» y la placa arrancó desde cero
       al reenchufar (uptime desde 0): no hay otra fuente de alimentación (pines 5V
-      o 3V3). El SHT41 toma 3V3 de la placa (C-HW-04), que no es alimentarla. El
-      propietario puede confirmarlo mirando el montaje
+      o 3V3). El SHT41 toma 3V3 de la placa (C-HW-04), que no es alimentarla
+    manual_evidence: >
+      propietario, 2026-11-06, revisión visual del montaje: la placa del SLOT1
+      solo recibe alimentación por su USB-C conectado a la Pi; en 5V no hay nada
+      conectado y en 3V3 solo está la alimentación que la placa da al SHT41
   - id: TC-HW-07
     shape: atomic
     kind: standard
