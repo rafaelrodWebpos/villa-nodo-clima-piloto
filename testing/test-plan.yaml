@@ -1116,6 +1116,10 @@ tests:
     expect: >
       las cabeceras del bootloader y de la app de cada imagen de la CI declaran 8 MB de flash, nunca «detect» ni otro tamaño (FSD 0.9.6, criterio de la Fase 1)
     impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42294803194   # Build Firmware (push): build_checks.py, todas «ok»
   - id: TC-HW-02
     shape: atomic
     kind: standard
@@ -1127,6 +1131,12 @@ tests:
     expect: >
       esptool sobre la placa del banco (/api/chip/info): ESP32-S3, «Embedded PSRAM 8MB» (N8R8), «Detected flash size: 8MB» y las interfaces 303a:1001 y 1a86:55d3 del único USB-C
     impl: tests/bench/test_hw.py::test_tc_hw_02_chip_reading
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42295284731   # build.yml, workflow_dispatch variant=bench version=0.0.0-9f8d3f8
+    evidence: >
+      test-results/20261106T211547Z-9f8d3f8/: ESP32-S3 (QFN56) v0.2, «Embedded PSRAM 8MB», «Detected flash size: 8MB», USB 303a:1001 y 1a86:55d3
   - id: TC-HW-03
     shape: atomic
     kind: standard
@@ -1138,6 +1148,12 @@ tests:
     expect: >
       la imagen de la CI (PSRAM deshabilitada en su sdkconfig, build_checks.py) llega a con: ARRANQUE -> CONECTANDO_WIFI|PORTAL (fin_arranque) en ≤ 120 s desde el reset, sin Guru Meditation ni abort() y con un solo arranque
     impl: tests/bench/test_hw.py::test_tc_hw_03_boots_without_psram
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42295284731   # build.yml, workflow_dispatch variant=bench version=0.0.0-9f8d3f8
+    evidence: >
+      test-results/20261106T211547Z-9f8d3f8/: «con: ARRANQUE -> PORTAL (fin_arranque)» a los 649 ms, una sola línea E1 en 120 s, sin Guru Meditation ni abort()
   - id: TC-HW-05
     shape: atomic
     kind: standard
@@ -1149,6 +1165,12 @@ tests:
     expect: >
       la sonda tests/target/i2c_probe escanea GPIO8/9 a 100 kHz con solo los pull-ups externos: «i2c: scan sda=8 scl=9 hz=100000 ack=…» con 0x44; después se restaura la imagen de la CI
     impl: tests/bench/test_hw.py::test_tc_hw_05_i2c_scan
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42295284731   # build.yml, workflow_dispatch variant=bench version=0.0.0-9f8d3f8
+    evidence: >
+      test-results/20261106T211547Z-9f8d3f8/: escaneo con solo pull-ups externos «i2c: scan sda=8 scl=9 hz=100000 ack=0x44»; imagen de la CI restaurada después
   - id: TC-HW-06
     shape: atomic
     kind: standard
@@ -1160,6 +1182,15 @@ tests:
     expect: >
       revisión del montaje: la placa se alimenta solo por su USB-C de 5 V, sin alimentación externa por los pines 5V o 3V3
     impl: review   # ver evidence
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    evidence: >
+      revisión documental: en el diagnóstico de TC-CFG-02 (test-results/20261106T190648Z-9bcc519-diag-corte/)
+      desenchufar el único USB-C dejó el slot «absent» y la placa arrancó desde cero
+      al reenchufar (uptime desde 0): no hay otra fuente de alimentación (pines 5V
+      o 3V3). El SHT41 toma 3V3 de la placa (C-HW-04), que no es alimentarla. El
+      propietario puede confirmarlo mirando el montaje
   - id: TC-HW-07
     shape: atomic
     kind: standard
@@ -1171,6 +1202,10 @@ tests:
     expect: >
       revisión + grep en la CI: los pines que usa el firmware (main/, components/) no incluyen GPIO0/3/19/20/38/43/44/45/46/48
     impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_hw_07.py)   # detecta un GPIO_NUM_0 plantado
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42294803261   # host tests + secret scan, job config-checks
   - id: TC-HW-08
     shape: atomic
     kind: standard
@@ -1182,6 +1217,10 @@ tests:
     expect: >
       fila de revisión de C-HW-08: consola primaria UART0 y secundaria USB-Serial/JTAG en sdkconfig.defaults (config-checks) y en el sdkconfig de cada imagen (build_checks.py); la fila bench (bench-dual-console) queda fuera de la Fase 1
     impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_hw_08.py) + build.yml#build/Verify build constraints
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: [42294803261, 42294803194]   # config-checks (sdkconfig.defaults) y build_checks.py (sdkconfig de la imagen)
   - id: TC-BLD-01
     shape: atomic
     kind: standard
@@ -1193,6 +1232,10 @@ tests:
     expect: >
       gen_esp32part.py sobre la tabla de cada imagen coincide fila a fila con la tabla de FSD §2.2 (leída del propio FSD)
     impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42294803194   # Build Firmware (push): build_checks.py, todas «ok»
   - id: TC-BLD-02
     shape: atomic
     kind: standard
@@ -1204,6 +1247,10 @@ tests:
     expect: >
       check_sizes.py del build rechaza una app de 0x300001 bytes («too small») y acepta la app real (control)
     impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42294803194   # Build Firmware (push): build_checks.py, todas «ok»
   - id: TC-BLD-03
     shape: atomic
     kind: standard
@@ -1215,6 +1262,10 @@ tests:
     expect: >
       idf.py --version es v6.x y el sdkconfig de la imagen tiene CONFIG_IDF_TARGET="esp32s3"
     impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+    status: successful
+    commit: 9f8d3f8
+    date: 2026-11-06
+    ci_run: 42294803194   # Build Firmware (push): build_checks.py, todas «ok»
   - id: TC-HW-04
     shape: atomic
     kind: standard
