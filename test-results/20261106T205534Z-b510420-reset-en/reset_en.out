@@ -1,0 +1,43 @@
+{
+ "slot": {
+  "gpio_en": 17,
+  "gpio_boot": 18,
+  "has_gpio": true,
+  "gpio_wired": null,
+  "gpio_wired_detail": null
+ },
+ "gpio_antes": {
+  "ok": true,
+  "pins": {}
+ },
+ "A_serial_reset": {
+  "method": "serial (DTR/RTS)",
+  "lineas": [
+   "rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)",
+   "I (449) nodo: boot: clima-f3c6d4 fw=0.0.0-b510420-bench reset=usb part=ota_0 img=valida"
+  ]
+ },
+ "B_set_bajo": {
+  "ok": true,
+  "pin": 17,
+  "value": 0
+ },
+ "B_set_libre": {
+  "ok": true,
+  "pin": 17,
+  "value": "z"
+ },
+ "B_pulso_en": {
+  "lineas": [],
+  "n_lineas_tras_pulso": 0
+ },
+ "gpio_despues": {
+  "ok": true,
+  "pins": {
+   "17": {
+    "direction": "input",
+    "value": 1
+   }
+  }
+ }
+}
