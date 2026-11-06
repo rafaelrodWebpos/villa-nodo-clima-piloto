@@ -609,6 +609,15 @@ tests:
       2): en 15 min ninguna línea con: con destino distinto de CONECTANDO_WIFI y
       el AP clima-* del DUT no aparece en 5 escaneos
     impl: tests/bench/test_con.py::test_tc_con_06_never_portal
+    status: successful
+    commit: c9838dc
+    date: 2026-11-06
+    ci_run: 42147201965   # build.yml, workflow_dispatch variant=bench version=0.0.0-c9838dc
+    evidence: >
+      test-results/20261106T020031Z-c9838dc/TC-CON-06.md: 39 líneas con:, todas
+      hacia CONECTANDO_WIFI, durante 890 s de log del DUT; ningún clima-* en los
+      escaneos a 185, 365, 545, 725 y 905 s; un solo arranque. La ejecución sobre
+      5d0699d no cuenta: contó las líneas del bootloader como reinicios
   - id: TC-POR-01
     shape: atomic
     kind: standard
@@ -915,6 +924,10 @@ tests:
       revisión de sdkconfig.defaults, Kconfig y el código: los 7 campos de cadena
       de §17 arrancan en «ninguno» o vacíos y ningún prefijo de tópico es literal
     impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_cfg_01.py)   # detecta los tres casos plantados (Kconfig, defaults, tópico)
+    status: successful
+    commit: 9dbe5a9
+    date: 2026-11-06
+    ci_run: 42144397227   # host tests + secret scan, job config-checks
   - id: TC-CFG-02
     shape: atomic
     kind: standard
@@ -1038,6 +1051,10 @@ tests:
       revisión + grep en la CI: SDA = GPIO8, SCL = GPIO9 y 100 kHz en la única
       configuración del bus I²C (components/sht41/sht41.c)
     impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_hw_04.py)   # detecta SDA ≠ 8, 400 kHz y un segundo bus plantados
+    status: successful
+    commit: 9dbe5a9
+    date: 2026-11-06
+    ci_run: 42144397227   # host tests + secret scan, job config-checks
   - id: TC-SEC-01
     shape: atomic
     kind: security
