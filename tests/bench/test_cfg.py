@@ -10,8 +10,9 @@ from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, prim
 
 CORTES = 5                      # contrato de FR-CFG-01 (fila de cortes de alimentación)
 ESPERA_AVISO_S = 600            # lo que el aviso espera a que el operador pulse «Hecho»
-AVISO = ("Corte de alimentación {n} de {total} (TC-CFG-02): desenchufa los DOS cables USB-C de la "
-         "placa del SLOT1, espera 5 segundos, vuelve a enchufarlos y pulsa «Hecho».")
+# La placa tiene un solo USB-C (FSD C-HW-01: hub interno con 303a:1001 y 1a86:55d3)
+AVISO = ("Corte de alimentación {n} de {total} (TC-CFG-02): desenchufa el cable USB-C de la placa, "
+         "espera 5 segundos y vuelve a enchufarlo en el mismo puerto de la Pi. Después pulsa «Hecho».")
 
 
 def test_tc_cfg_02_power_cuts(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
