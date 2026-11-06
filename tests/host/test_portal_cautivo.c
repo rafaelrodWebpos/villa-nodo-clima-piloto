@@ -31,6 +31,9 @@ int main(void)
     /* Redirección (FR-POR-02): las dos rutas del contrato, otras, y «/» no */
     ESPERA(portal_redirige("/generate_204") == 1, "/generate_204 no redirige");
     ESPERA(portal_redirige("/hotspot-detect.html") == 1, "/hotspot-detect.html no redirige");
+    /* FSD 0.9.5, fila host de FR-POR-02: el destino del 302 es exactamente el portal
+     * (el código «302 Found» lo pone el adaptador, portal_http.c; revisión) */
+    ESPERA(strcmp(PORTAL_URL, "http://192.168.4.1/") == 0, "destino del 302: '%s'", PORTAL_URL);
     ESPERA(portal_redirige("/connecttest.txt") == 1 && portal_redirige("/x/y?z=1") == 1, "otra ruta no redirige");
     ESPERA(portal_redirige("/") == 0, "«/» redirige (debe servir el formulario)");
     ESPERA(strcmp(PORTAL_URL, "http://192.168.4.1/") == 0, "PORTAL_URL = %s", PORTAL_URL);

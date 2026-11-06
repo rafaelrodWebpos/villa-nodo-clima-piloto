@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.4
+fsd_version: 0.9.5
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -484,12 +484,13 @@ tests:
     phase: 2
     tier: bench
     verifies: [FR-CON-05, FR-CFG-01]
-    needs: [bench-driver, bench-wifi-ap, bench-operator-prompt, bench-serial-monitor, bench-mqtt-broker, bench-portal-driver, dut-board]
+    needs: [bench-driver, bench-wifi-ap, bench-operator-prompt, bench-mqtt-broker, bench-portal-driver, dut-board]
     expect: >
-      el operador desenchufa el USB-C y lo vuelve a enchufar; el log muestra
-      cfg: sitio=<mismo sitio> zona=<misma zona> y con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque),
-      sin AP clima-* en el escaneo, y la primera medida en vivo llega en ≤ 30 s
-      desde la primera línea del arranque en la consola (bootloader o boot:)
+      el operador desenchufa el USB-C y lo vuelve a enchufar (FSD 0.9.5; la consola
+      del banco no captura el arranque tras el corte, CR-TB-10): el primer status
+      llega con reset = poweron y uptime_s ≤ 25 bajo <sitio>/<zona>/<nodo>/status con
+      el mismo sitio y la misma zona, sin AP clima-* en el escaneo, y la primera
+      medida en vivo llega ≤ 5 s después de ese status
     impl: null
 
   # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
@@ -766,7 +767,7 @@ tests:
     tier: host
     verifies: [FR-POR-02]
     needs: [hosted-ci]
-    expect: >
+    expect: >   # parte host de la primera fila de FR-POR-02 (FSD 0.9.5)
       toda ruta GET salvo «/» (incluidas /generate_204 y /hotspot-detect.html)
       se redirige a http://192.168.4.1/; una consulta DNS A (o ANY) de clase IN de
       cualquier nombre, con o sin EDNS, recibe una respuesta A con 192.168.4.1
@@ -789,7 +790,8 @@ tests:
       unido al AP del DUT, GET /generate_204 y GET /hotspot-detect.html por el
       relé terminan en el formulario del portal (200, los 8 campos de §17) y
       nunca en 204. El relé sigue las redirecciones, así que el 302 en sí no se
-      observa aquí (lo cubre TC-POR-06)
+      observa aquí (lo cubre TC-POR-06). Es la parte bench de la primera fila de
+      FR-POR-02 (FSD 0.9.5); última ejecución verde también sobre 5f20820
     impl: tests/bench/test_por.py::test_tc_por_07_captive_redirects
     status: successful
     commit: 9c382b9
@@ -1001,9 +1003,9 @@ tests:
       CommandTimeout (CR-TB-11). El test ya guarda el buffer y el estado del
       slot antes de decidir, y trata el CommandTimeout como not done
     next: >
-      decidido (propietario, 2026-11-06, opción A): no se repiten los cortes;
-      la fila pasa a la Fase 2 con el status MQTT en la próxima versión del
-      FSD (fsd_pending), y entonces este test se rehace sobre status
+      decidido (propietario, 2026-11-06, opción A) y aplicado en FSD 0.9.4: no
+      se repiten los cortes por consola; el test se reescribe sobre el primer
+      status tras cada corte cuando exista el publicador MQTT (Fase 2)
   - id: TC-SEN-01
     shape: atomic
     kind: standard
