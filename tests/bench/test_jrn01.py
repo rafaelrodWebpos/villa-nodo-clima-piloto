@@ -268,9 +268,15 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         finally:
             if ap_on:
                 tb.ap_stop()
+        c.save_log("serie", [e["text"] for e in vistas])
+        c.save_log("udp", [str(u.get("line", u) if isinstance(u, dict) else u) for u in udp])
+        # Solo lo que siguió a nuestro reset: el buffer del banco puede entregar tarde la cola
+        # del arranque anterior con marcas de tiempo posteriores a t0
+        ult = max((i for i, e in enumerate(vistas) if e["text"].startswith("rst:")), default=None)
+        assert ult is not None, "la captura no contiene el rst: del reset"
+        vistas = vistas[ult:]
         textos = [e["text"] for e in vistas]
-        c.save_log("serie", textos)
-        c.save_log("udp", [str(u.get("text", u) if isinstance(u, dict) else u) for u in udp])
+        t_ip = primera(vistas, "con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)")
 
         # T01: boot:, cfg:, con: ARRANQUE -> CONECTANDO_WIFI y el primer intento en ≤ 2 s; sin AP
         boot = primera(vistas, "boot: clima-")
@@ -290,14 +296,15 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         assert not primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO"), "OPERATIVO sin broker (T11 en la Fase 1)"
 
         # FR-LOG-02: «UDP logging -> host:port» y cada línea serie en el receptor en ≤ 1 s
-        def txt(u): return str(u.get("text", "") if isinstance(u, dict) else u).strip()
+        def txt(u): return str(u.get("line", u.get("text", "")) if isinstance(u, dict) else u).strip()   # el receptor da «line»
         def ts(u): return float(u.get("ts", 0)) if isinstance(u, dict) else 0.0
-        assert any("UDP logging -> " in txt(u) for u in udp), "el receptor UDP no recibió UDP logging -> <host>:<port> (E11)"
-        tras_ip = [e for e in vistas if e["ts"] >= t_ip["ts"] and e["text"].strip()]
+        assert any("UDP logging -> " in txt(u) for u in udp if ts(u) >= t0), "el receptor UDP no recibió UDP logging -> <host>:<port> (E11)"
+        # Desde la línea de T08 en el orden en que el DUT escribe (la hora de llegada al banco va a ráfagas)
+        tras_ip = [e for e in vistas[vistas.index(t_ip):] if e["text"].strip()]
         perdidas, tarde = [], []
         for e in tras_ip:
-            cuerpo = re.sub(r"^\w \(\d+\) ", "", e["text"].strip())
-            m = next((u for u in udp if cuerpo and cuerpo in txt(u)), None)
+            cuerpo = e["text"].strip()   # con su «I (ms)» del DUT: no casa con una línea igual de otro arranque
+            m = next((u for u in udp if ts(u) >= t0 and txt(u) == cuerpo), None)
             if not m: perdidas.append(cuerpo)
             elif ts(m) - e["ts"] > UDP_RETARDO_S: tarde.append(cuerpo)
         c.note(f"- {len(tras_ip)} líneas serie tras obtener IP; perdidas {len(perdidas)}, tarde {len(tarde)}")
