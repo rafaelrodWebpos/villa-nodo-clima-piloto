@@ -3,7 +3,7 @@ establece su precondición con los procedimientos de benchlib."""
 import re
 import time
 
-from benchlib import aprovisionar, case, esperar_lineas, primera
+from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, primera
 
 BACKOFF_S = [1, 2, 4, 8, 16, 32, 60, 60, 60, 60]   # FR-CON-02
 TOLERANCIA = 0.10
@@ -26,11 +26,16 @@ def _unicas(vistas):
     return out
 
 
-def test_tc_con_03_wifi_backoff(testbench, dut_slot, dut_mac, run_dir, tmp_path):
+def test_tc_con_03_wifi_backoff(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
     """TC-CON-03 · FR-CON-02 (fila Wi-Fi), T09, T10 — AP apagado desde el arranque: 10 intervalos del backoff."""
     tb = testbench
     ssid_portal = "clima-" + dut_mac.replace(":", "").lower()[-6:]
     with case(tb, "TC-CON-03", "Backoff de Wi-Fi con el AP apagado", run_dir, spec="TC-CON villa-nodo-clima-piloto") as c:
+        # Atómico: graba él mismo la imagen de la CI del commit bajo prueba (no depende del orden)
+        c.note(f"- imagen: `{firmware['version']}` (variante {firmware['variant']}, run CI {firmware['ci_run']})", "")
+        c.step(f"Precondiciones: grabar la imagen de la CI en {dut_slot}")
+        res = tb.flash(dut_slot, _parse_flash_args(firmware["dir"] / "coldflash"), chip="esp32s3")
+        assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
         aprovisionar(tb, dut_slot, ssid_portal, c, tmp_path)
         assert not tb.ap_status().get("active"), "el AP del banco sigue activo"
         c.step("Reset con el AP del banco apagado; observación de 10 reintentos (≈ 6 min)")
@@ -44,7 +49,9 @@ def test_tc_con_03_wifi_backoff(testbench, dut_slot, dut_mac, run_dir, tmp_path)
         assert primera(lineas, "con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)"), "falta T01"
         assert not any("con: ARRANQUE -> PORTAL" in t for t in textos), "el nodo configurado abrió el portal"
         assert not any("softAP" in t for t in textos if "wifi:mode" in t), "se abrió el AP (prohibido en T09/T10)"
-        assert sum("boot: " in t for t in textos) <= 1, "el nodo se reinició durante los reintentos"
+        boots = [t for t in textos if "boot: " in t and " fw=" in t]
+        assert boots and firmware["version"] in boots[0], f"el arranque no es la imagen {firmware['version']}"
+        assert len(boots) <= 1, "el nodo se reinició durante los reintentos"
         # Cada intervalo: de la línea de T09 al siguiente «wifi: intento <n>», en el reloj del DUT
         intervalos, i = [], 0
         while i < len(textos) and len(intervalos) < len(BACKOFF_S):
