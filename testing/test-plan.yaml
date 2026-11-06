@@ -183,7 +183,8 @@ capabilities:
     what: cortar y devolver la alimentación del DUT por instrumento
     available: no
     reason: >
-      el banco reporta EN/BOOT por GPIO (has_gpio, gpio_wired sin determinar),
+      el banco reporta EN/BOOT por GPIO (has_gpio, gpio_wired sin determinar; el
+      2026-11-06 un pulso en la GPIO EN no reinició el DUT: hoy no llega a su EN),
       no corte de alimentación; el corte lo hace el operador desenchufando el
       USB-C (bench-operator-prompt), pero tras el corte la captura serie vuelve
       ~2 s después del arranque y pierde boot:/cfg:/con: — petición CR-TB-10
@@ -1005,7 +1006,7 @@ tests:
       CommandTimeout (CR-TB-11). El test ya guarda el buffer y el estado del
       slot antes de decidir, y trata el CommandTimeout como not done
     next: >
-      decidido (propietario, 2026-11-06, opción A) y aplicado en FSD 0.9.4: no
+      decidido (propietario, 2026-11-06, opción A), aplicado en FSD 0.9.4 y precisado en 0.9.6: no
       se repiten los cortes por consola; el test se reescribe sobre el primer
       status tras cada corte cuando exista el publicador MQTT (Fase 2)
   - id: TC-SEN-01
@@ -1318,6 +1319,10 @@ tests:
       sw, panic, task_wdt, int_wdt, wdt, deepsleep, brownout, usb, jtag, otro;
       un valor fuera de la enumeración da «otro» (también en E1)
     impl: tests/host/test_diag_reset.c
+    status: successful
+    commit: ce15ce2
+    date: 2026-11-06
+    ci_run: host tests + secret scan de ce15ce2 (verde); en la placa, «reset=usb» tras /api/serial/reset (test-results/*-b510420-reset-en/)
   - id: TC-SEC-01
     shape: atomic
     kind: security
@@ -1379,7 +1384,38 @@ release_verify:
 # del plan; se listan para que la reconciliación no las tome por huérfanas.
 # Cambios del FSD pendientes para la próxima versión (regla del propietario,
 # 2026-11-05: una sola versión por ronda de checkers). fsd_applied guarda los ya aplicados.
-fsd_pending: []   # vacío: los puntos de abajo se aplicaron en FSD 0.9.4 (propietario, 2026-11-06)
+fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0.9.6); regla del propietario: no abren versión
+  - from: checker puerta 01, cf744e1 (1, 9)
+    issue: >
+      historial: la entrada 0.9.4 dice «sin cambios en requisitos» y amplía los
+      valores de `reset` (D18, FR-MQTT-08); la 0.9.6 la corrigió sin listarlo;
+      approval_status sin las rondas 0.9.4–0.9.6 ni la ampliación de D18;
+      baseline_commit sin hash
+  - from: checker puerta 01, cf744e1 (2)
+    issue: >
+      FR-CON-05: declarar el −2 s como banda de guarda hacia lo estricto (puede
+      rechazar un nodo que publique entre ~28 y 30 s) y decir desde cuándo cuenta
+      uptime_s (ROM o aplicación); «arranque previo ≤ 1 s» no está verificado
+  - from: checker puerta 01, cf744e1 (3)
+    issue: >
+      C-HW-08: ninguna fase cierra su fila bench (bench-dual-console); las
+      dependencias de la Fase 1 no citan bench-chip-info (TC-HW-02)
+  - from: checker puerta 01, cf744e1 (4)
+    issue: el 302 de FR-POR-02 solo se prueba en host mientras CR-TB-09 siga abierta
+  - from: checker puerta 01, cf744e1 (5)
+    issue: >
+      nivel manual: las convenciones dicen «válida solo para su commit» y §22.0 la
+      hace vencer solo si cambia el portal o su DNS; aclarar cuál manda (el plan
+      aplica la de §22.0: scope components/portal)
+  - from: checker puerta 01, cf744e1 (6)
+    issue: FR-MQTT-05 no fija la duración mínima del corte (si vuelve antes de 100 s, la observación es ambigua)
+  - from: checker puerta 01, cf744e1 (7)
+    issue: FR-CFG-01 (cortes) prohíbe un status con otro sitio o zona sin decir que el suscriptor escuche fuera del tópico configurado (p. ej. `#`)
+  - from: checker puerta 01, cf744e1 (8)
+    issue: >
+      bench-operator-prompt sigue en yes aunque CR-TB-11 muestra que el aviso no
+      devuelve la respuesta tras un USB remove/add, que es lo que hacen los cortes
+      de la Fase 2 (revisar al empezar esos tests)
 fsd_applied:
   - applied_in: 0.9.4
     from: checker puerta 01, c3ed691 (no bloqueante 1)
@@ -1641,3 +1677,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "FSD 0.9.5. Bloqueante: el contrato de FR-CON-05 no equivale a su requisito (≤ 30 s desde el encendido): «status con uptime_s ≤ 25 y medida ≤ 5 s después» rechaza un nodo conforme (status a 27 s y medida 0,5 s después) y aprueba uno que no lo es (uptime_s entero, + 5 s, + arranque previo ≈ 31,6 s); su prohibido «un status con uptime_s > 25» no dice «primero». No bloqueantes: status de FR-CON-05/FR-CFG-01 sin exigir retain = 0; §3.1 cita aún avisos al operador; nivel manual fuera de las convenciones y de tiers del plan; last_updated 2026-11-05; ext (pin EN) puede salir como poweron en el S3; reset posterior por corte en §3.3/FR-OTA-08/T17/T20/T22; FR-CON-06 Fase 2 con broker activo pasa por T16, no T14; FR-TIME-05 hereda B1; paréntesis de §3.2 omite FR-MQTT-05 y FR-TIME-03; 0.9.4 (8) amplía valores de reset y dice «sin cambios en requisitos»; fila bench de FR-POR-02 no distingue 302 de 200; C-HW-*/C-BLD-* fuera de §3"}
   - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-11-06, commit: dd0099a,
      findings: "sin bloqueantes; mecánicas rc 0 (fila 6: conectividad, diagnostico, identidad, medicion, portal, sht41, udplog; mal []). Posición: Fase 3 ola 1; Fase 1 abierta por TC-POR-08 (H-40 vencida); siguiente JRN-01.4 en xfail. No bloqueantes: sin veredicto de la puerta 01 para 0.9.5 al evaluar; fsd_applied sin entradas 0.9.5; TC-DIAG-01 sin status; testbench.reported 2026-11-02; build/SKILL.md:82"}
+  - {gate: 01-load-defined, verdict: OPEN, date: 2026-11-06, commit: cf744e1,
+     findings: "FSD 0.9.6; sin bloqueantes (FR-CON-05 ya no aprueba un nodo que incumple). No bloqueantes en fsd_pending: historial 0.9.4/approval_status/baseline_commit; banda de guarda de FR-CON-05 y origen de uptime_s; C-HW-08 bench sin fase y bench-chip-info fuera de dependencias; 302 de FR-POR-02 solo en host; regla de vencimiento del nivel manual; duración del corte en FR-MQTT-05; suscriptor de FR-CFG-01; bench-operator-prompt frente a CR-TB-11. Desfases fuera del FSD (CR-TB-10, bench-power-cycle) corregidos en el plan"}
+  - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-11-06, commit: cf744e1,
+     findings: "sin bloqueantes; mecánicas rc 0; posición: Fase 3 ola 1, 41 de 52 standard en verde; Fase 1 abierta solo por TC-POR-08 (H-40 vencida, la renueva el propietario con un teléfono); siguiente JRN-01.4 en xfail. No bloqueantes: reported_by de bench-flash (running/idle); build/SKILL.md:82; TC-DIAG-01 sin status (corregido); testbench.reported 2026-11-02; next de TC-CFG-02 (corregido)"}
