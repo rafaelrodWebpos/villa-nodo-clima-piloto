@@ -578,7 +578,7 @@ tests:
       (wifi_down)» hasta el siguiente «wifi: intento <n>» dentro de ±10 % de 1,
       2, 4, 8, 16, 32, 60, 60, 60, 60 s; sin ráfagas (< 1 s), sin reinicio y
       sin AP
-    impl: null   # siguiente: necesita el DUT configurado contra el AP desechable
+    impl: tests/bench/test_con.py::test_tc_con_03_wifi_backoff
   - id: TC-POR-01
     shape: atomic
     kind: standard

@@ -206,3 +206,46 @@ def esperar_lineas(tb, slot, since, patrones, timeout):
 def primera(entradas, patron, desde_ts=0):
     """Primera entrada con patron y ts ≥ desde_ts, o None."""
     return next((e for e in entradas if patron in e.get("text", "") and e.get("ts", 0) >= desde_ts), None)
+
+
+def aprovisionar(tb, slot, ssid_portal, c, tmp_dir):
+    """Precondición compartida: deja el DUT configurado contra un AP desechable del
+    banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+    y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+    escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+    llega a guardar. Nunca escribe las credenciales en la evidencia."""
+    from urllib.parse import urlencode
+    import pytest
+    ap_ssid, ap_clave = credenciales_desechables()
+    c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+    assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+    c.step("Precondiciones: P-NVS-ERASE y reset; el DUT debe arrancar en PORTAL")
+    borrar_nvs(tb, slot, tmp_dir)
+    boot = _after_last_reset(_boot_capture(tb, slot, "con: ARRANQUE -> PORTAL"))
+    if not any("con: ARRANQUE -> PORTAL" in ln for ln in boot):
+        pytest.skip("not done: el DUT no arrancó en PORTAL tras P-NVS-ERASE")
+    form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": "broker.local", "mqtt_port": "1883",
+            "mqtt_user": "", "mqtt_pass": "", "sitio": "sitio1", "zona": "zona1"}
+    t_envio = time.time()
+    joined = ap_on = False
+    try:
+        time.sleep(2)
+        unirse_al_portal(tb, ssid_portal, c)
+        joined = True
+        c.step("Precondiciones: POST / con los datos de un AP desechable nuevo")
+        r = tb.http_request("POST", "http://192.168.4.1/", headers={"Content-Type": "application/x-www-form-urlencoded"},
+                            body=urlencode(form).encode(), timeout=10)
+        if r.status_code != 200 or 'id="estado-probando"' not in r.text:
+            pytest.skip(f"not done: el envío no respondió «probando» (HTTP {r.status_code})")
+        tb.sta_leave(); joined = False
+        tb.ap_start(ap_ssid, ap_clave, channel=1); ap_on = True
+        vistas = esperar_lineas(tb, slot, t_envio, ["nvs: config escrita", "con: VALIDANDO -> ARRANQUE (wifi_up)"], timeout=40)
+    finally:
+        if ap_on:
+            tb.ap_stop()
+        if joined:
+            tb.sta_leave()
+    if not primera(vistas, "nvs: config escrita"):
+        pytest.skip("not done: el DUT no guardó la configuración (sin «nvs: config escrita»)")
+    c.note("- precondición: DUT configurado contra un AP desechable nuevo (redactado); AP del banco apagado", "")
+    return ap_ssid, ap_clave

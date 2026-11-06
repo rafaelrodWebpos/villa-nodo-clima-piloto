@@ -194,9 +194,15 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
             tb.sta_leave(); joined = False
             c.step("El banco levanta su AP desechable (canal 1); el DUT debe unirse, guardar y reiniciar")
             tb.ap_start(ap_ssid, ap_clave, channel=1); ap_on = True
-            vistas = esperar_lineas(tb, dut_slot, t_envio, ["con: VALIDANDO -> ARRANQUE (wifi_up)", "boot: "], timeout=40)
-            time.sleep(3)
-            vistas = esperar_lineas(tb, dut_slot, t_envio, ["con: VALIDANDO -> ARRANQUE (wifi_up)"], timeout=1)
+            vistas = esperar_lineas(tb, dut_slot, t_envio, ["con: VALIDANDO -> ARRANQUE (wifi_up)"], timeout=40)
+            # El reinicio llega 4 s después de T05 (H-41): se espera un rst:/boot: posterior a T05,
+            # no cualquier boot: (el del arranque anterior ya está en el buffer)
+            t05_ = primera(vistas, "con: VALIDANDO -> ARRANQUE (wifi_up)")
+            fin = time.time() + REINICIO_LIMIT_S + 10
+            while t05_ and time.time() < fin and not (primera(vistas, "rst:", desde_ts=t05_["ts"])
+                                                     and primera(vistas, "boot: ", desde_ts=t05_["ts"])):
+                time.sleep(1)
+                vistas = esperar_lineas(tb, dut_slot, t_envio, [], timeout=0)
         finally:
             if ap_on:
                 tb.ap_stop()
