@@ -228,3 +228,58 @@ def test_tc_por_09_wrong_password(testbench, dut_slot, run_dir, tmp_path):
         c.save_log("log", [redactar(t, secretos) for t in textos + ["--- reset ---"] + tras])
         assert any("con: ARRANQUE -> PORTAL (fin_arranque)" in ln for ln in tras), "tras el reset no vuelve a PORTAL"
         c.passed(f"clave errónea: T06 a los {dt:.1f} s, AP visible, «no se pudo conectar», NVS sin cambios")
+
+
+def test_tc_por_11_no_portal_when_configured(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-POR-11 · FR-POR-07 (bench) — configurado (CONECTANDO_WIFI o posterior): ningún SSID clima-*
+    en el escaneo y GET http://<ip-dut>/ rechazado, sin respuesta HTTP."""
+    from benchlib import _parse_flash_args, aprovisionar
+    tb = testbench
+    ssid_portal = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    with case(tb, "TC-POR-11", "Sin portal fuera de PORTAL y VALIDANDO", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
+        c.note(f"- imagen: `{firmware['version']}` (variante {firmware['variant']}, run CI {firmware['ci_run']})", "")
+        c.step(f"Precondiciones: grabar la imagen de la CI en {dut_slot}")
+        res = tb.flash(dut_slot, _parse_flash_args(firmware["dir"] / "coldflash"), chip="esp32s3")
+        assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
+        ap_ssid, ap_clave = aprovisionar(tb, dut_slot, ssid_portal, c, tmp_path)
+        # 1. CONECTANDO_WIFI (AP del banco apagado): escaneo sin clima-*
+        c.step("Reset con el AP apagado (CONECTANDO_WIFI) y escaneo")
+        t0 = time.time()
+        tb.serial_reset(dut_slot)
+        time.sleep(5)
+        nets = tb.scan().get("networks") or []
+        clima = sorted({n.get("ssid") for n in nets if str(n.get("ssid", "")).startswith("clima-")})
+        hay_redes = len(nets)
+        # 2. CONECTANDO_BROKER (con IP en la red del banco): GET a la IP del DUT
+        ap_on = False
+        try:
+            c.step("El banco levanta el AP desechable; tras T08, GET http://<ip-dut>/ por el relé")
+            tb.ap_start(ap_ssid, ap_clave, channel=1); ap_on = True
+            vistas = esperar_lineas(tb, dut_slot, t0, ["con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)"], timeout=90)
+            ipl = next((m.group(1) for e in vistas for m in [re.search(r"sta ip: (192\.168\.4\.\d+)", e["text"])] if m), None)
+            control = rechazo = None
+            if ipl:
+                time.sleep(3)
+                try:   # control positivo: el relé llega a la red del AP (el propio banco en 192.168.4.1)
+                    control = tb.http_get("http://192.168.4.1:8080/api/info", timeout=5).status_code
+                except Exception as e:
+                    control = f"error {type(e).__name__}"
+                try:
+                    r = tb.http_get(f"http://{ipl}/", timeout=5)
+                    rechazo = ("respuesta", r.status_code)
+                except Exception as e:
+                    rechazo = ("sin respuesta", str(e)[:160])
+        finally:
+            if ap_on:
+                tb.ap_stop()
+        vistas = esperar_lineas(tb, dut_slot, t0, [], timeout=0)
+        c.save_log("serie", [c._r(e["text"]) for e in vistas])
+        c.note("", "## Resultado", "", f"- escaneo en CONECTANDO_WIFI: {hay_redes} redes, clima-*: {clima or 'ninguna'}",
+               f"- IP del DUT tras T08: `{ipl}`", f"- control positivo del relé (GET al banco por la red del AP): {control}",
+               f"- GET http://<ip-dut>/: {rechazo}")
+        assert hay_redes > 0, "el escaneo no vio ninguna red: no sirve como observación (control positivo)"
+        assert ssid_portal not in clima, "el AP del portal aparece con el nodo configurado"
+        assert ipl, "el DUT no obtuvo IP en la red del banco (T08 no llegó)"
+        assert control == 200, f"el relé no llega a la red del AP ({control}): la observación del rechazo sería nula"
+        assert rechazo and rechazo[0] == "sin respuesta", f"el DUT respondió por HTTP fuera del portal: {rechazo}"
+        c.passed(f"sin clima-* en el escaneo y GET a {ipl} sin respuesta HTTP")

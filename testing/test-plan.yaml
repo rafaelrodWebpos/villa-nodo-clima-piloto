@@ -596,6 +596,20 @@ tests:
       intervalos 1,0 · 2,0 · 4,0 · 8,0 · 16,0 · 32,0 · 60,0 · 60,0 · 60,0 · 60,0 s
       en el reloj del DUT; sin AP ni reinicio. En la misma ejecución pasaron
       también TC-POR-02/05/07/09 y TC-SEN-03
+  - id: TC-CON-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [T07]
+    needs: [bench-driver, bench-flash, bench-portal-driver, bench-serial-monitor, dut-board]
+    expect: >
+      fila bench de T07 (§6.6, fila T01–T10): con un primer envío válido hacia
+      una red inexistente (VALIDANDO hasta T06), un segundo envío responde
+      «ocupado» (id estado-ocupado), con una línea con: VALIDANDO -> VALIDANDO
+      (envío), un solo «wifi: intento 1» y sin escribir la NVS
+    impl: tests/bench/test_con.py::test_tc_con_07_busy_while_validating
   - id: TC-CON-06
     shape: atomic
     kind: standard
@@ -1087,6 +1101,20 @@ tests:
     commit: 9dbe5a9
     date: 2026-11-06
     ci_run: 42144397227   # host tests + secret scan, job config-checks
+  - id: TC-POR-11
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-POR-07]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-serial-monitor, dut-board]
+    expect: >
+      configurado: en CONECTANDO_WIFI ningún SSID clima-* en el escaneo (con
+      redes vistas como control) y, en CONECTANDO_BROKER con IP en la red del
+      banco, GET http://<ip-dut>/ sin respuesta HTTP, con el relé llegando a
+      la red del AP (control positivo)
+    impl: tests/bench/test_por.py::test_tc_por_11_no_portal_when_configured
   - id: TC-SEC-01
     shape: atomic
     kind: security

@@ -116,3 +116,55 @@ def test_tc_con_06_never_portal(testbench, dut_slot, dut_mac, firmware, run_dir,
         # E1 («nodo: boot: … fw=»), no las líneas del bootloader de 2.ª etapa («boot: ESP-IDF …»)
         assert sum("boot: " in e["text"] and " fw=" in e["text"] for e in lineas) <= 1, "el nodo se reinició en la ventana"
         c.passed(f"{len(cons)} líneas con:, todas hacia CONECTANDO_WIFI; el AP del portal no apareció en {ESCANEOS_CON06} escaneos")
+
+
+def test_tc_con_07_busy_while_validating(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-CON-07 · T07 (bench) — un segundo envío en VALIDANDO responde «ocupado», escribe
+    con: VALIDANDO -> VALIDANDO (envío) y no inicia una segunda prueba."""
+    from urllib.parse import urlencode
+    from benchlib import _after_last_reset, _boot_capture, borrar_nvs, unirse_al_portal
+    import pytest
+    tb = testbench
+    ssid_portal = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    with case(tb, "TC-CON-07", "Ocupado mientras valida", run_dir, spec="TC-CON villa-nodo-clima-piloto") as c:
+        c.note(f"- imagen: `{firmware['version']}` (variante {firmware['variant']}, run CI {firmware['ci_run']})",
+               "- red del envío: ficticia (`red-que-no-existe`), así que el DUT sigue en VALIDANDO hasta T06", "")
+        c.step(f"Precondiciones: grabar la imagen de la CI en {dut_slot}, P-NVS-ERASE y PORTAL")
+        res = tb.flash(dut_slot, _parse_flash_args(firmware["dir"] / "coldflash"), chip="esp32s3")
+        assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        borrar_nvs(tb, dut_slot, tmp_path)
+        boot = _after_last_reset(_boot_capture(tb, dut_slot, "con: ARRANQUE -> PORTAL"))
+        if not any("con: ARRANQUE -> PORTAL" in ln for ln in boot):
+            pytest.skip("not done: el DUT no arrancó en PORTAL tras P-NVS-ERASE")
+        form = {"wifi_ssid": "red-que-no-existe", "wifi_pass": "clave-de-prueba", "mqtt_host": "broker.local",
+                "mqtt_port": "1883", "mqtt_user": "", "mqtt_pass": "", "sitio": "sitio1", "zona": "zona1"}
+        cab = {"Content-Type": "application/x-www-form-urlencoded"}
+        t0 = time.time()
+        joined = False
+        try:
+            time.sleep(2)
+            unirse_al_portal(tb, ssid_portal, c)
+            joined = True
+            c.step("Primer POST / válido (T04) y, enseguida, un segundo POST (T07)")
+            r1 = tb.http_request("POST", "http://192.168.4.1/", headers=cab, body=urlencode(form).encode(), timeout=10)
+            r2 = tb.http_request("POST", "http://192.168.4.1/", headers=cab, body=urlencode(form).encode(), timeout=10)
+        finally:
+            if joined:
+                tb.sta_leave()
+        vistas = _unicas(esperar_lineas(tb, dut_slot, t0, ["con: VALIDANDO -> PORTAL (wifi_down)"], timeout=40))
+        c.save_log("serie", [c._r(e["text"]) for e in vistas])
+        textos = [e["text"] for e in vistas]
+        n_t04 = sum("con: PORTAL -> VALIDANDO (envío)" in t for t in textos)
+        n_t07 = sum("con: VALIDANDO -> VALIDANDO (envío)" in t for t in textos)
+        n_i1 = sum("wifi: intento 1" in t and "wifi: intento 1" == t.split("nodo: ")[-1].strip() for t in textos)
+        c.note("", "## Resultado", "", f"- 1.er POST: HTTP {r1.status_code}, probando={'id=\"estado-probando\"' in r1.text}",
+               f"- 2.º POST: HTTP {r2.status_code}, ocupado={'id=\"estado-ocupado\"' in r2.text}",
+               f"- líneas T04: {n_t04}, T07: {n_t07}, «wifi: intento 1»: {n_i1}",
+               f"- T06 al final: {'sí' if any('con: VALIDANDO -> PORTAL (wifi_down)' in t for t in textos) else 'no'}")
+        assert 'id="estado-probando"' in r1.text, "el primer envío no responde «probando» (T04)"
+        assert r2.status_code == 200 and 'id="estado-ocupado"' in r2.text, "el segundo envío no responde «ocupado» (T07)"
+        assert n_t04 == 1 and n_t07 == 1, f"T04 {n_t04} y T07 {n_t07} veces; se espera una de cada"
+        assert n_i1 == 1, f"«wifi: intento 1» {n_i1} veces: el segundo envío inició otra prueba"
+        assert not any("nvs: config escrita" in t for t in textos), "se escribió la NVS"
+        c.passed("el segundo envío en VALIDANDO respondió «ocupado», con su línea T07 y sin segunda prueba")
