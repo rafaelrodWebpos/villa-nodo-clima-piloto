@@ -942,6 +942,28 @@ tests:
       control positivo del corte), muestra cfg: sitio=sitio1 zona=zona1 y
       con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque); nunca el portal
     impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # necesita al propietario en el banco
+    status: not done
+    last_run:
+      commit: 9bcc519
+      date: 2026-11-06
+      outcome: skipped (not done) tras el corte 1
+      evidence: test-results/20261106T030110Z-9bcc519/TC-CFG-02.md
+      observed: >
+        precondición cumplida (imagen grabada, DUT configurado contra un AP
+        desechable, AP apagado). El propietario hizo el corte 1 (desenchufar el
+        único USB-C, 5 s, reenchufar en el mismo puerto de la Pi) y pulsó
+        «Hecho»; en 40 s el buffer serie del slot no tenía ninguna línea boot:
+        del arranque. Después del test el banco lista SLOT1 presente e «idle»
+    hypothesis: >
+      el monitor serie del banco no se reengancha solo cuando el devnode
+      desaparece y vuelve al reenchufar el USB (el slot queda idle), así que el
+      arranque tras el corte no llega al buffer. No es un fallo del DUT
+    next: >
+      diagnosticar antes de repetir (decisión del propietario, 2026-11-06):
+      estado del slot y de /api/serial antes y después de un corte; si el
+      monitor necesita reabrirse, ver si TestbenchDriver lo hace (o pedirlo
+      al testbench con un CR); que el test guarde el buffer serie también
+      cuando sale not done
   - id: TC-SEN-01
     shape: atomic
     kind: standard
