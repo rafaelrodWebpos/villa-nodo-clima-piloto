@@ -819,6 +819,10 @@ tests:
       larga sale cortada con la marca « [cortada]» y lo que sobra no contamina la
       siguiente
     impl: tests/host/test_udplog_lineas.c
+    status: successful
+    commit: 0d3da79
+    date: 2026-11-05
+    ci_run: 42110797953   # host tests + secret scan
   - id: TC-LOG-03
     shape: atomic
     kind: standard
@@ -867,6 +871,10 @@ tests:
     expect: >
       tramas (S_T, S_RH) = (0, 0), (65535, 65535) y (0x6666, 0x8000) con su CRC dan T = −45 / 130 / 25,00 °C y HR = 0 / 100 (recortadas) / 56,50 %; CRC(0xBEEF) = 0x92; ninguna HR fuera de [0, 100]
     impl: tests/host/test_sht41.c (sen01)
+    status: successful
+    commit: 5f93e6d
+    date: 2026-11-05
+    ci_run: 42132868016   # host tests + secret scan
   - id: TC-SEN-02
     shape: atomic
     kind: standard
@@ -878,6 +886,10 @@ tests:
     expect: >
       una trama con el CRC de T o el de HR alterado, o con un dato alterado, es inválida (crc) y no escribe ninguna de las dos medidas
     impl: tests/host/test_sht41.c (sen02)
+    status: successful
+    commit: 5f93e6d
+    date: 2026-11-05
+    ci_run: 42132868016   # host tests + secret scan
   - id: TC-MED-03
     shape: atomic
     kind: standard
@@ -889,6 +901,10 @@ tests:
     expect: >
       200 pares (T, HR) en una rejilla de 20 × 10 sobre T ∈ [−10, 50] °C y HR ∈ [1, 100] %, extremos incluidos: |Td − Td_ref| ≤ 0,1 °C con la referencia en doble de §5.4; ningún NaN ni infinito
     impl: tests/host/test_medicion.c (med03)
+    status: successful
+    commit: 5f93e6d
+    date: 2026-11-05
+    ci_run: 42132868016   # host tests + secret scan
   - id: TC-MED-04
     shape: atomic
     kind: standard
@@ -900,6 +916,10 @@ tests:
     expect: >
       HR = 0 y una lectura inválida dan «no publicar punto_rocio» (Td=- en E3, «med: invalida (…)»), también después de una lectura con Td
     impl: tests/host/test_medicion.c (med04)
+    status: successful
+    commit: 5f93e6d
+    date: 2026-11-05
+    ci_run: 42132868016   # host tests + secret scan
   - id: TC-MED-05
     shape: atomic
     kind: standard
@@ -911,6 +931,10 @@ tests:
     expect: >
       21,45 · −0,05 · 21,449 · 99,96 (float32) → 21,5 · −0,1 · 21,4 · 100,0; −0,04 → 0,0 sin signo; la línea E3 usa los valores redondeados con 1 decimal
     impl: tests/host/test_medicion.c (med05)
+    status: successful
+    commit: 5f93e6d
+    date: 2026-11-05
+    ci_run: 42132868016   # host tests + secret scan
   - id: TC-SEN-03
     shape: atomic
     kind: standard
@@ -924,6 +948,15 @@ tests:
       (E3) con T ∈ [0, 50] °C, la primera ya tras el arranque, y ninguna
       «med: invalida (…)»
     impl: tests/bench/test_sen.py::test_tc_sen_03_three_cycles
+    status: successful
+    commit: 3ddee73
+    date: 2026-11-06
+    evidence: >
+      test-results/20261106T000523Z-3ddee73/TC-SEN-03.md: imagen de banco del run CI
+      42133869815 en SLOT1; med: en I (508), I (60508) e I (120508) (60 s en el
+      reloj del DUT), T = 30,1 °C, HR ≈ 72 %, Td = 24,4, ninguna inválida, la
+      primera ya tras el arranque. La ejecución sobre 5f93e6d no cuenta: contó
+      dos veces una línea repetida por el buffer del banco (corregido en 3ddee73)
   - id: TC-HW-04
     shape: atomic
     kind: standard
