@@ -15,6 +15,13 @@ AVISO = ("Corte de alimentación {n} de {total} (TC-CFG-02): desenchufa el cable
          "espera 5 segundos y vuelve a enchufarlo en el mismo puerto de la Pi. Después pulsa «Hecho».")
 
 
+def _estado_slot(tb, slot):
+    """Estado del slot y de su monitor serie (diagnóstico del reenganche tras el corte)."""
+    s = tb.get_slot(slot)
+    campos = ("present", "running", "pid", "devnode", "devnodes", "state", "flapping", "recovering", "last_error")
+    return [f"  - slot: " + ", ".join(f"{k}={s.get(k)}" for k in campos)]
+
+
 def test_tc_cfg_02_power_cuts(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
     """TC-CFG-02 · FR-CFG-01 (fila de cortes) — 5 cortes de alimentación: cada arranque
     muestra cfg: con el mismo sitio y zona y con: ARRANQUE -> CONECTANDO_WIFI; nunca el portal."""
@@ -31,9 +38,19 @@ def test_tc_cfg_02_power_cuts(testbench, dut_slot, dut_mac, firmware, run_dir, t
         for n in range(1, CORTES + 1):
             c.step(f"Corte {n}/{CORTES}: aviso al operador")
             t_aviso = time.time()
-            if not tb.human_interaction(AVISO.format(n=n, total=CORTES), timeout=ESPERA_AVISO_S):
-                pytest.skip(f"not done: el operador no confirmó el corte {n} (cancelado o {ESPERA_AVISO_S} s)")
+            try:
+                ok = tb.human_interaction(AVISO.format(n=n, total=CORTES), timeout=ESPERA_AVISO_S)
+            except Exception as e:   # CommandTimeout: la respuesta no llegó aunque el banco registre «confirmed» (CR-TB-11)
+                ok = False
+                c.note(f"- corte {n}: el aviso no devolvió respuesta ({type(e).__name__})")
+            if not ok:
+                vistas = esperar_lineas(tb, dut_slot, t_aviso, [], timeout=0)
+                c.save_log(f"corte{n}", [c._r(e["text"]) for e in vistas])
+                pytest.skip(f"not done: sin confirmación del corte {n} (cancelado, agotado o sin respuesta)")
             vistas = esperar_lineas(tb, dut_slot, t_aviso, ["con: ARRANQUE -> "], timeout=40)
+            # La evidencia se guarda antes de decidir: también cuando el corte sale not done
+            c.save_log(f"corte{n}", [c._r(e["text"]) for e in vistas])
+            c.note(f"- corte {n}: {len(vistas)} líneas en el buffer del slot desde el aviso", *_estado_slot(tb, dut_slot))
             boots = [e for e in vistas if "boot: " in e.get("text", "") and " fw=" in e.get("text", "")]
             if not boots:
                 pytest.skip(f"not done: la consola no capturó el arranque tras el corte {n} (instrumento, no el DUT)")
@@ -43,7 +60,6 @@ def test_tc_cfg_02_power_cuts(testbench, dut_slot, dut_mac, firmware, run_dir, t
             cfg = primera(tras, "cfg: ")
             con = primera(tras, "con: ARRANQUE -> ")
             resultados.append((n, boot, cfg["text"].strip() if cfg else None, con["text"].strip() if con else None))
-            c.save_log(f"corte{n}", [c._r(e["text"]) for e in vistas])
         c.note("", "## Resultado", "", *[f"- corte {n}: `{re.sub(r'^.*boot: ', 'boot: ', b)}` · "
                                          f"`{(g or 'sin cfg:').split('nodo: ')[-1]}` · `{(k or 'sin con:').split('nodo: ')[-1]}`"
                                          for n, b, g, k in resultados])

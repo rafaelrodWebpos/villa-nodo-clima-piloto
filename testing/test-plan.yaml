@@ -185,7 +185,8 @@ capabilities:
     reason: >
       el banco reporta EN/BOOT por GPIO (has_gpio, gpio_wired sin determinar),
       no corte de alimentación; el corte lo hace el operador desenchufando el
-      USB-C (bench-operator-prompt)
+      USB-C (bench-operator-prompt), pero tras el corte la captura serie vuelve
+      ~2 s después del arranque y pierde boot:/cfg:/con: — petición CR-TB-10
   bench-portal-dns:
     what: >
       que el relé HTTP del banco, unido al AP de un DUT, resuelva los nombres con
@@ -955,15 +956,23 @@ tests:
         «Hecho»; en 40 s el buffer serie del slot no tenía ninguna línea boot:
         del arranque. Después del test el banco lista SLOT1 presente e «idle»
     hypothesis: >
-      el monitor serie del banco no se reengancha solo cuando el devnode
-      desaparece y vuelve al reenchufar el USB (el slot queda idle), así que el
-      arranque tras el corte no llega al buffer. No es un fallo del DUT
+      (2026-11-06, descartada por el diagnóstico) el monitor serie no se
+      reengancha tras reenchufar; «idle» es el modo de reserva del slot, no el
+      estado del monitor
+    diagnosis: >
+      2026-11-06, un corte del propietario con muestreo a 1 Hz del slot, el
+      buffer y el log de actividad (sin tocar el DUT): USB remove 19:15:39, USB
+      add 19:15:53, el banco relanza el proxy solo ~2 s después (pid nuevo) y
+      la captura sigue sola; la primera línea capturada es «I (659) main_task:
+      Returned from app_main()». El DUT escribe boot:, cfg: y con: ARRANQUE en
+      ≈ 0,65 s, antes de que el puerto vuelva a abrirse: con este banco esas
+      líneas no se pueden capturar tras un corte (CR-TB-10). Además, «Human
+      confirmed» consta en el banco a las 19:15:56 pero el cliente acabó en
+      CommandTimeout (CR-TB-11). El test ya guarda el buffer y el estado del
+      slot antes de decidir, y trata el CommandTimeout como not done
     next: >
-      diagnosticar antes de repetir (decisión del propietario, 2026-11-06):
-      estado del slot y de /api/serial antes y después de un corte; si el
-      monitor necesita reabrirse, ver si TestbenchDriver lo hace (o pedirlo
-      al testbench con un CR); que el test guarde el buffer serie también
-      cuando sale not done
+      no repetir los 5 cortes hasta que el propietario decida cómo verificar
+      la fila de cortes de FR-CFG-01 (CR-TB-10, o el cambio en fsd_pending)
   - id: TC-SEN-01
     shape: atomic
     kind: standard
@@ -1159,6 +1168,13 @@ fsd_pending:
       intervalos suman 303 s más la duración de cada intento
   - from: checker puerta 01, c3ed691 (no bloqueante 5, ya existía)
     issue: SNTP en el alcance de la Fase 1 sin criterio de salida
+  - from: /build, diagnóstico de TC-CFG-02 (2026-11-06)
+    issue: >
+      la fila de cortes de alimentación de FR-CFG-01 (Fase 1) observa boot:,
+      cfg: y con: ARRANQUE en la consola, que el banco no puede capturar tras
+      un corte (CR-TB-10). Alternativa sin banco nuevo: observarla en la Fase 2
+      con el primer status tras cada corte (reset = poweron, publicado bajo
+      <sitio>/<zona>/…, sin portal). Pendiente de la decisión del propietario
   - from: /build, al escribir TC-CON-06 (2026-11-06)
     issue: >
       el contrato de FR-CON-06 (Fase 1) dice «aprovisionar y apagar ese AP»: con
