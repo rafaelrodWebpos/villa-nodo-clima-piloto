@@ -32,6 +32,8 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
         default: break;
         }
     }
+    if (origen == CON_CONECTANDO_WIFI && evento == CON_EV_WIFI_UP)
+        return (con_transicion_t){"T08", CON_CONECTANDO_BROKER, CON_ACC_RED_LISTA};
     return (con_transicion_t){NULL, origen, CON_ACC_NINGUNA};
 }
 

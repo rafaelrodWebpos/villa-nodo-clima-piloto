@@ -23,6 +23,7 @@ typedef enum {
     CON_ACC_PERSISTIR,         /* T05: persistir la configuración, responder con éxito y reiniciar */
     CON_ACC_RESPONDER_NO_CONECTA, /* T06: responder «no se pudo conectar» y descartar los datos */
     CON_ACC_RESPONDER_OCUPADO, /* T07: responder «ocupado» */
+    CON_ACC_RED_LISTA,         /* T08: reiniciar el backoff de Wi-Fi; arrancar SNTP y MQTT (Fase 2) */
 } con_accion_t;
 
 typedef struct {

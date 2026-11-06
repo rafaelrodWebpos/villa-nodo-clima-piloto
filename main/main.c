@@ -7,7 +7,8 @@
  * cautivo, HTTP, validación del envío) y la prueba de unión con su resultado
  * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
  * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
- * test: T08 (fila de la Fase 1), T09/T10 (backoff) y el resto de §6.3. El
+ * test: T09/T10 (backoff) y el resto de §6.3; T08 está en su parte de la
+ * Fase 1 (transición, E0, sin AP). El
  * ciclo de medición (FSD §5.4) lee el SHT41 cada 60 s en cualquier estado y
  * escribe E3; la publicación por MQTT es de la Fase 2.
  */
@@ -240,6 +241,15 @@ static void probar_union(void)
     intentar_union();
 }
 
+/* Acción de T08 (Fase 1): reiniciar el backoff de Wi-Fi; <n> de E4 vuelve a 1
+ * en el siguiente intento. Sin AP (T08, «No debe ocurrir»). El arranque de
+ * SNTP y del cliente MQTT es de la Fase 2 (FSD §3.2), y hasta T11 no se
+ * publica nada. */
+static void red_lista(void)
+{
+    s_intento = 0;
+}
+
 /* Acción de T05: persistir, responder con éxito y reiniciar. */
 static void persistir_y_reiniciar(void)
 {
@@ -355,6 +365,7 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_PERSISTIR:            persistir_y_reiniciar(); break;
     case CON_ACC_RESPONDER_NO_CONECTA: no_conecta(); break;
     case CON_ACC_RESPONDER_OCUPADO:    /* T07: la respuesta la da el adaptador del portal */ break;
+    case CON_ACC_RED_LISTA:            red_lista(); break;
     case CON_ACC_NINGUNA:              break;
     }
     /* E0 */

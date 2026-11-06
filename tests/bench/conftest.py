@@ -119,9 +119,11 @@ def firmware(request, commit_under_test, tmp_path_factory):
         remote = _git("ls-remote", "origin", "refs/heads/main").split()[0]
         if remote != commit_under_test:
             pytest.skip("not done: HEAD no es origin/main; sube el commit antes de pedir el build")
+        # La versión lleva el commit: el log del arranque prueba qué commit corre en la placa
+        ver_ci = f"0.0.0-{commit_under_test[:7]}"
         since = time.time() - 5
         _gh("workflow", "run", "build.yml", "--ref", "main",
-            "-f", f"variant={variant}", "-f", "version=0.0.0")
+            "-f", f"variant={variant}", "-f", f"version={ver_ci}")
         ci_run = None
         for _ in range(60):  # workflow_dispatch no devuelve el id: se busca el run nuevo
             time.sleep(3)
@@ -138,12 +140,13 @@ def firmware(request, commit_under_test, tmp_path_factory):
         subprocess.run(["gh", "run", "watch", ci_run, "--exit-status", "-R", GH_REPO],
                        check=True, capture_output=True)
         d = tmp_path_factory.mktemp("fw")
-        name = f"firmware-v0.0.0-{variant}" if variant != "production" else "firmware-v0.0.0"
+        name = f"firmware-v{ver_ci}-{variant}" if variant != "production" else f"firmware-v{ver_ci}"
         _gh("run", "download", ci_run, "-n", name, "-D", str(d))
     bins = sorted(d.glob("firmware_v*.bin"))
     assert len(bins) == 1 and (d / "coldflash" / "flash_args").is_file(), \
         f"artefacto incompleto en {d}: {[p.name for p in d.iterdir()]}"
     version = bins[0].stem[len("firmware_v"):]
+    # commit: el que la versión tiene que nombrar (None con --firmware-dir: la del tag)
     return {"dir": d, "version": version,
             "variant": "bench" if version.endswith("-bench") else "production",
-            "ci_run": ci_run}
+            "ci_run": ci_run, "commit": None if given else commit_under_test[:7]}

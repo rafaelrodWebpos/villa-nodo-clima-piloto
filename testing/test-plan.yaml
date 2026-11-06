@@ -413,7 +413,7 @@ tests:
     wave: 1
     phase: 1
     tier: bench
-    verifies: [T01, FR-LOG-02]
+    verifies: [T01, T08, FR-LOG-02]   # T08: su parte de la Fase 1 (FSD 0.9.3)
     needs: [bench-driver, bench-wifi-ap, bench-serial-monitor, bench-udp-log-receiver, dut-board]
     expect: >
       tras el reinicio, el log muestra boot:, cfg: sitio=<sitio enviado> zona=<zona enviada> y
@@ -421,7 +421,7 @@ tests:
       (con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)); el receptor UDP del
       banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
       del log serie en ≤ 1 s
-    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # xfail(strict): T08 (fila de la Fase 1, FSD 0.9.3); log UDP (0d3da79) y ciclo de medición (5f93e6d) hechos
+    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # sin xfail desde que T08 (Fase 1) está implementada
     status: not done
     reason: the feature is not implemented (T08 de la Fase 1)
     last_run:
@@ -543,7 +543,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
@@ -1028,6 +1028,29 @@ release_verify:
 
 # Comprobaciones de que cada nivel funciona. No verifican el FSD y no son tests
 # del plan; se listan para que la reconciliación no las tome por huérfanas.
+# Cambios del FSD pendientes para la próxima versión (regla del propietario,
+# 2026-11-05: una sola versión por ronda de checkers). No bloquean nada hoy.
+fsd_pending:
+  - from: checker puerta 01, c3ed691 (no bloqueante 1)
+    issue: >
+      §6.6 pone T18 en la fila de la Fase 2 (y el historial 0.9.3 lo repite),
+      pero §3.2 cita solo T11–T16 y §3.3 cita T17–T23; T18 (cmd_ota) es de la Fase 3
+  - from: checker puerta 01, c3ed691 (no bloqueante 2)
+    issue: >
+      la fila T01–T10 pide «su acción» observada con boot:/med:/wifi: intento/nvs:,
+      pero la acción de T08 (backoff, SNTP, MQTT) no se ve con esas líneas; aclarar
+      que en T08 la Fase 1 observa solo la transición y «no abrir el AP»
+  - from: checker puerta 01, c3ed691 (no bloqueante 3)
+    issue: >
+      la observación del reinicio del backoff de T08 (Fase 2, tras T14) no exige
+      fallos previos que lo hayan subido, no dice desde qué línea se mide, y su
+      ±10 % no casa con la regla general «≤ backoff vigente + 1 s»
+  - from: checker puerta 01, c3ed691 (no bloqueante 4, ya existía)
+    issue: >
+      la fila Wi-Fi de FR-CON-02 («AP apagado 5 min») tiene poco margen: los 10
+      intervalos suman 303 s más la duración de cada intento
+  - from: checker puerta 01, c3ed691 (no bloqueante 5, ya existía)
+    issue: SNTP en el alcance de la Fase 1 sin criterio de salida
 tier_checks:
   - impl: tests/host/tier_smoke.c
     proves: el nivel host compila y ejecuta en CI
@@ -1223,3 +1246,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "FSD 0.9.2; sin bloqueantes. No bloqueantes: la fila bench de T08 en §6.6 nombra el broker real (la Fase 1 se verifica sin él); el reinicio del backoff en la Fase 1 depende en la práctica de T14 (Fase 2); SNTP en el alcance de la Fase 1 sin criterio de salida; C-HW-*/C-BLD-* fuera de los criterios de salida; D19 fuera de orden; baseline_commit sin hash; JRN-01.3 aún dice «T08 pendiente de /define»"}
   - {gate: 02-ai-harnessed, verdict: SHUT, date: 2026-11-05, commit: 69dea7c,
      findings: "fila 6: «esqueleto, sin components/» (test ! -d components, rc 1) frente a los componentes de la Fase 3; la comprobación de bench-driver falla porque gh run view --log sale vacío con gh 2.46 (el run 41552251499 es correcto por la API de jobs)"}
+  - {gate: 01-load-defined, verdict: OPEN, date: 2026-11-05, commit: c3ed691,
+     findings: "FSD 0.9.3; sin bloqueantes. No bloqueantes (en fsd_pending): T18 etiquetado Fase 2 en §6.6 frente a §3; «su acción» de T08 en la fila T01–T10; observación del reinicio del backoff tras T14 sin fallos previos ni línea de inicio; margen de la fila Wi-Fi de FR-CON-02; SNTP en la Fase 1 sin criterio"}
+  - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-11-05, commit: c3ed691,
+     findings: "sin bloqueantes; fila 6 con mal []; bench-driver ok por la API de jobs; posición derivada sin preguntar: Fase 3, ola 1, siguiente T08 de la Fase 1 para JRN-01.3. No bloqueantes: T08 en ningún verifies; xfail de JRN-01.3 desfasado; TC-CFG-01/TC-HW-04 sin ejecutable; build/SKILL.md:82 «agenda abierta → Fase 2» al pie de la letra; testbench.reported en 2026-11-02"}

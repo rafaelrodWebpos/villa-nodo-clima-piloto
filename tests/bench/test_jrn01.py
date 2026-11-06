@@ -70,6 +70,9 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
             assert not has_marker, f"{bench_image_marker} aparece en la imagen de producción (C-LOG-01)"
         assert has_init, f"«{boot_marker}» no aparece en el arranque"
         assert firmware["version"] in ver, f"el log no muestra la versión {firmware['version']}"
+        if firmware["commit"]:   # build de la CI pedido por el test: la versión nombra el commit
+            c.note(f"- commit en la versión del arranque: `{firmware['commit']}`")
+            assert f"-{firmware['commit']}" in ver, f"la placa no corre el commit {firmware['commit']}: «{ver.strip()}»"
         mk = bench_image_marker if firmware["variant"] == "bench" else f"sin {bench_image_marker}"
         c.passed(f"{firmware['version']} arranca: {mk} + {boot_marker}")
 
@@ -218,7 +221,7 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
 
 
 # --------------------------------------------------------------------------
-# JRN-01.3 · T01, FR-LOG-02 (+ la línea de T08: ver /define)
+# JRN-01.3 · T01, T08 (parte de la Fase 1, FSD 0.9.3), FR-LOG-02
 # --------------------------------------------------------------------------
 T01_LIMIT_MS = 2000           # T01 (D21): desde la línea boot:
 UDP_RETARDO_S = 1.0           # FR-LOG-02
@@ -231,7 +234,6 @@ def _ms(linea):
     return int(m.group(1)) if m else None
 
 
-@pytest.mark.xfail(strict=True, reason="T08 (pendiente de /define), log UDP (FR-LOG-02) y ciclo de medición sin implementar")
 def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
     """JRN-01.3 — tras el reinicio, el nodo configurado arranca el STA (T01), se une al AP
     del banco y copia su log por UDP al receptor del banco (FR-LOG-02) durante 3 ciclos."""
@@ -277,8 +279,9 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         assert not any("softAP" in t for t in textos if "wifi:mode" in t), "T01 abrió el AP (prohibido)"
         assert not primera(vistas, "con: ARRANQUE -> PORTAL"), "el nodo configurado volvió a PORTAL"
 
-        # T08: la unión al AP del banco (ver la propuesta para /define sobre su fase)
+        # T08 (Fase 1): su línea con: en ≤ 30 s y sin AP; MQTT y SNTP son de la Fase 2
         assert t_ip, "falta con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up) en 30 s"
+        assert not primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO"), "OPERATIVO sin broker (T11 en la Fase 1)"
 
         # FR-LOG-02: «UDP logging -> host:port» y cada línea serie en el receptor en ≤ 1 s
         def txt(u): return str(u.get("text", "") if isinstance(u, dict) else u).strip()
@@ -294,6 +297,6 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         c.note(f"- {len(tras_ip)} líneas serie tras obtener IP; perdidas {len(perdidas)}, tarde {len(tarde)}")
         assert not perdidas, f"{len(perdidas)} líneas serie sin copia UDP (FR-LOG-02)"
         assert not tarde, f"{len(tarde)} líneas llegaron por UDP más de {UDP_RETARDO_S} s tarde"
-        meds = [t for t in textos if "nodo: med: " in t]
+        meds = sorted({t.strip() for t in textos if "nodo: med: " in t})   # el buffer del banco puede repetir una línea
         assert len(meds) >= CICLOS, f"solo {len(meds)} ciclos de medición en la ventana"
         c.passed(f"T01 en {t01} ms, unido al AP del banco, log UDP completo en {CICLOS} ciclos")

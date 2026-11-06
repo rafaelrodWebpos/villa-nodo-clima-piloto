@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T07.
+/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T08.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -58,6 +58,16 @@ int main(void)
         ESPERA(t.accion != CON_ACC_PROBAR_UNION, "T07 inicia una segunda prueba");
     }
 
+    /* T08: CONECTANDO_WIFI + wifi_up -> CONECTANDO_BROKER; reiniciar el backoff de Wi-Fi
+     * (y, en la Fase 2, arrancar SNTP y MQTT). No debe: abrir el AP; publicar antes de T11 */
+    t = con_transicion(CON_CONECTANDO_WIFI, CON_EV_WIFI_UP, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T08") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_BROKER, "siguiente %d", t.siguiente);
+    ESPERA(t.accion == CON_ACC_RED_LISTA, "acción %d", t.accion);
+    ESPERA(t.accion != CON_ACC_ARRANCAR_PORTAL, "T08 abre el AP");
+    ESPERA(t.siguiente != CON_OPERATIVO, "T08 pasa a OPERATIVO sin T11");
+    ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_BROKER), "CONECTANDO_BROKER") == 0, "nombre CONECTANDO_BROKER");
+
     /* Fuera de VALIDANDO, wifi_up/wifi_down no tienen fila todavía (no se inventa) */
     t = con_transicion(CON_PORTAL, CON_EV_WIFI_DOWN, (con_guardas_t){0});
     ESPERA(t.fila == NULL && t.accion == CON_ACC_NINGUNA, "PORTAL + wifi_down tiene fila %s", t.fila ? t.fila : "NULL");
@@ -72,6 +82,6 @@ int main(void)
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_WIFI), "CONECTANDO_WIFI") == 0, "nombre CONECTANDO_WIFI");
     ESPERA(strcmp(con_nombre_evento(CON_EV_FIN_ARRANQUE), "fin_arranque") == 0, "nombre fin_arranque");
 
-    printf("TC-CON-01 (T01–T07): %s\n", fallos ? "FALLO" : "ok");
+    printf("TC-CON-01 (T01–T08): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }
