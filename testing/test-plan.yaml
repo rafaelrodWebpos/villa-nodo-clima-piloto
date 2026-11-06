@@ -915,6 +915,20 @@ tests:
       revisión de sdkconfig.defaults, Kconfig y el código: los 7 campos de cadena
       de §17 arrancan en «ninguno» o vacíos y ningún prefijo de tópico es literal
     impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_cfg_01.py)   # detecta los tres casos plantados (Kconfig, defaults, tópico)
+  - id: TC-CFG-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-CFG-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-serial-monitor, bench-operator-prompt, dut-board]
+    expect: >
+      configurado (benchlib.aprovisionar), 5 cortes de alimentación hechos por el
+      operador al aviso del banco: cada arranque es un encendido (reset=poweron,
+      control positivo del corte), muestra cfg: sitio=sitio1 zona=zona1 y
+      con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque); nunca el portal
+    impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # necesita al propietario en el banco
   - id: TC-SEN-01
     shape: atomic
     kind: standard
