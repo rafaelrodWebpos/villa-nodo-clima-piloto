@@ -31,6 +31,7 @@
 
 #include "conectividad.h"
 #include "conectividad_backoff.h"
+#include "diag_reset.h"
 #include "identidad.h"
 #include "medicion.h"
 #include "sht41.h"
@@ -86,17 +87,26 @@ static con_transicion_t transicion(con_evento_t ev, con_guardas_t g)
 }
 
 /* Valores de `reset` de §9.3. */
+/* Traducción de esp_reset_reason() a la causa de §9.3 (FSD 0.9.4); el nombre lo da
+ * diag_reset (núcleo puro, TC-DIAG-01). Lo que no tiene valor propio es «otro». */
 static const char *causa_reset(void)
 {
+    diag_reset_t c;
     switch (esp_reset_reason()) {
-    case ESP_RST_POWERON:  return "poweron";
-    case ESP_RST_SW:       return "sw";
-    case ESP_RST_PANIC:    return "panic";
-    case ESP_RST_TASK_WDT: return "task_wdt";
-    case ESP_RST_INT_WDT:  return "int_wdt";
-    case ESP_RST_BROWNOUT: return "brownout";
-    default:               return "otro";
+    case ESP_RST_POWERON:   c = DIAG_RESET_POWERON; break;
+    case ESP_RST_EXT:       c = DIAG_RESET_EXT; break;
+    case ESP_RST_SW:        c = DIAG_RESET_SW; break;
+    case ESP_RST_PANIC:     c = DIAG_RESET_PANIC; break;
+    case ESP_RST_TASK_WDT:  c = DIAG_RESET_TASK_WDT; break;
+    case ESP_RST_INT_WDT:   c = DIAG_RESET_INT_WDT; break;
+    case ESP_RST_WDT:       c = DIAG_RESET_WDT; break;
+    case ESP_RST_DEEPSLEEP: c = DIAG_RESET_DEEPSLEEP; break;
+    case ESP_RST_BROWNOUT:  c = DIAG_RESET_BROWNOUT; break;
+    case ESP_RST_USB:       c = DIAG_RESET_USB; break;
+    case ESP_RST_JTAG:      c = DIAG_RESET_JTAG; break;
+    default:                c = DIAG_RESET_OTRO; break;
     }
+    return diag_reset_nombre(c);
 }
 
 /* E1: «boot: <nodo> fw=<versión> reset=<causa> part=<slot> img=<pendiente|valida>» */

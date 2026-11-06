@@ -74,3 +74,8 @@ add_test(NAME TC-MED-05 COMMAND test_medicion med05)
 add_executable(test_backoff test_backoff.c ${COMP}/conectividad/conectividad_backoff.c)
 target_include_directories(test_backoff PRIVATE ${COMP}/conectividad/include)
 add_test(NAME TC-CON-02 COMMAND test_backoff)
+
+# TC-DIAG-01 · FR-MQTT-08 (valores de `reset` de §9.3, también en E1)
+add_executable(test_diag_reset test_diag_reset.c ${COMP}/diagnostico/diag_reset.c)
+target_include_directories(test_diag_reset PRIVATE ${COMP}/diagnostico/include)
+add_test(NAME TC-DIAG-01 COMMAND test_diag_reset)

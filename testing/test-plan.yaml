@@ -1137,6 +1137,19 @@ tests:
     ci_run: 42282560803   # build.yml, workflow_dispatch variant=bench version=0.0.0-324179c
     evidence: >
       test-results/20261106T194930Z-324179c/: en CONECTANDO_WIFI 7 redes vistas y ningún clima-*; tras T08 (IP 192.168.4.11) GET http://<ip-dut>/ → «[Errno 111] Connection refused», con el relé llegando al banco por la red del AP (200)
+  - id: TC-DIAG-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-MQTT-08]
+    needs: [hosted-ci]
+    expect: >
+      cada causa de reinicio tiene el nombre de §9.3 (FSD 0.9.4): poweron, ext,
+      sw, panic, task_wdt, int_wdt, wdt, deepsleep, brownout, usb, jtag, otro;
+      un valor fuera de la enumeración da «otro» (también en E1)
+    impl: tests/host/test_diag_reset.c
   - id: TC-SEC-01
     shape: atomic
     kind: security
@@ -1452,3 +1465,7 @@ gate_verdicts:   # [{gate, verdict, date, commit}] — los escribe el checker
      findings: "FSD 0.9.3; sin bloqueantes. No bloqueantes (en fsd_pending): T18 etiquetado Fase 2 en §6.6 frente a §3; «su acción» de T08 en la fila T01–T10; observación del reinicio del backoff tras T14 sin fallos previos ni línea de inicio; margen de la fila Wi-Fi de FR-CON-02; SNTP en la Fase 1 sin criterio"}
   - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-11-05, commit: c3ed691,
      findings: "sin bloqueantes; fila 6 con mal []; bench-driver ok por la API de jobs; posición derivada sin preguntar: Fase 3, ola 1, siguiente T08 de la Fase 1 para JRN-01.3. No bloqueantes: T08 en ningún verifies; xfail de JRN-01.3 desfasado; TC-CFG-01/TC-HW-04 sin ejecutable; build/SKILL.md:82 «agenda abierta → Fase 2» al pie de la letra; testbench.reported en 2026-11-02"}
+  - {gate: 01-load-defined, verdict: SHUT, date: 2026-11-06, commit: e27d536,
+     findings: "FSD 0.9.4. Bloqueante: el contrato de FR-CON-05 (Fase 2) mide el plazo de 30 s desde la primera línea del bootloader o desde boot:, y la 0.9.4 reconoce (CR-TB-10) que el banco no captura ninguna de las dos tras un corte; las dependencias de la Fase 2 no citan bench-power-cycle. No bloqueantes: §3.1 «todo se verifica en host, target, bench y other» sin el nivel manual y sin bench-portal-dns en dependencias; dependencias de la Fase 1 citan aún bench-operator-prompt para cortes; NFR-SEN-01 usa «manual» en otro sentido; «backoff vigente ≥ 8 s» ambiguo con 3 fallos; FR-POR-02 pide /hotspot-detect.html sin fila de contrato; FR-ID-01 bench «3 reinicios» sin decir cómo; JRN-01.7 aún espera cfg:/con: por consola para FR-CFG-01"}
+  - {gate: 02-ai-harnessed, verdict: OPEN, date: 2026-11-06, commit: e27d536,
+     findings: "sin bloqueantes; mecánicas rc 0 (fila 1 con las de la puerta 01; fila 6 mal []). Posición derivada: Fase 3 ola 1; Fase 1 del FSD a falta de renovar H-40 (vencida); siguiente JRN-01.4 en xfail. No bloqueantes: reported_by de bench-flash dice running y en vivo idle; build/SKILL.md:82; next de TC-CFG-02 desfasado; gate_changes sin commit en 2026-11-02 y H-43; testbench.reported en 2026-11-02"}
