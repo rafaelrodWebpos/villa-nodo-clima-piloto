@@ -900,7 +900,7 @@ tests:
     expect: >
       revisión de sdkconfig.defaults, Kconfig y el código: los 7 campos de cadena
       de §17 arrancan en «ninguno» o vacíos y ningún prefijo de tópico es literal
-    impl: null   # declarado 2026-11-05 (H-43); el portal ya usa solo ejemplos genéricos
+    impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_cfg_01.py)   # detecta los tres casos plantados (Kconfig, defaults, tópico)
   - id: TC-SEN-01
     shape: atomic
     kind: standard
@@ -1009,7 +1009,7 @@ tests:
     expect: >
       revisión + grep en la CI: SDA = GPIO8, SCL = GPIO9 y 100 kHz en la única
       configuración del bus I²C (components/sht41/sht41.c)
-    impl: null   # declarado 2026-11-05 al escribir el driver (fila 6 de la puerta 02)
+    impl: .github/workflows/ci.yml#config-checks (scripts/ci/c_hw_04.py)   # detecta SDA ≠ 8, 400 kHz y un segundo bus plantados
   - id: TC-SEC-01
     shape: atomic
     kind: security

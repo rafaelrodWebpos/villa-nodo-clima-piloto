@@ -30,6 +30,15 @@ jobs:
           python3 -m pip install --quiet pyyaml==6.0.2
           python3 scripts/ci/plan_check.py testing/test-plan.yaml
 
+  config-checks:        # revisión + CI (nivel other): TC-CFG-01 · C-CFG-01, TC-HW-04 · C-HW-04/05
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: C-CFG-01 sin valores iniciales ni prefijos de tópico literales
+        run: python3 scripts/ci/c_cfg_01.py
+      - name: C-HW-04/05 bus I²C en GPIO8/9 a 100 kHz
+        run: python3 scripts/ci/c_hw_04.py
+
   secret-scan:          # FSD NFR-SEC-01 (repositorio público)
     runs-on: ubuntu-latest
     env:
