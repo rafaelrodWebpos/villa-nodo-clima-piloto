@@ -113,5 +113,6 @@ def test_tc_con_06_never_portal(testbench, dut_slot, dut_mac, firmware, run_dir,
         assert not otros, f"líneas con: hacia otro estado: {otros[:3]}"
         assert all(ssid_portal not in v for _, v in vistos), "el AP del portal apareció en el escaneo"
         assert ultimo >= (VENTANA_CON06_S - 60) * 1000, f"el log del DUT cubre solo {ultimo / 1000:.0f} s de la ventana"
-        assert sum("boot: " in e["text"] for e in lineas) <= 1, "el nodo se reinició en la ventana"
+        # E1 («nodo: boot: … fw=»), no las líneas del bootloader de 2.ª etapa («boot: ESP-IDF …»)
+        assert sum("boot: " in e["text"] and " fw=" in e["text"] for e in lineas) <= 1, "el nodo se reinició en la ventana"
         c.passed(f"{len(cons)} líneas con:, todas hacia CONECTANDO_WIFI; el AP del portal no apareció en {ESCANEOS_CON06} escaneos")
