@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.2
+fsd_version: 0.9.3
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -73,6 +73,12 @@ change_history:
     transición, su línea `con:`, el reinicio del backoff y «no abrir el AP» (lo que ya piden
     el contrato de FR-POR-06 y el journey de la Fase 1); la Fase 2, el arranque de SNTP y del
     cliente MQTT y «no publicar antes de T11». Sin cambios en requisitos ni contratos.
+  - 0.9.3 (2026-11-05): sin cambios en requisitos (propietario). La fila bench de §6.6 que
+    cubría T01–T16 y T18 con el broker se separa por fase: T01–T10 sin broker (Fase 1) y el
+    arranque de SNTP y MQTT de T08, T11–T16 y T18 con el broker (Fase 2). El reinicio del
+    backoff de Wi-Fi de T08 se verifica en la Fase 2, junto con T14, que es donde se observa.
+    La fila Wi-Fi de FR-CON-02 se verifica en la Fase 1 con el AP apagado desde el arranque
+    (T09/T10).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -274,9 +280,10 @@ Cada fase se entra solo con lo que entregaron las anteriores.
   aprobado, se une al Wi-Fi y registra las tres medidas por consola serie cada
   60 s.
 - **Criterios de salida.** Pasan FR-SEN-01, FR-SEN-02, FR-MED-03…05, FR-ID-01,
-  FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02 (host y Wi-Fi), FR-CON-06,
+  FR-POR-*, FR-CFG-01 (fila de cortes de alimentación), FR-CON-02 (host, y la fila Wi-Fi con
+  el AP apagado desde el arranque), FR-CON-06,
   NFR-SEC-01, C-CFG-01, C-LOG-01, FR-LOG-02 (fila del receptor), las filas T01–T07, T09 y T10, y T08 en su
-  transición, su línea `con:`, el reinicio del backoff y «no abrir el AP».
+  transición, su línea `con:` y «no abrir el AP».
   Todo se verifica en host, en target, en bench sin broker ni salida a Internet (log serie, AP
   del banco y su corte, escaneo Wi-Fi y portal manejados por el banco, receptor UDP y avisos al
   operador) y en other (CI); nada requiere MQTT.
@@ -297,8 +304,9 @@ Cada fase se entra solo con lo que entregaron las anteriores.
 - **Criterios de salida.** Pasan FR-MQTT-01…08, FR-HA-*, FR-MED-01, -02 y -06,
   FR-SEN-03, NFR-SEN-01, FR-CON-01, FR-CON-02 (fila bench de MQTT), FR-CON-03, -04 y -05,
   FR-TIME-*, NFR-WDT-01, FR-SEC-03, FR-LOG-01, FR-LOG-02 (fila de captura), FR-LOG-03,
-  C-LOG-02, la fila T08 en el arranque de SNTP y del cliente MQTT y «no publicar por MQTT
-  antes de T11», y las filas T11–T16.
+  C-LOG-02, la fila T08 en el arranque de SNTP y del cliente MQTT, en el reinicio del
+  backoff de Wi-Fi (se observa tras T14) y en «no publicar por MQTT antes de T11», y las
+  filas T11–T16.
 - **Dependencias.** Fase 1: la configuración del broker llega por el portal y
   la conexión, por el Wi-Fi de la Fase 1. Además, salida a Internet desde la
   red de prueba para SNTP con `pool.ntp.org` (FR-TIME-*, FR-MQTT-03; §22.0,
@@ -652,7 +660,8 @@ verification:
 | FR-CON-05 | Cortar y devolver la alimentación a un DUT configurado | Primera medida en vivo (retain = 0) en ≤ 30 s desde la primera línea del bootloader en la consola o, si la consola no la captura tras el corte, desde la línea `boot:` | Que pase por PORTAL | bench |
 | FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP; esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
 | T01–T23 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
-| T01–T16, T18 | Una prueba por fila con el portal, el AP y el broker reales del banco | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento`, `mqtt: intento`, `sntp:`, `ota: estado` y `nvs: config escrita` (§18) o con `status`, dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
+| T01–T10 | Una prueba por fila con el portal y el AP reales del banco, sin broker (Fase 1); tras T08 el DUT queda en CONECTANDO_BROKER | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento` y `nvs: config escrita` (§18), dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita`; en T08, el AP `clima-*` no aparece en el escaneo | Lo indicado en la columna «No debe ocurrir» de la fila; en T08, «abrir el AP» (la parte MQTT es de la fila siguiente) | bench |
+| T08 (arranque de SNTP y MQTT), T11–T16, T18 | Una prueba por fila con el AP y el broker reales del banco (Fase 2) | La línea `con:` de la fila (§18) y su acción, observada con `mqtt: intento`, `sntp:`, `wifi: intento`, `med:` y `ota: estado` (§18) o con `status`, dentro del límite; en T08, `sntp:` y `mqtt: intento 1` tras su línea `con:`, y el siguiente `wifi: intento` tras T14 a 1 s (±10 %) | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
 | T17, T19, T20 (imagen, misma_version, http), T21, T23 | Comandos OTA con releases y pre-releases `ota-test-*` reales del repo (§22.0) | La línea `con:` de la fila (en T23, `ota: rollback`) y su acción (`ota: estado`, `ota: imagen validada`, `ota: rollback`, `boot:`), dentro del límite; en T17 (descarga abortada por un reset) y T20, un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de la fila | bench⁺ · alt. field |
 | T20 (tls) | Como el contrato de FR-OTA-03 | `con: OTA_DESCARGA -> OPERATIVO (ota_err)` y `ota: estado error:tls` | Lo indicado en la columna «No debe ocurrir» de T20 | bench (`bench-dns-override`) |
 | T22 | Como el contrato de FR-OTA-08, y la misma prueba deteniendo el broker en lugar del AP | `con: OTA_DESCARGA -> CONECTANDO_WIFI (wifi_down)` o `con: OTA_DESCARGA -> CONECTANDO_BROKER (mqtt_down)` seguida de `ota: estado error:red`; el primer `status` al volver a OPERATIVO lleva `ota` = `error:red`; un reset posterior muestra `boot: … fw=A part=<slot de A>` | Lo indicado en la columna «No debe ocurrir» de T22 | bench⁺ (sin alternativa field) |

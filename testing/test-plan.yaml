@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.2
+fsd_version: 0.9.3
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -421,9 +421,9 @@ tests:
       (con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)); el receptor UDP del
       banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
       del log serie en ≤ 1 s
-    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # xfail(strict): T08 (fila de la Fase 1, FSD 0.9.2) y ciclo de medición; log UDP hecho (0d3da79)
+    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # xfail(strict): T08 (fila de la Fase 1, FSD 0.9.3); log UDP (0d3da79) y ciclo de medición (5f93e6d) hechos
     status: not done
-    reason: the feature is not implemented (T08 de la Fase 1 y ciclo de medición)
+    reason: the feature is not implemented (T08 de la Fase 1)
     last_run:
       commit: b19c553
       date: 2026-11-05
