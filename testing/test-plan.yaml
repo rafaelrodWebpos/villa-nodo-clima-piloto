@@ -327,10 +327,11 @@ tests:
       NODO-BENCH-IMAGE si es de producción (C-LOG-01)
     impl: tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
     status: successful
-    commit: 9c382b9
-    date: 2026-11-04
+    commit: 2af6ae9   # última ejecución verde (antes 9c382b9)
+    date: 2026-11-06
     runs:
-      - {variant: bench, ci_run: 41951568245, evidence: test-results/20261105T015612Z-9c382b9/}
+      - {variant: bench, ci_run: 42142970107, evidence: test-results/20261106T012123Z-2af6ae9/, note: "la versión 0.0.0-2af6ae9-bench nombra el commit y el test lo comprueba"}
+      - {variant: bench, ci_run: 41951568245, evidence: test-results/20261105T015612Z-9c382b9/, commit: 9c382b9}
       - {variant: production, ci_run: 41561334943, evidence: test-results/20261103T014326Z-bbe0cc2/, commit: bbe0cc2}
     observed: >
       flash por /api/flash en SLOT1 ok, returncode 0; tras el último rst: del
@@ -350,9 +351,9 @@ tests:
       del banco ve el SSID abierto clima-xxxxxx (xxxxxx de la MAC) en ≤ 10 s
     impl: tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
     status: successful
-    commit: 9c382b9
-    date: 2026-11-04
-    evidence: test-results/20261105T015612Z-9c382b9/
+    commit: 2af6ae9   # última ejecución verde (antes 9c382b9)
+    date: 2026-11-06
+    evidence: test-results/20261106T012123Z-2af6ae9/   # antes test-results/20261105T015612Z-9c382b9/
     observed: >
       AP abierto clima-f3c6d4 en el escaneo del banco a los 5,6 s desde la
       petición de reset (cota superior); T02 en 180 ms en el reloj del DUT
@@ -382,9 +383,9 @@ tests:
       ≤ 5 s desde esa línea y el nodo reinicia (boot:)
     impl: tests/bench/test_jrn01.py::test_jrn_01_2_provision
     status: successful
-    commit: 9c382b9
-    date: 2026-11-04
-    evidence: test-results/20261105T015612Z-9c382b9/
+    commit: 2af6ae9   # última ejecución verde (antes 9c382b9)
+    date: 2026-11-06
+    evidence: test-results/20261106T012123Z-2af6ae9/   # antes test-results/20261105T015612Z-9c382b9/
     manual_evidence: >
       H-42, propietario, 2026-11-05, sobre 9c382b9 (ELF 877fe62b2…, run
       41951568245), con el AP desechable del banco (<ssid-de-prueba>, canal 1) y un
@@ -421,19 +422,19 @@ tests:
       (con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)); el receptor UDP del
       banco recibe UDP logging -> <host>:<port> y, durante 3 ciclos, cada línea
       del log serie en ≤ 1 s
-    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log   # sin xfail desde que T08 (Fase 1) está implementada
-    status: not done
-    reason: the feature is not implemented (T08 de la Fase 1)
-    last_run:
-      commit: b19c553
-      date: 2026-11-05
-      outcome: xfail
-      evidence: test-results/20261105T205517Z-b19c553/
-      observed: >
-        T01 ya cumple: boot:, cfg: sitio=sitio1 zona=zona1, wifi:mode solo sta (sin
-        softAP), wifi: intento 1 a los 200 ms de boot: (límite 2000 ms) y con:
-        ARRANQUE -> CONECTANDO_WIFI (fin_arranque); el DUT se une al AP desechable
-        y obtiene IP de la red de prueba. Falla, como se esperaba, en la línea de T08
+    impl: tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log
+    status: successful
+    commit: 2af6ae9
+    date: 2026-11-06
+    ci_run: 42142970107   # build.yml, workflow_dispatch variant=bench version=0.0.0-2af6ae9
+    evidence: test-results/20261106T012123Z-2af6ae9/
+    observed: >
+      T01 en 210 ms (solo STA); T08 «con: CONECTANDO_WIFI -> CONECTANDO_BROKER
+      (wifi_up)» sin AP ni OPERATIVO; E11 en el receptor UDP; cada línea serie
+      desde T08 durante 3 ciclos llegó por UDP (perdidas 0, tarde 0) y 3 med:
+      distintos. Antes falló dos veces por defectos del test, no del firmware
+      (5f20820: campo «line» del receptor; a6e3356: JRN-01.2 no esperaba el
+      reinicio), corregidos en 2af6ae9 y dbe4f6b
   - id: JRN-01.4
     shape: workflow
     kind: standard
@@ -550,8 +551,10 @@ tests:
       siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
       T02 no intenta el STA); nombres de estado y evento de la línea E0
     impl: tests/host/test_conectividad.c
-    status: not done   # T08–T10 añadidas; se registra con la CI del commit que las trae
-    last_run: {commit: 9c382b9, date: 2026-11-04, ci_run: 41951228893, result: "T01–T07 en verde"}
+    status: successful   # T01–T10
+    commit: 07da69b
+    date: 2026-11-05
+    ci_run: 42138329897   # host tests + secret scan
   - id: TC-CON-02
     shape: atomic
     kind: standard
@@ -564,6 +567,10 @@ tests:
       10 fallos dan 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s; nunca más de 60 s (ni
       tras 1000 fallos); tras un éxito, 1 s
     impl: tests/host/test_backoff.c
+    status: successful
+    commit: 07da69b
+    date: 2026-11-05
+    ci_run: 42138329897   # host tests + secret scan
   - id: TC-CON-03
     shape: atomic
     kind: standard
@@ -579,6 +586,15 @@ tests:
       2, 4, 8, 16, 32, 60, 60, 60, 60 s; sin ráfagas (< 1 s), sin reinicio y
       sin AP
     impl: tests/bench/test_con.py::test_tc_con_03_wifi_backoff
+    status: successful
+    commit: 5f20820
+    date: 2026-11-06
+    ci_run: 42140310109   # build.yml, workflow_dispatch variant=bench version=0.0.0-5f20820
+    evidence: >
+      test-results/20261106T005824Z-5f20820/TC-CON-03.md: 10 T09 y 10 T10;
+      intervalos 1,0 · 2,0 · 4,0 · 8,0 · 16,0 · 32,0 · 60,0 · 60,0 · 60,0 · 60,0 s
+      en el reloj del DUT; sin AP ni reinicio. En la misma ejecución pasaron
+      también TC-POR-02/05/07/09 y TC-SEN-03
   - id: TC-POR-01
     shape: atomic
     kind: standard
