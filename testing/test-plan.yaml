@@ -971,8 +971,9 @@ tests:
       CommandTimeout (CR-TB-11). El test ya guarda el buffer y el estado del
       slot antes de decidir, y trata el CommandTimeout como not done
     next: >
-      no repetir los 5 cortes hasta que el propietario decida cómo verificar
-      la fila de cortes de FR-CFG-01 (CR-TB-10, o el cambio en fsd_pending)
+      decidido (propietario, 2026-11-06, opción A): no se repiten los cortes;
+      la fila pasa a la Fase 2 con el status MQTT en la próxima versión del
+      FSD (fsd_pending), y entonces este test se rehace sobre status
   - id: TC-SEN-01
     shape: atomic
     kind: standard
@@ -1169,12 +1170,24 @@ fsd_pending:
   - from: checker puerta 01, c3ed691 (no bloqueante 5, ya existía)
     issue: SNTP en el alcance de la Fase 1 sin criterio de salida
   - from: /build, diagnóstico de TC-CFG-02 (2026-11-06)
+    decision: aprobada por el propietario el 2026-11-06 (opción A); se aplica en la próxima versión agrupada del FSD
     issue: >
-      la fila de cortes de alimentación de FR-CFG-01 (Fase 1) observa boot:,
-      cfg: y con: ARRANQUE en la consola, que el banco no puede capturar tras
-      un corte (CR-TB-10). Alternativa sin banco nuevo: observarla en la Fase 2
-      con el primer status tras cada corte (reset = poweron, publicado bajo
-      <sitio>/<zona>/…, sin portal). Pendiente de la decisión del propietario
+      la fila de cortes de alimentación de FR-CFG-01 se verifica en la Fase 2
+      con el primer status por MQTT tras cada corte: reset = poweron, publicado
+      bajo <sitio>/<zona>/… y sin pasar por el portal. Sale del criterio de
+      salida de la Fase 1 (§3.1: «FR-CFG-01 (fila de cortes de alimentación)»)
+      y entra en el de la Fase 2. Motivo: la consola del banco no captura
+      boot:/cfg:/con: tras un corte (CR-TB-10, la registra el propietario)
+  - from: propietario, 2026-11-06
+    decision: pedida por el propietario; se aplica en la próxima versión agrupada del FSD
+    issue: >
+      que el status MQTT permita explicar cualquier reinicio (p. ej., el no
+      capturado de hacia las 18:31 UTC del 2026-11-06, que en la consola salió
+      reset=otro). §9.3 ya publica `reset`, pero con poweron, sw, panic,
+      task_wdt, int_wdt, brownout u otro: los reinicios por USB/JTAG
+      (ESP_RST_USB), por el pin EN (ESP_RST_EXT) y por los watchdogs RTC o de
+      sistema caen en «otro». Propuesta: valores propios para ellos (p. ej.,
+      usb, ext, rtc_wdt) también en la línea E1
   - from: /build, al escribir TC-CON-06 (2026-11-06)
     issue: >
       el contrato de FR-CON-06 (Fase 1) dice «aprovisionar y apagar ese AP»: con
