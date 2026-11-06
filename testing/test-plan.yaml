@@ -819,15 +819,16 @@ tests:
       responde 302 a http://192.168.4.1/ o el formulario de §17, nunca una
       respuesta que no venga del portal (la segunda mitad del contrato de FR-POR-02)
     impl: null   # bloqueado: bench-portal-dns en no (CR-TB-09)
-    status: not done
-    reason: needs bench-portal-dns — unavailable (CR-TB-09); la alternativa manual (FSD 0.9.4, §22.0) tiene su evidencia vencida
+    status: successful   # por la alternativa manual de FSD 0.9.6 (§3.1, §22.0) mientras CR-TB-09 siga abierta
+    reason: el ejecutable de banco sigue bloqueado (bench-portal-dns en no, CR-TB-09); la fila se cumple con la evidencia manual vigente H-44
     manual_alt:
       allowed_by: FSD 0.9.4 §22.0 y §3.1 (alt. manual mientras CR-TB-09 siga abierta)
-      evidence: H-40
-      evidence_commit: ea41d50
+      evidence: H-44   # vigente
+      evidence_commit: 9f8d3f8   # imagen grabada; components/portal sin cambios desde 9c382b9
       scope: [components/portal]   # o lo que sirva FR-POR-02; si cambia, la evidencia vence
-      valid: false
-      expired_by: [17161d3, e6a1bcd, 9c382b9]   # cambios en components/portal posteriores a ea41d50 (9c382b9 toca portal_cautivo.c)
+      valid: true
+      history:
+        - {evidence: H-40, evidence_commit: ea41d50, valid: false, expired_by: [17161d3, e6a1bcd, 9c382b9]}
       renew: >
         repetir la prueba con un teléfono real sobre el commit vigente antes de
         cerrar la Fase 1 o publicar un release (regla del propietario, 2026-11-06)
@@ -835,7 +836,19 @@ tests:
       H-40, propietario, 2026-11-04, sobre ea41d50: iPhone con los datos móviles
       apagados y la red olvidada; al unirse a clima-f3c6d4 la ventana del portal
       apareció sola, y http://example.com mostró el formulario «Nodo clima».
-      Evidencia manual: no sustituye al test del banco, que sigue en not done
+      Evidencia manual: no sustituye al test del banco, que sigue en not done.
+      VENCIDA: components/portal cambió después de ea41d50
+      H-44, propietario, 2026-11-06 hacia las 17:42 AST (21:42 UTC), sobre la imagen
+      0.0.0-9f8d3f8-bench en SLOT1 (components/portal igual que en 9c382b9):
+      iPhone 14 Pro Max con iOS 27.0.1, datos móviles apagados, unido a
+      clima-f3c6d4 (abierta). La ventana del portal apareció sola con el
+      formulario «Nodo clima»; cerrada sin enviar nada, en Safari
+      http://example.com mostró el formulario, no la página real. Sin envío; la
+      red se olvidó después. Contraste con el log del portal (UTC): 21:40:23 y
+      21:40:43, dos uniones de un cliente, cada una con GET /hotspot-detect.html
+      -> 302 y GET / -> formulario; 21:42:01–21:43:33, GET / -> formulario
+      (Safari con example.com resuelto por el DNS del nodo); ningún POST, ninguna
+      «nvs: config escrita», el nodo siguió en PORTAL
   - id: TC-POR-09
     shape: atomic
     kind: standard
