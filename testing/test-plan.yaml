@@ -543,17 +543,42 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07, T08]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
       siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
       T02 no intenta el STA); nombres de estado y evento de la línea E0
     impl: tests/host/test_conectividad.c
-    status: successful
-    commit: 9c382b9
-    date: 2026-11-04
-    ci_run: 41951228893   # host tests + secret scan
+    status: not done   # T08–T10 añadidas; se registra con la CI del commit que las trae
+    last_run: {commit: 9c382b9, date: 2026-11-04, ci_run: 41951228893, result: "T01–T07 en verde"}
+  - id: TC-CON-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-CON-02]
+    needs: [hosted-ci]
+    expect: >
+      10 fallos dan 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s; nunca más de 60 s (ni
+      tras 1000 fallos); tras un éxito, 1 s
+    impl: tests/host/test_backoff.c
+  - id: TC-CON-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: bench
+    verifies: [FR-CON-02, T09, T10]
+    needs: [bench-driver, bench-wifi-ap, bench-serial-monitor, dut-board]
+    expect: >
+      fila Wi-Fi de FR-CON-02 con el AP apagado desde el arranque (FSD 0.9.3,
+      §3.1): los 10 primeros intervalos desde «con: … -> CONECTANDO_WIFI
+      (wifi_down)» hasta el siguiente «wifi: intento <n>» dentro de ±10 % de 1,
+      2, 4, 8, 16, 32, 60, 60, 60, 60 s; sin ráfagas (< 1 s), sin reinicio y
+      sin AP
+    impl: null   # siguiente: necesita el DUT configurado contra el AP desechable
   - id: TC-POR-01
     shape: atomic
     kind: standard

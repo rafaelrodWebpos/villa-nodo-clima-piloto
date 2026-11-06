@@ -69,3 +69,8 @@ target_link_libraries(test_medicion m)
 add_test(NAME TC-MED-03 COMMAND test_medicion med03)
 add_test(NAME TC-MED-04 COMMAND test_medicion med04)
 add_test(NAME TC-MED-05 COMMAND test_medicion med05)
+
+# TC-CON-02 · FR-CON-02 (función de backoff)
+add_executable(test_backoff test_backoff.c ${COMP}/conectividad/conectividad_backoff.c)
+target_include_directories(test_backoff PRIVATE ${COMP}/conectividad/include)
+add_test(NAME TC-CON-02 COMMAND test_backoff)

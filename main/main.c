@@ -7,8 +7,8 @@
  * cautivo, HTTP, validación del envío) y la prueba de unión con su resultado
  * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
  * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
- * test: T09/T10 (backoff) y el resto de §6.3; T08 está en su parte de la
- * Fase 1 (transición, E0, sin AP). El
+ * test: el resto de §6.3. T08 está en su parte de la Fase 1 (transición, E0,
+ * sin AP) y T09/T10 reintentan la unión con el backoff de FR-CON-02. El
  * ciclo de medición (FSD §5.4) lee el SHT41 cada 60 s en cualquier estado y
  * escribe E3; la publicación por MQTT es de la Fase 2.
  */
@@ -30,6 +30,7 @@
 #include "sdkconfig.h"
 
 #include "conectividad.h"
+#include "conectividad_backoff.h"
 #include "identidad.h"
 #include "medicion.h"
 #include "sht41.h"
@@ -55,6 +56,8 @@ static const char *const *s_envio;             /* valores del envío, solo duran
 static esp_timer_handle_t s_t_validacion;      /* T06: 20 s sin IP */
 static esp_timer_handle_t s_t_reinicio;        /* T05: reinicio tras responder */
 static esp_timer_handle_t s_t_reintento;       /* T04: reintento de la unión dentro de los 20 s */
+static esp_timer_handle_t s_t_backoff;         /* T09/T10: backoff de Wi-Fi (FR-CON-02) */
+static con_backoff_t s_backoff_wifi;
 
 #define VALIDACION_US   (20 * 1000 * 1000)     /* T06, D12: 20 s */
 #define REINICIO_US     (4 * 1000 * 1000)      /* T05: ≤ 5 s desde la línea con: (D12); 4 s para que el teléfono vea «Conectado…» (H-41) */
@@ -247,7 +250,24 @@ static void probar_union(void)
  * publica nada. */
 static void red_lista(void)
 {
+    esp_timer_stop(s_t_backoff);
+    con_backoff_reiniciar(&s_backoff_wifi);
     s_intento = 0;
+}
+
+/* Acción de T09: programar el reintento con el backoff de FR-CON-02. Si ya hay
+ * uno armado (un segundo aviso de desconexión del mismo intento), no se cuenta
+ * otro fallo: un intento fallido avanza el backoff una sola vez. */
+static void programar_reintento(void)
+{
+    if (esp_timer_is_active(s_t_backoff)) return;
+    unsigned ms = con_backoff_fallo(&s_backoff_wifi);
+    esp_timer_start_once(s_t_backoff, (uint64_t)ms * 1000u);
+}
+
+static void al_vencer_backoff(void *arg)
+{
+    transicion(CON_EV_BACKOFF, (con_guardas_t){0});      /* T10 */
 }
 
 /* Acción de T05: persistir, responder con éxito y reiniciar. */
@@ -306,6 +326,8 @@ static void wifi_iniciar(void)
     const esp_timer_create_args_t tv = {.callback = al_vencer_validacion, .name = "validacion"};
     const esp_timer_create_args_t tr = {.callback = al_reiniciar, .name = "reinicio"};
     const esp_timer_create_args_t ti = {.callback = al_reintentar, .name = "reintento"};
+    const esp_timer_create_args_t tb = {.callback = al_vencer_backoff, .name = "backoff"};
+    ESP_ERROR_CHECK(esp_timer_create(&tb, &s_t_backoff));
     ESP_ERROR_CHECK(esp_timer_create(&tv, &s_t_validacion));
     ESP_ERROR_CHECK(esp_timer_create(&tr, &s_t_reinicio));
     ESP_ERROR_CHECK(esp_timer_create(&ti, &s_t_reintento));
@@ -366,6 +388,8 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_RESPONDER_NO_CONECTA: no_conecta(); break;
     case CON_ACC_RESPONDER_OCUPADO:    /* T07: la respuesta la da el adaptador del portal */ break;
     case CON_ACC_RED_LISTA:            red_lista(); break;
+    case CON_ACC_PROGRAMAR_REINTENTO:  programar_reintento(); break;
+    case CON_ACC_INTENTAR_UNION:       intentar_union(); break;
     case CON_ACC_NINGUNA:              break;
     }
     /* E0 */

@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T08.
+/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T10.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -68,6 +68,19 @@ int main(void)
     ESPERA(t.siguiente != CON_OPERATIVO, "T08 pasa a OPERATIVO sin T11");
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_BROKER), "CONECTANDO_BROKER") == 0, "nombre CONECTANDO_BROKER");
 
+    /* T09: CONECTANDO_WIFI + wifi_down (intento fallido) -> CONECTANDO_WIFI, programar el
+     * reintento con el backoff. No debe: reiniciar el nodo; abrir el AP */
+    t = con_transicion(CON_CONECTANDO_WIFI, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T09") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_WIFI && t.accion == CON_ACC_PROGRAMAR_REINTENTO, "T09: %d/%d", t.siguiente, t.accion);
+    ESPERA(t.accion != CON_ACC_ARRANCAR_PORTAL && t.accion != CON_ACC_PERSISTIR, "T09 abre el AP o reinicia");
+
+    /* T10: CONECTANDO_WIFI + backoff -> CONECTANDO_WIFI, lanzar un intento de unión. No debe: abrir el AP */
+    t = con_transicion(CON_CONECTANDO_WIFI, CON_EV_BACKOFF, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T10") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_WIFI && t.accion == CON_ACC_INTENTAR_UNION, "T10: %d/%d", t.siguiente, t.accion);
+    ESPERA(strcmp(con_nombre_evento(CON_EV_BACKOFF), "backoff") == 0, "nombre backoff");
+
     /* Fuera de VALIDANDO, wifi_up/wifi_down no tienen fila todavía (no se inventa) */
     t = con_transicion(CON_PORTAL, CON_EV_WIFI_DOWN, (con_guardas_t){0});
     ESPERA(t.fila == NULL && t.accion == CON_ACC_NINGUNA, "PORTAL + wifi_down tiene fila %s", t.fila ? t.fila : "NULL");
@@ -82,6 +95,6 @@ int main(void)
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_WIFI), "CONECTANDO_WIFI") == 0, "nombre CONECTANDO_WIFI");
     ESPERA(strcmp(con_nombre_evento(CON_EV_FIN_ARRANQUE), "fin_arranque") == 0, "nombre fin_arranque");
 
-    printf("TC-CON-01 (T01–T08): %s\n", fallos ? "FALLO" : "ok");
+    printf("TC-CON-01 (T01–T10): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

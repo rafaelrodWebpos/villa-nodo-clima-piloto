@@ -9,7 +9,7 @@ static const char *const NOMBRE_ESTADO[CON_N_ESTADOS] = {
     "CONECTANDO_BROKER", "OPERATIVO", "OTA_DESCARGA",
 };
 static const char *const NOMBRE_EVENTO[CON_N_EVENTOS] = {
-    "fin_arranque", "envío", "wifi_up", "wifi_down",
+    "fin_arranque", "envío", "wifi_up", "wifi_down", "backoff",
 };
 
 con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_guardas_t g)
@@ -32,8 +32,14 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
         default: break;
         }
     }
-    if (origen == CON_CONECTANDO_WIFI && evento == CON_EV_WIFI_UP)
-        return (con_transicion_t){"T08", CON_CONECTANDO_BROKER, CON_ACC_RED_LISTA};
+    if (origen == CON_CONECTANDO_WIFI) {
+        switch (evento) {
+        case CON_EV_WIFI_UP:   return (con_transicion_t){"T08", CON_CONECTANDO_BROKER, CON_ACC_RED_LISTA};
+        case CON_EV_WIFI_DOWN: return (con_transicion_t){"T09", CON_CONECTANDO_WIFI, CON_ACC_PROGRAMAR_REINTENTO};
+        case CON_EV_BACKOFF:   return (con_transicion_t){"T10", CON_CONECTANDO_WIFI, CON_ACC_INTENTAR_UNION};
+        default: break;
+        }
+    }
     return (con_transicion_t){NULL, origen, CON_ACC_NINGUNA};
 }
 
