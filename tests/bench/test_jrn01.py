@@ -12,7 +12,7 @@ import time
 import pytest
 
 from benchlib import (_after_last_reset, _boot_capture, _boot_ids, _lines,
-                      _nvs_partition, _parse_flash_args, case)
+                      _nvs_partition, _parse_flash_args, case, ultimo_arranque)
 
 pytestmark = pytest.mark.journey
 
@@ -274,8 +274,8 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         c.save_log("udp", [str(u.get("line", u) if isinstance(u, dict) else u) for u in udp])
         # Solo lo que siguió a nuestro reset: el buffer del banco puede entregar tarde la cola
         # del arranque anterior con marcas de tiempo posteriores a t0
-        ult = max((i for i, e in enumerate(vistas) if e["text"].startswith("rst:")), default=None)
-        assert ult is not None, "la captura no contiene el rst: del reset"
+        ult = ultimo_arranque(vistas)   # el último arranque, aunque llegue sin rst: (CR-TB-12)
+        assert ult is not None, "la captura no contiene el inicio del arranque tras el reset"
         vistas = vistas[ult:]
         textos = [e["text"] for e in vistas]
         t_ip = primera(vistas, "con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)")
@@ -394,8 +394,8 @@ def test_jrn_01_4_broker_and_status(testbench, dut_slot, dut_mac, run_dir):
         c.save_log("serie", [e["text"] for e in vistas])
         c.save_log("mqtt", [f"{m['t'] - t0:+.2f} s retain={m['retain']} qos={m['qos']} {m['topic']} {m['payload']}"
                             for m in vivo + retenido])
-        ult = max((i for i, e in enumerate(vistas) if e["text"].startswith("rst:")), default=None)
-        assert ult is not None, "la captura no contiene el rst: del reset"
+        ult = ultimo_arranque(vistas)   # el último arranque, aunque llegue sin rst: (CR-TB-12)
+        assert ult is not None, "la captura no contiene el inicio del arranque tras el reset"
         vistas = vistas[ult:]
         t11 = primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)")
         assert t11, f"sin con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up) en {T11_ESPERA_S} s (T11)"

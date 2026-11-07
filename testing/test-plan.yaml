@@ -461,7 +461,13 @@ tests:
       serial_reset (el segundo, sin línea rst:, a los ~4,1 s del primero, reset=usb):
       el broker publicó el Last Will del primero al conectarse el segundo. Test
       corregido: reset antes del AP, solo mensajes posteriores al reset, uptime_s del
-      primer status de este arranque y recuento informativo de sesiones
+      primer status de este arranque y recuento informativo de sesiones. Sobre
+      35d7460 (test-results/20261107T022017Z-35d7460/) JRN-01.3 falló por el test:
+      tras un solo serial_reset hubo dos arranques y el corte desde el último rst:
+      mezclaba ambos (80 líneas del segundo arranque sin copia UDP, anteriores a
+      su Wi-Fi). Diagnóstico con 35d7460 y con la imagen de la Fase 1 (f1f5a43):
+      siempre dos arranques por reset, también sin Wi-Fi ni MQTT; es el banco
+      (CR-TB-12). Los tests cortan ahora desde el último inicio de arranque
     note: >
       JRN-01.2 aprovisiona mqtt_host = 192.168.4.1 (el broker del banco visto desde su
       AP); JRN-01.3 exige el broker apagado. El suscriptor del banco (paho-mqtt, fijado

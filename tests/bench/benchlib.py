@@ -106,6 +106,19 @@ def _after_last_reset(lines: list) -> list:
     return lines[idx[-1]:] if idx else []
 
 
+# Inicio de un arranque: la línea rst: de la ROM o, si se perdió, las primeras líneas de
+# la aplicación. Un solo /api/serial/reset produce hoy DOS arranques: el segundo llega
+# ~2,6 s después, sin rst: (el proxy serie reabre el puerto; CR-TB-12).
+_INICIO_ARRANQUE = re.compile(r"^rst:|cpu_start: (Multicore app|Pro cpu start user code)")
+
+
+def ultimo_arranque(entradas: list) -> int | None:
+    """Índice del inicio del último arranque en [{text, ts}] o en líneas; None si no hay."""
+    txt = [e.get("text", "") if isinstance(e, dict) else str(e) for e in entradas]
+    idx = [i for i, t in enumerate(txt) if _INICIO_ARRANQUE.search(t)]
+    return idx[-1] if idx else None
+
+
 def _boot_capture(tb, slot: str, pattern: str) -> list:
     """P-BOOT-CAPTURE: el reset trae su propio log; si el patrón no está,
     monitor esperando (15 s) y segundo reset."""
@@ -209,7 +222,7 @@ def primera(entradas, patron, desde_ts=0):
     return next((e for e in entradas if patron in e.get("text", "") and e.get("ts", 0) >= desde_ts), None)
 
 
-def aprovisionar(tb, slot, ssid_portal, c, tmp_dir):
+def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local"):
     """Precondición compartida: deja el DUT configurado contra un AP desechable del
     banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
     y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
@@ -225,7 +238,7 @@ def aprovisionar(tb, slot, ssid_portal, c, tmp_dir):
     boot = _after_last_reset(_boot_capture(tb, slot, "con: ARRANQUE -> PORTAL"))
     if not any("con: ARRANQUE -> PORTAL" in ln for ln in boot):
         pytest.skip("not done: el DUT no arrancó en PORTAL tras P-NVS-ERASE")
-    form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": "broker.local", "mqtt_port": "1883",
+    form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": mqtt_host, "mqtt_port": "1883",
             "mqtt_user": "", "mqtt_pass": "", "sitio": "sitio1", "zona": "zona1"}
     t_envio = time.time()
     joined = ap_on = False
