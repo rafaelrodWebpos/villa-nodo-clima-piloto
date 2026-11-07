@@ -445,6 +445,13 @@ tests:
       distintos. Antes falló dos veces por defectos del test, no del firmware
       (5f20820: campo «line» del receptor; a6e3356: JRN-01.2 no esperaba el
       reinicio), corregidos en 2af6ae9 y dbe4f6b
+    regression: >
+      ROJO sobre 581ec56 (test-results/20261107T124105Z-581ec56/): «I (5118) nodo: mqtt: intento 1» salió por la
+      consola y no por UDP (FR-LOG-02); en el mismo milisegundo escribió la tarea Wi-Fi
+      «wifi:<ba-add>…», que sí llegó. El receptor UDP del banco conserva otra sesión
+      anterior con la misma pérdida. La espera de 10 ms del mutex de 3405028 lo hizo
+      menos frecuente pero no lo eliminó. Defecto del firmware; parado para el
+      propietario antes de cambiar nada (JRN-01.4 y JRN-01.5 quedaron not done)
   - id: JRN-01.4
     shape: workflow
     kind: standard
@@ -729,6 +736,16 @@ tests:
       en vivo del nodo es status online (FR-MQTT-06) y una medida válida llega en
       ≤ 75 s (FR-CON-04)
     impl: tests/bench/test_mqtt.py::test_tc_con_08_broker_outage
+    status: successful
+    commit: 581ec56
+    date: 2026-11-07
+    ci_run: 42373359706   # build.yml, workflow_dispatch variant=bench version=0.0.0-581ec56
+    evidence: test-results/20261107T124105Z-581ec56/
+    observed: >
+      T15 1, T12 10, T13 11 (cada intento a ≤ 10 ms de su línea); intervalos 1,0 ·
+      2,0 · 4,0 · 8,0 · 16,0 · 32,0 · 60,0 · 60,0 · 60,0 · 60,0 s; sin Wi-Fi ni
+      reinicio; al volver el broker, T11, status online primero a +59,1 s y medida a
+      +59,2 s (límite 75 s)
     history: >
       rojo sobre 9ddfcb4 (test-results/20261107T113833Z-9ddfcb4/) por dos defectos del test, no del firmware: los 10
       intervalos MQTT salieron 1,0 · 2,0 · 4,0 · 8,0 · 16,0 · 32,0 · 60,0 · 60,0 ·
