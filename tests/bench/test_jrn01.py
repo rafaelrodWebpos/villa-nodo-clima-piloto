@@ -348,7 +348,6 @@ def _tipos_status(st):
     return errores
 
 
-@pytest.mark.xfail(strict=True, reason="Fase 2: el publicador MQTT (§9, T11) aún no existe")
 def test_jrn_01_4_broker_and_status(testbench, dut_slot, dut_mac, run_dir):
     """JRN-01.4 — con el AP y el broker del banco arriba, el nodo pasa a OPERATIVO (T11) y el
     primer mensaje que publica es status online con los 9 campos de §9.3, retenido."""

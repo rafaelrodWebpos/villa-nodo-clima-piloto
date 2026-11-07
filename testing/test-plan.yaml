@@ -449,8 +449,8 @@ tests:
       se conecta al broker (CONECTANDO_BROKER -> OPERATIVO); el primer mensaje
       es status retained con estado = online y los 9 campos de diagnóstico con
       sus tipos (§9.3)
-    impl: tests/bench/test_jrn01.py::test_jrn_01_4_broker_and_status   # xfail estricto hasta el publicador MQTT
-    status: not done   # xfail estricto: feature ausente (Fase 2)
+    impl: tests/bench/test_jrn01.py::test_jrn_01_4_broker_and_status
+    status: not done   # XPASS limpio sobre 422c289 (test-results/20261107T023446Z-422c289/); falta la ejecución sin xfail
     history: >
       xfail estricto confirmado sobre f1f5a43 (test-results/20261107T015958Z-f1f5a43/):
       JRN-01.0–01.3 en verde y JRN-01.4 sin con: CONECTANDO_BROKER -> OPERATIVO
@@ -579,10 +579,10 @@ tests:
       siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
       T02 no intenta el STA); nombres de estado y evento de la línea E0
     impl: tests/host/test_conectividad.c
-    status: successful   # T01–T10; T11–T16 (Fase 2) en verde en local, a la espera de la CI
-    commit: 07da69b
-    date: 2026-11-05
-    ci_run: 42138329897   # host tests + secret scan
+    status: successful   # T01–T16
+    commit: 56e2b85   # antes 07da69b (T01–T10)
+    date: 2026-11-07
+    ci_run: 42327311133   # host tests + secret scan
   - id: TC-CON-02
     shape: atomic
     kind: standard
@@ -1374,7 +1374,10 @@ tests:
       adicionales ni v como string; humedad en %, punto_rocio en °C, sin -0.0; los
       tópicos <sitio>/<zona>/<nodo>/<medida> de §9.2; nunca trunca (devuelve -1)
     impl: tests/host/test_publicador.c   # caso mqtt01
-    status: not done   # en verde en local; falta la CI
+    status: successful
+    commit: 56e2b85
+    date: 2026-11-07
+    ci_run: 42327311133   # host tests + secret scan
   - id: TC-MQTT-02
     shape: atomic
     kind: standard
@@ -1388,7 +1391,10 @@ tests:
       escapa las cadenas, nunca escribe (null) y nunca trunca
     needs: [hosted-ci]
     impl: tests/host/test_publicador.c   # caso mqtt02
-    status: not done   # en verde en local; falta la CI
+    status: successful
+    commit: 56e2b85
+    date: 2026-11-07
+    ci_run: 42327311133   # host tests + secret scan
   - id: TC-SEC-01
     shape: atomic
     kind: security
