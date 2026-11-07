@@ -526,3 +526,33 @@ def test_jrn_01_5_home_assistant_discovery(testbench, dut_slot, dut_mac, run_dir
             assert not errores, f"{nombre}: {errores} (FR-HA-01/02)"
             assert len(devs) == 1, f"{nombre}: {len(devs)} dispositivos MQTT (duplicados)"
         c.passed("1 dispositivo «Clima sitio1 zona1» con 3 entidades en °C/% tras conectar, tras el broker y tras el reset")
+
+
+# --------------------------------------------------------------------------
+# JRN-01.7 · FR-CON-05, FR-CFG-01 (corte de alimentación visto por MQTT, FSD 0.9.6)
+# --------------------------------------------------------------------------
+def test_jrn_01_7_power_cut(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """JRN-01.7 — con el suscriptor conectado desde antes, el operador desenchufa el USB-C de la
+    placa y lo vuelve a enchufar: el primer status en vivo trae reset = poweron bajo
+    sitio1/zona1/<nodo>/status, sin AP clima-* en el escaneo, y la primera medida en vivo llega
+    ≤ 30 s después del encendido estimado. Pone su propia precondición (imagen de la CI y
+    aprovisionamiento): JRN-01.6 está bloqueado (bench-ap-internet) y no deja el estado."""
+    from benchlib import suscriptor_mqtt
+    from cortes import corte, errores, filtros, guardar_mqtt, limpiar, preparar, resumen
+    from test_mqtt import configurado
+    tb = testbench
+    nodo = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    with case(tb, "JRN-01.7", "Corte de alimentación visto por MQTT", run_dir) as c:
+        with configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+            c.step("Arrancar el broker y suscribirse antes del corte (cualquier sitio/zona del nodo)")
+            banco.broker_on()
+            with suscriptor_mqtt(tb, filtros(nodo), limpiar=limpiar(nodo)) as sub:
+                t0, reg = preparar(tb, dut_slot, banco, sub, c)
+                r = corte(tb, dut_slot, sub, nodo, "JRN-01.7", 1, 1, c)
+            guardar_mqtt(c, sub, t0)
+            c.save_log("serie", [e["text"] for e in reg.leer()])
+        c.note("", "## Resultado", "", resumen(r))
+        mal = errores(r, nodo)
+        assert not mal, "; ".join(mal)
+        c.passed(f"reset=poweron bajo sitio1/zona1/{nodo}/status, sin portal, primera medida a "
+                 f"{r['medida_s']:.1f} s del encendido estimado")

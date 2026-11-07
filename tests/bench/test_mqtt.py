@@ -382,3 +382,25 @@ def test_tc_con_10_wifi_loss_operativo(testbench, dut_slot, dut_mac, firmware, r
             f"el primer mensaje tras la reconexión no es status online (FR-MQTT-06): {primero}"
         assert medida and medida["t"] - t_on <= 90, "ninguna medida válida en ≤ 90 s tras volver el AP (FR-CON-03)"
         c.passed(f"T16; siguiente intento a {dt} s; status primero y medida a {medida['t'] - t_on:.1f} s del AP")
+
+
+def test_tc_mqtt_04_last_will_on_power_cut(testbench, run_dir):
+    """TC-MQTT-04 · FR-MQTT-05 — en cada corte de alimentación de esta sesión (JRN-01.7 y
+    TC-CFG-02, hechos por el operador), el broker publica {"estado":"offline"} en status
+    ≤ 100 s después del corte y queda retenido. No corta nada: lee lo que midieron."""
+    from cortes import LWT_LIMITE_S, LWT_MEDIDOS
+    tb = testbench
+    with case(tb, "TC-MQTT-04", "Last Will tras un corte de alimentación", run_dir,
+              spec="TC-MQTT villa-nodo-clima-piloto") as c:
+        if not LWT_MEDIDOS:
+            pytest.skip("not done: ningún corte de alimentación en esta sesión (JRN-01.7 o TC-CFG-02)")
+        c.note("- corte = última muestra del slot presente antes de verlo ausente (cota por arriba del retraso)", "",
+               "## Resultado", "",
+               *[f"- {tid} corte {n}: Last Will {'—' if s is None else f'{s:.1f} s'}; retenido: {'sí' if ret else 'no'}"
+                 for tid, n, s, ret in LWT_MEDIDOS])
+        mal = [f"{tid} corte {n}: " + ("sin Last Will" if s is None else f"{s:.1f} s > {LWT_LIMITE_S} s" if s > LWT_LIMITE_S
+                                       else "no quedó retenido")
+               for tid, n, s, ret in LWT_MEDIDOS if s is None or s > LWT_LIMITE_S or not ret]
+        assert not mal, "; ".join(mal)
+        peor = max(s for _, _, s, _ in LWT_MEDIDOS)
+        c.passed(f"{len(LWT_MEDIDOS)} cortes: Last Will retenido en ≤ {peor:.1f} s (límite {LWT_LIMITE_S} s)")

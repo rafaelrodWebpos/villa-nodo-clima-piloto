@@ -1,72 +1,34 @@
 """TC-CFG-* — configuración persistente (FSD §17), nivel bench. TC-CFG-02 necesita
-al operador: el banco no corta la alimentación (bench-power-cycle en no); el
-corte se pide con un aviso bloqueante en la UI del banco (bench-operator-prompt)."""
-import re
-import time
-
-import pytest
-
-from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, primera
+al operador: el banco no corta la alimentación (bench-power-cycle en no); cada corte se
+pide con avisos en la UI del banco (bench-operator-prompt) y se observa por MQTT, porque
+la consola del banco no captura el arranque tras un corte (CR-TB-10, FSD 0.9.6)."""
+from benchlib import case, suscriptor_mqtt
+from cortes import corte, errores, filtros, guardar_mqtt, limpiar, preparar, resumen
 
 CORTES = 5                      # contrato de FR-CFG-01 (fila de cortes de alimentación)
-ESPERA_AVISO_S = 600            # lo que el aviso espera a que el operador pulse «Hecho»
-# La placa tiene un solo USB-C (FSD C-HW-01: hub interno con 303a:1001 y 1a86:55d3)
-AVISO = ("Corte de alimentación {n} de {total} (TC-CFG-02): desenchufa el cable USB-C de la placa, "
-         "espera 5 segundos y vuelve a enchufarlo en el mismo puerto de la Pi. Después pulsa «Hecho».")
-
-
-def _estado_slot(tb, slot):
-    """Estado del slot y de su monitor serie (diagnóstico del reenganche tras el corte)."""
-    s = tb.get_slot(slot)
-    campos = ("present", "running", "pid", "devnode", "devnodes", "state", "flapping", "recovering", "last_error")
-    return [f"  - slot: " + ", ".join(f"{k}={s.get(k)}" for k in campos)]
 
 
 def test_tc_cfg_02_power_cuts(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
-    """TC-CFG-02 · FR-CFG-01 (fila de cortes) — 5 cortes de alimentación: cada arranque
-    muestra cfg: con el mismo sitio y zona y con: ARRANQUE -> CONECTANDO_WIFI; nunca el portal."""
+    """TC-CFG-02 · FR-CFG-01 (fila de cortes) — 5 cortes de alimentación con el suscriptor
+    conectado desde antes: tras cada uno, el primer status en vivo (retain = 0) llega con
+    reset = poweron bajo sitio1/zona1/<nodo>/status; nunca el portal (escaneo sin clima-*)."""
+    from test_mqtt import configurado
     tb = testbench
-    ssid_portal = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    nodo = "clima-" + dut_mac.replace(":", "").lower()[-6:]
     with case(tb, "TC-CFG-02", "Cinco cortes de alimentación", run_dir, spec="TC-CFG villa-nodo-clima-piloto") as c:
-        c.note(f"- imagen: `{firmware['version']}` (variante {firmware['variant']}, run CI {firmware['ci_run']})", "")
-        c.step(f"Precondiciones: grabar la imagen de la CI en {dut_slot}")
-        res = tb.flash(dut_slot, _parse_flash_args(firmware["dir"] / "coldflash"), chip="esp32s3")
-        assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
-        aprovisionar(tb, dut_slot, ssid_portal, c, tmp_path)
-        time.sleep(8)    # el reinicio de T05 llega a los 4 s
         resultados = []
-        for n in range(1, CORTES + 1):
-            c.step(f"Corte {n}/{CORTES}: aviso al operador")
-            t_aviso = time.time()
-            try:
-                ok = tb.human_interaction(AVISO.format(n=n, total=CORTES), timeout=ESPERA_AVISO_S)
-            except Exception as e:   # CommandTimeout: la respuesta no llegó aunque el banco registre «confirmed» (CR-TB-11)
-                ok = False
-                c.note(f"- corte {n}: el aviso no devolvió respuesta ({type(e).__name__})")
-            if not ok:
-                vistas = esperar_lineas(tb, dut_slot, t_aviso, [], timeout=0)
-                c.save_log(f"corte{n}", [c._r(e["text"]) for e in vistas])
-                pytest.skip(f"not done: sin confirmación del corte {n} (cancelado, agotado o sin respuesta)")
-            vistas = esperar_lineas(tb, dut_slot, t_aviso, ["con: ARRANQUE -> "], timeout=40)
-            # La evidencia se guarda antes de decidir: también cuando el corte sale not done
-            c.save_log(f"corte{n}", [c._r(e["text"]) for e in vistas])
-            c.note(f"- corte {n}: {len(vistas)} líneas en el buffer del slot desde el aviso", *_estado_slot(tb, dut_slot))
-            boots = [e for e in vistas if "boot: " in e.get("text", "") and " fw=" in e.get("text", "")]
-            if not boots:
-                pytest.skip(f"not done: la consola no capturó el arranque tras el corte {n} (instrumento, no el DUT)")
-            ult = vistas.index(boots[-1])
-            tras = vistas[ult:]
-            boot = boots[-1]["text"].strip()
-            cfg = primera(tras, "cfg: ")
-            con = primera(tras, "con: ARRANQUE -> ")
-            resultados.append((n, boot, cfg["text"].strip() if cfg else None, con["text"].strip() if con else None))
-        c.note("", "## Resultado", "", *[f"- corte {n}: `{re.sub(r'^.*boot: ', 'boot: ', b)}` · "
-                                         f"`{(g or 'sin cfg:').split('nodo: ')[-1]}` · `{(k or 'sin con:').split('nodo: ')[-1]}`"
-                                         for n, b, g, k in resultados])
-        for n, b, g, k in resultados:
-            # Control positivo: fue un corte de verdad (encendido), no un reset del banco
-            assert "reset=poweron" in b, f"corte {n}: el arranque no es un encendido ({b})"
-            assert firmware["version"] in b, f"corte {n}: no es la imagen {firmware['version']}"
-            assert g and "cfg: sitio=sitio1 zona=zona1" in g, f"corte {n}: falta cfg: sitio=sitio1 zona=zona1 ({g})"
-            assert k and "con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)" in k, f"corte {n}: abrió el portal o no hizo T01 ({k})"
-        c.passed(f"{CORTES} encendidos con cfg: sitio=sitio1 zona=zona1 y T01; ningún portal")
+        with configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+            c.step("Arrancar el broker y suscribirse antes del primer corte (cualquier sitio/zona del nodo)")
+            banco.broker_on()
+            with suscriptor_mqtt(tb, filtros(nodo), limpiar=limpiar(nodo)) as sub:
+                t0, reg = preparar(tb, dut_slot, banco, sub, c)
+                try:
+                    for n in range(1, CORTES + 1):
+                        resultados.append(corte(tb, dut_slot, sub, nodo, "TC-CFG-02", n, CORTES, c))
+                finally:
+                    guardar_mqtt(c, sub, t0)
+                    c.save_log("serie", [e["text"] for e in reg.leer()])
+                    c.note("", "## Resultado", "", *[resumen(r) for r in resultados])
+        mal = [e for r in resultados for e in errores(r, nodo, arranque=False)]
+        assert not mal, "; ".join(mal)
+        c.passed(f"{CORTES} encendidos con status reset=poweron bajo sitio1/zona1/{nodo}/status; ningún portal")

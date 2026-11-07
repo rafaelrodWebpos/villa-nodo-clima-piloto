@@ -589,7 +589,7 @@ tests:
       bajo <sitio>/<zona>/<nodo>/status con el mismo sitio y la misma zona, sin AP
       clima-* en el escaneo, y la primera medida en vivo llega ≤ 30 s después del
       encendido estimado (llegada del primer status − uptime_s − 2 s)
-    impl: null
+    impl: tests/bench/test_jrn01.py::test_jrn_01_7_power_cut   # pone su propia precondición (JRN-01.6 bloqueado); cortes en tests/bench/cortes.py
 
   # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
   # aparte de JRN-01 porque necesita la salida a Internet del banco (bench+;
@@ -1261,7 +1261,7 @@ tests:
       cada uno, el primer status en vivo (retain = 0) llega con reset = poweron
       bajo <sitio>/<zona>/<nodo>/status con el sitio y la zona configurados; nunca
       el portal (FSD 0.9.6)
-    impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # versión de consola; se reescribe sobre status en la Fase 2
+    impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # reescrito sobre status (FSD 0.9.6); cortes en tests/bench/cortes.py
     status: not done
     last_run:
       commit: 9bcc519
@@ -1690,6 +1690,21 @@ tests:
       con sitio1/zona1 y fw 0.0.0-5d9228e-bench) y después las medidas (QoS 0); un
       suscriptor nuevo recibió con retain = 1 las tres configuraciones y el último
       valor en vivo de cada medida
+  - id: TC-MQTT-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-MQTT-05]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-operator-prompt, dut-board]
+    expect: >
+      OPERATIVO y suscriptor conectado; el operador desenchufa el USB-C de la
+      placa y no lo vuelve a enchufar hasta ver el Last Will o pasados 130 s:
+      {"estado":"offline"} llega en status ≤ 100 s después del corte (última
+      muestra del slot presente, cota por arriba) y un suscriptor nuevo lo recibe
+      retenido. Se mide en cada corte de JRN-01.7 y TC-CFG-02 de la misma sesión
+    impl: tests/bench/test_mqtt.py::test_tc_mqtt_04_last_will_on_power_cut
   - id: TC-HA-01
     shape: atomic
     kind: standard
