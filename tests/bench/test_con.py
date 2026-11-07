@@ -3,7 +3,7 @@ establece su precondición con los procedimientos de benchlib."""
 import re
 import time
 
-from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, primera
+from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, primera, ultimo_arranque
 
 BACKOFF_S = [1, 2, 4, 8, 16, 32, 60, 60, 60, 60]   # FR-CON-02
 TOLERANCIA = 0.10
@@ -43,6 +43,7 @@ def test_tc_con_03_wifi_backoff(testbench, dut_slot, dut_mac, firmware, run_dir,
         tb.serial_reset(dut_slot)
         vistas = esperar_lineas(tb, dut_slot, t0, ["wifi: intento 11"], timeout=sum(BACKOFF_S) + 120)
         lineas = _unicas(vistas)
+        lineas = lineas[ultimo_arranque(lineas) or 0:]   # el último arranque, aunque llegue sin rst: (CR-TB-12)
         c.save_log("serie", [c._r(e["text"]) for e in lineas])
 
         textos = [e["text"] for e in lineas]
@@ -100,7 +101,7 @@ def test_tc_con_06_never_portal(testbench, dut_slot, dut_mac, firmware, run_dir,
             clima = sorted({n.get("ssid") for n in nets if str(n.get("ssid", "")).startswith("clima-")})
             vistos.append((round(time.time() - t0), clima))
         lineas = _unicas(esperar_lineas(tb, dut_slot, t0, [], timeout=0))
-        ult = max((i for i, e in enumerate(lineas) if e["text"].startswith("rst:")), default=0)
+        ult = ultimo_arranque(lineas) or 0        # el último arranque, aunque llegue sin rst: (CR-TB-12)
         lineas = lineas[ult:]                     # solo nuestro arranque (el buffer entrega tarde la cola del anterior)
         c.save_log("serie", [c._r(e["text"]) for e in lineas])
         cons = [e["text"].strip() for e in lineas if " con: " in e["text"]]
