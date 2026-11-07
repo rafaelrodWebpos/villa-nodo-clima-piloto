@@ -97,3 +97,8 @@ add_executable(test_udplog_escritores test_udplog_escritores.c ${COMP}/udplog/ud
 target_include_directories(test_udplog_escritores PRIVATE ${COMP}/udplog/include)
 target_link_libraries(test_udplog_escritores Threads::Threads)
 add_test(NAME TC-LOG-05 COMMAND test_udplog_escritores)
+
+# TC-LOG-06 · FR-LOG-02, FR-LOG-03 (reintento del envío UDP, H-57)
+add_executable(test_udplog_envio test_udplog_envio.c ${COMP}/udplog/udplog_envio.c)
+target_include_directories(test_udplog_envio PRIVATE ${COMP}/udplog/include)
+add_test(NAME TC-LOG-06 COMMAND test_udplog_envio)

@@ -1148,6 +1148,23 @@ tests:
       con CONFIG_LOG_VERSION=1 cada ESP_LOGx llega en una llamada, pero la tarea wifi
       escribe 3 líneas por arranque en trozos (formato "%s"); 0 esperas de mutex
       fallidas y 0 colas llenas. Con un acumulador compartido el test da 16 fallos
+  - id: TC-LOG-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-LOG-02, FR-LOG-03]
+    needs: [hosted-ci]
+    expect: >
+      reintento del envío (H-57): un sendto fallido se reintenta hasta 3 veces con
+      20 ms entre intentos (1 + 3 intentos, 60 ms como mucho) sin adelantar la línea
+      siguiente; si sale en un reintento cuenta como reintentada; si sigue fallando se
+      descarta y cuenta como descartada. Las esperas son solo de la tarea de envío
+    impl: tests/host/test_udplog_envio.c
+    note: >
+      los contadores salen en «udplog: descartadas=<n> reintentadas=<n>
+      cola_llena=<n>» en cada obtención de IP y, si cambiaron, cada 60 s
   - id: TC-LOG-03
     shape: atomic
     kind: standard
