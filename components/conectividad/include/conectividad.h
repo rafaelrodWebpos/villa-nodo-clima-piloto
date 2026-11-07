@@ -11,6 +11,7 @@ typedef enum {
 
 typedef enum {
     CON_EV_FIN_ARRANQUE, CON_EV_ENVIO, CON_EV_WIFI_UP, CON_EV_WIFI_DOWN, CON_EV_BACKOFF,
+    CON_EV_MQTT_UP, CON_EV_MQTT_DOWN,
     CON_N_EVENTOS                        /* el resto de §6.4 llega con sus filas */
 } con_evento_t;
 
@@ -23,9 +24,13 @@ typedef enum {
     CON_ACC_PERSISTIR,         /* T05: persistir la configuración, responder con éxito y reiniciar */
     CON_ACC_RESPONDER_NO_CONECTA, /* T06: responder «no se pudo conectar» y descartar los datos */
     CON_ACC_RESPONDER_OCUPADO, /* T07: responder «ocupado» */
-    CON_ACC_RED_LISTA,         /* T08: reiniciar el backoff de Wi-Fi; arrancar SNTP y MQTT (Fase 2) */
+    CON_ACC_RED_LISTA,         /* T08: reiniciar el backoff de Wi-Fi; arrancar SNTP y el cliente MQTT */
     CON_ACC_PROGRAMAR_REINTENTO, /* T09: programar un reintento Wi-Fi con el backoff (FR-CON-02) */
     CON_ACC_INTENTAR_UNION,    /* T10: lanzar un intento de unión */
+    CON_ACC_MQTT_LISTO,        /* T11: status online, Discovery, medidas; reiniciar el backoff MQTT */
+    CON_ACC_PROGRAMAR_REINTENTO_MQTT, /* T12/T15: programar un reintento MQTT con el backoff */
+    CON_ACC_INTENTAR_MQTT,     /* T13: lanzar un intento de conexión MQTT */
+    CON_ACC_RED_CAIDA,         /* T14/T16: detener los intentos MQTT; programar un reintento Wi-Fi */
 } con_accion_t;
 
 typedef struct {

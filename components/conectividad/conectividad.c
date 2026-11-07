@@ -9,7 +9,7 @@ static const char *const NOMBRE_ESTADO[CON_N_ESTADOS] = {
     "CONECTANDO_BROKER", "OPERATIVO", "OTA_DESCARGA",
 };
 static const char *const NOMBRE_EVENTO[CON_N_EVENTOS] = {
-    "fin_arranque", "envío", "wifi_up", "wifi_down", "backoff",
+    "fin_arranque", "envío", "wifi_up", "wifi_down", "backoff", "mqtt_up", "mqtt_down",
 };
 
 con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_guardas_t g)
@@ -38,6 +38,22 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
         case CON_EV_WIFI_DOWN: return (con_transicion_t){"T09", CON_CONECTANDO_WIFI, CON_ACC_PROGRAMAR_REINTENTO};
         case CON_EV_BACKOFF:   return (con_transicion_t){"T10", CON_CONECTANDO_WIFI, CON_ACC_INTENTAR_UNION};
         default: break;
+        }
+    }
+    if (origen == CON_CONECTANDO_BROKER) {
+        switch (evento) {
+        case CON_EV_MQTT_UP:   return (con_transicion_t){"T11", CON_OPERATIVO, CON_ACC_MQTT_LISTO};
+        case CON_EV_MQTT_DOWN: return (con_transicion_t){"T12", CON_CONECTANDO_BROKER, CON_ACC_PROGRAMAR_REINTENTO_MQTT};
+        case CON_EV_BACKOFF:   return (con_transicion_t){"T13", CON_CONECTANDO_BROKER, CON_ACC_INTENTAR_MQTT};
+        case CON_EV_WIFI_DOWN: return (con_transicion_t){"T14", CON_CONECTANDO_WIFI, CON_ACC_RED_CAIDA};
+        default: break;                  /* wifi_up: ign (§6.4) */
+        }
+    }
+    if (origen == CON_OPERATIVO) {
+        switch (evento) {
+        case CON_EV_MQTT_DOWN: return (con_transicion_t){"T15", CON_CONECTANDO_BROKER, CON_ACC_PROGRAMAR_REINTENTO_MQTT};
+        case CON_EV_WIFI_DOWN: return (con_transicion_t){"T16", CON_CONECTANDO_WIFI, CON_ACC_RED_CAIDA};
+        default: break;                  /* wifi_up, backoff, mqtt_up: ign (§6.4) */
         }
     }
     return (con_transicion_t){NULL, origen, CON_ACC_NINGUNA};

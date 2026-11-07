@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T10.
+/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T16.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -81,6 +81,50 @@ int main(void)
     ESPERA(t.siguiente == CON_CONECTANDO_WIFI && t.accion == CON_ACC_INTENTAR_UNION, "T10: %d/%d", t.siguiente, t.accion);
     ESPERA(strcmp(con_nombre_evento(CON_EV_BACKOFF), "backoff") == 0, "nombre backoff");
 
+    /* T11: CONECTANDO_BROKER + mqtt_up -> OPERATIVO; publicar status online, luego Discovery,
+     * luego las medidas; reiniciar el backoff MQTT. No debe: publicar medidas antes que status */
+    t = con_transicion(CON_CONECTANDO_BROKER, CON_EV_MQTT_UP, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T11") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_OPERATIVO && t.accion == CON_ACC_MQTT_LISTO, "T11: %d/%d", t.siguiente, t.accion);
+
+    /* T12: CONECTANDO_BROKER + mqtt_down (intento fallido) -> CONECTANDO_BROKER, programar el
+     * reintento MQTT con el backoff. No debe: reiniciar; desconectar el Wi-Fi */
+    t = con_transicion(CON_CONECTANDO_BROKER, CON_EV_MQTT_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T12") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_BROKER && t.accion == CON_ACC_PROGRAMAR_REINTENTO_MQTT, "T12: %d/%d", t.siguiente, t.accion);
+
+    /* T13: CONECTANDO_BROKER + backoff -> CONECTANDO_BROKER, lanzar un intento MQTT (no de Wi-Fi) */
+    t = con_transicion(CON_CONECTANDO_BROKER, CON_EV_BACKOFF, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T13") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_BROKER && t.accion == CON_ACC_INTENTAR_MQTT, "T13: %d/%d", t.siguiente, t.accion);
+
+    /* T14: CONECTANDO_BROKER + wifi_down -> CONECTANDO_WIFI; detener MQTT y programar el reintento Wi-Fi. No debe: reiniciar */
+    t = con_transicion(CON_CONECTANDO_BROKER, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T14") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_WIFI && t.accion == CON_ACC_RED_CAIDA, "T14: %d/%d", t.siguiente, t.accion);
+
+    /* T15: OPERATIVO + mqtt_down -> CONECTANDO_BROKER, programar el reintento MQTT. No debe: reiniciar; desconectar el Wi-Fi */
+    t = con_transicion(CON_OPERATIVO, CON_EV_MQTT_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T15") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_BROKER && t.accion == CON_ACC_PROGRAMAR_REINTENTO_MQTT, "T15: %d/%d", t.siguiente, t.accion);
+
+    /* T16: OPERATIVO + wifi_down -> CONECTANDO_WIFI, programar el reintento Wi-Fi. No debe: reiniciar */
+    t = con_transicion(CON_OPERATIVO, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T16") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_CONECTANDO_WIFI && t.accion == CON_ACC_RED_CAIDA, "T16: %d/%d", t.siguiente, t.accion);
+
+    /* «ign» de §6.4: sin transición ni acción (CONECTANDO_BROKER + wifi_up; OPERATIVO + wifi_up, backoff, mqtt_up) */
+    const struct { con_estado_t e; con_evento_t ev; } ign[] = {
+        {CON_CONECTANDO_BROKER, CON_EV_WIFI_UP}, {CON_OPERATIVO, CON_EV_WIFI_UP},
+        {CON_OPERATIVO, CON_EV_BACKOFF}, {CON_OPERATIVO, CON_EV_MQTT_UP}};
+    for (unsigned i = 0; i < sizeof ign / sizeof ign[0]; i++) {
+        t = con_transicion(ign[i].e, ign[i].ev, (con_guardas_t){0});
+        ESPERA(t.fila == NULL && t.accion == CON_ACC_NINGUNA && t.siguiente == ign[i].e, "ign %u con fila %s", i, t.fila ? t.fila : "NULL");
+    }
+    ESPERA(strcmp(con_nombre_evento(CON_EV_MQTT_UP), "mqtt_up") == 0, "nombre mqtt_up");
+    ESPERA(strcmp(con_nombre_evento(CON_EV_MQTT_DOWN), "mqtt_down") == 0, "nombre mqtt_down");
+    ESPERA(strcmp(con_nombre_estado(CON_OPERATIVO), "OPERATIVO") == 0, "nombre OPERATIVO");
+
     /* Fuera de VALIDANDO, wifi_up/wifi_down no tienen fila todavía (no se inventa) */
     t = con_transicion(CON_PORTAL, CON_EV_WIFI_DOWN, (con_guardas_t){0});
     ESPERA(t.fila == NULL && t.accion == CON_ACC_NINGUNA, "PORTAL + wifi_down tiene fila %s", t.fila ? t.fila : "NULL");
@@ -95,6 +139,6 @@ int main(void)
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_WIFI), "CONECTANDO_WIFI") == 0, "nombre CONECTANDO_WIFI");
     ESPERA(strcmp(con_nombre_evento(CON_EV_FIN_ARRANQUE), "fin_arranque") == 0, "nombre fin_arranque");
 
-    printf("TC-CON-01 (T01–T10): %s\n", fallos ? "FALLO" : "ok");
+    printf("TC-CON-01 (T01–T16): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

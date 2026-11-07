@@ -555,14 +555,14 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
       siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
       T02 no intenta el STA); nombres de estado y evento de la línea E0
     impl: tests/host/test_conectividad.c
-    status: successful   # T01–T10
+    status: successful   # T01–T10; T11–T16 (Fase 2) en verde en local, a la espera de la CI
     commit: 07da69b
     date: 2026-11-05
     ci_run: 42138329897   # host tests + secret scan
@@ -1343,6 +1343,35 @@ tests:
     commit: ce15ce2
     date: 2026-11-06
     ci_run: host tests + secret scan de ce15ce2 (verde); en la placa, «reset=usb» tras /api/serial/reset (test-results/*-b510420-reset-en/)
+  - id: TC-MQTT-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-MQTT-02]
+    needs: [hosted-ci]
+    expect: >
+      contrato host de §9.5: con T = 21,4 y ts = 1791720000,
+      {"v":21.4,"u":"°C","ts":1791720000}; con ts ausente, …"ts":null}; sin claves
+      adicionales ni v como string; humedad en %, punto_rocio en °C, sin -0.0; los
+      tópicos <sitio>/<zona>/<nodo>/<medida> de §9.2; nunca trunca (devuelve -1)
+    impl: tests/host/test_publicador.c   # caso mqtt01
+    status: not done   # en verde en local; falta la CI
+  - id: TC-MQTT-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-MQTT-08]
+    expect: >
+      el serializador de status da los 9 campos de §9.3 en su orden y con sus
+      tipos (estado online|offline, enteros sin comillas, hora_valida booleano),
+      escapa las cadenas, nunca escribe (null) y nunca trunca
+    needs: [hosted-ci]
+    impl: tests/host/test_publicador.c   # caso mqtt02
+    status: not done   # en verde en local; falta la CI
   - id: TC-SEC-01
     shape: atomic
     kind: security

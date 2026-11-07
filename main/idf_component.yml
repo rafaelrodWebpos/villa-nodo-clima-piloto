@@ -1,0 +1,5 @@
+# Componentes gestionados (docs/Method/project/arquitectura.md): solo los de la
+# fase que los usa. Fase 2: cliente MQTT (FSD §9, §14); versión exacta.
+dependencies:
+  idf: ">=6.0"
+  espressif/mqtt: "==1.1.0"

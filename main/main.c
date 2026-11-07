@@ -7,10 +7,11 @@
  * cautivo, HTTP, validación del envío) y la prueba de unión con su resultado
  * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
  * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
- * test: el resto de §6.3. T08 está en su parte de la Fase 1 (transición, E0,
- * sin AP) y T09/T10 reintentan la unión con el backoff de FR-CON-02. El
- * ciclo de medición (FSD §5.4) lee el SHT41 cada 60 s en cualquier estado y
- * escribe E3; la publicación por MQTT es de la Fase 2.
+ * test: el resto de §6.3. T08 arranca el cliente MQTT (el SNTP llega con su
+ * test), T09/T10 reintentan la unión con el backoff de FR-CON-02 y T11–T16
+ * llevan el broker (§9): status online al conectar, medidas y status en cada
+ * ciclo en OPERATIVO, Last Will offline. El ciclo de medición (FSD §5.4) lee
+ * el SHT41 cada 60 s en cualquier estado y escribe E3.
  */
 #include <string.h>
 #include "esp_app_desc.h"
@@ -23,8 +24,10 @@
 #include "esp_timer.h"
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "mqtt_client.h"
 #include "nvs.h"
 #include "nvs_flash.h"
 #include "sdkconfig.h"
@@ -39,6 +42,7 @@
 #include "portal_dns.h"
 #include "portal_http.h"
 #include "portal_validar.h"
+#include "publicador.h"
 #include "udplog.h"
 
 static const char *TAG = "nodo";
@@ -59,6 +63,14 @@ static esp_timer_handle_t s_t_reinicio;        /* T05: reinicio tras responder *
 static esp_timer_handle_t s_t_reintento;       /* T04: reintento de la unión dentro de los 20 s */
 static esp_timer_handle_t s_t_backoff;         /* T09/T10: backoff de Wi-Fi (FR-CON-02) */
 static con_backoff_t s_backoff_wifi;
+static esp_timer_handle_t s_t_backoff_mqtt;    /* T12/T13/T15: backoff MQTT (FR-CON-02) */
+static esp_timer_handle_t s_t_primer_mqtt;     /* T08: primer intento MQTT, después de su línea E0 */
+static con_backoff_t s_backoff_mqtt;
+static esp_mqtt_client_handle_t s_mqtt;        /* creado en el primer T08 */
+static bool s_mqtt_activo;                     /* el cliente está arrancado (start sin stop) */
+static int s_intento_mqtt;                     /* E5: <n> del intento MQTT en curso */
+static QueueHandle_t s_eventos_mqtt;           /* mqtt_up / mqtt_down hacia la tarea del gestor */
+static char s_top_status[160];                 /* <sitio>/<zona>/<nodo>/status */
 
 #define VALIDACION_US   (20 * 1000 * 1000)     /* T06, D12: 20 s */
 #define REINICIO_US     (4 * 1000 * 1000)      /* T05: ≤ 5 s desde la línea con: (D12); 4 s para que el teléfono vea «Conectado…» (H-41) */
@@ -254,15 +266,21 @@ static void probar_union(void)
     intentar_union();
 }
 
-/* Acción de T08 (Fase 1): reiniciar el backoff de Wi-Fi; <n> de E4 vuelve a 1
- * en el siguiente intento. Sin AP (T08, «No debe ocurrir»). El arranque de
- * SNTP y del cliente MQTT es de la Fase 2 (FSD §3.2), y hasta T11 no se
- * publica nada. */
+static void intentar_mqtt(void);
+
+/* Acción de T08: reiniciar el backoff de Wi-Fi (<n> de E4 vuelve a 1 en el
+ * siguiente intento) y arrancar el cliente MQTT con su primer intento (E5).
+ * Sin AP y sin publicar hasta T11 (T08, «No debe ocurrir»). El SNTP llega
+ * con su test (FR-TIME-01). */
 static void red_lista(void)
 {
     esp_timer_stop(s_t_backoff);
     con_backoff_reiniciar(&s_backoff_wifi);
     s_intento = 0;
+    esp_timer_stop(s_t_backoff_mqtt);
+    con_backoff_reiniciar(&s_backoff_mqtt);
+    s_intento_mqtt = 0;
+    esp_timer_start_once(s_t_primer_mqtt, 1000);   /* tras la línea con: de T08 (§6.6), muy dentro de su 1 s */
 }
 
 /* Acción de T09: programar el reintento con el backoff de FR-CON-02. Si ya hay
@@ -278,6 +296,134 @@ static void programar_reintento(void)
 static void al_vencer_backoff(void *arg)
 {
     transicion(CON_EV_BACKOFF, (con_guardas_t){0});      /* T10 */
+}
+
+/* ---- Adaptador MQTT (§9) ---------------------------------------------------
+ * El cliente esp-mqtt corre sin reconexión automática: cada intento lo lanza
+ * la tabla (T08, T13) y los fallos siguen el backoff MQTT de FR-CON-02 (T12,
+ * T15). Sus eventos no tocan el gestor desde la tarea del cliente: van por una
+ * cola a la tarea «gestor», que nunca espera al cliente con s_lock tomado
+ * mientras el cliente la espera a ella. */
+
+static uint32_t s_lecturas, s_err_sensor;
+static med_lectura_t s_ultima;                  /* la medida más reciente (T11) */
+static bool s_hay_medida;
+
+static void al_evento_mqtt(void *arg, esp_event_base_t base, int32_t id, void *datos)
+{
+    con_evento_t ev;
+    if (id == MQTT_EVENT_CONNECTED) ev = CON_EV_MQTT_UP;
+    else if (id == MQTT_EVENT_DISCONNECTED) ev = CON_EV_MQTT_DOWN;
+    else return;
+    xQueueSend(s_eventos_mqtt, &ev, 0);
+}
+
+static void tarea_gestor(void *arg)
+{
+    con_evento_t ev;
+    for (;;) {
+        if (xQueueReceive(s_eventos_mqtt, &ev, portMAX_DELAY) == pdTRUE) transicion(ev, (con_guardas_t){0});
+    }
+}
+
+static void crear_mqtt(void)
+{
+    if (s_mqtt) return;
+    pub_topico(s_top_status, sizeof s_top_status, s_cfg.sitio, s_cfg.zona, s_id, "status");
+    esp_mqtt_client_config_t c = {
+        .broker.address = {.hostname = s_cfg.mqtt_host, .port = s_cfg.mqtt_port,
+                           .transport = MQTT_TRANSPORT_OVER_TCP},
+        .credentials = {.client_id = s_id},
+        .session = {.keepalive = 60, .protocol_ver = MQTT_PROTOCOL_V_3_1_1,
+                    .last_will = {.topic = s_top_status, .msg = PUB_LWT_OFFLINE, .qos = 1, .retain = 1}},
+        .network = {.disable_auto_reconnect = true},
+    };
+    if (s_cfg.mqtt_user[0]) {                   /* FR-MQTT-07: sin usuario, sin credenciales */
+        c.credentials.username = s_cfg.mqtt_user;
+        c.credentials.authentication.password = s_cfg.mqtt_pass;
+    }
+    s_mqtt = esp_mqtt_client_init(&c);
+    ESP_ERROR_CHECK(s_mqtt ? ESP_OK : ESP_FAIL);
+    ESP_ERROR_CHECK(esp_mqtt_client_register_event(s_mqtt, ESP_EVENT_ANY_ID, al_evento_mqtt, NULL));
+}
+
+/* Acción de T13 (y primer intento de T08): E5 y un intento de conexión. */
+static void intentar_mqtt(void)
+{
+    crear_mqtt();
+    ESP_LOGI(TAG, "mqtt: intento %d", ++s_intento_mqtt);
+    if (!s_mqtt_activo) { s_mqtt_activo = esp_mqtt_client_start(s_mqtt) == ESP_OK; }
+    else esp_mqtt_client_reconnect(s_mqtt);
+}
+
+/* Acción de T12/T15: un intento fallido avanza el backoff una sola vez. */
+static void programar_reintento_mqtt(void)
+{
+    if (esp_timer_is_active(s_t_backoff_mqtt)) return;
+    unsigned ms = con_backoff_fallo(&s_backoff_mqtt);
+    esp_timer_start_once(s_t_backoff_mqtt, (uint64_t)ms * 1000u);
+}
+
+/* Acción de T14/T16: detener los intentos MQTT y programar un reintento Wi-Fi. */
+static void red_caida(void)
+{
+    esp_timer_stop(s_t_backoff_mqtt);
+    esp_timer_stop(s_t_primer_mqtt);
+    if (s_mqtt_activo) { esp_mqtt_client_stop(s_mqtt); s_mqtt_activo = false; }
+    programar_reintento();
+}
+
+static void publicar_status(void)
+{
+    wifi_ap_record_t ap = {0};
+    int rssi = esp_wifi_sta_get_ap_info(&ap) == ESP_OK ? ap.rssi : 0;
+    pub_status_t st = {.online = true, .fw = s_version, .rssi = rssi, .reset = causa_reset(),
+                       .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000), .lecturas = s_lecturas,
+                       .err_sensor = s_err_sensor, .ota = "ninguno", .hora_valida = false};   /* hora: FR-TIME-02 */
+    char json[256];
+    if (pub_status_json(json, sizeof json, &st) > 0)
+        esp_mqtt_client_publish(s_mqtt, s_top_status, json, 0, 1, 1);          /* §9.2: QoS 1, retain */
+}
+
+/* Medidas de una lectura válida: QoS 0, retain (FR-MQTT-04); sin punto_rocio si no hay (FR-MED-04).
+ * Sin hora válida, ts = null (FR-MQTT-03). */
+static void publicar_medidas(const med_lectura_t *m)
+{
+    const float v[PUB_N_MEDIDAS] = {m->t, m->hr, m->td};
+    for (int i = 0; i < PUB_N_MEDIDAS; i++) {
+        if (i == PUB_PUNTO_ROCIO && !m->td_valida) continue;
+        char top[160], json[64];
+        if (pub_topico(top, sizeof top, s_cfg.sitio, s_cfg.zona, s_id, pub_nombre_medida(i)) < 0) continue;
+        if (pub_medida_json(json, sizeof json, i, v[i], false, 0) < 0) continue;
+        esp_mqtt_client_publish(s_mqtt, top, json, 0, 0, 1);
+    }
+}
+
+/* Acción de T11: status online, luego (Discovery, FR-HA-01, con su test) las
+ * medidas más recientes; reiniciar el backoff MQTT; validar la imagen si está
+ * PENDIENTE. No debe: publicar medidas antes que status. */
+static void mqtt_listo(void)
+{
+    esp_timer_stop(s_t_backoff_mqtt);
+    con_backoff_reiniciar(&s_backoff_mqtt);
+    s_intento_mqtt = 0;
+    publicar_status();
+    if (s_hay_medida && s_ultima.valida) publicar_medidas(&s_ultima);
+    esp_ota_img_states_t st;
+    if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY)
+        esp_ota_mark_app_valid_cancel_rollback();
+}
+
+static void al_primer_mqtt(void *arg)
+{
+    xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+    if (s_estado == CON_CONECTANDO_BROKER && !s_mqtt_activo) intentar_mqtt();
+    xSemaphoreGiveRecursive(s_lock);
+}
+
+static void al_vencer_backoff_mqtt(void *arg)
+{
+    transicion(CON_EV_BACKOFF, (con_guardas_t){0});      /* T13 */
 }
 
 /* Acción de T05: persistir, responder con éxito y reiniciar. */
@@ -338,6 +484,10 @@ static void wifi_iniciar(void)
     const esp_timer_create_args_t ti = {.callback = al_reintentar, .name = "reintento"};
     const esp_timer_create_args_t tb = {.callback = al_vencer_backoff, .name = "backoff"};
     ESP_ERROR_CHECK(esp_timer_create(&tb, &s_t_backoff));
+    const esp_timer_create_args_t tm = {.callback = al_vencer_backoff_mqtt, .name = "backoff_mqtt"};
+    ESP_ERROR_CHECK(esp_timer_create(&tm, &s_t_backoff_mqtt));
+    const esp_timer_create_args_t tp = {.callback = al_primer_mqtt, .name = "primer_mqtt"};
+    ESP_ERROR_CHECK(esp_timer_create(&tp, &s_t_primer_mqtt));
     ESP_ERROR_CHECK(esp_timer_create(&tv, &s_t_validacion));
     ESP_ERROR_CHECK(esp_timer_create(&tr, &s_t_reinicio));
     ESP_ERROR_CHECK(esp_timer_create(&ti, &s_t_reintento));
@@ -400,6 +550,10 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_RED_LISTA:            red_lista(); break;
     case CON_ACC_PROGRAMAR_REINTENTO:  programar_reintento(); break;
     case CON_ACC_INTENTAR_UNION:       intentar_union(); break;
+    case CON_ACC_MQTT_LISTO:           mqtt_listo(); break;
+    case CON_ACC_PROGRAMAR_REINTENTO_MQTT: programar_reintento_mqtt(); break;
+    case CON_ACC_INTENTAR_MQTT:        intentar_mqtt(); break;
+    case CON_ACC_RED_CAIDA:            red_caida(); break;
     case CON_ACC_NINGUNA:              break;
     }
     /* E0 */
@@ -411,7 +565,6 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
  * monotónico del planificador, en cualquier estado. Los contadores son los de
  * `status` (§9.3, Fase 2). */
 #define PERIODO_MEDIDA_MS 60000
-static uint32_t s_lecturas, s_err_sensor;
 
 static void tarea_medicion(void *arg)
 {
@@ -428,6 +581,17 @@ static void tarea_medicion(void *arg)
         med_linea(linea, sizeof linea, &m, sht41_motivo(r));
         if (m.valida) ESP_LOGI(TAG, "%s", linea);             /* E3 */
         else          ESP_LOGW(TAG, "%s", linea);
+        /* FR-MQTT-08: en OPERATIVO, medidas y status en cada ciclo. Se mira el
+         * estado con s_lock y se publica sin él (el cliente puede estar
+         * esperando a la tarea del gestor). */
+        xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+        s_ultima = m; s_hay_medida = true;
+        bool operativo = s_estado == CON_OPERATIVO;
+        xSemaphoreGiveRecursive(s_lock);
+        if (operativo) {
+            if (m.valida) publicar_medidas(&m);
+            publicar_status();
+        }
         vTaskDelayUntil(&ultimo, pdMS_TO_TICKS(PERIODO_MEDIDA_MS));
     }
 }
@@ -445,6 +609,8 @@ void app_main(void)
     ESP_LOGI(TAG, "%s", BENCH_MARKER);
 #endif
     s_lock = xSemaphoreCreateRecursiveMutex();
+    s_eventos_mqtt = xQueueCreate(8, sizeof(con_evento_t));
+    xTaskCreate(tarea_gestor, "gestor", 4096, NULL, 6, NULL);
 
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
