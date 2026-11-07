@@ -1,0 +1,252 @@
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x403cd9b7
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2f54
+entry 0x403c8908
+I (27) boot: ESP-IDF v6.0.2 2nd stage bootloader
+I (27) boot: compile time Nov  7 2026 14:01:43
+I (27) boot: Multicore bootloader
+I (27) boot: chip revision: v0.2
+I (30) boot: efuse block revision: v1.4
+I (34) boot.esp32s3: Boot SPI Speed : 40MHz
+I (37) boot.esp32s3: SPI Mode       : DIO
+I (41) boot.esp32s3: SPI Flash Size : 8MB
+I (45) boot: Enabling RNG early entropy source...
+I (49) boot: Partition Table:
+I (52) boot: ## Label            Usage          Type ST Offset   Length
+I (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (65) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (71) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (78) boot:  3 ota_0            OTA app          00 10 00020000 00300000
+I (84) boot:  4 ota_1            OTA app          00 11 00320000 00300000
+I (91) boot: End of partition table
+I (94) esp_image: segment 0: paddr=00020020 vaddr=3c0b0020 size=254fch (152828) map
+I (140) esp_image: segment 1: paddr=00045524 vaddr=3fc98000 size=061ach ( 25004) load
+I (148) esp_image: segment 2: paddr=0004b6d8 vaddr=40374000 size=04940h ( 18752) load
+I (154) esp_image: segment 3: paddr=00050020 vaddr=42000020 size=af860h (718944) map
+I (335) esp_image: segment 4: paddr=000ff888 vaddr=40378940 size=0f644h ( 63044) load
+I (354) esp_image: segment 5: paddr=0010eed4 vaddr=50000000 size=00024h (    36) load
+I (363) boot: Loaded app from partition at offset 0x20000
+I (363) boot: Disabling RNG early entropy source...
+I (374) cpu_start: Multicore app
+I (382) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (384) cpu_start: Pro cpu start user code
+I (384) cpu_start: cpu freq: 160000000 Hz
+I (385) app_init: Application information:
+I (389) app_init: Project name:     nodo_clima
+I (393) app_init: App version:      0.0.0-7096cb7-bench
+I (398) app_init: Compile time:     Nov  7 2026 14:02:17
+I (403) app_init: ELF file SHA256:  97440caf9...
+I (407) app_init: ESP-IDF:          v6.0.2
+I (411) efuse_init: Min chip rev:     v0.0
+I (415) efuse_init: Max chip rev:     v0.99
+I (419) efuse_init: Chip rev:         v0.2
+I (423) heap_init: Initializing. RAM available for dynamic allocation:
+I (429) heap_init: At 3FCA2C30 len 00046AE0 (282 KiB): RAM
+I (434) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (439) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (444) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (451) spi_flash: detected chip: gd
+I (453) spi_flash: flash io: dio
+I (457) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (462) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (470) main_task: Started on CPU0
+I (470) main_task: Calling app_main()
+I (480) nodo: boot: clima-f3c6d4 fw=0.0.0-7096cb7-bench reset=usb part=ota_0 img=valida
+I (480) nodo: nodo_clima 0.0.0-7096cb7-bench
+I (490) nodo: NODO-BENCH-IMAGE
+I (530) nodo: cfg: sitio=sitio1 zona=zona1
+I (530) pp: pp rom version: e7ae62f
+I (530) net80211: net80211 rom version: e7ae62f
+I (540) wifi:wifi driver task: 3fcaf4f4, prio:23, stack:6656, core=0
+I (550) wifi:wifi firmware version: 00ad238
+I (550) wifi:wifi certification version: v7.0
+I (550) wifi:config NVS flash: enabled
+I (550) wifi:config nano formatting: disabled
+I (560) wifi:Init data frame dynamic rx buffer num: 32
+I (560) wifi:Init static rx mgmt buffer num: 5
+I (570) wifi:Init management short buffer num: 32
+I (570) wifi:Init dynamic tx buffer num: 32
+I (580) wifi:Init static tx FG buffer num: 2
+I (580) wifi:Init static rx buffer size: 1600
+I (580) wifi:Init static rx buffer num: 10
+I (590) wifi:Init dynamic rx buffer num: 32
+I (540) nodo: med: T=30.2 HR=64.8 Td=22.9
+I (600) wifi_init: rx ba win: 6
+I (600) wifi_init: accept mbox: 6
+I (600) wifi_init: tcpip mbox: 32
+I (600) wifi_init: udp mbox: 6
+I (610) wifi_init: tcp mbox: 6
+I (610) wifi_init: tcp tx win: 5760
+I (610) wifi_init: tcp rx win: 5760
+I (620) wifi_init: tcp mss: 1440
+I (620) wifi_init: WiFi IRAM OP enabled
+I (620) wifi_init: WiFi RX IRAM OP enabled
+W (630) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (640) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (680) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (680) wifi:enable tsf
+I (690) nodo: wifi: intento 1
+I (690) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (690) nodo: Init complete
+I (700) wifi:state: init -> auth (0xb0)
+I (690) main_task: Returned from app_main()
+I (700) wifi:state: auth -> assoc (0x0)
+I (710) wifi:state: assoc -> init (0x2c0)
+I (720) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1720) nodo: wifi: intento 2
+I (1720) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (4030) wifi:state: init -> auth (0xb0)
+I (4040) wifi:state: auth -> assoc (0x0)
+I (4050) wifi:state: assoc -> run (0x10)
+I (4080) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (4080) wifi:security: WPA2-PSK, phy: bgn, rssi: -38, cipher(pairwise:0x3, group:0x3), pmf:0
+I (4090) wifi:pm start, type: 1
+I (4090) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (4100) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (4110) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (4110) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (4130) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (411) efuse_init: Min chip rev:     v0.0
+I (415) efuse_init: Max chip rev:     v0.99 
+I (419) efuse_init: Chip rev:         v0.2
+I (423) heap_init: Initializing. RAM available for dynamic allocation:
+I (429) heap_init: At 3FCA2C30 len 00046AE0 (282 KiB): RAM
+I (434) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (439) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (444) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (451) spi_flash: detected chip: gd
+I (453) spi_flash: flash io: dio
+I (457) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (463) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (470) main_task: Started on CPU0
+I (470) main_task: Calling app_main()
+I (480) nodo: boot: clima-f3c6d4 fw=0.0.0-7096cb7-bench reset=usb part=ota_0 img=valida
+I (480) nodo: nodo_clima 0.0.0-7096cb7-bench
+I (490) nodo: NODO-BENCH-IMAGE
+I (530) nodo: cfg: sitio=sitio1 zona=zona1
+I (530) pp: pp rom version: e7ae62f
+I (530) net80211: net80211 rom version: e7ae62f
+I (540) wifi:wifi driver task: 3fcaf4f4, prio:23, stack:6656, core=0
+I (550) wifi:wifi firmware version: 00ad238
+I (550) wifi:wifi certification version: v7.0
+I (550) wifi:config NVS flash: enabled
+I (550) wifi:config nano formatting: disabled
+I (560) wifi:Init data frame dynamic rx buffer num: 32
+I (560) wifi:Init static rx mgmt buffer num: 5
+I (570) wifi:Init management short buffer num: 32
+I (570) wifi:Init dynamic tx buffer num: 32
+I (580) wifi:Init static tx FG buffer num: 2
+I (580) wifi:Init static rx buffer size: 1600
+I (580) wifi:Init static rx buffer num: 10
+I (590) wifi:Init dynamic rx buffer num: 32
+I (540) nodo: med: T=30.2 HR=65.2 Td=23.0
+I (600) wifi_init: rx ba win: 6
+I (600) wifi_init: accept mbox: 6
+I (600) wifi_init: tcpip mbox: 32
+I (600) wifi_init: udp mbox: 6
+I (610) wifi_init: tcp mbox: 6
+I (610) wifi_init: tcp tx win: 5760
+I (610) wifi_init: tcp rx win: 5760
+I (620) wifi_init: tcp mss: 1440
+I (620) wifi_init: WiFi IRAM OP enabled
+I (620) wifi_init: WiFi RX IRAM OP enabled
+W (630) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (640) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (690) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (690) wifi:enable tsf
+I (690) nodo: wifi: intento 1
+I (690) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (700) nodo: Init complete
+I (700) wifi:state: init -> auth (0xb0)
+I (710) main_task: Returned from app_main()
+I (710) wifi:state: auth -> assoc (0x0)
+I (720) wifi:state: assoc -> init (0x2c0)
+I (730) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1730) nodo: wifi: intento 2
+I (1730) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (4040) wifi:state: init -> auth (0xb0)
+I (4050) wifi:state: auth -> assoc (0x0)
+I (4060) wifi:state: assoc -> run (0x10)
+I (4080) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (4090) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (4090) wifi:security: WPA2-PSK, phy: bgn, rssi: -38, cipher(pairwise:0x3, group:0x3), pmf:0
+I (4100) wifi:pm start, type: 1
+I (4100) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (4110) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (4130) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (4180) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (4180) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (5130) nodo: UDP logging -> 192.168.4.1:5555
+I (5130) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5130) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5130) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5140) nodo: mqtt: intento 1
+E (5160) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (5160) transport_base: Failed to open a new connection: 32772
+E (5160) mqtt_client: Error transport connect
+I (5160) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (6160) nodo: mqtt: intento 2
+I (6160) mqtt_client: Client force reconnect requested
+I (6160) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (6180) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (6190) transport_base: Failed to open a new connection: 32772
+E (6190) mqtt_client: Error transport connect
+I (6190) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (8190) nodo: mqtt: intento 3
+I (8190) mqtt_client: Client force reconnect requested
+I (8190) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (8200) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (8210) transport_base: Failed to open a new connection: 32772
+E (8210) mqtt_client: Error transport connect
+I (8210) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (12210) nodo: mqtt: intento 4
+I (12210) mqtt_client: Client force reconnect requested
+I (12210) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (12230) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (12230) transport_base: Failed to open a new connection: 32772
+E (12230) mqtt_client: Error transport connect
+I (12240) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (20240) nodo: mqtt: intento 5
+I (20240) mqtt_client: Client force reconnect requested
+I (20240) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (20250) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (20250) transport_base: Failed to open a new connection: 32772
+E (20250) mqtt_client: Error transport connect
+I (20260) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (36260) nodo: mqtt: intento 6
+I (36260) mqtt_client: Client force reconnect requested
+I (36260) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (36270) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (36270) transport_base: Failed to open a new connection: 32772
+E (36280) mqtt_client: Error transport connect
+I (36280) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (60540) nodo: med: T=30.3 HR=65.6 Td=23.1
+I (68280) nodo: mqtt: intento 7
+I (68280) mqtt_client: Client force reconnect requested
+I (68280) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (68290) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (68300) transport_base: Failed to open a new connection: 32772
+E (68300) mqtt_client: Error transport connect
+I (68300) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (120540) nodo: med: T=30.3 HR=63.6 Td=22.6
+I (128300) nodo: mqtt: intento 8
+I (128300) mqtt_client: Client force reconnect requested
+I (128300) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (128320) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (128320) transport_base: Failed to open a new connection: 32772
+E (128320) mqtt_client: Error transport connect
+I (128330) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (180540) nodo: med: T=30.3 HR=63.6 Td=22.6
+I (188330) nodo: mqtt: intento 9
+I (188330) mqtt_client: Client force reconnect requested
+I (188330) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (188340) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (188340) transport_base: Failed to open a new connection: 32772
+E (188340) mqtt_client: Error transport connect
+I (188350) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
