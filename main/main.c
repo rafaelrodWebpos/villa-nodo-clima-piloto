@@ -43,6 +43,7 @@
 #include "portal_http.h"
 #include "portal_validar.h"
 #include "publicador.h"
+#include "ha_discovery.h"
 #include "udplog.h"
 
 static const char *TAG = "nodo";
@@ -399,8 +400,19 @@ static void publicar_medidas(const med_lectura_t *m)
     }
 }
 
-/* Acción de T11: status online, luego (Discovery, FR-HA-01, con su test) las
- * medidas más recientes; reiniciar el backoff MQTT; validar la imagen si está
+/* Discovery de Home Assistant (§10.2, FR-HA-01): las tres configuraciones, retain y QoS 1 */
+static void publicar_discovery(void)
+{
+    for (int i = 0; i < HAD_N_MEDIDAS; i++) {
+        char top[96], json[768];
+        if (had_topico(top, sizeof top, s_id, i) < 0) continue;
+        if (had_config_json(json, sizeof json, s_cfg.sitio, s_cfg.zona, s_id, s_version, i) < 0) continue;
+        esp_mqtt_client_publish(s_mqtt, top, json, 0, 1, 1);
+    }
+}
+
+/* Acción de T11: status online, luego Discovery (FR-HA-01), luego las medidas
+ * más recientes; reiniciar el backoff MQTT; validar la imagen si está
  * PENDIENTE. No debe: publicar medidas antes que status. */
 static void mqtt_listo(void)
 {
@@ -408,6 +420,7 @@ static void mqtt_listo(void)
     con_backoff_reiniciar(&s_backoff_mqtt);
     s_intento_mqtt = 0;
     publicar_status();
+    publicar_discovery();
     if (s_hay_medida && s_ultima.valida) publicar_medidas(&s_ultima);
     esp_ota_img_states_t st;
     if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY)
@@ -610,7 +623,7 @@ void app_main(void)
 #endif
     s_lock = xSemaphoreCreateRecursiveMutex();
     s_eventos_mqtt = xQueueCreate(8, sizeof(con_evento_t));
-    xTaskCreate(tarea_gestor, "gestor", 4096, NULL, 6, NULL);
+    xTaskCreate(tarea_gestor, "gestor", 6144, NULL, 6, NULL);   /* T11 serializa Discovery (§10.2) en su pila */
 
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {

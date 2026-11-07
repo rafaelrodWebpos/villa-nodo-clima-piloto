@@ -417,3 +417,110 @@ def test_jrn_01_4_broker_and_status(testbench, dut_slot, dut_mac, run_dir):
         assert ret and ret[0]["retain"], "status no quedó retenido en el broker (§9.2)"
         assert json.loads(ret[-1]["payload"]).get("estado") == "online", "el status retenido no dice online"
         c.passed(f"T11, primer mensaje status online con los 9 campos (fw={st['fw']}, reset={st['reset']}), retenido")
+
+
+# --------------------------------------------------------------------------
+# JRN-01.5 · FR-HA-01 (con el Home Assistant de prueba, H-52)
+# --------------------------------------------------------------------------
+HA_ESPERA_S = 60        # de T11 a ver el dispositivo y sus valores en Home Assistant
+UNIDADES_HA = {"temperatura": "°C", "humedad": "%", "punto_rocio": "°C"}
+
+
+def _ha_resumen(ha, nodo):
+    """Dispositivos MQTT de Home Assistant con sus entidades (unidad y valor). La instancia
+    es nueva y solo ve el broker del banco: todo dispositivo MQTT es del nodo; dos serían
+    un duplicado."""
+    devs = ha.dispositivos_mqtt()
+    return devs, devs
+
+
+def _ha_ok(del_nodo):
+    """Errores frente a «1 dispositivo con 3 entidades y valores en °C/%»; [] si cumple."""
+    if len(del_nodo) != 1:
+        return [f"{len(del_nodo)} dispositivos del nodo"]
+    (dev,) = del_nodo.values()
+    errores = [] if dev["nombre"] == "Clima sitio1 zona1" else [f"nombre {dev['nombre']!r}"]
+    ents = dev["entidades"]
+    if len(ents) != 3:
+        errores.append(f"{len(ents)} entidades")
+    unidades = sorted(e["unit"] or "" for e in ents)
+    if unidades != sorted(UNIDADES_HA.values()):
+        errores.append(f"unidades {unidades}")
+    for e in ents:
+        try:
+            float(e["state"])
+        except (TypeError, ValueError):
+            errores.append(f"{e['entity_id']} = {e['state']!r}")
+    return errores
+
+
+def _ha_esperar(ha, nodo, timeout):
+    fin = time.time() + timeout
+    while True:
+        devs, del_nodo = _ha_resumen(ha, nodo)
+        errores = _ha_ok(del_nodo)
+        if not errores or time.time() > fin:
+            return devs, del_nodo, errores
+        time.sleep(3)
+
+
+def test_jrn_01_5_home_assistant_discovery(testbench, dut_slot, dut_mac, run_dir):
+    """JRN-01.5 — con el broker del banco y el Home Assistant de prueba (laptop, H-52), el nodo
+    publica Discovery al conectar y Home Assistant muestra 1 dispositivo con 3 entidades en
+    °C/%; tras parar y arrancar el broker una vez y reiniciar el DUT una vez, sin duplicados."""
+    from urllib.parse import urlparse
+    from benchlib import Registro, suscriptor_mqtt
+    from ha_cliente import HomeAssistant
+    tb = testbench
+    nodo = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    t11 = re.escape("con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)")
+    with case(tb, "JRN-01.5", "Home Assistant descubre el nodo", run_dir, requires="JRN-01.4") as c:
+        ha = HomeAssistant()
+        c.secretos = [(AP_PRUEBA["clave"], "<clave-de-prueba>"), (AP_PRUEBA["ssid"], "<ssid-de-prueba>")]
+        c.note(f"- Home Assistant de prueba {ha.version} en la laptop (Docker de WSL, H-52), instancia nueva", "")
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        assert not tb.mqtt_status().get("running"), "el broker del banco está activo: no es nuestro, no se toca"
+        ap_on = broker_on = False
+        fases = []
+        try:
+            c.step("Arrancar el broker, borrar los retenidos de Discovery y añadir la integración MQTT a Home Assistant")
+            tb.mqtt_start(); broker_on = True
+            with suscriptor_mqtt(tb, f"homeassistant/sensor/{nodo}/#",
+                                 limpiar=[f"homeassistant/sensor/{nodo}/{m}/config" for m in UNIDADES_HA]):
+                pass
+            ha.anadir_mqtt(urlparse(tb.base_url).hostname)
+            c.step("Resetear el DUT y levantar el AP; esperar T11 y el dispositivo en Home Assistant")
+            t0 = time.time()
+            reg = Registro(tb, dut_slot, t0)
+            tb.serial_reset(dut_slot)
+            tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
+            assert reg.esperar(t11, 60), "sin T11 en 60 s"
+            fases.append(("conexión", *_ha_esperar(ha, nodo, HA_ESPERA_S)))
+            c.step("Parar el broker 10 s y arrancarlo; esperar T11")
+            tb.mqtt_stop(); broker_on = False
+            time.sleep(10)
+            t_b = time.time()
+            tb.mqtt_start(); broker_on = True
+            assert reg.esperar(t11, 90, desde_ts=t_b), "sin T11 en 90 s tras volver el broker"
+            fases.append(("broker parado y arrancado", *_ha_esperar(ha, nodo, HA_ESPERA_S)))
+            c.step("Resetear el DUT; esperar T11")
+            t_r = time.time()
+            tb.serial_reset(dut_slot)
+            assert reg.esperar(t11, 60, desde_ts=t_r + 5), "sin T11 en 60 s tras el reset"
+            fases.append(("DUT reiniciado", *_ha_esperar(ha, nodo, HA_ESPERA_S)))
+        finally:
+            if ap_on:
+                tb.ap_stop()
+            if broker_on:
+                tb.mqtt_stop()
+            c.save_log("serie", [e["text"] for e in reg.leer()] if "reg" in locals() else [])
+        c.note("", "## Resultado", "")
+        for nombre, devs, del_nodo, errores in fases:
+            c.note(f"- {nombre}: {len(devs)} dispositivo(s) MQTT; " +
+                   "; ".join(f"«{v['nombre']}»: " + ", ".join(f"{e['entity_id']}={e['state']} {e['unit'] or ''}"
+                                                            for e in v["entidades"]) for v in devs.values()) +
+                   (f" — {errores}" if errores else ""))
+        for nombre, devs, del_nodo, errores in fases:
+            assert not errores, f"{nombre}: {errores} (FR-HA-01/02)"
+            assert len(devs) == 1, f"{nombre}: {len(devs)} dispositivos MQTT (duplicados)"
+        c.passed("1 dispositivo «Clima sitio1 zona1» con 3 entidades en °C/% tras conectar, tras el broker y tras el reset")

@@ -133,7 +133,6 @@ def _sin_reinicio(ent):
     assert len(e1) <= 1, f"el nodo se reinició: {e1}"
 
 
-@pytest.mark.xfail(strict=True, reason="Fase 2: el nodo aún no publica Discovery en T11 (FR-HA-01)")
 def test_tc_mqtt_03_connect_order_and_retain(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
     """TC-MQTT-03 · FR-HA-01, FR-MQTT-04 — broker limpio y DUT que conecta: status, luego las
     tres configuraciones de Discovery (§10.2, retain, QoS 1), luego las medidas; un suscriptor

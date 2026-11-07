@@ -500,8 +500,15 @@ tests:
     expect: >
       las tres configuraciones de Discovery llegan retained y Home Assistant
       muestra 1 dispositivo con 3 entidades (temperatura, humedad, punto de
-      rocío) sin duplicados
-    impl: null
+      rocío) sin duplicados; también tras parar y arrancar el broker una vez y
+      reiniciar el DUT una vez (contrato de banco FR-HA-01/02, §10.4), con
+      valores numéricos en °C y %
+    impl: tests/bench/test_jrn01.py::test_jrn_01_5_home_assistant_discovery
+    note: >
+      el Home Assistant de prueba es una instancia nueva en la laptop (H-52):
+      scripts/ha/ha_prueba.py up (imagen fija homeassistant/home-assistant:2026.10.4)
+      antes de la ejecución y down después; el test añade la integración MQTT contra
+      el broker del banco con él arrancado. Sin la instancia, not done
   - id: JRN-01.6
     shape: workflow
     kind: standard
