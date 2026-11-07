@@ -820,10 +820,10 @@ tests:
       respuesta que no venga del portal (la segunda mitad del contrato de FR-POR-02)
     impl: null   # bloqueado: bench-portal-dns en no (CR-TB-09)
     status: successful   # por la alternativa manual de FSD 0.9.6 (§3.1, §22.0) mientras CR-TB-09 siga abierta
-    reason: el ejecutable de banco sigue bloqueado (bench-portal-dns en no, CR-TB-09); la fila se cumple con la evidencia manual vigente H-44
+    reason: el ejecutable de banco sigue bloqueado (bench-portal-dns en no, CR-TB-09); la fila se cumple con la evidencia manual vigente H-51
     manual_alt:
       allowed_by: FSD 0.9.4 §22.0 y §3.1 (alt. manual mientras CR-TB-09 siga abierta)
-      evidence: H-44   # vigente
+      evidence: H-51   # vigente
       evidence_commit: 9f8d3f8   # imagen grabada; components/portal sin cambios desde 9c382b9
       scope: [components/portal]   # o lo que sirva FR-POR-02; si cambia, la evidencia vence
       valid: true
@@ -838,7 +838,7 @@ tests:
       apareció sola, y http://example.com mostró el formulario «Nodo clima».
       Evidencia manual: no sustituye al test del banco, que sigue en not done.
       VENCIDA: components/portal cambió después de ea41d50
-      H-44, propietario, 2026-11-06 hacia las 17:42 AST (21:42 UTC), sobre la imagen
+      H-51, propietario, 2026-11-06 hacia las 17:42 AST (21:42 UTC), sobre la imagen
       0.0.0-9f8d3f8-bench en SLOT1 (components/portal igual que en 9c382b9):
       iPhone 14 Pro Max con iOS 27.0.1, datos móviles apagados, unido a
       clima-f3c6d4 (abierta). La ventana del portal apareció sola con el
@@ -1371,6 +1371,22 @@ tests:
 # El journey en el job verify (build.yml) corre sobre la imagen de PRODUCCIÓN
 # del tag (opción a, propietario, 2026-11-02). Pasos que usan algo que solo
 # tiene la imagen de banco, y cómo se tratan allí. Revisar antes del primer tag.
+# Cierre de fases del FSD (§3): una fase se cierra cuando todos sus criterios de
+# salida tienen un test de la fase en verde. No es una puerta; lo anota /build
+# con la aprobación del propietario.
+phase_closures:
+  - phase: 1
+    date: 2026-11-06
+    commit: 9b5a3da   # último criterio (FR-POR-02, evidencia manual H-51) registrado; firmware evaluado en cf744e1, imagen 9f8d3f8
+    fsd_version: 0.9.6
+    gates_open: [{gate: "01", commit: cf744e1}, {gate: "02", commit: cf744e1}]
+    criteria: 40 de 40 criterios de §3.1 con test de la Fase 1 en verde
+    approved_by: propietario (2026-11-06)
+    caveats:
+      - FR-POR-02 (parte de example.com) descansa en la evidencia manual H-51; vence si cambia components/portal (CR-TB-09 abierta)
+      - la fila de banco de C-HW-08 queda fuera de §3.1 por FSD 0.9.6
+      - 8 no bloqueantes en fsd_pending, sin versión abierta
+
 release_verify:
   first_tag: v0.0.1   # decisión del propietario (H-37, 2026-11-03): el primer tag de release; el tag lo crea él cuando /build anuncie Ready for shipment
   image: producción del tag (--firmware-dir fw)
