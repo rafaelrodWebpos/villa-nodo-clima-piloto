@@ -590,27 +590,23 @@ tests:
       clima-* en el escaneo, y la primera medida en vivo llega ≤ 30 s después del
       encendido estimado (llegada del primer status − uptime_s − 2 s)
     impl: tests/bench/test_jrn01.py::test_jrn_01_7_power_cut   # pone su propia precondición (JRN-01.6 bloqueado); cortes en tests/bench/cortes.py
-    status: not done
-    last_run:
-      commit: a8f210a
-      date: 2026-11-07
-      outcome: not done (el banco no respondió al escaneo Wi-Fi con su AP arriba)
-      evidence: test-results/20261107T203408Z-a8f210a/JRN-01.7.md
-      observed: >
-        un corte del propietario: Last Will retenido a 85,5 s; tras reenchufar,
-        primer status en vivo bajo sitio1/zona1/clima-f3c6d4/status con reset =
-        poweron y uptime_s = 1, y primera medida a 3,0 s del encendido estimado.
-        Los 3 escaneos con el AP del banco arriba acabaron en CommandTimeout (como
-        el intento 1 en 60d8cd8, test-results/20261107T180528Z-60d8cd8/); con el AP
-        apagado, el mismo escaneo respondió enseguida. Al quedar not done, la
-        prueba se paró (pedido del propietario) durante la grabación de TC-CFG-02;
-        el DUT quedó sin aplicación y se volvió a grabar la imagen de la CI
-        0.0.0-a8f210a-bench, que arranca bien
-    next: >
-      H-63 (propietario, 2026-11-07, opción 1): tras el status y la primera medida,
-      el AP del banco se apaga unos 20 s para escanear (CR-TB-14) y se vuelve a
-      encender; antes del siguiente corte, el nodo vuelve a publicar. El expect no
-      cambia. Se repite con los cortes del propietario, con --parar-si-no-verde
+    status: successful
+    commit: 8828c44
+    date: 2026-11-07
+    ci_run: 42413406134   # build.yml, workflow_dispatch variant=bench version=0.0.0-8828c44
+    evidence: test-results/20261107T205853Z-8828c44/JRN-01.7.md
+    observed: >
+      un corte del propietario (USB-C desenchufado del lado de la placa): Last Will
+      retenido a 74,0 s; tras reenchufar, primer status en vivo bajo
+      sitio1/zona1/clima-f3c6d4/status con reset = poweron y uptime_s = 1,
+      primera medida a 3,0 s del encendido estimado; escaneo con el AP del banco
+      apagado un momento (H-63) sin ningún clima-*; el nodo volvió a publicar a
+      3,7 s de encender el AP
+    history: >
+      60d8cd8: rojo por el banco (escaneo sin respuesta con su AP arriba,
+      test-results/20261107T180528Z-60d8cd8/); a8f210a: not done por lo mismo tras
+      3 intentos (test-results/20261107T203408Z-a8f210a/), CR-TB-14 y H-63. El
+      firmware cumplió en los tres
 
   - id: JRN-02.1
     shape: workflow
@@ -1280,28 +1276,22 @@ tests:
       bajo <sitio>/<zona>/<nodo>/status con el sitio y la zona configurados; nunca
       el portal (FSD 0.9.6)
     impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # reescrito sobre status (FSD 0.9.6); cortes en tests/bench/cortes.py
-    status: not done
-    last_run:
-      commit: 60d8cd8
-      date: 2026-11-07
-      outcome: failed por el banco antes del primer corte
-      evidence: test-results/20261107T180528Z-60d8cd8/TC-CFG-02.md
-      observed: >
-        justo después del corte de JRN-01.7, al grabar la imagen el banco
-        respondió «Could not exclusively lock port /dev/ttyACM0» (esptool exited
-        2): algo en la Pi mantenía el puerto ocupado tras el reenchufe (CR-TB-13).
-        Ningún corte hecho
+    status: successful
+    commit: 8828c44
+    date: 2026-11-07
+    ci_run: 42413406134   # build.yml, workflow_dispatch variant=bench version=0.0.0-8828c44
+    evidence: test-results/20261107T205853Z-8828c44/TC-CFG-02.md
+    observed: >
+      5 cortes del propietario: tras cada uno, primer status en vivo bajo
+      sitio1/zona1/clima-f3c6d4/status con reset = poweron y uptime_s = 1;
+      escaneo sin clima-* (AP del banco apagado un momento, H-63); el nodo volvió
+      a publicar en ≤ 4,2 s al encender el AP
     history: >
-      9bcc519 (2026-11-06), versión de consola: not done tras el corte 1 porque el
-      banco no captura el arranque tras un corte (CR-TB-10); el propietario
-      decidió (opción A, FSD 0.9.4 y 0.9.6) observar los cortes por status, y
-      así está escrito desde 60d8cd8. Evidencia:
-      test-results/20261106T030110Z-9bcc519/TC-CFG-02.md y el diagnóstico en
-      test-results/20261106T190648Z-9bcc519-diag-corte/
-    next: >
-      H-61 (propietario, 2026-11-07, opción 1): con el puerto ocupado se espera
-      15 s y se reintenta una vez la grabación (si sigue, not done); se repite
-      con los cortes del propietario
+      9bcc519 (2026-11-06), versión de consola: not done porque el banco no captura
+      el arranque tras un corte (CR-TB-10; test-results/20261106T030110Z-9bcc519/);
+      reescrito sobre status (FSD 0.9.4 y 0.9.6). 60d8cd8: la grabación falló por
+      el puerto ocupado tras un reenchufe (CR-TB-13,
+      test-results/20261107T180528Z-60d8cd8/); desde H-61 se reintenta tras 15 s
 
   - id: TC-SEN-01
     shape: atomic
@@ -1715,13 +1705,18 @@ tests:
       muestra del slot presente, cota por arriba) y un suscriptor nuevo lo recibe
       retenido. Se mide en cada corte de JRN-01.7 y TC-CFG-02 de la misma sesión
     impl: tests/bench/test_mqtt.py::test_tc_mqtt_04_last_will_on_power_cut
-    status: successful   # con un solo corte; se vuelve a medir en los cortes de H-61
-    commit: 60d8cd8
+    status: successful
+    commit: 8828c44
     date: 2026-11-07
-    evidence: test-results/20261107T180528Z-60d8cd8/TC-MQTT-04.md
+    ci_run: 42413406134   # build.yml, workflow_dispatch variant=bench version=0.0.0-8828c44
+    evidence: test-results/20261107T205853Z-8828c44/TC-MQTT-04.md
     observed: >
-      corte de JRN-01.7: {"estado":"offline"} en status a 79,7 s de la última
-      muestra con el slot presente, y un suscriptor nuevo lo recibió retenido
+      6 cortes (JRN-01.7 y TC-CFG-02): Last Will en status a 74,0 / 65,2 / 83,5 /
+      81,1 / 70,3 / 79,9 s de la última muestra con el slot presente, retenido en
+      los 6
+    history: >
+      60d8cd8: verde con un solo corte (79,7 s; test-results/20261107T180528Z-60d8cd8/)
+
   - id: TC-HA-01
     shape: atomic
     kind: standard
