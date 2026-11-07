@@ -1,7 +1,9 @@
 /* L0 udplog — adaptador del log por UDP (FR-LOG-02, FR-LOG-03, E11).
  * Cada línea del log serie se copia, una vez que hay IP de STA, en un datagrama
- * unicast al host:puerto de Kconfig. Nunca bloquea a quien escribe el log: si el
- * mutex está ocupado o la cola llena, esa copia se descarta (FR-LOG-03). */
+ * unicast al host:puerto de Kconfig. Nunca bloquea a quien escribe el log más de
+ * ESPERA_MUTEX: dos tareas que escriben a la vez se turnan (FR-LOG-02, «cada
+ * línea»); si el mutex sigue ocupado o la cola está llena, esa copia se
+ * descarta (FR-LOG-03). */
 #include "sdkconfig.h"
 #include "udplog.h"
 
@@ -22,6 +24,7 @@
 #include "udplog_lineas.h"
 
 #define COLA_LINEAS 32
+#define ESPERA_MUTEX (pdMS_TO_TICKS(10) + 1)   /* ≥ 10 ms con tick de 10 ms; el otro escritor solo acumula y encola */
 
 typedef struct { uint16_t n; char txt[UDPLOG_LINEA_MAX]; } linea_t;
 
@@ -48,7 +51,7 @@ static int gancho(const char *fmt, va_list ap)
     va_copy(copia, ap);
     int r = s_anterior(fmt, ap);                         /* la consola serie, como siempre */
     if (s_con_ip && xTaskGetCurrentTaskHandle() != s_tarea &&
-        xSemaphoreTake(s_mutex, 0) == pdTRUE) {
+        xSemaphoreTake(s_mutex, ESPERA_MUTEX) == pdTRUE) {
         char tmp[UDPLOG_LINEA_MAX];
         int n = vsnprintf(tmp, sizeof tmp, fmt, copia);
         if (n > 0) udplog_acumular(&s_acum, tmp, (size_t)(n < (int)sizeof tmp ? n : (int)sizeof tmp - 1), encolar, NULL);
