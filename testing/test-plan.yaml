@@ -1627,6 +1627,36 @@ tests:
     commit: ce15ce2
     date: 2026-11-06
     ci_run: host tests + secret scan de ce15ce2 (verde); en la placa, «reset=usb» tras /api/serial/reset (test-results/*-b510420-reset-en/)
+  - id: TC-CON-11
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-CON-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      caso A de FR-CON-01: OPERATIVO, AP del banco apagado 60 min y vuelto a
+      encender; en la ventana (corte + 120 s) ninguna línea boot: ni rst: en la
+      consola, con med: llegando en cada tramo de 10 min (control de la captura);
+      escaneos cada 10 min con el AP apagado sin ningún clima-*; el primer status
+      en vivo tras la vuelta con uptime_s ≥ 3600 y el mismo reset que antes
+    impl: tests/bench/test_con_largo.py::test_tc_con_11_ap_off_60_min
+  - id: TC-CON-12
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-CON-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, bench-serial-monitor, dut-board]
+    expect: >
+      caso B de FR-CON-01: OPERATIVO, broker parado 60 min con el Wi-Fi arriba y
+      vuelto a arrancar; en la ventana ninguna línea boot: ni rst:, con med: en
+      cada tramo de 10 min; el primer status en vivo tras la vuelta con uptime_s ≥
+      3600 y el mismo reset que antes; al final, escaneo con el AP del banco
+      apagado un momento (CR-TB-14, como H-63) sin ningún clima-*
+    impl: tests/bench/test_con_largo.py::test_tc_con_12_broker_off_60_min
   - id: TC-MQTT-01
     shape: atomic
     kind: standard
