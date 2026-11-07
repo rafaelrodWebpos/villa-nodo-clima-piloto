@@ -1,0 +1,25 @@
+I (5958) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
+I (5958) wifi:station: <mac> join, AID=1, bgn, 20
+I (6008) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6448) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (7498) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
+I (13318) wifi:mode : sta (3c:0f:02:f3:c6:d4) + softAP (3c:0f:02:f3:c6:d5)
+I (13318) wifi:enable tsf
+W (13318) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (13348) nodo: wifi: intento 1
+I (13348) nodo: con: PORTAL -> VALIDANDO (envío)
+I (13348) portal: POST / -> probando
+I (13388) nodo: con: VALIDANDO -> VALIDANDO (envío)
+I (13388) portal: POST / -> ocupado
+I (13498) wifi:station: <mac> leave, AID = 1, reason = 8, bss_flags is 33721443, bss:0x3fca4928
+I (13498) wifi:<ba-del>idx:3, tid:0
+I (13498) wifi:<ba-del>idx:2, tid:7
+I (13498) wifi:new:<1,1>, old:<1,0>, ap:<1,1>, sta:<0,0>, prof:1, snd_ch_cfg:0x0
+I (13508) wifi:scan in process, ignore set current channel
+I (17208) nodo: wifi: intento 2
+I (21058) nodo: wifi: intento 3
+I (24908) nodo: wifi: intento 4
+I (28758) nodo: wifi: intento 5
+I (32608) nodo: wifi: intento 6
+I (33348) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (33358) nodo: con: VALIDANDO -> PORTAL (wifi_down)

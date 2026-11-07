@@ -627,6 +627,10 @@ tests:
       sin AP
     impl: tests/bench/test_con.py::test_tc_con_03_wifi_backoff
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 5f20820
     date: 2026-11-06
     ci_run: 42140310109   # build.yml, workflow_dispatch variant=bench version=0.0.0-5f20820
@@ -650,6 +654,10 @@ tests:
       (envío), un solo «wifi: intento 1» y sin escribir la NVS
     impl: tests/bench/test_con.py::test_tc_con_07_busy_while_validating
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 324179c
     date: 2026-11-06
     ci_run: 42282560803   # build.yml, workflow_dispatch variant=bench version=0.0.0-324179c
@@ -670,6 +678,10 @@ tests:
       el AP clima-* del DUT no aparece en 5 escaneos
     impl: tests/bench/test_con.py::test_tc_con_06_never_portal
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: c9838dc
     date: 2026-11-06
     ci_run: 42147201965   # build.yml, workflow_dispatch variant=bench version=0.0.0-c9838dc
@@ -711,6 +723,10 @@ tests:
       sta_join (ruta de eth0 intacta)
     impl: tests/bench/test_por.py::test_tc_por_02_get_form
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 9c382b9
     date: 2026-11-04
     evidence: test-results/20261105T015612Z-9c382b9/
@@ -785,6 +801,10 @@ tests:
       con: ARRANQUE -> PORTAL (fin_arranque)
     impl: tests/bench/test_por.py::test_tc_por_05_invalid_submit
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 9c382b9
     date: 2026-11-04
     evidence: test-results/20261105T015612Z-9c382b9/
@@ -832,6 +852,18 @@ tests:
       FR-POR-02 (FSD 0.9.5); última ejecución verde también sobre 5f20820
     impl: tests/bench/test_por.py::test_tc_por_07_captive_redirects
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53) sobre a2bc8e3 (imagen bench 0.0.0-a2bc8e3, run
+      CI 42365108439), 2026-11-07. Rojo en test-results/20261107T104237Z-a2bc8e3/: el
+      primer sta_join devolvió 169.254.138.107 (CR-TB-08, issue #72), el segundo
+      192.168.4.2 y GET /generate_204 acabó en timeout; esa ejecución no guardaba el
+      log serie. Repetido 3 veces con la misma imagen y el test instrumentado (81cc33b:
+      hora UTC de cada unión y petición, log serie y arranques): 3 verdes
+      (test-results/20261107T112919Z-, 112951Z- y 113024Z-81cc33b/), sta_join con
+      192.168.4.2 a la primera, respuestas en ≈ 0,1 s y dos arranques por reset en
+      cada pasada (el segundo a ≈ 2,65 s, CR-TB-12, issue #47), ambos antes de la
+      unión. Ninguna pasada falló con IP correcta y sin reinicio: incidencia del banco
+      (CR-TB-08; CR-TB-12 posible y no comprobable en la roja)
     commit: 9c382b9
     date: 2026-11-04
     evidence: test-results/20261105T015612Z-9c382b9/
@@ -908,6 +940,10 @@ tests:
       el propietario en H-41; el FSD no cambia)
     impl: tests/bench/test_por.py::test_tc_por_09_wrong_password
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 9c382b9
     date: 2026-11-04
     evidence: test-results/20261105T015612Z-9c382b9/
@@ -1147,6 +1183,10 @@ tests:
       «med: invalida (…)»
     impl: tests/bench/test_sen.py::test_tc_sen_03_three_cycles
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 3ddee73
     date: 2026-11-06
     evidence: >
@@ -1182,6 +1222,10 @@ tests:
       esptool sobre la placa del banco (/api/chip/info): ESP32-S3, «Embedded PSRAM 8MB» (N8R8), «Detected flash size: 8MB» y las interfaces 303a:1001 y 1a86:55d3 del único USB-C
     impl: tests/bench/test_hw.py::test_tc_hw_02_chip_reading
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 9f8d3f8
     date: 2026-11-06
     ci_run: 42295284731   # build.yml, workflow_dispatch variant=bench version=0.0.0-9f8d3f8
@@ -1199,6 +1243,10 @@ tests:
       la imagen de la CI (PSRAM deshabilitada en su sdkconfig, build_checks.py) llega a con: ARRANQUE -> CONECTANDO_WIFI|PORTAL (fin_arranque) en ≤ 120 s desde el reset, sin Guru Meditation ni abort() y con un solo arranque
     impl: tests/bench/test_hw.py::test_tc_hw_03_boots_without_psram
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 9f8d3f8
     date: 2026-11-06
     ci_run: 42295284731   # build.yml, workflow_dispatch variant=bench version=0.0.0-9f8d3f8
@@ -1216,6 +1264,10 @@ tests:
       la sonda tests/target/i2c_probe escanea GPIO8/9 a 100 kHz con solo los pull-ups externos: «i2c: scan sda=8 scl=9 hz=100000 ack=…» con 0x44; después se restaura la imagen de la CI
     impl: tests/bench/test_hw.py::test_tc_hw_05_i2c_scan
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 9f8d3f8
     date: 2026-11-06
     ci_run: 42295284731   # build.yml, workflow_dispatch variant=bench version=0.0.0-9f8d3f8
@@ -1350,6 +1402,10 @@ tests:
       la red del AP (control positivo)
     impl: tests/bench/test_por.py::test_tc_por_11_no_portal_when_configured
     status: successful
+    regression: >
+      regresión de la Fase 2 (H-53): verde sobre a2bc8e3 (imagen bench
+      0.0.0-a2bc8e3, run CI 42365108439), 2026-11-07,
+      test-results/20261107T104237Z-a2bc8e3/
     commit: 324179c
     date: 2026-11-06
     ci_run: 42282560803   # build.yml, workflow_dispatch variant=bench version=0.0.0-324179c
