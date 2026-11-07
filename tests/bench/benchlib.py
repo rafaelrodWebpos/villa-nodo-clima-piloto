@@ -349,7 +349,9 @@ class Registro:
         self.entradas, self._vistas = [], set()
 
     def leer(self):
-        out = self.tb.serial_output(self.slot, lines=500, since=self.desde)
+        # Solape de 2 s: varias líneas comparten la marca del banco y llegan en lecturas
+        # distintas; pedir desde la última marca exacta perdería las posteriores con la misma
+        out = self.tb.serial_output(self.slot, lines=500, since=max(0.0, self.desde - 2.0))
         for e in out.get("lines") or []:
             e = e if isinstance(e, dict) else {"text": str(e), "ts": 0}
             clave = (e.get("ts", 0), e.get("text", ""))

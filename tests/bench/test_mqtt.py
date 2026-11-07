@@ -236,12 +236,14 @@ def test_tc_con_08_broker_outage(testbench, dut_slot, dut_mac, firmware, run_dir
                 intervalos.append(round((_ms(sig) - _ms(t)) / 1000, 2))
         t12 = sum("con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)" in t for t in ventana)
         t13 = [i for i, t in enumerate(ventana) if "con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)" in t]
-        # T13: el intento sale ≤ 1 s tras su línea; nunca dos intentos sin un resultado entre ellos
+        # T13: el intento sale en el mismo instante que su línea (el firmware escribe E0 tras
+        # ejecutar la acción, así que «mqtt: intento» va justo antes): el más cercano, ≤ 1 s;
+        # nunca dos intentos sin un resultado entre ellos
         t13_ms = []
+        ms_intentos = [_ms(t) for t in ventana if "mqtt: intento " in t]
         for i in t13:
-            sig = next((u for u in ventana[i + 1:] if "mqtt: intento " in u), None)
-            if sig:
-                t13_ms.append(_ms(sig) - _ms(ventana[i]))
+            if ms_intentos:
+                t13_ms.append(min(abs(m - _ms(ventana[i])) for m in ms_intentos))
         intentos = [i for i, t in enumerate(ventana) if "mqtt: intento " in t]
         solapes = [a for a, b in zip(intentos, intentos[1:])
                    if not any(("(mqtt_down)" in u or "(mqtt_up)" in u) for u in ventana[a:b])]
@@ -250,7 +252,7 @@ def test_tc_con_08_broker_outage(testbench, dut_slot, dut_mac, firmware, run_dir
         primero = next((m for m in del_nodo if m["payload"] != LWT), None)
         medida = next((m for m in del_nodo if m["topic"].rsplit("/", 1)[-1] in MEDIDAS), None)
         c.note("", "## Resultado", "",
-               f"- T15: 1; T12: {t12}; T13: {len(t13)} (intento tras T13: máx. {max(t13_ms, default=0)} ms)",
+               f"- T15: 1; T12: {t12}; T13: {len(t13)} (distancia máx. de T13 a su intento: {max(t13_ms, default=0)} ms)",
                *[f"- intervalo {k + 1}: {v} s (esperado {BACKOFF_S[k]} s ± 10 %)" for k, v in enumerate(intervalos)],
                f"- broker de vuelta: T11 {'sí' if vuelta else 'no'}; suscriptor resuscrito a "
                f"{(resus[0] - t_start) if resus else float('nan'):+.1f} s",
@@ -263,7 +265,7 @@ def test_tc_con_08_broker_outage(testbench, dut_slot, dut_mac, firmware, run_dir
             assert v >= 0.9, f"intervalo {k + 1} en ráfaga: {v} s"
             assert abs(v - e) <= e * TOLERANCIA, f"intervalo {k + 1}: {v} s fuera de {e} s ± 10 %"
         assert t12 >= 10 and len(t13) >= 10, f"T12 {t12} / T13 {len(t13)}: menos de 10"
-        assert max(t13_ms, default=0) <= 1000, f"un intento llegó {max(t13_ms)} ms después de T13 (límite 1 s)"
+        assert len(t13_ms) == len(t13) and max(t13_ms, default=0) <= 1000, f"un T13 sin intento a ≤ 1 s: {t13_ms}"
         assert not solapes, "dos intentos MQTT sin un resultado entre ellos (T13)"
         assert not wifi, f"el Wi-Fi se tocó con el broker caído: {wifi[:2]}"
         _sin_reinicio(ent)

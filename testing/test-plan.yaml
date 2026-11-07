@@ -712,6 +712,15 @@ tests:
       en vivo del nodo es status online (FR-MQTT-06) y una medida válida llega en
       ≤ 75 s (FR-CON-04)
     impl: tests/bench/test_mqtt.py::test_tc_con_08_broker_outage
+    history: >
+      rojo sobre 9ddfcb4 (test-results/20261107T113833Z-9ddfcb4/) por dos defectos del test, no del firmware: los 10
+      intervalos MQTT salieron 1,0 · 2,0 · 4,0 · 8,0 · 16,0 · 32,0 · 60,0 · 60,0 ·
+      60,0 · 60,0 s, T15 1, T12 10, sin Wi-Fi ni reinicio y status primero a +59,2 s;
+      pero (1) el test buscaba el intento después de la línea T13 y el firmware
+      escribe E0 tras ejecutar la acción («mqtt: intento n» va unos ms antes; el FSD
+      no fija ese orden en T13), y (2) el lector incremental del log pedía desde la
+      última marca exacta y perdió la línea T11 de vuelta, que comparte marca. Test
+      corregido: T13 por cercanía (≤ 1 s) y relectura con solape de 2 s
   - id: TC-CON-09
     shape: atomic
     kind: standard
@@ -727,6 +736,15 @@ tests:
       «wifi: intento» en ≤ 2 s (el backoff de Wi-Fi se reinició en T08); en 60 s
       ningún «mqtt: intento» más y sin reinicio
     impl: tests/bench/test_mqtt.py::test_tc_con_09_wifi_loss_connecting_broker
+    status: successful
+    commit: 9ddfcb4
+    date: 2026-11-07
+    ci_run: 42368845448   # build.yml, workflow_dispatch variant=bench version=0.0.0-9ddfcb4
+    evidence: test-results/20261107T113833Z-9ddfcb4/
+    observed: >
+      7 intentos de unión con el AP apagado (espacios 3,4 · 0,0 · 4,4 · 6,4 · 10,4 ·
+      18,4 s entre inicios), T08 y dos «mqtt: intento»; T14 a +4,8 s de apagar el AP;
+      siguiente «wifi: intento» a 1,0 s de T14; 0 intentos MQTT en 60 s; sin reinicio
   - id: TC-CON-10
     shape: atomic
     kind: standard
@@ -742,6 +760,15 @@ tests:
       Will de la sesión anterior, que publica el broker) es status online y una
       medida válida llega en ≤ 90 s
     impl: tests/bench/test_mqtt.py::test_tc_con_10_wifi_loss_operativo
+    status: successful
+    commit: 9ddfcb4
+    date: 2026-11-07
+    ci_run: 42368845448   # build.yml, workflow_dispatch variant=bench version=0.0.0-9ddfcb4
+    evidence: test-results/20261107T113833Z-9ddfcb4/
+    observed: >
+      T16 a +0,8 s de apagar el AP (sin T15), siguiente «wifi: intento» a 1,0 s; al
+      volver el AP, T11 y el primer mensaje del nodo fue status online (el broker
+      publicó antes 1 Last Will de la sesión anterior); primera medida a +31,4 s
   - id: TC-POR-01
     shape: atomic
     kind: standard
@@ -1530,6 +1557,9 @@ tests:
       suscriptor nuevo recibe con retain = 1 las tres configuraciones y el último
       valor en vivo de cada medida
     impl: tests/bench/test_mqtt.py::test_tc_mqtt_03_connect_order_and_retain
+    history: >
+      xfail estricto confirmado sobre 9ddfcb4 (test-results/20261107T113833Z-9ddfcb4/): status online, después las
+      medidas y 0 configuraciones de Discovery
   - id: TC-HA-01
     shape: atomic
     kind: standard
@@ -1546,6 +1576,10 @@ tests:
       sitio ni la zona; sw_version = el fw dado; tópicos
       homeassistant/sensor/<nodo>/<medida>/config; escapa y nunca trunca
     impl: tests/host/test_ha_discovery.c
+    status: successful
+    commit: 9ddfcb4
+    date: 2026-11-07
+    ci_run: 42368833137   # host tests + secret scan
   - id: TC-SEC-01
     shape: atomic
     kind: security
