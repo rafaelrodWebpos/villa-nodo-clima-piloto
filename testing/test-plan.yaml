@@ -1323,6 +1323,19 @@ tests:
     commit: 5f93e6d
     date: 2026-11-05
     ci_run: 42132868016   # host tests + secret scan
+  - id: TC-MED-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-MED-02]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, sht41-wiring, dut-board]
+    expect: >
+      OPERATIVO con dos status en vivo; broker detenido 10 min y vuelto a
+      arrancar: entre el último status previo al corte y el primero posterior,
+      Δlecturas = ⌊Δuptime_s / 60⌋ ± 1, con Δuptime_s > 600 (sin reinicio)
+    impl: tests/bench/test_med.py::test_tc_med_02_cycle_without_broker
   - id: TC-MED-03
     shape: atomic
     kind: standard
