@@ -71,6 +71,24 @@ class Banco:
             self.broker_off()
 
 
+PUERTO_OCUPADO = "Could not exclusively lock port"
+ESPERA_PUERTO_S = 15        # H-61
+
+
+def grabar(tb, slot, firmware, c):
+    """Graba la imagen de la CI. Si el banco tiene el puerto serie ocupado (CR-TB-13, tras un
+    desenchufe y reenchufe del USB-C), espera 15 s y reintenta una vez; si sigue, not done."""
+    args = _parse_flash_args(firmware["dir"] / "coldflash")
+    res = tb.flash(slot, args, chip="esp32s3")
+    if not res.get("ok") and PUERTO_OCUPADO in str(res.get("output", "")):
+        c.note(f"- el banco tenía el puerto serie ocupado al grabar (CR-TB-13); reintento en {ESPERA_PUERTO_S} s")
+        time.sleep(ESPERA_PUERTO_S)
+        res = tb.flash(slot, args, chip="esp32s3")
+        if not res.get("ok") and PUERTO_OCUPADO in str(res.get("output", "")):
+            pytest.skip("not done: el banco mantiene ocupado el puerto serie tras reintentar (CR-TB-13)")
+    assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
+
+
 @contextlib.contextmanager
 def configurado(tb, slot, dut_mac, firmware, c, tmp_path):
     """Precondición: imagen de la CI grabada y DUT aprovisionado con el broker del banco;
@@ -79,8 +97,7 @@ def configurado(tb, slot, dut_mac, firmware, c, tmp_path):
            f"- broker del banco (abierto); tópicos bajo `sitio1/zona1/{_nodo(dut_mac)}/` y "
            f"`homeassistant/sensor/{_nodo(dut_mac)}/`", "")
     c.step(f"Precondiciones: grabar la imagen de la CI en {slot}")
-    res = tb.flash(slot, _parse_flash_args(firmware["dir"] / "coldflash"), chip="esp32s3")
-    assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
+    grabar(tb, slot, firmware, c)
     ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO)
     assert not tb.mqtt_status().get("running"), "el broker del banco está activo: no es nuestro, no se toca"
     banco = Banco(tb, ssid, clave)

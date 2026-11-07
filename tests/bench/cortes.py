@@ -29,6 +29,7 @@ MEDIDA_LIMITE_S = 30          # FR-CON-05, desde el encendido estimado
 STATUS_ESPERA_S = 120         # del reenchufe al primer status en vivo
 ESPERA_OPERADOR_S = 600       # lo que se espera a que el operador desenchufe o enchufe
 MUESTREO_S = 0.5
+ESCANEO_INTENTOS = 3          # H-61
 
 AVISO_DESENCHUFAR = ("Corte {n} de {total} ({tid}): desenchufa el cable USB-C del lado de la PLACA "
                      "(el lado de la Raspberry Pi no se toca) y pulsa «Hecho». NO lo vuelvas a enchufar "
@@ -158,13 +159,16 @@ def corte(tb, slot, sub, nodo, tid, n, total, c):
         r["medida_s"] = (med["t"] - r["encendido"]) if med and r["encendido"] is not None else None
     # 5) Nunca el portal: escaneo con el AP del banco arriba (FR-013 del banco)
     c.step(f"Corte {n}/{total}: escaneo Wi-Fi (no debe verse ningún clima-*)")
-    try:
-        nets = tb.scan().get("networks") or []
+    r["clima_ap"], r["escaneo_ok"], r["escaneo_fallos"] = [], False, []
+    for _ in range(ESCANEO_INTENTOS):        # H-61: el banco a veces no responde al escaneo
+        try:
+            nets = tb.scan().get("networks") or []
+        except Exception as e:
+            r["escaneo_fallos"].append(type(e).__name__)
+            continue
         r["clima_ap"] = sorted({x.get("ssid", "") for x in nets if str(x.get("ssid", "")).startswith("clima-")})
         r["escaneo_ok"] = True
-    except Exception as e:
-        r["clima_ap"], r["escaneo_ok"] = [], False
-        r["escaneo_error"] = type(e).__name__
+        break
     r["avisos"] = [h1.res.get("ok", h1.res.get("error", "sin respuesta")), h2.res.get("ok", h2.res.get("error", "sin respuesta"))]
     return r
 
@@ -178,7 +182,8 @@ def resumen(r):
             f"reenchufe a {r['t_enchufe'] - r['t_corte']:.0f} s; primer status `{tema}` reset={st.get('reset')} "
             f"uptime_s={st.get('uptime_s')} a {f(r['status']['t'] - r['t_enchufe'] if r.get('status') else None)} del reenchufe; "
             f"primera medida a {f(r.get('medida_s'))} del encendido estimado; clima-* en el escaneo: "
-            f"{r['clima_ap'] or 'ninguno'}{'' if r.get('escaneo_ok') else ' (escaneo falló: ' + r.get('escaneo_error', '?') + ')'}; "
+            f"{r['clima_ap'] or 'ninguno'}{' (escaneos fallidos: ' + ', '.join(r['escaneo_fallos']) + ')' if r.get('escaneo_fallos') else ''}"
+            f"{'' if r.get('escaneo_ok') else ' — escaneo sin hacer'}; "
             f"avisos: {r['avisos']}")
 
 
@@ -195,8 +200,6 @@ def errores(r, nodo, cfg_y_portal=True, arranque=True, lwt=False):
             out.append(f"corte {r['n']}: status bajo {st['topic']}, no {base}/status (FR-CFG-01)")
         if r.get("clima_ap"):
             out.append(f"corte {r['n']}: AP del portal en el escaneo {r['clima_ap']}")
-        if not r.get("escaneo_ok"):
-            out.append(f"corte {r['n']}: el escaneo no se pudo hacer ({r.get('escaneo_error')})")
     if cuerpo.get("estado") != "online":
         out.append(f"corte {r['n']}: el primer status no es online: {st['payload']}")
     if cuerpo.get("reset") != "poweron":
@@ -212,6 +215,13 @@ def errores(r, nodo, cfg_y_portal=True, arranque=True, lwt=False):
         elif r["lwt_s"] > LWT_LIMITE_S:
             out.append(f"corte {r['n']}: Last Will a {r['lwt_s']:.1f} s (> {LWT_LIMITE_S} s)")
     return out
+
+
+def sin_hacer(r, cfg_y_portal=True):
+    """Puntos que el banco no dejó observar (H-61: «no hecho» nunca cuenta como verde)."""
+    if cfg_y_portal and r.get("status") and not r.get("escaneo_ok"):
+        return [f"corte {r['n']}: escaneo sin hacer tras {ESCANEO_INTENTOS} intentos ({', '.join(r['escaneo_fallos'])})"]
+    return []
 
 
 def guardar_mqtt(c, sub, t0):

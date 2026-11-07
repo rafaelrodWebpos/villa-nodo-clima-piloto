@@ -538,7 +538,7 @@ def test_jrn_01_7_power_cut(testbench, dut_slot, dut_mac, firmware, run_dir, tmp
     ≤ 30 s después del encendido estimado. Pone su propia precondición (imagen de la CI y
     aprovisionamiento): JRN-01.6 está bloqueado (bench-ap-internet) y no deja el estado."""
     from benchlib import suscriptor_mqtt
-    from cortes import corte, errores, filtros, guardar_mqtt, limpiar, preparar, resumen
+    from cortes import corte, errores, filtros, guardar_mqtt, limpiar, preparar, resumen, sin_hacer
     from test_mqtt import configurado
     tb = testbench
     nodo = "clima-" + dut_mac.replace(":", "").lower()[-6:]
@@ -554,5 +554,8 @@ def test_jrn_01_7_power_cut(testbench, dut_slot, dut_mac, firmware, run_dir, tmp
         c.note("", "## Resultado", "", resumen(r))
         mal = errores(r, nodo)
         assert not mal, "; ".join(mal)
+        falta = sin_hacer(r)
+        if falta:
+            pytest.skip("not done: " + "; ".join(falta))
         c.passed(f"reset=poweron bajo sitio1/zona1/{nodo}/status, sin portal, primera medida a "
                  f"{r['medida_s']:.1f} s del encendido estimado")

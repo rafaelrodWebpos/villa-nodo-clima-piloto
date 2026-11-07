@@ -590,6 +590,23 @@ tests:
       clima-* en el escaneo, y la primera medida en vivo llega ≤ 30 s después del
       encendido estimado (llegada del primer status − uptime_s − 2 s)
     impl: tests/bench/test_jrn01.py::test_jrn_01_7_power_cut   # pone su propia precondición (JRN-01.6 bloqueado); cortes en tests/bench/cortes.py
+    status: not done
+    last_run:
+      commit: 60d8cd8
+      date: 2026-11-07
+      outcome: failed por el banco (escaneo sin respuesta), no por el firmware
+      evidence: test-results/20261107T180528Z-60d8cd8/JRN-01.7.md
+      observed: >
+        un corte del propietario (USB-C desenchufado del lado de la placa): Last Will
+        retenido a 79,7 s; tras reenchufar, primer status en vivo bajo
+        sitio1/zona1/clima-f3c6d4/status con reset = poweron y uptime_s = 1, y
+        primera medida a 3,0 s del encendido estimado. El único rojo: el escaneo
+        Wi-Fi del banco no respondió (CommandTimeout a los 90 s), así que «sin AP
+        clima-*» quedó sin observar
+    next: >
+      H-61 (propietario, 2026-11-07, opción 1): el escaneo se reintenta hasta 3
+      veces y, si el banco no responde, el paso queda not done (nunca verde);
+      se repite con los cortes del propietario
 
   # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
   # aparte de JRN-01 porque necesita la salida a Internet del banco (bench+;
@@ -1264,35 +1281,27 @@ tests:
     impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # reescrito sobre status (FSD 0.9.6); cortes en tests/bench/cortes.py
     status: not done
     last_run:
-      commit: 9bcc519
-      date: 2026-11-06
-      outcome: skipped (not done) tras el corte 1
-      evidence: test-results/20261106T030110Z-9bcc519/TC-CFG-02.md
+      commit: 60d8cd8
+      date: 2026-11-07
+      outcome: failed por el banco antes del primer corte
+      evidence: test-results/20261107T180528Z-60d8cd8/TC-CFG-02.md
       observed: >
-        precondición cumplida (imagen grabada, DUT configurado contra un AP
-        desechable, AP apagado). El propietario hizo el corte 1 (desenchufar el
-        único USB-C, 5 s, reenchufar en el mismo puerto de la Pi) y pulsó
-        «Hecho»; en 40 s el buffer serie del slot no tenía ninguna línea boot:
-        del arranque. Después del test el banco lista SLOT1 presente e «idle»
-    hypothesis: >
-      (2026-11-06, descartada por el diagnóstico) el monitor serie no se
-      reengancha tras reenchufar; «idle» es el modo de reserva del slot, no el
-      estado del monitor
-    diagnosis: >
-      2026-11-06, un corte del propietario con muestreo a 1 Hz del slot, el
-      buffer y el log de actividad (sin tocar el DUT): USB remove 19:15:39, USB
-      add 19:15:53, el banco relanza el proxy solo ~2 s después (pid nuevo) y
-      la captura sigue sola; la primera línea capturada es «I (659) main_task:
-      Returned from app_main()». El DUT escribe boot:, cfg: y con: ARRANQUE en
-      ≈ 0,65 s, antes de que el puerto vuelva a abrirse: con este banco esas
-      líneas no se pueden capturar tras un corte (CR-TB-10). Además, «Human
-      confirmed» consta en el banco a las 19:15:56 pero el cliente acabó en
-      CommandTimeout (CR-TB-11). El test ya guarda el buffer y el estado del
-      slot antes de decidir, y trata el CommandTimeout como not done
+        justo después del corte de JRN-01.7, al grabar la imagen el banco
+        respondió «Could not exclusively lock port /dev/ttyACM0» (esptool exited
+        2): algo en la Pi mantenía el puerto ocupado tras el reenchufe (CR-TB-13).
+        Ningún corte hecho
+    history: >
+      9bcc519 (2026-11-06), versión de consola: not done tras el corte 1 porque el
+      banco no captura el arranque tras un corte (CR-TB-10); el propietario
+      decidió (opción A, FSD 0.9.4 y 0.9.6) observar los cortes por status, y
+      así está escrito desde 60d8cd8. Evidencia:
+      test-results/20261106T030110Z-9bcc519/TC-CFG-02.md y el diagnóstico en
+      test-results/20261106T190648Z-9bcc519-diag-corte/
     next: >
-      decidido (propietario, 2026-11-06, opción A), aplicado en FSD 0.9.4 y precisado en 0.9.6: no
-      se repiten los cortes por consola; el test se reescribe sobre el primer
-      status tras cada corte cuando exista el publicador MQTT (Fase 2)
+      H-61 (propietario, 2026-11-07, opción 1): con el puerto ocupado se espera
+      15 s y se reintenta una vez la grabación (si sigue, not done); se repite
+      con los cortes del propietario
+
   - id: TC-SEN-01
     shape: atomic
     kind: standard
@@ -1705,6 +1714,13 @@ tests:
       muestra del slot presente, cota por arriba) y un suscriptor nuevo lo recibe
       retenido. Se mide en cada corte de JRN-01.7 y TC-CFG-02 de la misma sesión
     impl: tests/bench/test_mqtt.py::test_tc_mqtt_04_last_will_on_power_cut
+    status: successful   # con un solo corte; se vuelve a medir en los cortes de H-61
+    commit: 60d8cd8
+    date: 2026-11-07
+    evidence: test-results/20261107T180528Z-60d8cd8/TC-MQTT-04.md
+    observed: >
+      corte de JRN-01.7: {"estado":"offline"} en status a 79,7 s de la última
+      muestra con el slot presente, y un suscriptor nuevo lo recibió retenido
   - id: TC-HA-01
     shape: atomic
     kind: standard
