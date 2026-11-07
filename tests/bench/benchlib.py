@@ -1,6 +1,7 @@
 """Ayudantes comunes del nivel bench: protocolo de tres fases (panel + evidencia)
 y captura de arranque (P-BOOT-CAPTURE). Los usan los JRN y los TC."""
 import contextlib
+import os
 import pathlib
 import re
 import threading
@@ -249,3 +250,50 @@ def aprovisionar(tb, slot, ssid_portal, c, tmp_dir):
         pytest.skip("not done: el DUT no guardó la configuración (sin «nvs: config escrita»)")
     c.note("- precondición: DUT configurado contra un AP desechable nuevo (redactado); AP del banco apagado", "")
     return ap_ssid, ap_clave
+
+
+class _Suscripcion:
+    def __init__(self):
+        self._msgs, self._lock = [], __import__("threading").Lock()
+
+    def guardar(self, msg):
+        with self._lock:
+            self._msgs.append({"t": time.time(), "topic": msg.topic, "qos": msg.qos, "retain": bool(msg.retain),
+                               "payload": msg.payload.decode("utf-8", "replace")})
+
+    def mensajes(self):
+        with self._lock:
+            return list(self._msgs)
+
+
+@contextlib.contextmanager
+def suscriptor_mqtt(tb, filtro, limpiar=()):
+    """Cliente MQTT del lado del banco (red de laboratorio) contra el broker del banco: la
+    dirección sale de TESTBENCH_URL y nunca se escribe en la evidencia. Antes de suscribirse
+    borra los retenidos de `limpiar` (payload vacío, retain) para no confundirlos con los del DUT."""
+    import paho.mqtt.client as mqtt
+    from urllib.parse import urlparse
+    host = urlparse(tb.base_url).hostname
+    sub = _Suscripcion()
+    cli = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"banco-{os.getpid()}-{time.time_ns() % 10**6}",
+                      protocol=mqtt.MQTTv311)
+    cli.on_message = lambda _c, _u, msg: sub.guardar(msg)
+    fin = time.time() + 15
+    while True:
+        try:
+            cli.connect(host, 1883, keepalive=30)
+            break
+        except OSError:
+            if time.time() > fin:
+                raise
+            time.sleep(1)
+    cli.loop_start()
+    try:
+        for t in limpiar:
+            cli.publish(t, b"", qos=1, retain=True).wait_for_publish(5)
+        cli.subscribe(filtro, qos=1)
+        time.sleep(0.5)
+        yield sub
+    finally:
+        cli.loop_stop()
+        cli.disconnect()

@@ -160,6 +160,7 @@ def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
 # --------------------------------------------------------------------------
 REINICIO_LIMIT_S = 5          # T05 / FR-POR-06: desde con: VALIDANDO -> ARRANQUE (wifi_up)
 AP_PRUEBA = {}                # SSID y clave del AP desechable que el DUT guardó en JRN-01.2 (solo en memoria)
+BROKER_BANCO = "192.168.4.1"  # broker mosquitto del banco visto desde su AP (bench-mqtt-broker); sin autenticación
 
 
 def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
@@ -174,10 +175,10 @@ def test_jrn_01_2_provision(testbench, dut_slot, dut_mac, run_dir):
     with case(tb, "JRN-01.2", "Aprovisionar por el portal", run_dir, requires="JRN-01.1") as c:
         c.secretos = secretos
         c.note("- AP desechable del banco con SSID y clave aleatorios de esta ejecución (redactados en la evidencia)",
-               "- broker `broker.local`, sitio `sitio1`, zona `zona1` (ficticios, NFR-SEC-01)", "")
+               f"- broker `{BROKER_BANCO}:1883` (el del banco en la red de su AP, JRN-01.4), sitio `sitio1`, zona `zona1` (ficticios, NFR-SEC-01)", "")
         c.step("Precondiciones: AP del banco apagado; el DUT sigue en PORTAL (JRN-01.1)")
         assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
-        form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": "broker.local", "mqtt_port": "1883",
+        form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": BROKER_BANCO, "mqtt_port": "1883",
                 "mqtt_user": "", "mqtt_pass": "", "sitio": "sitio1", "zona": "zona1"}
         t_envio = time.time()
         joined, ap_on = False, False
@@ -249,8 +250,9 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         assert AP_PRUEBA, "JRN-01.2 no dejó las credenciales del AP desechable"
         c.secretos = [(AP_PRUEBA["clave"], "<clave-de-prueba>"), (AP_PRUEBA["ssid"], "<ssid-de-prueba>")]
         c.note("- el banco levanta el mismo AP desechable que el DUT guardó en JRN-01.2 (redactado)", "")
-        c.step("Precondiciones: AP del banco apagado; el DUT quedó configurado (JRN-01.2)")
+        c.step("Precondiciones: AP y broker del banco apagados; el DUT quedó configurado (JRN-01.2)")
         assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        assert not tb.mqtt_status().get("running"), "el broker del banco está activo: T11 no debe ocurrir en este paso"
         ap_on = False
         try:
             c.step("El banco levanta su AP desechable (canal 1) y resetea el DUT")
@@ -313,3 +315,99 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         meds = sorted({t.strip() for t in textos if "nodo: med: " in t})   # el buffer del banco puede repetir una línea
         assert len(meds) >= CICLOS, f"solo {len(meds)} ciclos de medición en la ventana"
         c.passed(f"T01 en {t01} ms, unido al AP del banco, log UDP completo en {CICLOS} ciclos")
+
+
+# --------------------------------------------------------------------------
+# JRN-01.4 · T11, FR-MQTT-06, FR-MQTT-08 (Fase 2)
+# --------------------------------------------------------------------------
+T11_ESPERA_S = 60             # margen de observación desde el reset hasta OPERATIVO (no es un límite del FSD)
+TRAS_T11_S = 10               # tiempo de escucha tras OPERATIVO
+RESET_VALORES = {"poweron", "ext", "sw", "panic", "task_wdt", "int_wdt", "wdt", "deepsleep",
+                 "brownout", "usb", "jtag", "otro"}                                      # §9.3
+OTA_VALOR = re.compile(r"^(ninguno|en_curso|ok|rechazado:(payload|host|ruta|misma_version|ocupado)"
+                       r"|error:(redirecciones|tls|imagen|http|red))$")                 # §9.3
+
+
+def _tipos_status(st):
+    """Errores de §9.3 en un status: los 9 campos con su tipo (bool no cuenta como entero)."""
+    def entero(v): return isinstance(v, int) and not isinstance(v, bool)
+    reglas = {
+        "estado": lambda v: v == "online",
+        "fw": lambda v: isinstance(v, str) and v != "",
+        "rssi": lambda v: entero(v) and v < 0,
+        "reset": lambda v: v in RESET_VALORES,
+        "uptime_s": lambda v: entero(v) and v >= 0,
+        "lecturas": lambda v: entero(v) and v >= 0,
+        "err_sensor": lambda v: entero(v) and v >= 0,
+        "ota": lambda v: isinstance(v, str) and bool(OTA_VALOR.match(v)),
+        "hora_valida": lambda v: isinstance(v, bool),
+    }
+    errores = [f"{k} ausente" for k in reglas if k not in st]
+    errores += [f"{k}={st[k]!r}" for k, ok in reglas.items() if k in st and not ok(st[k])]
+    errores += [f"campo extra {k}" for k in st if k not in reglas]
+    return errores
+
+
+@pytest.mark.xfail(strict=True, reason="Fase 2: el publicador MQTT (§9, T11) aún no existe")
+def test_jrn_01_4_broker_and_status(testbench, dut_slot, dut_mac, run_dir):
+    """JRN-01.4 — con el AP y el broker del banco arriba, el nodo pasa a OPERATIVO (T11) y el
+    primer mensaje que publica es status online con los 9 campos de §9.3, retenido."""
+    import json
+    from benchlib import esperar_lineas, primera, suscriptor_mqtt
+    tb = testbench
+    nodo = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+    base = f"sitio1/zona1/{nodo}"
+    with case(tb, "JRN-01.4", "Conectar al broker y publicar status", run_dir, requires="JRN-01.3") as c:
+        assert AP_PRUEBA, "JRN-01.2 no dejó las credenciales del AP desechable"
+        c.secretos = [(AP_PRUEBA["clave"], "<clave-de-prueba>"), (AP_PRUEBA["ssid"], "<ssid-de-prueba>")]
+        c.note(f"- broker del banco (abierto); tópicos bajo `{base}/`", "")
+        c.step("Precondiciones: AP y broker del banco apagados")
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+        assert not tb.mqtt_status().get("running"), "el broker del banco está activo: no es nuestro, no se toca"
+        ap_on = broker_on = False
+        vivo, retenido, vistas = [], [], []
+        try:
+            c.step("Arrancar el broker, borrar los retenidos del nodo y suscribirse a sitio1/zona1/#")
+            tb.mqtt_start(); broker_on = True
+            with suscriptor_mqtt(tb, "sitio1/zona1/#", limpiar=[f"{base}/{m}" for m in
+                                 ("status", "temperatura", "humedad", "punto_rocio")]) as sub:
+                c.step("Levantar el AP desechable (canal 1) y resetear el DUT")
+                tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
+                t0 = time.time()
+                tb.serial_reset(dut_slot)
+                vistas = esperar_lineas(tb, dut_slot, t0, ["con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)"],
+                                        timeout=T11_ESPERA_S)
+                time.sleep(TRAS_T11_S)
+                vivo = sub.mensajes()
+            c.step("Suscriptor nuevo: el status debe estar retenido")
+            with suscriptor_mqtt(tb, f"{base}/status") as sub2:
+                time.sleep(3)
+                retenido = sub2.mensajes()
+            vistas = esperar_lineas(tb, dut_slot, t0, [], timeout=0)
+        finally:
+            if ap_on:
+                tb.ap_stop()
+            if broker_on:
+                tb.mqtt_stop()
+        c.save_log("serie", [e["text"] for e in vistas])
+        c.save_log("mqtt", [f"{m['t'] - t0:+.2f} s retain={m['retain']} qos={m['qos']} {m['topic']} {m['payload']}"
+                            for m in vivo + retenido])
+        ult = max((i for i, e in enumerate(vistas) if e["text"].startswith("rst:")), default=None)
+        assert ult is not None, "la captura no contiene el rst: del reset"
+        vistas = vistas[ult:]
+        t11 = primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)")
+        assert t11, f"sin con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up) en {T11_ESPERA_S} s (T11)"
+        del_nodo = [m for m in vivo if m["topic"].startswith(base + "/") and m["payload"]]
+        assert del_nodo, f"ningún mensaje del nodo bajo {base}/ tras T11"
+        primero = del_nodo[0]
+        c.note("", "## Resultado", "", f"- primer mensaje: `{primero['topic']}` qos={primero['qos']}",
+               f"- payload: `{primero['payload']}`", f"- mensajes del nodo en la ventana: {len(del_nodo)}")
+        assert primero["topic"] == f"{base}/status", f"el primer mensaje es {primero['topic']}, no status (FR-MQTT-06)"
+        st = json.loads(primero["payload"])
+        errores = _tipos_status(st)
+        assert not errores, f"status no cumple §9.3: {errores} (FR-MQTT-08)"
+        assert primero["qos"] == 1, f"status con QoS {primero['qos']} (§9.2: QoS 1)"
+        ret = [m for m in retenido if m["payload"]]
+        assert ret and ret[0]["retain"], "status no quedó retenido en el broker (§9.2)"
+        assert json.loads(ret[-1]["payload"]).get("estado") == "online", "el status retenido no dice online"
+        c.passed(f"T11, primer mensaje status online con los 9 campos (fw={st['fw']}, reset={st['reset']}), retenido")

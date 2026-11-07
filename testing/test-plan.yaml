@@ -449,7 +449,14 @@ tests:
       se conecta al broker (CONECTANDO_BROKER -> OPERATIVO); el primer mensaje
       es status retained con estado = online y los 9 campos de diagnóstico con
       sus tipos (§9.3)
-    impl: null
+    impl: tests/bench/test_jrn01.py::test_jrn_01_4_broker_and_status   # xfail estricto hasta el publicador MQTT
+    status: not done   # xfail estricto: feature ausente (Fase 2)
+    note: >
+      JRN-01.2 aprovisiona mqtt_host = 192.168.4.1 (el broker del banco visto desde su
+      AP); JRN-01.3 exige el broker apagado. El suscriptor del banco (paho-mqtt, fijado
+      en tests/bench/requirements.txt) borra antes los retenidos del nodo, comprueba que
+      el primer mensaje bajo sitio1/zona1/<nodo>/ es status (QoS 1) con los 9 campos de
+      §9.3 y que un suscriptor nuevo lo recibe retenido
   - id: JRN-01.5
     shape: workflow
     kind: standard
