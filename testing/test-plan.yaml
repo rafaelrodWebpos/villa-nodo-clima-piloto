@@ -77,6 +77,16 @@ capabilities:
       dos devnodes, así que cualquiera de los dos sirve para observarlo
     available: yes
     reported_by: /api/devices — SLOT1 devnode ttyACM0, monitor_port 5001 (devnodes ttyACM0 y ttyACM1)
+    known_limitation: >
+      H-60 (2026-11-07): por /dev/ttyACM0 (consola USB-Serial/JTAG del DUT, en el modo
+      sin driver de ESP-IDF 6.0.2, que no envía el paquete de cierre) una línea de
+      exactamente 64 bytes con su \r\n puede llegar tarde, hasta la siguiente salida:
+      medido 47,75 s para «I (372788) nodo: con: CONECTANDO_BROKER -> OPERATIVO
+      (mqtt_up)», con todas las demás líneas a 0,00–0,01 s y la misma línea por UDP a
+      su hora. No afecta a la instalación real (solo cargador, sin PC). Los tests lo
+      toleran: las esperas de líneas por consola llegan a 150 s (un ciclo de med:) y
+      los contratos con plazo se miden por MQTT o por UDP. Arreglo en el DUT aparcado
+      por el propietario (H-59, H-60)
   bench-dual-console:
     what: observar a la vez los dos devnodes del slot (UART0/CH343 y USB-Serial/JTAG) por separado (C-HW-08)
     available: no
