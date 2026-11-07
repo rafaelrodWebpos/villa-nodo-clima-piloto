@@ -26,7 +26,7 @@ def test_tc_cfg_02_power_cuts(testbench, dut_slot, dut_mac, firmware, run_dir, t
                 t0, reg = preparar(tb, dut_slot, banco, sub, c)
                 try:
                     for n in range(1, CORTES + 1):
-                        resultados.append(corte(tb, dut_slot, sub, nodo, "TC-CFG-02", n, CORTES, c))
+                        resultados.append(corte(tb, dut_slot, sub, nodo, "TC-CFG-02", n, CORTES, c, banco))
                 finally:
                     guardar_mqtt(c, sub, t0)
                     c.save_log("serie", [e["text"] for e in reg.leer()])

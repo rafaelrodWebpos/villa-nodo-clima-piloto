@@ -607,8 +607,10 @@ tests:
         el DUT quedó sin aplicación y se volvió a grabar la imagen de la CI
         0.0.0-a8f210a-bench, que arranca bien
     next: >
-      decisión del propietario sobre cómo comprobar «sin AP clima-*» (escaneo con
-      el AP del banco apagado un momento, u otra opción)
+      H-63 (propietario, 2026-11-07, opción 1): tras el status y la primera medida,
+      el AP del banco se apaga unos 20 s para escanear (CR-TB-14) y se vuelve a
+      encender; antes del siguiente corte, el nodo vuelve a publicar. El expect no
+      cambia. Se repite con los cortes del propietario, con --parar-si-no-verde
 
   - id: JRN-02.1
     shape: workflow

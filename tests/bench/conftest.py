@@ -29,6 +29,23 @@ def pytest_addoption(parser):
                      help="artefacto de build.yml ya descargado (coldflash/ + firmware_v*.bin)")
     parser.addoption("--ci-variant", default="bench", choices=["bench", "production"],
                      help="variante que se pide a la CI si no hay --firmware-dir")
+    parser.addoption("--parar-si-no-verde", action="store_true",
+                     help="no empezar el test siguiente si uno sale rojo o not done (nunca a mitad de un test)")
+
+
+_SESION = {}
+
+
+def pytest_sessionstart(session):
+    _SESION["s"] = session
+
+
+def pytest_runtest_logreport(report):
+    """--parar-si-no-verde: tras un rojo o un not done, pytest acaba el test en curso y no
+    empieza el siguiente (nunca se corta una grabación a medias)."""
+    s = _SESION.get("s")
+    if s and s.config.getoption("--parar-si-no-verde") and (report.failed or report.skipped):
+        s.shouldstop = f"{report.nodeid}: no verde ({report.when}); parado entre tests"
 
 
 def pytest_configure(config):

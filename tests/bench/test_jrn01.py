@@ -548,7 +548,7 @@ def test_jrn_01_7_power_cut(testbench, dut_slot, dut_mac, firmware, run_dir, tmp
             banco.broker_on()
             with suscriptor_mqtt(tb, filtros(nodo), limpiar=limpiar(nodo)) as sub:
                 t0, reg = preparar(tb, dut_slot, banco, sub, c)
-                r = corte(tb, dut_slot, sub, nodo, "JRN-01.7", 1, 1, c)
+                r = corte(tb, dut_slot, sub, nodo, "JRN-01.7", 1, 1, c, banco)
             guardar_mqtt(c, sub, t0)
             c.save_log("serie", [e["text"] for e in reg.leer()])
         c.note("", "## Resultado", "", resumen(r))

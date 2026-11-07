@@ -30,6 +30,8 @@ STATUS_ESPERA_S = 120         # del reenchufe al primer status en vivo
 ESPERA_OPERADOR_S = 600       # lo que se espera a que el operador desenchufe o enchufe
 MUESTREO_S = 0.5
 ESCANEO_INTENTOS = 3          # H-61
+AP_APAGADO_ANTES_S = 3        # H-63: AP abajo antes de escanear (≈ 20 s con el escaneo)
+VUELTA_ESPERA_S = 150         # del AP de vuelta a un status en vivo (backoff de FR-CON-02)
 
 AVISO_DESENCHUFAR = ("Corte {n} de {total} ({tid}): desenchufa el cable USB-C del lado de la PLACA "
                      "(el lado de la Raspberry Pi no se toca) y pulsa «Hecho». NO lo vuelvas a enchufar "
@@ -114,7 +116,7 @@ def _status_retenido(tb, base):
     return ret[-1]["payload"] if ret else None
 
 
-def corte(tb, slot, sub, nodo, tid, n, total, c):
+def corte(tb, slot, sub, nodo, tid, n, total, c, banco):
     """Un corte completo. Devuelve un dict con lo observado; nunca afirma (decide el test).
     not done (skip) solo si el operador no desenchufa o no vuelve a enchufar a tiempo."""
     base = f"sitio1/zona1/{nodo}"
@@ -157,18 +159,31 @@ def corte(tb, slot, sub, nodo, tid, n, total, c):
                           MEDIDA_LIMITE_S + 10)
         r["medida"] = med
         r["medida_s"] = (med["t"] - r["encendido"]) if med and r["encendido"] is not None else None
-    # 5) Nunca el portal: escaneo con el AP del banco arriba (FR-013 del banco)
-    c.step(f"Corte {n}/{total}: escaneo Wi-Fi (no debe verse ningún clima-*)")
+    # 5) Nunca el portal (H-63): el banco no escanea con su AP arriba (CR-TB-14), así que se
+    #    apaga el AP un momento, se escanea y se vuelve a encender. Un portal abierto al arrancar
+    #    seguiría visible; un nodo configurado sin Wi-Fi nunca lo abre (FR-CON-06)
+    c.step(f"Corte {n}/{total}: AP del banco apagado ~20 s y escaneo Wi-Fi (no debe verse ningún clima-*)")
     r["clima_ap"], r["escaneo_ok"], r["escaneo_fallos"] = [], False, []
-    for _ in range(ESCANEO_INTENTOS):        # H-61: el banco a veces no responde al escaneo
-        try:
-            nets = tb.scan().get("networks") or []
-        except Exception as e:
-            r["escaneo_fallos"].append(type(e).__name__)
-            continue
-        r["clima_ap"] = sorted({x.get("ssid", "") for x in nets if str(x.get("ssid", "")).startswith("clima-")})
-        r["escaneo_ok"] = True
-        break
+    banco.ap_off()
+    try:
+        time.sleep(AP_APAGADO_ANTES_S)
+        for _ in range(ESCANEO_INTENTOS):        # H-61
+            try:
+                nets = tb.scan().get("networks") or []
+            except Exception as e:
+                r["escaneo_fallos"].append(type(e).__name__)
+                continue
+            r["clima_ap"] = sorted({x.get("ssid", "") for x in nets if str(x.get("ssid", "")).startswith("clima-")})
+            r["escaneo_ok"] = True
+            break
+    finally:
+        t_ap = time.time()
+        banco.ap_on()
+    # 6) Antes del siguiente corte, el nodo vuelve a publicar (status en vivo tras el AP)
+    c.step(f"Corte {n}/{total}: AP del banco encendido; esperar a que el nodo vuelva a publicar")
+    vuelta = esperar_msg(sub, lambda m: m["topic"] == f"{base}/status" and not m["retain"] and m["payload"]
+                         and '"online"' in m["payload"] and m["t"] >= t_ap, VUELTA_ESPERA_S)
+    r["vuelta_s"] = (vuelta["t"] - t_ap) if vuelta else None
     r["avisos"] = [h1.res.get("ok", h1.res.get("error", "sin respuesta")), h2.res.get("ok", h2.res.get("error", "sin respuesta"))]
     return r
 
@@ -184,7 +199,7 @@ def resumen(r):
             f"primera medida a {f(r.get('medida_s'))} del encendido estimado; clima-* en el escaneo: "
             f"{r['clima_ap'] or 'ninguno'}{' (escaneos fallidos: ' + ', '.join(r['escaneo_fallos']) + ')' if r.get('escaneo_fallos') else ''}"
             f"{'' if r.get('escaneo_ok') else ' — escaneo sin hacer'}; "
-            f"avisos: {r['avisos']}")
+            f"vuelta a publicar {f(r.get('vuelta_s'))} tras encender el AP; avisos: {r['avisos']}")
 
 
 def errores(r, nodo, cfg_y_portal=True, arranque=True, lwt=False):
@@ -200,6 +215,8 @@ def errores(r, nodo, cfg_y_portal=True, arranque=True, lwt=False):
             out.append(f"corte {r['n']}: status bajo {st['topic']}, no {base}/status (FR-CFG-01)")
         if r.get("clima_ap"):
             out.append(f"corte {r['n']}: AP del portal en el escaneo {r['clima_ap']}")
+    if r.get("escaneo_ok") and r.get("vuelta_s") is None:
+        out.append(f"corte {r['n']}: el nodo no volvió a publicar en {VUELTA_ESPERA_S} s tras encender el AP")
     if cuerpo.get("estado") != "online":
         out.append(f"corte {r['n']}: el primer status no es online: {st['payload']}")
     if cuerpo.get("reset") != "poweron":
