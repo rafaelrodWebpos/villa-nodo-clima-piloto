@@ -76,10 +76,15 @@ class HomeAssistant:
             elif tipo == "form":
                 if paso.get("errors"):
                     raise AssertionError(f"integración MQTT: {paso['errors']}")
-                datos = {"broker": ip, "port": puerto}
+                # 2026.10: protocolo y el bloque «other_settings» son obligatorios (TCP, sin TLS, §9.1)
+                datos = {"broker": ip, "port": puerto, "protocol": "3.1.1",
+                         "other_settings": {"set_client_cert": False, "set_ca_cert": "off", "transport": "tcp"}}
             else:
                 raise AssertionError(f"paso inesperado del asistente MQTT: {tipo}")
-            paso = self.post(f"/api/config/config_entries/flow/{paso['flow_id']}", datos)
+            try:
+                paso = self.post(f"/api/config/config_entries/flow/{paso['flow_id']}", datos)
+            except urllib.error.HTTPError as e:
+                raise AssertionError(f"integración MQTT: HTTP {e.code} {e.read().decode()[:200]}") from None
         raise AssertionError("el asistente MQTT no terminó en 5 pasos")
 
     def dispositivos_mqtt(self):

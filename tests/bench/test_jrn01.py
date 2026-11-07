@@ -494,19 +494,21 @@ def test_jrn_01_5_home_assistant_discovery(testbench, dut_slot, dut_mac, run_dir
             reg = Registro(tb, dut_slot, t0)
             tb.serial_reset(dut_slot)
             tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
-            assert reg.esperar(t11, 60), "sin T11 en 60 s"
+            assert reg.esperar(t11, 130), "sin T11 en 130 s"
             fases.append(("conexión", *_ha_esperar(ha, nodo, HA_ESPERA_S)))
+            # Esperas de T11 de 130 s: la captura serie del banco puede retener la última línea
+            # hasta la salida siguiente (≤ 1 ciclo de med:); el contrato se observa en Home Assistant
             c.step("Parar el broker 10 s y arrancarlo; esperar T11")
             tb.mqtt_stop(); broker_on = False
             time.sleep(10)
             t_b = time.time()
             tb.mqtt_start(); broker_on = True
-            assert reg.esperar(t11, 90, desde_ts=t_b), "sin T11 en 90 s tras volver el broker"
+            assert reg.esperar(t11, 130, desde_ts=t_b), "sin T11 en 130 s tras volver el broker"
             fases.append(("broker parado y arrancado", *_ha_esperar(ha, nodo, HA_ESPERA_S)))
             c.step("Resetear el DUT; esperar T11")
             t_r = time.time()
             tb.serial_reset(dut_slot)
-            assert reg.esperar(t11, 60, desde_ts=t_r + 5), "sin T11 en 60 s tras el reset"
+            assert reg.esperar(t11, 130, desde_ts=t_r + 5), "sin T11 en 130 s tras el reset"
             fases.append(("DUT reiniciado", *_ha_esperar(ha, nodo, HA_ESPERA_S)))
         finally:
             if ap_on:

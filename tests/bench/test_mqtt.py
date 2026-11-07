@@ -215,7 +215,10 @@ def test_tc_con_08_broker_outage(testbench, dut_slot, dut_mac, firmware, run_dir
             c.step("Arrancar el broker (el siguiente intento llega a los 60 s)")
             t_start = time.time()
             banco.broker_on()
-            vuelta = reg.esperar(re.escape(T11), 90, desde_ts=t_start)
+            # La captura serie del banco puede retener la última línea hasta que llega más
+            # salida (T11 llegó 48 s tarde el 2026-11-07; por UDP, a su hora): 150 s cubren el
+            # med: del ciclo siguiente. FR-CON-04 y FR-MQTT-06 se miden en el broker.
+            vuelta = reg.esperar(re.escape(T11), 150, desde_ts=t_start)
             time.sleep(10)
             msgs = sub.mensajes()
             resus = [t for t in sub.conexiones if t >= t_start]
@@ -268,7 +271,7 @@ def test_tc_con_08_broker_outage(testbench, dut_slot, dut_mac, firmware, run_dir
         assert not solapes, "dos intentos MQTT sin un resultado entre ellos (T13)"
         assert not wifi, f"el Wi-Fi se tocó con el broker caído: {wifi[:2]}"
         _sin_reinicio(ent)
-        assert vuelta, f"sin {T11} en 90 s tras arrancar el broker"
+        assert vuelta, f"sin {T11} en 150 s tras arrancar el broker"
         if not resus or (primero and resus[0] > primero["t"]):
             pytest.skip("not done: el suscriptor no estaba resuscrito antes del primer mensaje del nodo")
         assert primero and primero["topic"] == f"{base}/status" and json.loads(primero["payload"]).get("estado") == "online", \

@@ -1,0 +1,59 @@
+I (478) nodo: boot: clima-f3c6d4 fw=0.0.0-5d9228e-bench reset=usb part=ota_0 img=valida
+I (478) nodo: nodo_clima 0.0.0-5d9228e-bench
+I (488) nodo: NODO-BENCH-IMAGE
+I (528) nodo: cfg: sitio=sitio1 zona=zona1
+I (528) pp: pp rom version: e7ae62f
+I (528) net80211: net80211 rom version: e7ae62f
+I (538) wifi:wifi driver task: 3fcae66c, prio:23, stack:6656, core=0
+I (548) wifi:wifi firmware version: 00ad238
+I (548) wifi:wifi certification version: v7.0
+I (548) wifi:config NVS flash: enabled
+I (548) wifi:config nano formatting: disabled
+I (558) wifi:Init data frame dynamic rx buffer num: 32
+I (558) wifi:Init static rx mgmt buffer num: 5
+I (568) wifi:Init management short buffer num: 32
+I (568) wifi:Init dynamic tx buffer num: 32
+I (578) wifi:Init static tx FG buffer num: 2
+I (578) wifi:Init static rx buffer size: 1600
+I (578) wifi:Init static rx buffer num: 10
+I (588) wifi:Init dynamic rx buffer num: 32
+I (538) nodo: med: T=30.0 HR=62.6 Td=22.1
+I (598) wifi_init: rx ba win: 6
+I (598) wifi_init: accept mbox: 6
+I (598) wifi_init: tcpip mbox: 32
+I (598) wifi_init: udp mbox: 6
+I (608) wifi_init: tcp mbox: 6
+I (608) wifi_init: tcp tx win: 5760
+I (608) wifi_init: tcp rx win: 5760
+I (618) wifi_init: tcp mss: 1440
+I (618) wifi_init: WiFi IRAM OP enabled
+I (618) wifi_init: WiFi RX IRAM OP enabled
+W (628) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (638) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (678) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (678) wifi:enable tsf
+I (678) nodo: wifi: intento 1
+I (688) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (688) nodo: Init complete
+I (688) main_task: Returned from app_main()
+I (3108) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (4108) nodo: wifi: intento 2
+I (4108) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (4118) wifi:state: init -> auth (0xb0)
+I (4128) wifi:state: auth -> assoc (0x0)
+I (4138) wifi:state: assoc -> run (0x10)
+I (4158) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (4158) wifi:security: WPA2-PSK, phy: bgn, rssi: -39, cipher(pairwise:0x3, group:0x3), pmf:0
+I (4168) wifi:pm start, type: 1
+I (4168) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (4178) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (4198) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (4208) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (4208) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (5208) nodo: UDP logging -> 192.168.4.1:5555
+I (5208) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5208) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5218) nodo: mqtt: intento 1
+I (5218) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5288) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (60538) nodo: med: T=30.0 HR=63.1 Td=22.2

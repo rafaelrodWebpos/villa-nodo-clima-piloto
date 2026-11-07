@@ -1,0 +1,141 @@
+I (478) nodo: boot: clima-f3c6d4 fw=0.0.0-5d9228e-bench reset=usb part=ota_0 img=valida
+I (478) nodo: nodo_clima 0.0.0-5d9228e-bench
+I (488) nodo: NODO-BENCH-IMAGE
+I (528) nodo: cfg: sitio=sitio1 zona=zona1
+I (528) pp: pp rom version: e7ae62f
+I (528) net80211: net80211 rom version: e7ae62f
+I (538) wifi:wifi driver task: 3fcae66c, prio:23, stack:6656, core=0
+I (548) wifi:wifi firmware version: 00ad238
+I (548) wifi:wifi certification version: v7.0
+I (548) wifi:config NVS flash: enabled
+I (548) wifi:config nano formatting: disabled
+I (558) wifi:Init data frame dynamic rx buffer num: 32
+I (558) wifi:Init static rx mgmt buffer num: 5
+I (568) wifi:Init management short buffer num: 32
+I (568) wifi:Init dynamic tx buffer num: 32
+I (578) wifi:Init static tx FG buffer num: 2
+I (578) wifi:Init static rx buffer size: 1600
+I (578) wifi:Init static rx buffer num: 10
+I (588) wifi:Init dynamic rx buffer num: 32
+I (538) nodo: med: T=30.0 HR=64.1 Td=22.5
+I (598) wifi_init: rx ba win: 6
+I (598) wifi_init: accept mbox: 6
+I (598) wifi_init: tcpip mbox: 32
+I (598) wifi_init: udp mbox: 6
+I (608) wifi_init: tcp mbox: 6
+I (608) wifi_init: tcp tx win: 5760
+I (608) wifi_init: tcp rx win: 5760
+I (618) wifi_init: tcp mss: 1440
+I (618) wifi_init: WiFi IRAM OP enabled
+I (618) wifi_init: WiFi RX IRAM OP enabled
+W (628) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (638) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (678) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (678) wifi:enable tsf
+I (678) nodo: wifi: intento 1
+I (688) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (688) nodo: Init complete
+I (688) main_task: Returned from app_main()
+I (3098) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (4098) nodo: wifi: intento 2
+I (4108) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (4108) wifi:state: init -> auth (0xb0)
+I (4128) wifi:state: auth -> assoc (0x0)
+I (4138) wifi:state: assoc -> run (0x10)
+I (4158) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (4158) wifi:security: WPA2-PSK, phy: bgn, rssi: -40, cipher(pairwise:0x3, group:0x3), pmf:0
+I (4168) wifi:pm start, type: 1
+I (4168) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (4178) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (4198) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (4198) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (4198) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (5208) nodo: UDP logging -> 192.168.4.1:5555
+I (5208) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5208) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5218) nodo: mqtt: intento 1
+I (5218) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5298) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+E (11478) mqtt_client: esp_mqtt_handle_transport_read_error: transport_read(): EOF
+E (11478) mqtt_client: esp_mqtt_handle_transport_read_error: transport_read() error: errno=128
+E (11488) mqtt_client: mqtt_process_receive: mqtt_message_receive() returned -2
+I (11498) nodo: con: OPERATIVO -> CONECTANDO_BROKER (mqtt_down)
+I (12498) nodo: mqtt: intento 1
+I (12498) mqtt_client: Client force reconnect requested
+I (12498) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (12518) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (12518) transport_base: Failed to open a new connection: 32772
+E (12518) mqtt_client: Error transport connect
+I (12518) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (14518) nodo: mqtt: intento 2
+I (14518) mqtt_client: Client force reconnect requested
+I (14518) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (14538) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (14538) transport_base: Failed to open a new connection: 32772
+E (14538) mqtt_client: Error transport connect
+I (14548) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (18548) nodo: mqtt: intento 3
+I (18548) mqtt_client: Client force reconnect requested
+I (18548) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (18558) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (18558) transport_base: Failed to open a new connection: 32772
+E (18558) mqtt_client: Error transport connect
+I (18568) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (26568) nodo: mqtt: intento 4
+I (26568) mqtt_client: Client force reconnect requested
+I (26568) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (26578) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (26588) transport_base: Failed to open a new connection: 32772
+E (26588) mqtt_client: Error transport connect
+I (26588) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (42588) nodo: mqtt: intento 5
+I (42588) mqtt_client: Client force reconnect requested
+I (42588) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (42608) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (42608) transport_base: Failed to open a new connection: 32772
+E (42608) mqtt_client: Error transport connect
+I (42608) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (60538) nodo: med: T=30.0 HR=64.1 Td=22.5
+I (74608) nodo: mqtt: intento 6
+I (74618) mqtt_client: Client force reconnect requested
+I (74618) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (74638) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (74638) transport_base: Failed to open a new connection: 32772
+E (74638) mqtt_client: Error transport connect
+I (74638) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (120538) nodo: med: T=30.0 HR=63.8 Td=22.4
+I (134638) nodo: mqtt: intento 7
+I (134638) mqtt_client: Client force reconnect requested
+I (134648) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (134658) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (134658) transport_base: Failed to open a new connection: 32772
+E (134658) mqtt_client: Error transport connect
+I (134668) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (180538) nodo: med: T=30.0 HR=65.0 Td=22.7
+I (194668) nodo: mqtt: intento 8
+I (194668) mqtt_client: Client force reconnect requested
+I (194668) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (194678) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (194678) transport_base: Failed to open a new connection: 32772
+E (194678) mqtt_client: Error transport connect
+I (194688) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (240538) nodo: med: T=30.1 HR=64.0 Td=22.5
+I (254688) nodo: mqtt: intento 9
+I (254688) mqtt_client: Client force reconnect requested
+I (254688) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (254708) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (254708) transport_base: Failed to open a new connection: 32772
+E (254708) mqtt_client: Error transport connect
+I (254718) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (300538) nodo: med: T=30.1 HR=63.8 Td=22.4
+I (314718) nodo: mqtt: intento 10
+I (314718) mqtt_client: Client force reconnect requested
+I (314718) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (314728) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (314738) transport_base: Failed to open a new connection: 32772
+E (314738) mqtt_client: Error transport connect
+I (314738) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (360538) nodo: med: T=30.1 HR=64.7 Td=22.7
+I (374738) nodo: mqtt: intento 11
+I (374738) mqtt_client: Client force reconnect requested
+I (374738) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
