@@ -1126,6 +1126,28 @@ tests:
     commit: 0d3da79
     date: 2026-11-05
     ci_run: 42110797953   # host tests + secret scan
+  - id: TC-LOG-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 1
+    tier: host
+    verifies: [FR-LOG-02, FR-LOG-03]
+    needs: [hosted-ci]
+    expect: >
+      dos escritores a la vez (H-55): con el prefijo «I (t) wifi:» de uno a medias y
+      una línea entera del otro en medio, salen las dos líneas enteras, sin mezclar;
+      dos a medias a la vez terminan cada una con lo suyo; una ranura solo se ocupa
+      con una línea a medias; con la tabla llena, el trozo incompleto se descarta y
+      se cuenta sin mezclarse; con dos hilos reales (uno en tres trozos por línea,
+      5000 líneas cada uno), cada línea sale una vez, entera y en el orden de su
+      escritor. El núcleo nunca espera (el cerrojo solo cubre la búsqueda de ranura)
+    impl: tests/host/test_udplog_escritores.c
+    note: >
+      medido en la placa el 2026-11-07 con un firmware de diagnóstico (no versionado):
+      con CONFIG_LOG_VERSION=1 cada ESP_LOGx llega en una llamada, pero la tarea wifi
+      escribe 3 líneas por arranque en trozos (formato "%s"); 0 esperas de mutex
+      fallidas y 0 colas llenas. Con un acumulador compartido el test da 16 fallos
   - id: TC-LOG-03
     shape: atomic
     kind: standard

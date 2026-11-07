@@ -1,9 +1,10 @@
 /* L0 udplog — adaptador del log por UDP (FR-LOG-02, FR-LOG-03, E11).
  * Cada línea del log serie se copia, una vez que hay IP de STA, en un datagrama
- * unicast al host:puerto de Kconfig. Nunca bloquea a quien escribe el log más de
- * ESPERA_MUTEX: dos tareas que escriben a la vez se turnan (FR-LOG-02, «cada
- * línea»); si el mutex sigue ocupado o la cola está llena, esa copia se
- * descarta (FR-LOG-03). */
+ * unicast al host:puerto de Kconfig. Cada tarea arma sus líneas en su propio
+ * acumulador (udplog_escritores: el driver Wi-Fi escribe algunas en trozos), así
+ * que dos tareas que escriben a la vez nunca se mezclan ni se esperan. Nunca
+ * bloquea a quien escribe el log: si la cola está llena, esa copia se descarta
+ * (FR-LOG-03). */
 #include "sdkconfig.h"
 #include "udplog.h"
 
@@ -18,19 +19,19 @@
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-#include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "lwip/sockets.h"
-#include "udplog_lineas.h"
+#include "udplog_escritores.h"
 
 #define COLA_LINEAS 32
-#define ESPERA_MUTEX (pdMS_TO_TICKS(10) + 1)   /* ≥ 10 ms con tick de 10 ms; el otro escritor solo acumula y encola */
 
 typedef struct { uint16_t n; char txt[UDPLOG_LINEA_MAX]; } linea_t;
 
 static vprintf_like_t s_anterior;
-static udplog_acum_t s_acum;
-static SemaphoreHandle_t s_mutex;
+static portMUX_TYPE s_cerrojo = portMUX_INITIALIZER_UNLOCKED;
+static void bloquear(void *c) { portENTER_CRITICAL((portMUX_TYPE *)c); }      /* solo la búsqueda de ranura */
+static void desbloquear(void *c) { portEXIT_CRITICAL((portMUX_TYPE *)c); }
+static udplog_tabla_t s_tabla = {.bloquear = bloquear, .desbloquear = desbloquear, .cerrojo = &s_cerrojo};
 static QueueHandle_t s_cola;
 static volatile bool s_con_ip;
 static TaskHandle_t s_tarea;
@@ -50,12 +51,11 @@ static int gancho(const char *fmt, va_list ap)
     va_list copia;
     va_copy(copia, ap);
     int r = s_anterior(fmt, ap);                         /* la consola serie, como siempre */
-    if (s_con_ip && xTaskGetCurrentTaskHandle() != s_tarea &&
-        xSemaphoreTake(s_mutex, ESPERA_MUTEX) == pdTRUE) {
+    if (s_con_ip && xTaskGetCurrentTaskHandle() != s_tarea) {
         char tmp[UDPLOG_LINEA_MAX];
         int n = vsnprintf(tmp, sizeof tmp, fmt, copia);
-        if (n > 0) udplog_acumular(&s_acum, tmp, (size_t)(n < (int)sizeof tmp ? n : (int)sizeof tmp - 1), encolar, NULL);
-        xSemaphoreGive(s_mutex);
+        if (n > 0) udplog_escribir(&s_tabla, xTaskGetCurrentTaskHandle(), tmp,
+                                   (size_t)(n < (int)sizeof tmp ? n : (int)sizeof tmp - 1), encolar, NULL);
     }
     va_end(copia);
     return r;
@@ -89,9 +89,8 @@ static void al_evento(void *arg, esp_event_base_t base, int32_t id, void *datos)
 
 esp_err_t udplog_iniciar(void)
 {
-    s_mutex = xSemaphoreCreateMutex();
     s_cola = xQueueCreate(COLA_LINEAS, sizeof(linea_t));
-    if (!s_mutex || !s_cola) return ESP_ERR_NO_MEM;
+    if (!s_cola) return ESP_ERR_NO_MEM;
     if (xTaskCreate(tarea_envio, "udplog", 4096, NULL, 3, &s_tarea) != pdPASS) return ESP_FAIL;
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, al_evento, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_LOST_IP, al_evento, NULL));
