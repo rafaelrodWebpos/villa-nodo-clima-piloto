@@ -451,6 +451,10 @@ tests:
       sus tipos (§9.3)
     impl: tests/bench/test_jrn01.py::test_jrn_01_4_broker_and_status   # xfail estricto hasta el publicador MQTT
     status: not done   # xfail estricto: feature ausente (Fase 2)
+    history: >
+      xfail estricto confirmado sobre f1f5a43 (test-results/20261107T015958Z-f1f5a43/):
+      JRN-01.0–01.3 en verde y JRN-01.4 sin con: CONECTANDO_BROKER -> OPERATIVO
+      (mqtt_up) en 60 s, 0 mensajes en el broker
     note: >
       JRN-01.2 aprovisiona mqtt_host = 192.168.4.1 (el broker del banco visto desde su
       AP); JRN-01.3 exige el broker apagado. El suscriptor del banco (paho-mqtt, fijado

@@ -1,0 +1,18 @@
+I (22899) nodo: UDP logging -> 192.168.4.1:5555
+I (22899) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (16019) nodo: UDP logging -> 192.168.4.1:5555
+I (16019) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (16019) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (16029) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (21469) nodo: UDP logging -> 192.168.4.1:5555
+I (21469) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5099) nodo: UDP logging -> 192.168.4.1:5555
+I (5099) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5149) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5089) nodo: UDP logging -> 192.168.4.1:5555
+I (5089) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5089) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5099) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (60509) nodo: med: T=29.7 HR=71.2 Td=23.9
+I (120509) nodo: med: T=29.7 HR=71.1 Td=23.9
+I (180509) nodo: med: T=29.6 HR=71.3 Td=23.9
