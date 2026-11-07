@@ -106,10 +106,12 @@ def _after_last_reset(lines: list) -> list:
     return lines[idx[-1]:] if idx else []
 
 
-# Inicio de un arranque: la línea rst: de la ROM o, si se perdió, las primeras líneas de
-# la aplicación. Un solo /api/serial/reset produce hoy DOS arranques: el segundo llega
-# ~2,6 s después, sin rst: (el proxy serie reabre el puerto; CR-TB-12).
-_INICIO_ARRANQUE = re.compile(r"^rst:|cpu_start: (Multicore app|Pro cpu start user code)")
+# Inicio de un arranque: la línea rst: de la ROM o, si se perdió, cualquiera de las
+# primeras líneas de la aplicación, hasta la E1 propia («nodo: boot: clima-»), que
+# está en todos. Un solo /api/serial/reset produce hoy DOS arranques: el segundo llega
+# ~2,6 s después, sin rst: y a veces sin sus primeras líneas (CR-TB-12).
+_INICIO_ARRANQUE = re.compile(r"^rst:|cpu_start: (Multicore app|Pro cpu start user code)|"
+                              r"app_init: Project name|nodo: boot: clima-")
 
 
 def ultimo_arranque(entradas: list) -> int | None:
