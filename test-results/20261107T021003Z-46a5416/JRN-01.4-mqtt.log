@@ -1,0 +1,15 @@
++0.81 s retain=False qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-46a5416-bench","rssi":-38,"reset":"usb","uptime_s":193,"lecturas":4,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++0.83 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":29.4,"u":"°C","ts":null}
++0.87 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":73.7,"u":"%","ts":null}
++0.88 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++10.54 s retain=False qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"offline"}
++10.55 s retain=False qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-46a5416-bench","rssi":-37,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++10.56 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":29.4,"u":"°C","ts":null}
++10.61 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":73.9,"u":"%","ts":null}
++10.61 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++17.75 s retain=False qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"offline"}
++17.76 s retain=False qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-46a5416-bench","rssi":-37,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++17.77 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":29.4,"u":"°C","ts":null}
++17.82 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":74.2,"u":"%","ts":null}
++17.82 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.3,"u":"°C","ts":null}
++28.91 s retain=True qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-46a5416-bench","rssi":-37,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}

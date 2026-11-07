@@ -371,10 +371,12 @@ def test_jrn_01_4_broker_and_status(testbench, dut_slot, dut_mac, run_dir):
             tb.mqtt_start(); broker_on = True
             with suscriptor_mqtt(tb, "sitio1/zona1/#", limpiar=[f"{base}/{m}" for m in
                                  ("status", "temperatura", "humedad", "punto_rocio")]) as sub:
-                c.step("Levantar el AP desechable (canal 1) y resetear el DUT")
-                tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
+                # Reset ANTES de levantar el AP: el DUT de JRN-01.3 sigue reintentando el Wi-Fi y,
+                # con el AP arriba, se uniría y publicaría antes del reset (sesión que no cuenta)
+                c.step("Resetear el DUT y levantar el AP desechable (canal 1)")
                 t0 = time.time()
                 tb.serial_reset(dut_slot)
+                tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
                 vistas = esperar_lineas(tb, dut_slot, t0, ["con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)"],
                                         timeout=T11_ESPERA_S)
                 time.sleep(TRAS_T11_S)
@@ -397,15 +399,20 @@ def test_jrn_01_4_broker_and_status(testbench, dut_slot, dut_mac, run_dir):
         vistas = vistas[ult:]
         t11 = primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)")
         assert t11, f"sin con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up) en {T11_ESPERA_S} s (T11)"
-        del_nodo = [m for m in vivo if m["topic"].startswith(base + "/") and m["payload"]]
+        del_nodo = [m for m in vivo if m["topic"].startswith(base + "/") and m["payload"] and m["t"] >= t0]
         assert del_nodo, f"ningún mensaje del nodo bajo {base}/ tras T11"
         primero = del_nodo[0]
-        c.note("", "## Resultado", "", f"- primer mensaje: `{primero['topic']}` qos={primero['qos']}",
-               f"- payload: `{primero['payload']}`", f"- mensajes del nodo en la ventana: {len(del_nodo)}")
+        # Sesiones MQTT en la ventana: cada status online abre una; un Last Will cierra la anterior
+        sesiones = [m for m in del_nodo if m["topic"] == f"{base}/status" and '"online"' in m["payload"]]
+        lwt = [m for m in del_nodo if m["payload"] == '{"estado":"offline"}']
+        c.note("", "## Resultado", "", f"- primer mensaje: `{primero['topic']}` qos={primero['qos']} a {primero['t'] - t0:+.2f} s del reset",
+               f"- payload: `{primero['payload']}`", f"- mensajes del nodo en la ventana: {len(del_nodo)}",
+               f"- status online: {len(sesiones)}; Last Will offline: {len(lwt)} (informativo: un segundo arranque daría 2 y 1)")
         assert primero["topic"] == f"{base}/status", f"el primer mensaje es {primero['topic']}, no status (FR-MQTT-06)"
         st = json.loads(primero["payload"])
         errores = _tipos_status(st)
         assert not errores, f"status no cumple §9.3: {errores} (FR-MQTT-08)"
+        assert st["uptime_s"] <= primero["t"] - t0 + 2, f"uptime_s={st['uptime_s']}: el status no es de este arranque"
         assert primero["qos"] == 1, f"status con QoS {primero['qos']} (§9.2: QoS 1)"
         ret = [m for m in retenido if m["payload"]]
         assert ret and ret[0]["retain"], "status no quedó retenido en el broker (§9.2)"

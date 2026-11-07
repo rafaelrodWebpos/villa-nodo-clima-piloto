@@ -454,7 +454,14 @@ tests:
     history: >
       xfail estricto confirmado sobre f1f5a43 (test-results/20261107T015958Z-f1f5a43/):
       JRN-01.0–01.3 en verde y JRN-01.4 sin con: CONECTANDO_BROKER -> OPERATIVO
-      (mqtt_up) en 60 s, 0 mensajes en el broker
+      (mqtt_up) en 60 s, 0 mensajes en el broker. XPASS estricto sobre 46a5416
+      (test-results/20261107T021003Z-46a5416/) con el publicador de 56e2b85, pero con
+      un defecto del test: el AP se levantaba antes del reset y el primer status
+      (uptime_s 193) era de la sesión anterior. Además, dos arranques tras un solo
+      serial_reset (el segundo, sin línea rst:, a los ~4,1 s del primero, reset=usb):
+      el broker publicó el Last Will del primero al conectarse el segundo. Test
+      corregido: reset antes del AP, solo mensajes posteriores al reset, uptime_s del
+      primer status de este arranque y recuento informativo de sesiones
     note: >
       JRN-01.2 aprovisiona mqtt_host = 192.168.4.1 (el broker del banco visto desde su
       AP); JRN-01.3 exige el broker apagado. El suscriptor del banco (paho-mqtt, fijado
