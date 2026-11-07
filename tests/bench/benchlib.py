@@ -145,6 +145,11 @@ def _boot_ids(lines: list) -> list:
 
 
 
+def hora_utc(t: float) -> str:
+    """HH:MM:SS.mmm UTC de un instante epoch (para cruzar la evidencia con el log del banco)."""
+    return time.strftime("%H:%M:%S", time.gmtime(t)) + f".{int(t * 1000) % 1000:03d}"
+
+
 def unirse_al_portal(tb, ssid, c, red="192.168.4.", intentos=2):
     """El banco se une al AP abierto del DUT y comprueba que el DHCP del portal
     le dio una IP de su red. sta_join del banco puede volver con una dirección
@@ -153,8 +158,9 @@ def unirse_al_portal(tb, ssid, c, red="192.168.4.", intentos=2):
     not done (precondición del banco), nunca failed."""
     for i in range(1, intentos + 1):
         c.step(f"El banco se une al AP abierto {ssid} (intento {i})")
+        t = time.time()
         ip = str(tb.sta_join(ssid, timeout=20).get("ip", ""))
-        c.note(f"- sta_join intento {i}: ip del banco `{ip}`")
+        c.note(f"- sta_join intento {i}: ip del banco `{ip}` ({hora_utc(t)} → {hora_utc(time.time())} UTC)")
         if ip.startswith(red):
             return ip
         tb.sta_leave()
@@ -270,6 +276,7 @@ def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local"):
 class _Suscripcion:
     def __init__(self):
         self._msgs, self._lock = [], __import__("threading").Lock()
+        self.conexiones = []     # instantes en que el suscriptor quedó suscrito (tras cada reconexión)
 
     def guardar(self, msg):
         with self._lock:
@@ -280,19 +287,36 @@ class _Suscripcion:
         with self._lock:
             return list(self._msgs)
 
+    def conectado(self, t):
+        with self._lock:
+            self.conexiones.append(t)
+
 
 @contextlib.contextmanager
 def suscriptor_mqtt(tb, filtro, limpiar=()):
     """Cliente MQTT del lado del banco (red de laboratorio) contra el broker del banco: la
     dirección sale de TESTBENCH_URL y nunca se escribe en la evidencia. Antes de suscribirse
-    borra los retenidos de `limpiar` (payload vacío, retain) para no confundirlos con los del DUT."""
+    borra los retenidos de `limpiar` (payload vacío, retain) para no confundirlos con los del DUT.
+    `filtro` es uno o varios filtros; si el broker se para y vuelve, el cliente se reconecta y se
+    vuelve a suscribir (sesión limpia), y `sub.conexiones` guarda cuándo."""
     import paho.mqtt.client as mqtt
     from urllib.parse import urlparse
     host = urlparse(tb.base_url).hostname
     sub = _Suscripcion()
     cli = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"banco-{os.getpid()}-{time.time_ns() % 10**6}",
                       protocol=mqtt.MQTTv311)
+    filtros = [filtro] if isinstance(filtro, str) else list(filtro)
     cli.on_message = lambda _c, _u, msg: sub.guardar(msg)
+
+    listo = []      # la primera suscripción va después de borrar los retenidos; las reconexiones, en on_connect
+
+    def al_conectar(c, _u, _f, rc, _p=None):
+        if listo and not rc.is_failure:
+            c.subscribe([(f, 1) for f in filtros])
+            sub.conectado(time.time())
+    cli.on_connect = al_conectar
+    cli.on_subscribe = lambda *_a: None
+    cli.reconnect_delay_set(min_delay=1, max_delay=2)
     fin = time.time() + 15
     while True:
         try:
@@ -306,9 +330,41 @@ def suscriptor_mqtt(tb, filtro, limpiar=()):
     try:
         for t in limpiar:
             cli.publish(t, b"", qos=1, retain=True).wait_for_publish(5)
-        cli.subscribe(filtro, qos=1)
+        listo.append(True)
+        cli.subscribe([(f, 1) for f in filtros])
+        sub.conectado(time.time())
         time.sleep(0.5)
         yield sub
     finally:
         cli.loop_stop()
         cli.disconnect()
+
+
+class Registro:
+    """Log serie del slot leído por tramos desde `desde` (el buffer devuelve como mucho 500
+    líneas por petición): acumula [{text, ts}] sin repetir y espera patrones o regex."""
+
+    def __init__(self, tb, slot, desde):
+        self.tb, self.slot, self.desde = tb, slot, desde
+        self.entradas, self._vistas = [], set()
+
+    def leer(self):
+        out = self.tb.serial_output(self.slot, lines=500, since=self.desde)
+        for e in out.get("lines") or []:
+            e = e if isinstance(e, dict) else {"text": str(e), "ts": 0}
+            clave = (e.get("ts", 0), e.get("text", ""))
+            if clave not in self._vistas:
+                self._vistas.add(clave)
+                self.entradas.append(e)
+                self.desde = max(self.desde, e.get("ts", 0))
+        return self.entradas
+
+    def esperar(self, regex, timeout, desde_ts=0):
+        """Primera entrada con ts ≥ desde_ts que casa con regex, o None al vencer timeout."""
+        rx = re.compile(regex)
+        fin = time.time() + timeout
+        while True:
+            hit = next((e for e in self.leer() if e.get("ts", 0) >= desde_ts and rx.search(e.get("text", ""))), None)
+            if hit or time.time() > fin:
+                return hit
+            time.sleep(1)

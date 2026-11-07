@@ -7,7 +7,7 @@ import time
 import pytest
 
 from benchlib import (_after_last_reset, _boot_capture, _boot_ids, _lines, borrar_nvs, case,
-                      credenciales_desechables, esperar_lineas, primera, redactar, unirse_al_portal)
+                      credenciales_desechables, esperar_lineas, hora_utc, primera, redactar, unirse_al_portal)
 
 PORTAL_IP = "192.168.4.1"          # FSD §11.1: el servidor del portal
 NAMES_17 = {"wifi_ssid", "wifi_pass", "mqtt_host", "mqtt_port",
@@ -141,6 +141,7 @@ def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir, tmp_path):
     El Location exacto lo verifica TC-POR-06 (host)."""
     tb = testbench
     with case(tb, "TC-POR-07", "Redirecciones del portal cautivo", run_dir, spec="TC-POR villa-nodo-clima-piloto") as c:
+        t_ini = time.time()
         ssid = _en_portal(tb, dut_slot, c, tmp_path)
         assert not tb.ap_status().get("active"), "el AP del banco está activo: la radio no puede unirse al DUT"
         time.sleep(2)
@@ -150,12 +151,22 @@ def test_tc_por_07_captive_redirects(testbench, dut_slot, run_dir, tmp_path):
             joined = True
             for ruta in ("/generate_204", "/hotspot-detect.html"):
                 c.step(f"GET http://{PORTAL_IP}{ruta}")
-                r = tb.http_get(f"http://{PORTAL_IP}{ruta}", timeout=10)
+                t = time.time()
+                try:
+                    r = tb.http_get(f"http://{PORTAL_IP}{ruta}", timeout=10)
+                finally:
+                    c.note(f"- GET {ruta}: {hora_utc(t)} → {hora_utc(time.time())} UTC")
                 respuestas.append((ruta, r))
                 (run_dir / f"TC-POR-07{ruta.replace('/', '-').replace('.', '_')}.html").write_text(r.text)
         finally:
             if joined:
                 tb.sta_leave()
+            # Log serie con la hora del banco y cada arranque del DUT (CR-TB-12: dos por reset)
+            vistas = esperar_lineas(tb, dut_slot, t_ini, [], timeout=0)
+            c.save_log("serie", [f"{hora_utc(e.get('ts', 0))} {e.get('text', '')}" for e in vistas])
+            arranques = [e for e in vistas if re.search(r"^rst:|nodo: boot: ", e.get("text", ""))]
+            c.note("- arranques del DUT (hora del banco, UTC):",
+                   *[f"  - {hora_utc(e.get('ts', 0))} `{e['text'].strip()[:90]}`" for e in arranques])
         for ruta, r in respuestas:
             names = {m.group(1) for t in re.findall(r"<input\b[^>]*>", r.text)
                      for m in [re.search(r'\bname="([^"]+)"', t)] if m}
