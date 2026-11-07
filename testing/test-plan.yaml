@@ -1670,6 +1670,34 @@ tests:
       3600 y el mismo reset que antes; al final, escaneo con el AP del banco
       apagado un momento (CR-TB-14, como H-63) sin ningún clima-*
     impl: tests/bench/test_con_largo.py::test_tc_con_12_broker_off_60_min
+  - id: TC-TIME-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-TIME-05]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      AP del banco sin salida a Internet (SNTP inalcanzable desde el arranque):
+      la primera medida en vivo llega ≤ 30 s después del encendido estimado
+      (llegada del primer status de la última sesión − uptime_s − 2 s, como en
+      FR-CON-05) con "ts": null, y ese status lleva hora_valida = false
+    impl: tests/bench/test_time.py::test_tc_time_05_publish_without_time
+  - id: TC-TIME-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-TIME-06]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      AP del banco sin salida a Internet; DUT con IP durante 5 min: la primera
+      «sntp: inicio <srv>» llega ≤ 15 s después de wifi_up y los intervalos entre
+      líneas consecutivas (marcas del DUT) son ≤ 15 s, también tras un
+      «sntp: fallo»
+    impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time   # xfail estricto hasta el cliente SNTP
   - id: TC-MQTT-01
     shape: atomic
     kind: standard
