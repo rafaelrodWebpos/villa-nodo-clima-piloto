@@ -4,5 +4,5 @@ idf_component_register(SRCS "main.c"
                        INCLUDE_DIRS "."
                        PRIV_REQUIRES esp_app_format app_update esp_hw_support esp_system
                                      esp_event esp_netif esp_wifi nvs_flash
-                                     identidad conectividad portal udplog sht41 medicion diagnostico publicador ha_discovery esp_timer freertos
+                                     identidad conectividad portal udplog sht41 medicion diagnostico publicador ha_discovery hora esp_timer freertos lwip
                                      espressif__mqtt)

@@ -1684,6 +1684,34 @@ tests:
       3600 y el mismo reset que antes; al final, escaneo con el AP del banco
       apagado un momento (CR-TB-14, como H-63) sin ningún clima-*
     impl: tests/bench/test_con_largo.py::test_tc_con_12_broker_off_60_min
+  - id: TC-TIME-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-TIME-02]
+    needs: [hosted-ci]
+    expect: >
+      función de validez: (sincronizado = no, reloj = 2030), (sí, 1970), (sí,
+      build − 1 s), (sí, build + 1 s) → no válida, no válida, no válida, válida;
+      una fecha de build ilegible nunca da hora válida
+    impl: tests/host/test_hora.c (time02)
+  - id: TC-TIME-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-TIME-04, FR-TIME-06]
+    needs: [hosted-ci]
+    expect: >
+      planificador SNTP con un tick cada 15 s: sin hora, una petición por tick y
+      «fallo» cada 30 s sin dejar de pedir; con hora, nada hasta 1 h; a la hora, un
+      intento que falla a los 30 s sin invalidar la hora y el siguiente 1 h después;
+      un arranque nuevo empieza sin hora. Complementa las filas bench y bench⁺,
+      que siguen siendo las del contrato
+    impl: tests/host/test_hora.c (time07)
   - id: TC-TIME-05
     shape: atomic
     kind: standard
@@ -1711,7 +1739,7 @@ tests:
       «sntp: inicio <srv>» llega ≤ 15 s después de wifi_up y los intervalos entre
       líneas consecutivas (marcas del DUT) son ≤ 15 s, también tras un
       «sntp: fallo»
-    impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time   # xfail estricto hasta el cliente SNTP
+    impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time
   - id: TC-MQTT-01
     shape: atomic
     kind: standard

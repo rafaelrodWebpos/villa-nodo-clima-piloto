@@ -7,19 +7,22 @@
  * cautivo, HTTP, validación del envío) y la prueba de unión con su resultado
  * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
  * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
- * test: el resto de §6.3. T08 arranca el cliente MQTT (el SNTP llega con su
- * test), T09/T10 reintentan la unión con el backoff de FR-CON-02 y T11–T16
+ * test: el resto de §6.3. T08 arranca el cliente MQTT y SNTP (§13: una petición
+ * cada 15 s sin hora válida, resincronización cada hora), T09/T10 reintentan la unión con el backoff de FR-CON-02 y T11–T16
  * llevan el broker (§9): status online al conectar, medidas y status en cada
  * ciclo en OPERATIVO, Last Will offline. El ciclo de medición (FSD §5.4) lee
  * el SHT41 cada 60 s en cualquier estado y escribe E3.
  */
 #include <string.h>
+#include <sys/time.h>
+#include <time.h>
 #include "esp_app_desc.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_mac.h"
 #include "esp_netif.h"
 #include "esp_ota_ops.h"
+#include "esp_sntp.h"
 #include "esp_system.h"
 #include "esp_timer.h"
 #include "esp_wifi.h"
@@ -44,6 +47,7 @@
 #include "portal_validar.h"
 #include "publicador.h"
 #include "ha_discovery.h"
+#include "hora.h"
 #include "udplog.h"
 
 static const char *TAG = "nodo";
@@ -269,10 +273,69 @@ static void probar_union(void)
 
 static void intentar_mqtt(void);
 
+/* ---- Adaptador SNTP (§13) ---------------------------------------------------
+ * El cliente SNTP de lwIP pide la hora; el planificador (components/hora) decide
+ * cuándo: con IP, un tick cada 15 s; sin hora válida, una petición por tick
+ * (FR-TIME-06); con hora, un intento cada hora (FR-TIME-04). Cada petición
+ * reinicia el cliente de lwIP, que la envía al arrancar. El estado del
+ * planificador lo tocan el tick (tarea esp_timer) y el aviso de sincronización
+ * (tarea de lwIP): va bajo s_mux_hora, y fuera de él se escribe el log y se
+ * llama a lwIP (nunca desde el aviso, que corre en la propia tarea de lwIP). */
+#define SNTP_SERVIDOR "pool.ntp.org"            /* FR-TIME-01 */
+static hora_sntp_t s_hora;
+static portMUX_TYPE s_mux_hora = portMUX_INITIALIZER_UNLOCKED;
+static esp_timer_handle_t s_t_sntp;
+static int64_t s_build_epoch = -1;
+
+static int64_t ahora_ms(void) { return esp_timer_get_time() / 1000; }
+
+/* FR-TIME-02: sincronizada en este arranque y no anterior a la fecha de build */
+static bool hora_valida(void)
+{
+    taskENTER_CRITICAL(&s_mux_hora);
+    bool sinc = s_hora.sincronizado;
+    taskEXIT_CRITICAL(&s_mux_hora);
+    return hora_es_valida(sinc, (int64_t)time(NULL), s_build_epoch);
+}
+
+static void al_sincronizar(struct timeval *tv)
+{
+    taskENTER_CRITICAL(&s_mux_hora);
+    hora_sincronizada(&s_hora, ahora_ms());
+    taskEXIT_CRITICAL(&s_mux_hora);
+    ESP_LOGI(TAG, "sntp: sincronizado ts=%lld", (long long)tv->tv_sec);      /* E6 */
+}
+
+static void al_tick_sntp(void *arg)
+{
+    taskENTER_CRITICAL(&s_mux_hora);
+    unsigned acc = hora_tick(&s_hora, ahora_ms());
+    taskEXIT_CRITICAL(&s_mux_hora);
+    if (acc & HORA_FALLO) ESP_LOGW(TAG, "sntp: fallo");                       /* E6 */
+    if (acc & HORA_PEDIR) {
+        ESP_LOGI(TAG, "sntp: inicio %s", SNTP_SERVIDOR);                        /* E6 */
+        esp_sntp_stop();
+        esp_sntp_init();
+    } else if (esp_sntp_enabled()) {
+        esp_sntp_stop();                        /* sincronizado o intento terminado: sin sondeo propio de lwIP */
+    }
+    esp_timer_start_once(s_t_sntp, (uint64_t)HORA_TICK_MS * 1000u);
+}
+
+static void sntp_configurar(const char *fecha, const char *hora)
+{
+    s_build_epoch = hora_build_epoch(fecha, hora);
+    hora_iniciar(&s_hora);
+    esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
+    esp_sntp_setservername(0, SNTP_SERVIDOR);
+    sntp_set_time_sync_notification_cb(al_sincronizar);
+    const esp_timer_create_args_t ts = {.callback = al_tick_sntp, .name = "sntp"};
+    ESP_ERROR_CHECK(esp_timer_create(&ts, &s_t_sntp));
+}
+
 /* Acción de T08: reiniciar el backoff de Wi-Fi (<n> de E4 vuelve a 1 en el
- * siguiente intento) y arrancar el cliente MQTT con su primer intento (E5).
- * Sin AP y sin publicar hasta T11 (T08, «No debe ocurrir»). El SNTP llega
- * con su test (FR-TIME-01). */
+ * siguiente intento), arrancar el cliente MQTT con su primer intento (E5) y
+ * SNTP (§13). Sin AP y sin publicar hasta T11 (T08, «No debe ocurrir»). */
 static void red_lista(void)
 {
     esp_timer_stop(s_t_backoff);
@@ -282,6 +345,8 @@ static void red_lista(void)
     con_backoff_reiniciar(&s_backoff_mqtt);
     s_intento_mqtt = 0;
     esp_timer_start_once(s_t_primer_mqtt, 1000);   /* tras la línea con: de T08 (§6.6), muy dentro de su 1 s */
+    esp_timer_stop(s_t_sntp);
+    esp_timer_start_once(s_t_sntp, 500 * 1000);     /* primera petición tras la línea con: de T08 (FR-TIME-06) */
 }
 
 /* Acción de T09: programar el reintento con el backoff de FR-CON-02. Si ya hay
@@ -309,6 +374,8 @@ static void al_vencer_backoff(void *arg)
 static uint32_t s_lecturas, s_err_sensor;
 static med_lectura_t s_ultima;                  /* la medida más reciente (T11) */
 static bool s_hay_medida;
+static bool s_ultima_ts_valido;                 /* ts de s_ultima (FR-TIME-03) */
+static int64_t s_ultima_ts;
 
 static void al_evento_mqtt(void *arg, esp_event_base_t base, int32_t id, void *datos)
 {
@@ -371,6 +438,8 @@ static void red_caida(void)
     esp_timer_stop(s_t_backoff_mqtt);
     esp_timer_stop(s_t_primer_mqtt);
     if (s_mqtt_activo) { esp_mqtt_client_stop(s_mqtt); s_mqtt_activo = false; }
+    esp_timer_stop(s_t_sntp);                       /* sin IP no hay peticiones SNTP (FR-TIME-06) */
+    esp_sntp_stop();
     programar_reintento();
 }
 
@@ -380,22 +449,22 @@ static void publicar_status(void)
     int rssi = esp_wifi_sta_get_ap_info(&ap) == ESP_OK ? ap.rssi : 0;
     pub_status_t st = {.online = true, .fw = s_version, .rssi = rssi, .reset = causa_reset(),
                        .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000), .lecturas = s_lecturas,
-                       .err_sensor = s_err_sensor, .ota = "ninguno", .hora_valida = false};   /* hora: FR-TIME-02 */
+                       .err_sensor = s_err_sensor, .ota = "ninguno", .hora_valida = hora_valida()};   /* FR-TIME-02 */
     char json[256];
     if (pub_status_json(json, sizeof json, &st) > 0)
         esp_mqtt_client_publish(s_mqtt, s_top_status, json, 0, 1, 1);          /* §9.2: QoS 1, retain */
 }
 
 /* Medidas de una lectura válida: QoS 0, retain (FR-MQTT-04); sin punto_rocio si no hay (FR-MED-04).
- * Sin hora válida, ts = null (FR-MQTT-03). */
-static void publicar_medidas(const med_lectura_t *m)
+ * ts = instante de la lectura si la hora era válida; si no, null (FR-TIME-03). */
+static void publicar_medidas(const med_lectura_t *m, bool ts_valido, int64_t ts)
 {
     const float v[PUB_N_MEDIDAS] = {m->t, m->hr, m->td};
     for (int i = 0; i < PUB_N_MEDIDAS; i++) {
         if (i == PUB_PUNTO_ROCIO && !m->td_valida) continue;
         char top[160], json[64];
         if (pub_topico(top, sizeof top, s_cfg.sitio, s_cfg.zona, s_id, pub_nombre_medida(i)) < 0) continue;
-        if (pub_medida_json(json, sizeof json, i, v[i], false, 0) < 0) continue;
+        if (pub_medida_json(json, sizeof json, i, v[i], ts_valido, ts) < 0) continue;
         esp_mqtt_client_publish(s_mqtt, top, json, 0, 0, 1);
     }
 }
@@ -421,7 +490,7 @@ static void mqtt_listo(void)
     s_intento_mqtt = 0;
     publicar_status();
     publicar_discovery();
-    if (s_hay_medida && s_ultima.valida) publicar_medidas(&s_ultima);
+    if (s_hay_medida && s_ultima.valida) publicar_medidas(&s_ultima, s_ultima_ts_valido, s_ultima_ts);
     esp_ota_img_states_t st;
     if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY)
         esp_ota_mark_app_valid_cancel_rollback();
@@ -513,6 +582,8 @@ static void arrancar_sta(void)
     wifi_base();
     crear_sta();
     wifi_iniciar();
+    const esp_app_desc_t *app = esp_app_get_description();
+    sntp_configurar(app->date, app->time);          /* §13: tras la pila Wi-Fi; arranca en T08 */
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     configurar_sta(&s_cfg);
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -589,6 +660,8 @@ static void tarea_medicion(void *arg)
         float t = 0, hr = 0;
         sht41_resultado_t r = sht41_leer(&t, &hr);
         med_lectura_t m = med_procesar(r == SHT41_OK, t, hr);
+        const bool ts_valido = hora_valida();                 /* FR-TIME-03/05: sin hora, ts = null; nunca se espera */
+        const int64_t ts = (int64_t)time(NULL);
         if (m.valida) s_lecturas++; else s_err_sensor++;      /* FR-SEN-02 */
         char linea[MED_LINEA_MAX];
         med_linea(linea, sizeof linea, &m, sht41_motivo(r));
@@ -599,10 +672,11 @@ static void tarea_medicion(void *arg)
          * esperando a la tarea del gestor). */
         xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
         s_ultima = m; s_hay_medida = true;
+        s_ultima_ts_valido = ts_valido; s_ultima_ts = ts;
         bool operativo = s_estado == CON_OPERATIVO;
         xSemaphoreGiveRecursive(s_lock);
         if (operativo) {
-            if (m.valida) publicar_medidas(&m);
+            if (m.valida) publicar_medidas(&m, ts_valido, ts);
             publicar_status();
         }
         vTaskDelayUntil(&ultimo, pdMS_TO_TICKS(PERIODO_MEDIDA_MS));
