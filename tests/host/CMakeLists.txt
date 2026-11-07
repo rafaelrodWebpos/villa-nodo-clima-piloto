@@ -85,3 +85,8 @@ add_executable(test_publicador test_publicador.c ${COMP}/publicador/publicador.c
 target_include_directories(test_publicador PRIVATE ${COMP}/publicador/include)
 add_test(NAME TC-MQTT-01 COMMAND test_publicador mqtt01)
 add_test(NAME TC-MQTT-02 COMMAND test_publicador mqtt02)
+
+# TC-HA-01 · FR-HA-02, FR-HA-03 (generador de Discovery)
+add_executable(test_ha_discovery test_ha_discovery.c ${COMP}/ha_discovery/ha_discovery.c)
+target_include_directories(test_ha_discovery PRIVATE ${COMP}/ha_discovery/include)
+add_test(NAME TC-HA-01 COMMAND test_ha_discovery)

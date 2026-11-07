@@ -268,8 +268,11 @@ capabilities:
       como inválidas (FR-SEN-02, ya en su contrato host). Un primer aviso con
       180 s de plazo caducó sin confirmación; para esta acción se usan 300 s
   home-assistant-test:
-    what: instancia de Home Assistant con integración MQTT apuntando al broker de prueba (Pi del banco o PC con Docker; lo decide /commission)
+    what: instancia de Home Assistant con integración MQTT apuntando al broker de prueba
     available: unproven
+    decision: >
+      H-52 (propietario, 2026-11-07): corre en la laptop, en el Docker de WSL,
+      conectada al broker del banco por la LAN; nada se instala en el Pi del banco
   github-test-releases:
     what: pre-releases ota-test-* del repo con las imágenes de prueba OTA (FSD §22.0)
     available: unproven
@@ -690,6 +693,55 @@ tests:
       hacia CONECTANDO_WIFI, durante 890 s de log del DUT; ningún clima-* en los
       escaneos a 185, 365, 545, 725 y 905 s; un solo arranque. La ejecución sobre
       5d0699d no cuenta: contó las líneas del bootloader como reinicios
+  - id: TC-CON-08
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [T12, T13, T15, FR-CON-02, FR-CON-04, FR-MQTT-06]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, bench-serial-monitor, dut-board]
+    expect: >
+      en OPERATIVO, broker del banco detenido hasta «mqtt: intento 10» y su fallo
+      con el Wi-Fi activo: una línea T15; T12 y T13 por cada intento; los 10
+      primeros intervalos desde «con: … -> CONECTANDO_BROKER (mqtt_down)» hasta
+      el siguiente «mqtt: intento <n>» dentro de ±10 % de 1, 2, 4, 8, 16, 32, 60,
+      60, 60, 60 s (fila MQTT de FR-CON-02); el intento ≤ 1 s tras T13 y nunca dos
+      intentos sin resultado entre ellos; ni «wifi: intento» ni destino
+      CONECTANDO_WIFI ni reinicio. Al arrancar el broker: T11, el primer mensaje
+      en vivo del nodo es status online (FR-MQTT-06) y una medida válida llega en
+      ≤ 75 s (FR-CON-04)
+    impl: tests/bench/test_mqtt.py::test_tc_con_08_broker_outage
+  - id: TC-CON-09
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [T14]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-serial-monitor, dut-board]
+    expect: >
+      con el broker parado, ≥ 4 fallos de unión con el AP apagado (último
+      intervalo ≥ 8 s), AP arriba, T08 y dos «mqtt: intento»; al apagar el AP,
+      «con: CONECTANDO_BROKER -> CONECTANDO_WIFI (wifi_down)» y el siguiente
+      «wifi: intento» en ≤ 2 s (el backoff de Wi-Fi se reinició en T08); en 60 s
+      ningún «mqtt: intento» más y sin reinicio
+    impl: tests/bench/test_mqtt.py::test_tc_con_09_wifi_loss_connecting_broker
+  - id: TC-CON-10
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [T16, FR-CON-03, FR-MQTT-06]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      en OPERATIVO, AP apagado 45 s: «con: OPERATIVO -> CONECTANDO_WIFI
+      (wifi_down)» (no T15), siguiente «wifi: intento» en ≤ 2 s, sin reinicio; al
+      levantar el AP, T11, el primer mensaje en vivo del nodo (sin contar el Last
+      Will de la sesión anterior, que publica el broker) es status online y una
+      medida válida llega en ≤ 90 s
+    impl: tests/bench/test_mqtt.py::test_tc_con_10_wifi_loss_operativo
   - id: TC-POR-01
     shape: atomic
     kind: standard
@@ -1463,6 +1515,37 @@ tests:
     commit: 56e2b85
     date: 2026-11-07
     ci_run: 42327311133   # host tests + secret scan
+  - id: TC-MQTT-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-HA-01, FR-MQTT-04]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      broker limpio y DUT que conecta: en vivo, status online, luego las tres
+      configuraciones homeassistant/sensor/<nodo>/<medida>/config (QoS 1, iguales
+      a §10.2 con sitio1/zona1 y el fw del status), luego las medidas (QoS 0); un
+      suscriptor nuevo recibe con retain = 1 las tres configuraciones y el último
+      valor en vivo de cada medida
+    impl: tests/bench/test_mqtt.py::test_tc_mqtt_03_connect_order_and_retain
+  - id: TC-HA-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-HA-02, FR-HA-03]
+    needs: [hosted-ci]
+    expect: >
+      contrato host de §10.4: con nodo clima-a1b2c3, sitio sitio1, zona zona1 y fw
+      0.3.0, la configuración de temperatura es idéntica campo a campo y en orden a
+      §10.2; humedad (humidity, %) y punto_rocio («Punto de rocío», temperature,
+      °C); expire_after 180 en las tres; unique_id e identifiers no cambian con el
+      sitio ni la zona; sw_version = el fw dado; tópicos
+      homeassistant/sensor/<nodo>/<medida>/config; escapa y nunca trunca
+    impl: tests/host/test_ha_discovery.c
   - id: TC-SEC-01
     shape: atomic
     kind: security
