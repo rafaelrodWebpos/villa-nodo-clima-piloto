@@ -1227,12 +1227,27 @@ tests:
     phase: 2
     tier: bench
     verifies: [FR-LOG-03]
-    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
     expect: >
       imagen de banco con CONFIG_NODO_UDP_LOG_HOST en una IP sin uso de la red
       del banco, 10 ciclos: en cada uno, 3 medidas en vivo y un status;
       intervalos entre medidas en [59, 61] s; ningún uptime_s menor ni bloqueo
-    impl: null   # declarado 2026-11-05 (H-43, fila 6 de la puerta 02): udplog ya descarta si la cola está llena
+    impl: tests/bench/test_log.py::test_tc_log_03_udp_log_to_nowhere   # --ci-variant bench-sin-receptor (H-67)
+  - id: TC-LOG-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: other
+    verifies: [C-LOG-02]
+    needs: [hosted-ci]
+    expect: >
+      CI (H-66): scripts/ci/c_log_02.py fuente — ninguna lectura de la consola ni
+      cadena de E13 fuera de #if CONFIG_NODO_BENCH_BUILD (ci.yml, cada push); y
+      c_log_02.py imagen — «wdt-test» y «wdt: bloqueando medicion» ausentes en la
+      imagen de producción (build.yml, cada push) y presentes en la de banco del
+      mismo commit (build.yml, workflow_dispatch variant=bench)
+    impl: scripts/ci/c_log_02.py
   - id: TC-LOG-04
     shape: atomic
     kind: standard

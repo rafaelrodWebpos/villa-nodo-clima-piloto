@@ -24,6 +24,7 @@
 #include "esp_ota_ops.h"
 #include "esp_sntp.h"
 #include "esp_system.h"
+#include "esp_task_wdt.h"
 #include "esp_timer.h"
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
@@ -86,6 +87,13 @@ static char s_top_status[160];                 /* <sitio>/<zona>/<nodo>/status *
  * imagen de banco; la de producción no debe contenerlo. */
 static const char BENCH_MARKER[] = "NODO-BENCH-IMAGE";
 #endif
+
+/* Watchdog de tareas (NFR-WDT-01, D16: 30 s; CONFIG_ESP_TASK_WDT_TIMEOUT_S y _PANIC en
+ * sdkconfig.defaults). Las tareas de medición y de conectividad se suscriben y lo
+ * alimentan al menos cada WDT_ALIMENTO_MS; si una deja de hacerlo 30 s, el nodo se
+ * reinicia con reset = task_wdt desde cualquier estado (acción global de §6.3). */
+#define WDT_ALIMENTO_MS 5000
+static volatile bool s_wdt_bloquear;          /* E13 wdt-test: la medición deja de alimentarlo */
 
 static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t);
 
@@ -389,8 +397,11 @@ static void al_evento_mqtt(void *arg, esp_event_base_t base, int32_t id, void *d
 static void tarea_gestor(void *arg)
 {
     con_evento_t ev;
+    ESP_ERROR_CHECK(esp_task_wdt_add(NULL));                 /* NFR-WDT-01: tarea de conectividad */
     for (;;) {
-        if (xQueueReceive(s_eventos_mqtt, &ev, portMAX_DELAY) == pdTRUE) transicion(ev, (con_guardas_t){0});
+        esp_task_wdt_reset();
+        if (xQueueReceive(s_eventos_mqtt, &ev, pdMS_TO_TICKS(WDT_ALIMENTO_MS)) == pdTRUE)
+            transicion(ev, (con_guardas_t){0});
     }
 }
 
@@ -653,6 +664,7 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
 static void tarea_medicion(void *arg)
 {
     (void)arg;
+    ESP_ERROR_CHECK(esp_task_wdt_add(NULL));                 /* NFR-WDT-01: tarea de medición */
     esp_err_t e = sht41_iniciar();
     if (e != ESP_OK) ESP_LOGE(TAG, "sht41: bus no iniciado (%s)", esp_err_to_name(e));
     TickType_t ultimo = xTaskGetTickCount();
@@ -679,9 +691,58 @@ static void tarea_medicion(void *arg)
             if (m.valida) publicar_medidas(&m, ts_valido, ts);
             publicar_status();
         }
-        vTaskDelayUntil(&ultimo, pdMS_TO_TICKS(PERIODO_MEDIDA_MS));
+        /* Espera al ciclo siguiente en tramos, alimentando el watchdog (NFR-WDT-01); el
+         * instante de cada ciclo sigue siendo el del reloj del planificador (FR-MED-01). */
+        const TickType_t siguiente = ultimo + pdMS_TO_TICKS(PERIODO_MEDIDA_MS);
+        while ((TickType_t)(siguiente - xTaskGetTickCount()) - 1u < pdMS_TO_TICKS(PERIODO_MEDIDA_MS)) {
+            if (!s_wdt_bloquear) esp_task_wdt_reset();
+            TickType_t falta = siguiente - xTaskGetTickCount();
+            vTaskDelay(falta < pdMS_TO_TICKS(WDT_ALIMENTO_MS) ? falta : pdMS_TO_TICKS(WDT_ALIMENTO_MS));
+        }
+        ultimo = siguiente;
+        while (s_wdt_bloquear) vTaskDelay(pdMS_TO_TICKS(1000));   /* E13 wdt-test: sin alimentar */
     }
 }
+
+#if CONFIG_NODO_BENCH_BUILD
+/* ---- Comandos serie de la imagen de banco (E13, §18; C-LOG-02) ---------------
+ * Solo existe con CONFIG_NODO_BENCH_BUILD=y: la imagen de producción no lee la
+ * consola. Lee líneas de la consola primaria (UART0) con el driver de la UART
+ * instalado solo para recibir (sin búfer de transmisión: el log sigue saliendo
+ * por la consola como siempre). */
+#include "driver/uart.h"
+#define CMD_UART CONFIG_ESP_CONSOLE_UART_NUM
+#define CMD_MAX  32
+
+static void tarea_comandos(void *arg)
+{
+    (void)arg;
+    char linea[CMD_MAX];
+    size_t n = 0;
+    for (;;) {
+        uint8_t c;
+        if (uart_read_bytes(CMD_UART, &c, 1, portMAX_DELAY) != 1) continue;
+        if (c == '\r') continue;
+        if (c != '\n') { if (n < sizeof linea - 1) linea[n++] = (char)c; continue; }
+        linea[n] = '\0';
+        n = 0;
+        if (strcmp(linea, "wdt-test") == 0) {
+            ESP_LOGW(TAG, "wdt: bloqueando medicion");         /* E13 → NFR-WDT-01 */
+            s_wdt_bloquear = true;
+        } else if (strcmp(linea, "reiniciar") == 0) {
+            esp_restart();                                     /* E13: la siguiente boot: con reset=sw */
+        }
+    }
+}
+
+static void comandos_iniciar(void)
+{
+    if (uart_driver_install(CMD_UART, 256, 0, 0, NULL, 0) == ESP_OK)
+        xTaskCreate(tarea_comandos, "comandos", 3072, NULL, 3, NULL);
+    else
+        ESP_LOGE(TAG, "comandos: uart %d sin driver", CMD_UART);
+}
+#endif
 
 void app_main(void)
 {
@@ -710,6 +771,9 @@ void app_main(void)
     xTaskCreate(tarea_medicion, "medicion", 4096, NULL, 5, NULL);
 
     transicion(CON_EV_FIN_ARRANQUE, (con_guardas_t){.config_valida = config_valida()});
+#if CONFIG_NODO_BENCH_BUILD
+    comandos_iniciar();                           /* E13: solo en la imagen de banco (C-LOG-02) */
+#endif
 
     /* Marcador de arranque del contrato del testbench: última línea de app_main. */
     ESP_LOGI(TAG, "Init complete");
