@@ -592,25 +592,24 @@ tests:
     impl: tests/bench/test_jrn01.py::test_jrn_01_7_power_cut   # pone su propia precondición (JRN-01.6 bloqueado); cortes en tests/bench/cortes.py
     status: not done
     last_run:
-      commit: 60d8cd8
+      commit: a8f210a
       date: 2026-11-07
-      outcome: failed por el banco (escaneo sin respuesta), no por el firmware
-      evidence: test-results/20261107T180528Z-60d8cd8/JRN-01.7.md
+      outcome: not done (el banco no respondió al escaneo Wi-Fi con su AP arriba)
+      evidence: test-results/20261107T203408Z-a8f210a/JRN-01.7.md
       observed: >
-        un corte del propietario (USB-C desenchufado del lado de la placa): Last Will
-        retenido a 79,7 s; tras reenchufar, primer status en vivo bajo
-        sitio1/zona1/clima-f3c6d4/status con reset = poweron y uptime_s = 1, y
-        primera medida a 3,0 s del encendido estimado. El único rojo: el escaneo
-        Wi-Fi del banco no respondió (CommandTimeout a los 90 s), así que «sin AP
-        clima-*» quedó sin observar
+        un corte del propietario: Last Will retenido a 85,5 s; tras reenchufar,
+        primer status en vivo bajo sitio1/zona1/clima-f3c6d4/status con reset =
+        poweron y uptime_s = 1, y primera medida a 3,0 s del encendido estimado.
+        Los 3 escaneos con el AP del banco arriba acabaron en CommandTimeout (como
+        el intento 1 en 60d8cd8, test-results/20261107T180528Z-60d8cd8/); con el AP
+        apagado, el mismo escaneo respondió enseguida. Al quedar not done, la
+        prueba se paró (pedido del propietario) durante la grabación de TC-CFG-02;
+        el DUT quedó sin aplicación y se volvió a grabar la imagen de la CI
+        0.0.0-a8f210a-bench, que arranca bien
     next: >
-      H-61 (propietario, 2026-11-07, opción 1): el escaneo se reintenta hasta 3
-      veces y, si el banco no responde, el paso queda not done (nunca verde);
-      se repite con los cortes del propietario
+      decisión del propietario sobre cómo comprobar «sin AP clima-*» (escaneo con
+      el AP del banco apagado un momento, u otra opción)
 
-  # JRN-02 — OTA desde una pre-release real de GitHub y rollback. Recorrido
-  # aparte de JRN-01 porque necesita la salida a Internet del banco (bench+;
-  # alternativa field, FSD §22.0). Parte de un nodo que ha superado JRN-01.
   - id: JRN-02.1
     shape: workflow
     kind: standard
