@@ -72,3 +72,65 @@ def test_tc_med_02_cycle_without_broker(testbench, dut_slot, dut_mac, firmware, 
         assert dl != 0, "lecturas sin cambio: el ciclo se paró sin broker"
         assert abs(dl - esperado) <= 1, f"Δlecturas={dl}, esperado {esperado} ± 1"
         c.passed(f"Δlecturas={dl} con Δuptime_s={du} (⌊Δ/60⌋={esperado}); sin reinicio")
+
+
+MED01_MENSAJES = 11            # FR-MED-01: 11 mensajes consecutivos → 10 intervalos
+MED01_RANGO = (59.0, 61.0)
+
+
+def _serie_med01(msgs, base, tema, t0):
+    """Temperaturas en vivo de la última sesión MQTT (CR-TB-12: el reset del banco puede dar dos
+    arranques), sin la de T11, que repite la última lectura (FR-MQTT-06) y no es un ciclo.
+    La sesión empieza en su status de T11 (uptime_s < 60); la medida de T11 llega pegada a él."""
+    inicio = None
+    for m in msgs:
+        if m["topic"] == f"{base}/status" and not m["retain"] and m["payload"] and m["t"] >= t0:
+            try:
+                st = json.loads(m["payload"])
+            except json.JSONDecodeError:
+                continue
+            if st.get("estado") == "online" and isinstance(st.get("uptime_s"), int) and st["uptime_s"] < 60:
+                inicio = m["t"]
+    if inicio is None:
+        return []
+    return [m for m in msgs if m["topic"] == tema and not m["retain"] and m["payload"]
+            and m["t"] > inicio + 1.5][:MED01_MENSAJES]
+
+
+def test_tc_med_01_period_60_s(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-MED-01 · FR-MED-01 — OPERATIVO, sin salida a Internet: 11 mensajes consecutivos de
+    temperatura recibidos en vivo; los 10 intervalos entre llegadas en [59, 61] s, sin dos
+    publicaciones en el mismo ciclo. Fuera de JRN-01.6, que necesita bench-ap-internet (H-64)."""
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    base = f"sitio1/zona1/{nodo}"
+    tema = f"{base}/temperatura"
+    with case(tb, "TC-MED-01", "Periodo de medición de 60 s", run_dir,
+              spec="TC-MED villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        with _suscribir(tb, nodo) as sub:
+            t0, reg = _a_operativo(tb, dut_slot, banco, c)
+            c.step(f"Capturar {MED01_MENSAJES} mensajes de temperatura en vivo")
+            fin = time.time() + 60 * (MED01_MENSAJES + 2)
+            while time.time() < fin and len(_serie_med01(sub.mensajes(), base, tema, t0)) < MED01_MENSAJES:
+                time.sleep(2)
+            msgs = sub.mensajes()
+        ent = reg.leer()
+        c.save_log("serie", [e["text"] for e in ent])
+        c.save_log("mqtt", [f"{m['t'] - t0:+.2f} s retain={int(m['retain'])} qos={m['qos']} {m['topic']} {m['payload']}"
+                            for m in msgs])
+        vivos = [m for m in msgs if m["topic"] == tema and not m["retain"] and m["payload"] and m["t"] >= t0]
+        serie = _serie_med01(msgs, base, tema, t0)
+        intervalos = [round(b["t"] - a["t"], 2) for a, b in zip(serie, serie[1:])]
+        c.note("", "## Resultado", "",
+               f"- mensajes de temperatura en vivo: {len(vivos)}; de la última sesión, sin el de T11: {len(serie)}",
+               f"- intervalos (s): {intervalos}",
+               f"- deriva acumulada en {len(intervalos)} ciclos: "
+               f"{(serie[-1]['t'] - serie[0]['t']) - 60 * len(intervalos):+.2f} s" if len(serie) > 1 else "- sin serie")
+        assert len(serie) == MED01_MENSAJES, f"solo {len(serie)} mensajes consecutivos (se esperaban {MED01_MENSAJES})"
+        fuera = [x for x in intervalos if not MED01_RANGO[0] <= x <= MED01_RANGO[1]]
+        assert not fuera, f"intervalos fuera de [59, 61] s: {fuera}"
+        deriva = (serie[-1]["t"] - serie[0]["t"]) - 60 * len(intervalos)
+        assert abs(deriva) <= 2, f"deriva acumulada {deriva:+.2f} s > 2 s"
+        c.passed(f"10 intervalos en [{min(intervalos)}, {max(intervalos)}] s; deriva {deriva:+.2f} s")

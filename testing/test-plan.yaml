@@ -1323,6 +1323,20 @@ tests:
     commit: 5f93e6d
     date: 2026-11-05
     ci_run: 42132868016   # host tests + secret scan
+  - id: TC-MED-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-MED-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, sht41-wiring, dut-board]
+    expect: >
+      OPERATIVO, sin salida a Internet (H-64: fuera de JRN-01.6, que necesita
+      bench-ap-internet): 11 mensajes consecutivos de temperatura recibidos en vivo
+      en la última sesión, sin el de T11; los 10 intervalos entre llegadas en [59,
+      61] s y deriva acumulada ≤ 2 s
+    impl: tests/bench/test_med.py::test_tc_med_01_period_60_s
   - id: TC-MED-02
     shape: atomic
     kind: standard
