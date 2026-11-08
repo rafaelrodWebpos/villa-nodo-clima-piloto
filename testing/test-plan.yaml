@@ -1823,6 +1823,26 @@ tests:
     commit: ed91e26   # merge del PR #1 (rama sntp) en main, H-70
     date: 2026-11-08
     ci_run: 42476259789   # host tests + secret scan (secret-scan relanzado tras un 504 al descargar gitleaks)
+  - id: TC-WDT-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [NFR-WDT-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      fila bench de NFR-WDT-01 y aceptación 22.1-2 (H-71): OPERATIVO 24 h con 3
+      cortes de broker y 2 de Wi-Fi (AP del banco apagado) de 5 min intercalados,
+      todos por API (sin acción física ni bench-serial-write); uptime_s creciente
+      en todos los status en vivo y reset sin cambio; ninguna línea boot:/rst: ni
+      task_wdt en la consola; Δlecturas = 1440 ± 2 (los ciclos de la ventana ± 2);
+      publicaciones por medida = ciclos en OPERATIVO (status en vivo) ± 2; tras
+      cada corte, un status en vivo en ≤ 150 s; control positivo: med: en cada
+      tramo de 10 min de la consola (si falta, not done). Se lanza en un turno de
+      noche; NODO_WDT_HUMO=1 hace una corrida de humo de 15 min con un corte de
+      broker, que no cuenta como resultado
+    impl: tests/bench/test_wdt.py::test_tc_wdt_01_24h_stability
   - id: TC-TIME-05
     shape: atomic
     kind: standard
@@ -1860,15 +1880,18 @@ tests:
       «sntp: fallo»
     impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time
     status: successful
-    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    commit: 7fb10da
     date: 2026-11-08
-    ci_run: 42417735201   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-ef118af
-    evidence: test-results/20261108T000941Z-ef118af/TC-TIME-06.md
+    ci_run: 42480882100   # build.yml, workflow_dispatch variant=bench version=0.0.0-7fb10da
+    evidence: test-results/20261108T123657Z-7fb10da/TC-TIME-06.md
     observed: >
-      primera «sntp: inicio pool.ntp.org» a 0,5 s de wifi_up; 20 peticiones en 5 min,
-      los 19 intervalos de 15,0 s (en el límite, ≤ 15 s); 10 «sntp: fallo» (uno cada
-      30 s) sin dejar de pedir
+      tick de 10 s (H-71): primera «sntp: inicio pool.ntp.org» a 0,5 s de wifi_up;
+      30 peticiones en 5 min, los 29 intervalos de 10,0 s (≤ 15 s, 5 s de margen);
+      10 «sntp: fallo» en la captura (uno cada 30 s) sin dejar de pedir
     history: >
+      ef118af (rama sntp, 2026-11-08, test-results/20261108T000941Z-ef118af/): verde
+      con tick de 15 s, 20 peticiones y los 19 intervalos de 15,0 s, en el límite;
+      por eso H-71 bajó el tick a 10 s.
       xfail estricto declarado en 491e4fb (main, sin cliente SNTP); por el plan H-68
       no se ejecutó en banco antes del cliente: la evidencia de que main no tenía SNTP
       es el código (ninguna línea sntp: en main/ ni components/ en 491e4fb)
