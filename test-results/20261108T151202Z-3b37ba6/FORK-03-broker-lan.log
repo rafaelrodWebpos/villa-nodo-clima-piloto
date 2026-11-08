@@ -1,0 +1,12 @@
+# Log del broker de prueba de la laptop (mosquitto 2.0.20 en Docker) durante FORK-03
+# IPs sustituidas por su papel: <ip-banco> = la Pi en la LAN (también el origen NAT de los clientes del AP), <ip-laptop> = la laptop
+1794150698: New connection from <ip-banco>:36950 on port 1883.
+1794150698: Client <unknown> disconnected due to protocol error.
+1794150769: New connection from <ip-laptop>:48517 on port 1883.
+1794150769: New client connected from <ip-laptop>:48517 as banco-100-672459 (p2, c1, k30).
+1794150769: No will message specified.
+1794150769: 	# (QoS 1)
+1794150769: banco-100-672459 1 #
+1794150769: New connection from <ip-banco>:40944 on port 1883.
+1794150769: Client <unknown> disconnected due to protocol error.
+1794150964: Client banco-100-672459 disconnected.
