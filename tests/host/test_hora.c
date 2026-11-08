@@ -29,31 +29,51 @@ static void time02(void)
 
 static void time07(void)
 {
+    /* Derivado de las constantes de hora.h, sin patrón fijo (H-71). El planificador solo
+     * actúa en los ticks: un intento falla en el primer tick con ≥ HORA_INTENTO_MS desde
+     * su inicio, es decir, a los K = ⌈intento / tick⌉ ticks. */
+    const int K = (int)((HORA_INTENTO_MS + HORA_TICK_MS - 1) / HORA_TICK_MS);
+    ESPERA(HORA_TICK_MS <= 15000, "FR-TIME-06: tick de %d ms > 15 s", (int)HORA_TICK_MS);
+    ESPERA(HORA_INTENTO_MS % HORA_TICK_MS == 0,
+           "FR-TIME-04: el tick (%d ms) no divide al intento (%d ms): el fallo no cae a los 30 s exactos",
+           (int)HORA_TICK_MS, (int)HORA_INTENTO_MS);
+    ESPERA((int64_t)K * HORA_TICK_MS == HORA_INTENTO_MS, "FR-TIME-04: fallo a %lld ms, no a %d ms",
+           (long long)K * HORA_TICK_MS, (int)HORA_INTENTO_MS);
+
     hora_sntp_t h;
     hora_iniciar(&h);
-    /* FR-TIME-06: sin hora, una petición en cada tick (15 s); el intento falla a los 30 s y sigue pidiendo */
-    unsigned esperado[] = {HORA_PEDIR, HORA_PEDIR, HORA_FALLO | HORA_PEDIR, HORA_PEDIR, HORA_FALLO | HORA_PEDIR};
-    for (int i = 0; i < 5; i++) {
+    /* FR-TIME-06: sin hora, una petición en cada tick; el intento falla cada K ticks
+     * (FR-TIME-04, 30 s) y en el mismo tick empieza otro: nunca deja de pedir */
+    int pedidas = 0, fallidos = 0;
+    const int N = 20 * K;
+    for (int i = 0; i < N; i++) {
         unsigned a = hora_tick(&h, (int64_t)i * HORA_TICK_MS);
-        ESPERA(a == esperado[i], "sin hora, tick %d: acciones %u, esperado %u", i, a, esperado[i]);
+        unsigned esperado = HORA_PEDIR | ((i > 0 && i % K == 0) ? HORA_FALLO : 0);
+        ESPERA(a == esperado, "sin hora, tick %d (%lld ms): acciones %u, esperado %u",
+               i, (long long)i * HORA_TICK_MS, a, esperado);
+        pedidas += (a & HORA_PEDIR) != 0;
+        fallidos += (a & HORA_FALLO) != 0;
     }
-    int pedidas = 0;
-    for (int i = 5; i < 25; i++) pedidas += (hora_tick(&h, (int64_t)i * HORA_TICK_MS) & HORA_PEDIR) != 0;
-    ESPERA(pedidas == 20, "sin hora: %d peticiones en 20 ticks", pedidas);
+    ESPERA(pedidas == N, "sin hora: %d peticiones en %d ticks", pedidas, N);
+    ESPERA(fallidos == (N - 1) / K, "sin hora: %d fallos en %d ticks, esperados %d", fallidos, N, (N - 1) / K);
     /* Sincroniza: sin peticiones hasta 1 h después */
-    int64_t t = 25 * HORA_TICK_MS;
+    int64_t t = (int64_t)N * HORA_TICK_MS;
     hora_sincronizada(&h, t);
     int antes = 0;
     for (int64_t x = t + HORA_TICK_MS; x < t + HORA_RESYNC_MS; x += HORA_TICK_MS) antes += hora_tick(&h, x) != HORA_NADA;
     ESPERA(antes == 0, "con hora: %d acciones antes de 1 h", antes);
-    /* FR-TIME-04: a la hora, intento de resincronización; falla a los 30 s; no invalida; siguiente en 1 h */
+    /* FR-TIME-04: a la hora, intento de resincronización con una petición por tick; falla a
+     * los 30 s (tick K) sin pedir otra vez; no invalida la hora; el siguiente, 1 h después */
     int64_t r = t + HORA_RESYNC_MS;
-    ESPERA(hora_tick(&h, r) == HORA_PEDIR, "resincronización a la hora");
-    ESPERA(hora_tick(&h, r + HORA_TICK_MS) == HORA_PEDIR, "segunda petición del intento");
-    ESPERA(hora_tick(&h, r + 2 * HORA_TICK_MS) == HORA_FALLO, "fallo a los 30 s, sin pedir otra vez");
+    for (int k = 0; k < K; k++)
+        ESPERA(hora_tick(&h, r + (int64_t)k * HORA_TICK_MS) == HORA_PEDIR, "resincronización: petición %d del intento", k + 1);
+    int64_t f = r + (int64_t)K * HORA_TICK_MS;
+    ESPERA(f - r == HORA_INTENTO_MS, "el fallo cae a %lld ms del inicio", (long long)(f - r));
+    ESPERA(hora_tick(&h, f) == HORA_FALLO, "fallo a los 30 s, sin pedir otra vez");
     ESPERA(h.sincronizado, "un fallo de resincronización no invalida la hora");
-    ESPERA(hora_tick(&h, r + 3 * HORA_TICK_MS) == HORA_NADA, "tras el fallo, nada hasta la hora siguiente");
-    ESPERA(hora_tick(&h, r + 2 * HORA_TICK_MS + HORA_RESYNC_MS) == HORA_PEDIR, "nuevo intento 1 h después del fallo");
+    ESPERA(hora_tick(&h, f + HORA_TICK_MS) == HORA_NADA, "tras el fallo, nada hasta la hora siguiente");
+    ESPERA(hora_tick(&h, f + HORA_RESYNC_MS - HORA_TICK_MS) == HORA_NADA, "nada justo antes de la hora siguiente");
+    ESPERA(hora_tick(&h, f + HORA_RESYNC_MS) == HORA_PEDIR, "nuevo intento 1 h después del fallo");
     /* Un nuevo arranque empieza sin hora (FR-TIME-02: sincronización de este arranque) */
     hora_iniciar(&h);
     ESPERA(!h.sincronizado && hora_tick(&h, 0) == HORA_PEDIR, "arranque nuevo: sin hora y pide");

@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define HORA_TICK_MS        15000      /* FR-TIME-06: una petición cada ≤ 15 s sin hora válida */
+#define HORA_TICK_MS        10000      /* FR-TIME-06: una petición cada ≤ 15 s sin hora válida (10 s: margen, H-71); divide a HORA_INTENTO_MS */
 #define HORA_INTENTO_MS     30000      /* FR-TIME-04: un intento falla a los 30 s sin respuesta */
 #define HORA_RESYNC_MS    3600000      /* FR-TIME-04: resincronizar cada 1 h */
 

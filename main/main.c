@@ -8,7 +8,7 @@
  * (guardar y reiniciar, o «no se pudo conectar»), y T01 en su parte de
  * arrancar el STA con la configuración guardada (E4). Pendiente, cada uno con su
  * test: el resto de §6.3. T08 arranca el cliente MQTT y SNTP (§13: una petición
- * cada 15 s sin hora válida, resincronización cada hora), T09/T10 reintentan la unión con el backoff de FR-CON-02 y T11–T16
+ * cada 10 s sin hora válida, resincronización cada hora), T09/T10 reintentan la unión con el backoff de FR-CON-02 y T11–T16
  * llevan el broker (§9): status online al conectar, medidas y status en cada
  * ciclo en OPERATIVO, Last Will offline. El ciclo de medición (FSD §5.4) lee
  * el SHT41 cada 60 s en cualquier estado y escribe E3.
@@ -283,7 +283,7 @@ static void intentar_mqtt(void);
 
 /* ---- Adaptador SNTP (§13) ---------------------------------------------------
  * El cliente SNTP de lwIP pide la hora; el planificador (components/hora) decide
- * cuándo: con IP, un tick cada 15 s; sin hora válida, una petición por tick
+ * cuándo: con IP, un tick cada 10 s; sin hora válida, una petición por tick
  * (FR-TIME-06); con hora, un intento cada hora (FR-TIME-04). Cada petición
  * reinicia el cliente de lwIP, que la envía al arrancar. El estado del
  * planificador lo tocan el tick (tarea esp_timer) y el aviso de sincronización

@@ -1812,10 +1812,11 @@ tests:
     verifies: [FR-TIME-04, FR-TIME-06]
     needs: [hosted-ci]
     expect: >
-      planificador SNTP con un tick cada 15 s: sin hora, una petición por tick y
-      «fallo» cada 30 s sin dejar de pedir; con hora, nada hasta 1 h; a la hora, un
-      intento que falla a los 30 s sin invalidar la hora y el siguiente 1 h después;
-      un arranque nuevo empieza sin hora. Complementa las filas bench y bench⁺,
+      planificador SNTP derivado de las constantes de hora.h (H-71; tick de 10 s):
+      tick ≤ 15 s y divisor del intento de 30 s; sin hora, una petición por tick y
+      «fallo» a los 30 s exactos sin dejar de pedir; con hora, nada hasta 1 h; a la
+      hora, un intento que falla a los 30 s sin invalidar la hora y el siguiente 1 h
+      después; un arranque nuevo empieza sin hora. Complementa las filas bench y bench⁺,
       que siguen siendo las del contrato
     impl: tests/host/test_hora.c (time07)
     status: successful
