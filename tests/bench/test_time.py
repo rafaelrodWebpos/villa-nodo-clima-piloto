@@ -6,8 +6,6 @@ import json
 import re
 import time
 
-import pytest
-
 from benchlib import case
 from test_mqtt import MEDIDAS, _a_operativo, _ms, _nodo, _suscribir, configurado, _ultimo_arranque
 
@@ -60,7 +58,6 @@ def test_tc_time_05_publish_without_time(testbench, dut_slot, dut_mac, firmware,
         c.passed(f"primera medida a {med['t'] - encendido:.1f} s del encendido estimado con ts=null; hora_valida=false")
 
 
-@pytest.mark.xfail(strict=True, reason="FR-TIME-06: el firmware aún no tiene cliente SNTP (§13)")
 def test_tc_time_06_sntp_retry_without_time(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
     """TC-TIME-06 · FR-TIME-06 — SNTP inalcanzable; DUT con IP durante 5 min: los intervalos
     entre líneas «sntp: inicio <srv>» consecutivas (marcas del DUT) son ≤ 15 s, también después

@@ -42,6 +42,8 @@ jobs:
         run: python3 scripts/ci/c_hw_07.py
       - name: C-HW-08 consola UART0 y copia por USB-Serial/JTAG
         run: python3 scripts/ci/c_hw_08.py sdkconfig.defaults
+      - name: C-LOG-02 lector de comandos de la consola solo en la imagen de banco
+        run: python3 scripts/ci/c_log_02.py fuente
 
   secret-scan:          # FSD NFR-SEC-01 (repositorio público)
     runs-on: ubuntu-latest

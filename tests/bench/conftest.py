@@ -27,7 +27,7 @@ GH_REPO = "rafaelrodWebpos/villa-nodo-clima-piloto"
 def pytest_addoption(parser):
     parser.addoption("--firmware-dir", default=None,
                      help="artefacto de build.yml ya descargado (coldflash/ + firmware_v*.bin)")
-    parser.addoption("--ci-variant", default="bench", choices=["bench", "production"],
+    parser.addoption("--ci-variant", default="bench", choices=["bench", "production", "bench-sin-receptor"],
                      help="variante que se pide a la CI si no hay --firmware-dir")
     parser.addoption("--parar-si-no-verde", action="store_true",
                      help="no empezar el test siguiente si uno sale rojo o not done (nunca a mitad de un test)")
@@ -165,5 +165,5 @@ def firmware(request, commit_under_test, tmp_path_factory):
     version = bins[0].stem[len("firmware_v"):]
     # commit: el que la versión tiene que nombrar (None con --firmware-dir: la del tag)
     return {"dir": d, "version": version,
-            "variant": "bench" if version.endswith("-bench") else "production",
+            "variant": next((v for v in ("bench-sin-receptor", "bench") if version.endswith("-" + v)), "production"),
             "ci_run": ci_run, "commit": None if given else commit_under_test[:7]}

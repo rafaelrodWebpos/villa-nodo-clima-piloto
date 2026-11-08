@@ -23,7 +23,7 @@ on:
       variant:
         description: 'Imagen a construir'
         type: choice
-        options: [production, bench]
+        options: [production, bench, bench-sin-receptor]   # H-67: TC-LOG-03
         default: production
 
 permissions:
@@ -67,10 +67,13 @@ jobs:
           fi
 
           DEFAULTS="sdkconfig.defaults"
-          if [ "$VARIANT" != "production" ]; then
-            DEFAULTS="sdkconfig.defaults;sdkconfig.$VARIANT.defaults"
-            VERSION="$VERSION-$VARIANT"
+          if [ "$VARIANT" = "bench" ]; then
+            DEFAULTS="sdkconfig.defaults;sdkconfig.bench.defaults"
+          elif [ "$VARIANT" != "production" ]; then
+            # Variantes de la imagen de banco (H-67): la de banco y encima la suya
+            DEFAULTS="sdkconfig.defaults;sdkconfig.bench.defaults;sdkconfig.$VARIANT.defaults"
           fi
+          [ "$VARIANT" = "production" ] || VERSION="$VERSION-$VARIANT"
           { echo "variant=$VARIANT"; echo "version=$VERSION"
             echo "defaults=$DEFAULTS"; } >> $GITHUB_OUTPUT
           echo "Building the $VARIANT firmware as $VERSION"
@@ -99,6 +102,9 @@ jobs:
             exit 1
           fi
           echo "verified: ${{ steps.plan.outputs.variant }} image, marker $FOUND"
+
+      - name: C-LOG-02 comandos serie (E13) solo en la imagen de banco
+        run: python3 scripts/ci/c_log_02.py imagen build/$APP_NAME.bin "${{ steps.plan.outputs.variant }}"
 
       - name: Collect artefacts
         run: |

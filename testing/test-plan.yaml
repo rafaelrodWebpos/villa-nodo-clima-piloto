@@ -591,18 +591,20 @@ tests:
       encendido estimado (llegada del primer status − uptime_s − 2 s)
     impl: tests/bench/test_jrn01.py::test_jrn_01_7_power_cut   # pone su propia precondición (JRN-01.6 bloqueado); cortes en tests/bench/cortes.py
     status: successful
-    commit: 8828c44
-    date: 2026-11-07
-    ci_run: 42413406134   # build.yml, workflow_dispatch variant=bench version=0.0.0-8828c44
-    evidence: test-results/20261107T205853Z-8828c44/JRN-01.7.md
+    commit: 3f2eac8   # rama sntp (H-69), merge de main sobre ef118af
+    date: 2026-11-08
+    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (H-69)
+    evidence: test-results/20261108T111528Z-3f2eac8/JRN-01.7.md
     observed: >
-      un corte del propietario (USB-C desenchufado del lado de la placa): Last Will
-      retenido a 74,0 s; tras reenchufar, primer status en vivo bajo
-      sitio1/zona1/clima-f3c6d4/status con reset = poweron y uptime_s = 1,
-      primera medida a 3,0 s del encendido estimado; escaneo con el AP del banco
-      apagado un momento (H-63) sin ningún clima-*; el nodo volvió a publicar a
-      3,7 s de encender el AP
+      un corte del propietario con la imagen de la rama sntp (SNTP, E13 y
+      watchdog de 30 s): Last Will retenido a 78,3 s; tras reenchufar, primer
+      status en vivo bajo sitio1/zona1/clima-f3c6d4/status con reset = poweron y
+      uptime_s = 1, primera medida a 3,0 s del encendido estimado; escaneo sin
+      ningún clima-*; el nodo volvió a publicar a 4,0 s de encender el AP; sin
+      pánico ni watchdog en la consola
     history: >
+      8828c44 (main, 2026-11-07): verde, Last Will a 74,0 s
+      (test-results/20261107T205853Z-8828c44/).
       60d8cd8: rojo por el banco (escaneo sin respuesta con su AP arriba,
       test-results/20261107T180528Z-60d8cd8/); a8f210a: not done por lo mismo tras
       3 intentos (test-results/20261107T203408Z-a8f210a/), CR-TB-14 y H-63. El
@@ -1227,12 +1229,46 @@ tests:
     phase: 2
     tier: bench
     verifies: [FR-LOG-03]
-    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, sht41-wiring, dut-board]
     expect: >
       imagen de banco con CONFIG_NODO_UDP_LOG_HOST en una IP sin uso de la red
       del banco, 10 ciclos: en cada uno, 3 medidas en vivo y un status;
       intervalos entre medidas en [59, 61] s; ningún uptime_s menor ni bloqueo
-    impl: null   # declarado 2026-11-05 (H-43, fila 6 de la puerta 02): udplog ya descarta si la cola está llena
+    impl: tests/bench/test_log.py::test_tc_log_03_udp_log_to_nowhere   # --ci-variant bench-sin-receptor (H-67)
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-08
+    ci_run: 42417737075   # build.yml, workflow_dispatch ref=sntp variant=bench-sin-receptor
+    evidence: test-results/20261108T025600Z-ef118af/TC-LOG-03.md
+    observed: >
+      «UDP logging -> 192.168.4.250:5555» (control positivo de la variante) y
+      «udplog: descartadas=5»: 10 ciclos con las 3 medidas y status cada uno,
+      intervalos entre temperaturas de 59,99 a 60,00 s, uptime_s creciente de 4 a
+      660 (sin reinicio ni bloqueo)
+  - id: TC-LOG-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: other
+    verifies: [C-LOG-02]
+    needs: [hosted-ci]
+    expect: >
+      CI (H-66): scripts/ci/c_log_02.py fuente — ninguna lectura de la consola ni
+      cadena de E13 fuera de #if CONFIG_NODO_BENCH_BUILD (ci.yml, cada push); y
+      c_log_02.py imagen — «wdt-test» y «wdt: bloqueando medicion» ausentes en la
+      imagen de producción (build.yml, cada push) y presentes en la de banco del
+      mismo commit (build.yml, workflow_dispatch variant=bench)
+    impl: scripts/ci/c_log_02.py
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-07
+    ci_run: 42417733022   # production; bench 42417735201; bench-sin-receptor 42417737075
+    observed: >
+      imagen de producción: «wdt-test» y «wdt: bloqueando medicion» ausentes; imagen
+      de banco y bench-sin-receptor del mismo commit: presentes; fuente: ningún
+      hallazgo fuera de CONFIG_NODO_BENCH_BUILD. El paso de fuente (ci.yml) corre en
+      main al fusionar; en la rama se ejecutó en local
   - id: TC-LOG-04
     shape: atomic
     kind: standard
@@ -1277,16 +1313,18 @@ tests:
       el portal (FSD 0.9.6)
     impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # reescrito sobre status (FSD 0.9.6); cortes en tests/bench/cortes.py
     status: successful
-    commit: 8828c44
-    date: 2026-11-07
-    ci_run: 42413406134   # build.yml, workflow_dispatch variant=bench version=0.0.0-8828c44
-    evidence: test-results/20261107T205853Z-8828c44/TC-CFG-02.md
+    commit: 3f2eac8   # rama sntp (H-69), merge de main sobre ef118af
+    date: 2026-11-08
+    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (H-69)
+    evidence: test-results/20261108T111528Z-3f2eac8/TC-CFG-02.md
     observed: >
-      5 cortes del propietario: tras cada uno, primer status en vivo bajo
-      sitio1/zona1/clima-f3c6d4/status con reset = poweron y uptime_s = 1;
-      escaneo sin clima-* (AP del banco apagado un momento, H-63); el nodo volvió
-      a publicar en ≤ 4,2 s al encender el AP
+      5 cortes del propietario con la imagen de la rama sntp: tras cada uno,
+      primer status en vivo con reset = poweron y uptime_s = 1, primera medida a
+      3,0–3,1 s del encendido estimado; escaneo sin clima-*; el nodo volvió a
+      publicar en ≤ 4,0 s al encender el AP; sin pánico ni watchdog en la consola
     history: >
+      8828c44 (main, 2026-11-07): verde
+      (test-results/20261107T205853Z-8828c44/).
       9bcc519 (2026-11-06), versión de consola: not done porque el banco no captura
       el arranque tras un corte (CR-TB-10; test-results/20261106T030110Z-9bcc519/);
       reescrito sobre status (FSD 0.9.4 y 0.9.6). 60d8cd8: la grabación falló por
@@ -1719,6 +1757,34 @@ tests:
       broker parado 60 min: 0 líneas boot:/rst:, 60 med: en la ventana, primer status 4,8 s
       tras volver el broker con uptime_s = 3615 y reset = usb igual que antes; escaneo final
       con el AP apagado un momento sin clima-*
+  - id: TC-TIME-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-TIME-02]
+    needs: [hosted-ci]
+    expect: >
+      función de validez: (sincronizado = no, reloj = 2030), (sí, 1970), (sí,
+      build − 1 s), (sí, build + 1 s) → no válida, no válida, no válida, válida;
+      una fecha de build ilegible nunca da hora válida
+    impl: tests/host/test_hora.c (time02)
+  - id: TC-TIME-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: host
+    verifies: [FR-TIME-04, FR-TIME-06]
+    needs: [hosted-ci]
+    expect: >
+      planificador SNTP con un tick cada 15 s: sin hora, una petición por tick y
+      «fallo» cada 30 s sin dejar de pedir; con hora, nada hasta 1 h; a la hora, un
+      intento que falla a los 30 s sin invalidar la hora y el siguiente 1 h después;
+      un arranque nuevo empieza sin hora. Complementa las filas bench y bench⁺,
+      que siguen siendo las del contrato
+    impl: tests/host/test_hora.c (time07)
   - id: TC-TIME-05
     shape: atomic
     kind: standard
@@ -1733,6 +1799,14 @@ tests:
       (llegada del primer status de la última sesión − uptime_s − 2 s, como en
       FR-CON-05) con "ts": null, y ese status lleva hora_valida = false
     impl: tests/bench/test_time.py::test_tc_time_05_publish_without_time
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-08
+    ci_run: 42417735201   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-ef118af
+    evidence: test-results/20261108T000941Z-ef118af/TC-TIME-05.md
+    observed: >
+      primera medida a 6,1 s del encendido estimado con "ts": null; status con
+      hora_valida = false
   - id: TC-TIME-06
     shape: atomic
     kind: standard
@@ -1746,7 +1820,20 @@ tests:
       «sntp: inicio <srv>» llega ≤ 15 s después de wifi_up y los intervalos entre
       líneas consecutivas (marcas del DUT) son ≤ 15 s, también tras un
       «sntp: fallo»
-    impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time   # xfail estricto hasta el cliente SNTP
+    impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-08
+    ci_run: 42417735201   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-ef118af
+    evidence: test-results/20261108T000941Z-ef118af/TC-TIME-06.md
+    observed: >
+      primera «sntp: inicio pool.ntp.org» a 0,5 s de wifi_up; 20 peticiones en 5 min,
+      los 19 intervalos de 15,0 s (en el límite, ≤ 15 s); 10 «sntp: fallo» (uno cada
+      30 s) sin dejar de pedir
+    history: >
+      xfail estricto declarado en 491e4fb (main, sin cliente SNTP); por el plan H-68
+      no se ejecutó en banco antes del cliente: la evidencia de que main no tenía SNTP
+      es el código (ninguna línea sntp: en main/ ni components/ en 491e4fb)
   - id: TC-MQTT-01
     shape: atomic
     kind: standard
@@ -1826,15 +1913,17 @@ tests:
       retenido. Se mide en cada corte de JRN-01.7 y TC-CFG-02 de la misma sesión
     impl: tests/bench/test_mqtt.py::test_tc_mqtt_04_last_will_on_power_cut
     status: successful
-    commit: 8828c44
-    date: 2026-11-07
-    ci_run: 42413406134   # build.yml, workflow_dispatch variant=bench version=0.0.0-8828c44
-    evidence: test-results/20261107T205853Z-8828c44/TC-MQTT-04.md
+    commit: 3f2eac8   # rama sntp (H-69), merge de main sobre ef118af
+    date: 2026-11-08
+    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (H-69)
+    evidence: test-results/20261108T111528Z-3f2eac8/TC-MQTT-04.md
     observed: >
-      6 cortes (JRN-01.7 y TC-CFG-02): Last Will en status a 74,0 / 65,2 / 83,5 /
-      81,1 / 70,3 / 79,9 s de la última muestra con el slot presente, retenido en
-      los 6
+      6 cortes (JRN-01.7 y TC-CFG-02) con la imagen de la rama sntp: Last Will
+      en status a 78,3 / 79,4 / 81,4 / 63,3 / 81,1 / 80,4 s de la última muestra
+      con el slot presente (límite 100 s), retenido en los 6
     history: >
+      8828c44 (main, 2026-11-07): verde, 6 cortes en ≤ 83,5 s
+      (test-results/20261107T205853Z-8828c44/).
       60d8cd8: verde con un solo corte (79,7 s; test-results/20261107T180528Z-60d8cd8/)
 
   - id: TC-HA-01
