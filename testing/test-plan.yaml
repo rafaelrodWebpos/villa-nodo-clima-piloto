@@ -593,7 +593,7 @@ tests:
       hora_valida = true en el primer status posterior; ts no es nulo y
       |ts − hora de llegada al suscriptor| ≤ 2 s, con el reloj del suscriptor
       sincronizado por NTP
-    impl: null
+    impl: tests/bench/test_bench_plus.py::test_jrn_01_6_sntp_and_measures   # pone su propia precondición, como JRN-01.7
   - id: JRN-01.7
     shape: workflow
     kind: standard
@@ -1870,6 +1870,64 @@ tests:
       vuelta a 3,6 s, uptime_s monótono, reset = usb, 0 boot: y 0 task_wdt; el test
       funciona. El primer intento no empezó: HTTP 500 de la API de GitHub al seguir el
       build (run 42481890517, que acabó en verde y se grabó con --firmware-dir)
+  - id: TC-MED-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench+
+    verifies: [FR-MED-06]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, bench-ap-internet, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      OPERATIVO con hora válida (salida a Internet del AP); broker detenido 5 min y
+      restablecido; suscriptor con los retenidos descartados: en la ventana [status
+      online de la reconexión, +5 s] llega exactamente 1 mensaje por medida, con ts ≤
+      60 s anterior a la llegada; ningún mensaje con ts de la ventana sin conexión
+    impl: tests/bench/test_bench_plus.py::test_tc_med_06_reconnect_publishes_latest_only
+  - id: TC-TIME-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench+
+    verifies: [FR-TIME-04]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-ap-internet, bench-sntp-block, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      hora válida; SNTP bloqueado 2 h (bench-sntp-block): hora_valida = true en todos
+      los status y ts entero en todas las medidas; «sntp: fallo» en el intento de
+      resincronización (≈ 1 h después de sincronizar); ninguna sincronización ni
+      reinicio durante el bloqueo. Complementa la fila host TC-TIME-07
+    impl: tests/bench/test_bench_plus.py::test_tc_time_04_resync_failure_keeps_time
+  - id: TC-TIME-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench+
+    verifies: [FR-TIME-03, FR-MQTT-03]
+    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-ap-internet, bench-sntp-block, bench-operator-prompt, bench-serial-monitor, sht41-wiring, dut-board]
+    expect: >
+      contrato de FR-TIME-03 (también el de FR-MQTT-03): SNTP bloqueado; el operador
+      corta y devuelve la alimentación del DUT (USB-C); 5 min con SNTP bloqueado: todas
+      las medidas con "ts": null y status con hora_valida = false; tras desbloquear, en
+      ≤ 30 s (más hasta un ciclo) medidas con ts entero y |ts − llegada| ≤ 2 s, y
+      hora_valida = true; nunca ts < fecha de build. Necesita una acción física (corte
+      del USB-C): pendiente del propietario (H-75)
+    impl: null
+  - id: TC-TIME-08
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench+
+    verifies: [FR-TIME-02]
+    needs: [bench-driver, bench-wifi-ap, bench-mqtt-broker, bench-ap-internet, bench-sntp-block, bench-serial-write, bench-serial-monitor, dut-board]
+    expect: >
+      fila bench⁺ de FR-TIME-02: imagen de banco; tras una sincronización, bloquear SNTP
+      y enviar el comando serie «reiniciar» (E13): boot: … reset=sw y hora_valida =
+      false en los status tras el reinicio. Bloqueado por bench-serial-write (en no: el
+      banco no la reporta por GET)
+    impl: null
   - id: TC-TIME-05
     shape: atomic
     kind: standard

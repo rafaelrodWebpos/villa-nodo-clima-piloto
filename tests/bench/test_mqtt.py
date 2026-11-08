@@ -52,8 +52,10 @@ class Banco:
         self.tb, self.ssid, self.clave = tb, ssid, clave
         self.ap = self.broker = False
 
-    def ap_on(self):
-        self.tb.ap_start(self.ssid, self.clave, channel=1); self.ap = True
+    def ap_on(self, internet=False):
+        """internet=True: el AP sale a Internet desde que se levanta (bench-ap-internet, fork
+        villa-1; solo direcciones públicas). ap_stop la vuelve a apagar."""
+        self.tb.ap_start(self.ssid, self.clave, channel=1, internet=internet); self.ap = True
 
     def ap_off(self):
         self.tb.ap_stop(); self.ap = False
@@ -114,13 +116,15 @@ def _suscribir(tb, nodo):
                                    [f"homeassistant/sensor/{nodo}/{m}/config" for m in MEDIDAS])
 
 
-def _a_operativo(tb, slot, banco, c):
-    """Broker ya arriba: reset y AP arriba; espera T11. Devuelve (t0, Registro)."""
-    c.step("Resetear el DUT y levantar el AP desechable (canal 1); esperar T11")
+def _a_operativo(tb, slot, banco, c, internet=False):
+    """Broker ya arriba: reset y AP arriba (con salida a Internet si internet); espera T11.
+    Devuelve (t0, Registro)."""
+    c.step("Resetear el DUT y levantar el AP desechable (canal 1"
+           + (", con salida a Internet" if internet else "") + "); esperar T11")
     t0 = time.time()
     reg = Registro(tb, slot, t0)
     tb.serial_reset(slot)
-    banco.ap_on()
+    banco.ap_on(internet=internet)
     if not reg.esperar(re.escape(T11), T11_ESPERA_S):
         pytest.fail(f"sin {T11} en {T11_ESPERA_S} s")
     return t0, reg
