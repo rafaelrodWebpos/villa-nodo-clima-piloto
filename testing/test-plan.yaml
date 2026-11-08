@@ -157,18 +157,38 @@ capabilities:
     reported_by: /api/human/status responde ok
   bench-ap-internet:
     what: el AP del banco da salida a Internet (github.com, release-assets.githubusercontent.com, pool.ntp.org) — nivel bench+
-    available: no
-    reason: el banco no reporta salida a Internet desde su AP — petición CR-TB-01 (testing/testbench-change-requests.md)
+    available: yes
+    reported_by: >
+      GET /api/info → capabilities incluye bench-ap-internet (build 8966260);
+      GET /api/wifi/internet → internet, lan_blocked, rules_ok, rules. Banco con el fork
+      propio rafaelrodWebpos/Embedded-AI-Harness, tag villa-1 (H-72, H-73, H-74)
+    observed: >
+      2026-11-08, regresión del fork (testing/regresion-fork-villa-1.md). FORK-01
+      (test-results/20261108T141629Z-660f6f5/): apagada por defecto y tras ap_stop, los 9
+      rangos privados cortados antes del ACCEPT, cuerpos no booleanos → 400, rules_ok en
+      los 12 pasos. FORK-02 (mismo directorio): el DUT sincroniza SNTP a 13,4 s de encender
+      la salida, hora_valida = true y ts real. FORK-03 (test-results/20261108T151202Z-3b37ba6/):
+      con la salida encendida el DUT no llega en 180 s a un broker de la LAN y sí sale a
+      Internet; control positivo en el log del broker. Vuelta atrás con un comando y
+      reinstalación comprobadas por HTTP
     consequence: >
-      dependencia de las Fases 2 y 3 (FSD §3.2, §3.3). Hasta que el banco la
-      reporte quedan bloqueados JRN-01.6, los contratos de hora en bench+
-      (FR-TIME-01…04, FR-MQTT-03, FR-MED-06) y todo JRN-02; los contratos OTA
-      marcados «alt. field» pueden pasar a field (FSD §22.0), salvo FR-OTA-08 y
-      T22, que quedan bloqueados en bench+
+      desbloquea JRN-01.6, los contratos de hora en bench+ (FR-TIME-01…04, FR-MQTT-03,
+      FR-MED-06) y la parte de red de JRN-02 (siguen haciendo falta las pre-releases
+      ota-test-*). La salida es solo hacia direcciones públicas: la LAN de la casa queda
+      cerrada. Si el banco vuelve al original (sudo harness-volver-original), la capacidad
+      vuelve a no
   bench-sntp-block:
     what: bloquear y desbloquear UDP/123 hacia fuera desde la red del banco
-    available: no
-    reason: el banco no reporta esta capacidad — petición CR-TB-02 (testing/testbench-change-requests.md)
+    available: yes
+    reported_by: >
+      GET /api/info → capabilities incluye bench-sntp-block (build 8966260);
+      GET /api/wifi/internet → sntp_blocked, rules. POST /api/wifi/sntp_block {"blocked"}
+      (fork villa-1, H-73)
+    observed: >
+      2026-11-08, FORK-01 y FORK-02 (test-results/20261108T141629Z-660f6f5/): la regla DROP
+      de UDP/123 va antes de cualquier ACCEPT; con SNTP bloqueado y el DUT reiniciado, 0
+      sincronizaciones en 75 s, 2 «sntp: fallo» y hora_valida = false; al desbloquear,
+      sincroniza a 5,0 s. ap_stop y el arranque del portal lo desbloquean
   bench-dns-override:
     what: resolver un host permitido hacia un servidor HTTPS con certificado autofirmado (FR-OTA-03, T20 tls)
     available: no
