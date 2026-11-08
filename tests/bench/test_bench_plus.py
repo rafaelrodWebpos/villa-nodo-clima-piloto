@@ -250,3 +250,114 @@ def test_tc_time_04_resync_failure_keeps_time(testbench, dut_slot, dut_mac, firm
         assert not boots, f"el nodo se reinició: {boots}"
         c.passed(f"{len(st)} status con hora_valida = true y {len(meds)} medidas con ts en 2 h de bloqueo; "
                  f"{len(fallos)} «sntp: fallo» en la resincronización")
+
+
+# ---------------------------------------------------------------------------
+# TC-TIME-03 · FR-TIME-03 y FR-MQTT-03 (bench⁺): corte de alimentación con SNTP bloqueado
+
+BLOQUEO_TRAS_CORTE_S = 300      # «mantener SNTP bloqueado 5 min»
+DESENCHUFADO_S = 10             # lo que la placa queda sin alimentación
+VUELTA_TRAS_DESBLOQUEO_S = 100  # ≤ 30 s hasta la hora válida + hasta 60 s de ciclo + margen
+AVISO_FUERA = ("TC-TIME-03: DESCONECTA AHORA el cable USB-C del lado de la PLACA (el lado de la "
+               "Raspberry Pi no se toca) y pulsa «Hecho». NO lo vuelvas a conectar todavía: en unos "
+               f"{DESENCHUFADO_S} s saldrá otro aviso.")
+AVISO_DENTRO = "TC-TIME-03: VUELVE A CONECTAR el cable USB-C en la PLACA y pulsa «Hecho»."
+
+
+def test_tc_time_03_power_cut_with_sntp_blocked(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-TIME-03 · FR-TIME-03, FR-MQTT-03 — DUT con hora válida; SNTP bloqueado; el operador
+    corta y devuelve la alimentación (USB-C); 5 min con SNTP bloqueado: todas las medidas con
+    "ts": null y status con hora_valida = false, sin faltar ninguna publicación; tras desbloquear,
+    en ≤ 30 s (más un ciclo) medidas con ts entero y |ts − llegada| ≤ 2 s y hora_valida = true.
+    Nunca ts < fecha de build (ni 0 ni 1970) ni un JSON de medida sin la clave ts."""
+    from cortes import ESPERA_OPERADOR_S, _aviso, _esperar_presencia
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    base = f"sitio1/zona1/{nodo}"
+    with case(tb, "TC-TIME-03", "Sin hora tras un corte con SNTP bloqueado", run_dir,
+              spec="TC-TIME villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        c.note(f"- reloj del suscriptor (laptop) frente a pool.ntp.org: {_desfase_ntp()} s", "")
+        banco.broker_on()
+        r = {}
+        try:
+            with _suscribir(tb, nodo) as sub:
+                t0, reg = _a_operativo(tb, dut_slot, banco, c, internet=True)
+                c.step("Precondición: hora válida antes del corte (status con hora_valida = true)")
+                fin = time.time() + 150
+                while time.time() < fin and not any(p.get("hora_valida") for m, p in _vivos(sub.mensajes(), base, t0)
+                                                    if m["topic"] == f"{base}/status"):
+                    time.sleep(2)
+                r["hora_antes"] = any(p.get("hora_valida") for m, p in _vivos(sub.mensajes(), base, t0)
+                                      if m["topic"] == f"{base}/status")
+                assert r["hora_antes"], "precondición: el DUT no tuvo hora válida antes del corte"
+                c.step("Bloquear SNTP")
+                r["bloqueo"] = _sntp_block(True)
+                c.step("Aviso: desconectar el USB-C de la placa")
+                h1 = _aviso(tb, AVISO_FUERA, c, "aviso-time03-a")
+                vista = _esperar_presencia(tb, dut_slot, False, ESPERA_OPERADOR_S)
+                if not vista:
+                    pytest.skip("not done: el slot no quedó ausente (corte sin hacer)")
+                r["t_corte"] = vista[0]
+                time.sleep(DESENCHUFADO_S)
+                c.step("Aviso: volver a conectar el USB-C")
+                h2 = _aviso(tb, AVISO_DENTRO, c, "aviso-time03-b")
+                vista = _esperar_presencia(tb, dut_slot, True, ESPERA_OPERADOR_S)
+                if not vista:
+                    pytest.skip("not done: el slot no volvió a estar presente (reenchufe sin hacer)")
+                r["t_enchufe"] = t_e = vista[1]
+                c.step(f"Mantener SNTP bloqueado {BLOQUEO_TRAS_CORTE_S // 60} min desde el reenchufe")
+                time.sleep(max(0.0, t_e + BLOQUEO_TRAS_CORTE_S - time.time()))
+                c.step("Desbloquear SNTP")
+                r["t_desbloqueo"] = t_u = time.time()
+                r["desbloqueo"] = _sntp_block(False)
+                time.sleep(VUELTA_TRAS_DESBLOQUEO_S)
+                msgs = sub.mensajes()
+                r["avisos"] = [h1.res.get("ok", h1.res.get("error", "sin respuesta")),
+                               h2.res.get("ok", h2.res.get("error", "sin respuesta"))]
+        finally:
+            _apagar_fork()
+        _guardar(c, reg, msgs, t0)
+        vivos = _vivos(msgs, base, t_e)
+        tras = [(m, p) for m, p in vivos if p.get("estado") != "offline"]
+        st = [(m, p) for m, p in tras if m["topic"] == f"{base}/status" and p.get("estado") == "online"]
+        meds = [(m, p) for m, p in tras if m["topic"].rsplit("/", 1)[-1] in MEDIDAS]
+        bloq_st = [(m, p) for m, p in st if m["t"] < t_u]
+        bloq_med = [(m, p) for m, p in meds if m["t"] < t_u]
+        desb_med = [(m, p) for m, p in meds if m["t"] >= t_u]
+        desb_st = [(m, p) for m, p in st if m["t"] >= t_u]
+        primero_st = st[0][1] if st else {}
+        sin_clave = [m["payload"] for m, p in meds if "ts" not in p]
+        ts_malos = [p["ts"] for m, p in meds if isinstance(p.get("ts"), int) and abs(p["ts"] - m["t"]) > TS_TOL_S]
+        bloq_con_ts = [m["payload"] for m, p in bloq_med if p.get("ts") is not None]
+        bloq_hora = [p.get("hora_valida") for m, p in bloq_st if p.get("hora_valida") is not False]
+        temps_bloq = [m for m, p in bloq_med if m["topic"] == f"{base}/temperatura"]
+        primer_ts = next(((m, p) for m, p in desb_med if isinstance(p.get("ts"), int)), None)
+        primer_hv = next(((m, p) for m, p in desb_st if p.get("hora_valida") is True), None)
+        hasta_ts = round(primer_ts[0]["t"] - t_u, 1) if primer_ts else None
+        desb_null_tras = [m["payload"] for m, p in desb_med if primer_ts and m["t"] > primer_ts[0]["t"] and p.get("ts") is None]
+        c.note("", "## Resultado", "",
+               f"- hora válida antes del corte: {r['hora_antes']}; SNTP bloqueado: {r['bloqueo']['sntp_blocked']} "
+               f"(rules_ok {r['bloqueo']['rules_ok']}); avisos: {r['avisos']}",
+               f"- corte: placa sin alimentación {t_e - r['t_corte']:.0f} s; primer status tras el reenchufe: "
+               f"reset={primero_st.get('reset')}, uptime_s={primero_st.get('uptime_s')}, hora_valida={primero_st.get('hora_valida')}",
+               f"- con SNTP bloqueado ({t_u - t_e:.0f} s desde el reenchufe): {len(bloq_st)} status "
+               f"(hora_valida ≠ false: {len(bloq_hora)}), {len(bloq_med)} medidas ({len(temps_bloq)} de temperatura), "
+               f"con ts no nulo: {len(bloq_con_ts)}",
+               f"- tras desbloquear: primera medida con ts a {hasta_ts} s "
+               + (f"(`{primer_ts[0]['payload']}`, ts − llegada {primer_ts[1]['ts'] - primer_ts[0]['t']:+.2f} s)" if primer_ts else "(ninguna)"),
+               "- primer status con hora_valida = true tras desbloquear: "
+               + (f"a {primer_hv[0]['t'] - t_u:+.1f} s" if primer_hv else "ninguno"),
+               f"- medidas sin la clave ts: {len(sin_clave)}; ts enteros con |ts − llegada| > {TS_TOL_S} s: {ts_malos}; "
+               f"null después de la primera con ts: {len(desb_null_tras)}")
+        assert primero_st.get("reset") == "poweron", f"el arranque tras el corte no es poweron: {primero_st}"
+        assert bloq_st and not bloq_hora, f"hora_valida no es false con SNTP bloqueado: {bloq_hora}"
+        assert bloq_med and not bloq_con_ts, f"medidas con ts con SNTP bloqueado: {bloq_con_ts[:3]}"
+        assert len(temps_bloq) >= (t_u - t_e) // 60 - 1, f"faltan publicaciones sin hora: {len(temps_bloq)} en {t_u - t_e:.0f} s"
+        assert not sin_clave, f"medidas sin la clave ts: {sin_clave[:3]}"
+        assert primer_ts and hasta_ts <= 30 + 60, f"ningún ts en ≤ 90 s tras desbloquear ({hasta_ts})"
+        assert primer_hv, "ningún status con hora_valida = true tras desbloquear"
+        assert not ts_malos, f"ts con |ts − llegada| > {TS_TOL_S} s (incluye 0 y 1970): {ts_malos}"
+        assert not desb_null_tras, f"ts null después de tener hora: {desb_null_tras[:3]}"
+        c.passed(f"tras el corte, {len(bloq_med)} medidas con ts null y hora_valida false con SNTP bloqueado; "
+                 f"al desbloquear, ts a {hasta_ts} s con |ts − llegada| ≤ {TS_TOL_S} s y hora_valida true")

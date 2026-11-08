@@ -1943,8 +1943,8 @@ tests:
       las medidas con "ts": null y status con hora_valida = false; tras desbloquear, en
       ≤ 30 s (más hasta un ciclo) medidas con ts entero y |ts − llegada| ≤ 2 s, y
       hora_valida = true; nunca ts < fecha de build. Necesita una acción física (corte
-      del USB-C): pendiente del propietario (H-75)
-    impl: null
+      del USB-C, el propietario a los avisos del banco)
+    impl: tests/bench/test_bench_plus.py::test_tc_time_03_power_cut_with_sntp_blocked
   - id: TC-TIME-08
     shape: atomic
     kind: standard
