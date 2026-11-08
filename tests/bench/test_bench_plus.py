@@ -261,6 +261,8 @@ VUELTA_TRAS_DESBLOQUEO_S = 100  # ≤ 30 s hasta la hora válida + hasta 60 s de
 AVISO_FUERA = ("TC-TIME-03: DESCONECTA AHORA el cable USB-C del lado de la PLACA (el lado de la "
                "Raspberry Pi no se toca) y pulsa «Hecho». NO lo vuelvas a conectar todavía: en unos "
                f"{DESENCHUFADO_S} s saldrá otro aviso.")
+CORTE_MIN_S = 5                 # H-76: evidencia de corte real
+UPTIME_MAX_S = 5
 AVISO_DENTRO = "TC-TIME-03: VUELVE A CONECTAR el cable USB-C en la PLACA y pulsa «Hecho»."
 
 
@@ -350,7 +352,13 @@ def test_tc_time_03_power_cut_with_sntp_blocked(testbench, dut_slot, dut_mac, fi
                + (f"a {primer_hv[0]['t'] - t_u:+.1f} s" if primer_hv else "ninguno"),
                f"- medidas sin la clave ts: {len(sin_clave)}; ts enteros con |ts − llegada| > {TS_TOL_S} s: {ts_malos}; "
                f"null después de la primera con ts: {len(desb_null_tras)}")
-        assert primero_st.get("reset") == "poweron", f"el arranque tras el corte no es poweron: {primero_st}"
+        # Prueba del corte real (H-76): slot ausente ≥ 5 s y arranque nuevo (uptime_s ≤ 5 en el
+        # primer status). No se exige reset = poweron: tras el reenchufe el banco puede resetear el
+        # DUT por USB y el status dice usb (observación del banco, pariente de CR-TB-12)
+        ausente = t_e - r["t_corte"]
+        assert ausente >= CORTE_MIN_S, f"el slot solo estuvo ausente {ausente:.1f} s (< {CORTE_MIN_S} s)"
+        up = primero_st.get("uptime_s")
+        assert isinstance(up, int) and up <= UPTIME_MAX_S, f"el primer status tras el reenchufe no es un arranque nuevo: {primero_st}"
         assert bloq_st and not bloq_hora, f"hora_valida no es false con SNTP bloqueado: {bloq_hora}"
         assert bloq_med and not bloq_con_ts, f"medidas con ts con SNTP bloqueado: {bloq_con_ts[:3]}"
         assert len(temps_bloq) >= (t_u - t_e) // 60 - 1, f"faltan publicaciones sin hora: {len(temps_bloq)} en {t_u - t_e:.0f} s"
