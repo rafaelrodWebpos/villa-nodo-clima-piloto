@@ -1267,8 +1267,9 @@ tests:
     observed: >
       imagen de producción: «wdt-test» y «wdt: bloqueando medicion» ausentes; imagen
       de banco y bench-sin-receptor del mismo commit: presentes; fuente: ningún
-      hallazgo fuera de CONFIG_NODO_BENCH_BUILD. El paso de fuente (ci.yml) corre en
-      main al fusionar; en la rama se ejecutó en local
+      hallazgo fuera de CONFIG_NODO_BENCH_BUILD. En main, tras la fusión (ed91e26,
+      2026-11-08): paso de fuente de ci.yml sin hallazgos (run 42476259789) e imagen
+      de producción sin hallazgos en build.yml (run 42476259792)
   - id: TC-LOG-04
     shape: atomic
     kind: standard
@@ -1770,6 +1771,10 @@ tests:
       build − 1 s), (sí, build + 1 s) → no válida, no válida, no válida, válida;
       una fecha de build ilegible nunca da hora válida
     impl: tests/host/test_hora.c (time02)
+    status: successful
+    commit: ed91e26   # merge del PR #1 (rama sntp) en main, H-70
+    date: 2026-11-08
+    ci_run: 42476259789   # host tests + secret scan (secret-scan relanzado tras un 504 al descargar gitleaks)
   - id: TC-TIME-07
     shape: atomic
     kind: standard
@@ -1785,6 +1790,10 @@ tests:
       un arranque nuevo empieza sin hora. Complementa las filas bench y bench⁺,
       que siguen siendo las del contrato
     impl: tests/host/test_hora.c (time07)
+    status: successful
+    commit: ed91e26   # merge del PR #1 (rama sntp) en main, H-70
+    date: 2026-11-08
+    ci_run: 42476259789   # host tests + secret scan (secret-scan relanzado tras un 504 al descargar gitleaks)
   - id: TC-TIME-05
     shape: atomic
     kind: standard
