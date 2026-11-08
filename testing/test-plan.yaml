@@ -594,6 +594,17 @@ tests:
       |ts − hora de llegada al suscriptor| ≤ 2 s, con el reloj del suscriptor
       sincronizado por NTP
     impl: tests/bench/test_bench_plus.py::test_jrn_01_6_sntp_and_measures   # pone su propia precondición, como JRN-01.7
+    status: successful
+    commit: 5b899fa
+    date: 2026-11-08
+    ci_run: 42495454952   # build.yml, workflow_dispatch variant=bench version=0.0.0-17dc543 (mismo firmware)
+    evidence: test-results/20261108T154156Z-5b899fa/JRN-01.6.md
+    observed: >
+      banco con el fork villa-1, AP con salida a Internet: sntp: sincronizado a 4,07 s de
+      wifi_up; primer status posterior con hora_valida = true; las tres medidas en vivo,
+      intervalo de 60,0 s; |ts − llegada| ≤ 0,14 s en las 6 medidas con ts (reloj de la
+      laptop sincronizado por NTP). La primera medida, la de T11, lleva ts null: se tomó
+      antes de sincronizar (FR-TIME-03)
   - id: JRN-01.7
     shape: workflow
     kind: standard
@@ -1884,6 +1895,15 @@ tests:
       online de la reconexión, +5 s] llega exactamente 1 mensaje por medida, con ts ≤
       60 s anterior a la llegada; ningún mensaje con ts de la ventana sin conexión
     impl: tests/bench/test_bench_plus.py::test_tc_med_06_reconnect_publishes_latest_only
+    status: successful
+    commit: 5b899fa
+    date: 2026-11-08
+    ci_run: 42495454952   # build.yml, workflow_dispatch variant=bench version=0.0.0-17dc543
+    evidence: test-results/20261108T154156Z-5b899fa/TC-MED-06.md
+    observed: >
+      broker parado 300 s: status de la reconexión a 3,5 s de arrancarlo (hora_valida true);
+      en [status, +5 s] exactamente 1 mensaje por medida, con ts 7,1 s anterior a la
+      llegada; ningún mensaje con ts de la ventana sin conexión
   - id: TC-TIME-04
     shape: atomic
     kind: standard
