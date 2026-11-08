@@ -1337,6 +1337,14 @@ tests:
       en la última sesión, sin el de T11; los 10 intervalos entre llegadas en [59,
       61] s y deriva acumulada ≤ 2 s
     impl: tests/bench/test_med.py::test_tc_med_01_period_60_s
+    status: successful
+    commit: 2bebc2a
+    date: 2026-11-07
+    ci_run: 42426367149   # build.yml, workflow_dispatch variant=bench version=0.0.0-2bebc2a
+    evidence: test-results/20261107T234415Z-2bebc2a/TC-MED-01.md
+    observed: >
+      11 temperaturas en vivo de la última sesión: 10 intervalos entre 59,99 y 60,00 s,
+      deriva acumulada −0,01 s
   - id: TC-MED-02
     shape: atomic
     kind: standard
@@ -1350,6 +1358,15 @@ tests:
       arrancar: entre el último status previo al corte y el primero posterior,
       Δlecturas = ⌊Δuptime_s / 60⌋ ± 1, con Δuptime_s > 600 (sin reinicio)
     impl: tests/bench/test_med.py::test_tc_med_02_cycle_without_broker
+    status: successful
+    commit: 2bebc2a
+    date: 2026-11-07
+    ci_run: 42426367149   # build.yml, workflow_dispatch variant=bench version=0.0.0-2bebc2a
+    evidence: test-results/20261107T234415Z-2bebc2a/TC-MED-02.md
+    observed: >
+      broker parado 10 min: último status antes uptime_s = 60, lecturas = 2; primer status
+      3,6 s tras volver el broker uptime_s = 666, lecturas = 12: Δlecturas = 10 = ⌊606/60⌋;
+      reset = usb sin cambio
   - id: TC-MED-03
     shape: atomic
     kind: standard
