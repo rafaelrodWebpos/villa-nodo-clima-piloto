@@ -1371,6 +1371,14 @@ tests:
       en la última sesión, sin el de T11; los 10 intervalos entre llegadas en [59,
       61] s y deriva acumulada ≤ 2 s
     impl: tests/bench/test_med.py::test_tc_med_01_period_60_s
+    status: successful
+    commit: 2bebc2a
+    date: 2026-11-07
+    ci_run: 42426367149   # build.yml, workflow_dispatch variant=bench version=0.0.0-2bebc2a
+    evidence: test-results/20261107T234415Z-2bebc2a/TC-MED-01.md
+    observed: >
+      11 temperaturas en vivo de la última sesión: 10 intervalos entre 59,99 y 60,00 s,
+      deriva acumulada −0,01 s
   - id: TC-MED-02
     shape: atomic
     kind: standard
@@ -1384,6 +1392,15 @@ tests:
       arrancar: entre el último status previo al corte y el primero posterior,
       Δlecturas = ⌊Δuptime_s / 60⌋ ± 1, con Δuptime_s > 600 (sin reinicio)
     impl: tests/bench/test_med.py::test_tc_med_02_cycle_without_broker
+    status: successful
+    commit: 2bebc2a
+    date: 2026-11-07
+    ci_run: 42426367149   # build.yml, workflow_dispatch variant=bench version=0.0.0-2bebc2a
+    evidence: test-results/20261107T234415Z-2bebc2a/TC-MED-02.md
+    observed: >
+      broker parado 10 min: último status antes uptime_s = 60, lecturas = 2; primer status
+      3,6 s tras volver el broker uptime_s = 666, lecturas = 12: Δlecturas = 10 = ⌊606/60⌋;
+      reset = usb sin cambio
   - id: TC-MED-03
     shape: atomic
     kind: standard
@@ -1703,6 +1720,15 @@ tests:
       escaneos cada 10 min con el AP apagado sin ningún clima-*; el primer status
       en vivo tras la vuelta con uptime_s ≥ 3600 y el mismo reset que antes
     impl: tests/bench/test_con_largo.py::test_tc_con_11_ap_off_60_min
+    status: successful
+    commit: e231678
+    date: 2026-11-07
+    ci_run: 42416208572   # build.yml, workflow_dispatch variant=bench version=0.0.0-e231678
+    evidence: test-results/20261107T213350Z-e231678/TC-CON-11.md
+    observed: >
+      AP apagado 60 min: 0 líneas boot:/rst:, 60 med: en la ventana (ningún tramo de 10 min
+      con menos de 5), 7 escaneos sin clima-*; primer status 32,8 s tras volver el AP con
+      uptime_s = 3648 y reset = usb igual que antes
   - id: TC-CON-12
     shape: atomic
     kind: standard
@@ -1718,6 +1744,15 @@ tests:
       3600 y el mismo reset que antes; al final, escaneo con el AP del banco
       apagado un momento (CR-TB-14, como H-63) sin ningún clima-*
     impl: tests/bench/test_con_largo.py::test_tc_con_12_broker_off_60_min
+    status: successful
+    commit: e231678
+    date: 2026-11-07
+    ci_run: 42416208572   # build.yml, workflow_dispatch variant=bench version=0.0.0-e231678
+    evidence: test-results/20261107T213350Z-e231678/TC-CON-12.md
+    observed: >
+      broker parado 60 min: 0 líneas boot:/rst:, 60 med: en la ventana, primer status 4,8 s
+      tras volver el broker con uptime_s = 3615 y reset = usb igual que antes; escaneo final
+      con el AP apagado un momento sin clima-*
   - id: TC-TIME-02
     shape: atomic
     kind: standard
