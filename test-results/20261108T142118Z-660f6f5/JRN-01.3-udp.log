@@ -1,0 +1,176 @@
+I (21625) nodo: UDP logging -> 192.168.4.1:5555
+I (21625) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (21625) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5215) nodo: UDP logging -> 192.168.4.1:5555
+I (5215) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5215) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5215) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5225) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5235) nodo: mqtt: intento 1
+I (5315) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5715) nodo: sntp: inicio pool.ntp.org
+I (15725) nodo: sntp: inicio pool.ntp.org
+I (18885) nodo: sntp: sincronizado ts=1794147488
+I (60545) nodo: med: T=30.9 HR=65.6 Td=23.7
+I (5125) nodo: UDP logging -> 192.168.4.1:5555
+I (5125) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5175) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5175) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5135) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5185) nodo: mqtt: intento 1
+I (5265) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5675) nodo: sntp: inicio pool.ntp.org
+I (5125) nodo: UDP logging -> 192.168.4.1:5555
+I (5125) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5125) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5125) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5135) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5145) nodo: mqtt: intento 1
+I (5205) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5625) nodo: sntp: inicio pool.ntp.org
+I (15635) nodo: sntp: inicio pool.ntp.org
+I (25635) nodo: sntp: inicio pool.ntp.org
+W (35635) nodo: sntp: fallo
+I (35635) nodo: sntp: inicio pool.ntp.org
+I (45635) nodo: sntp: inicio pool.ntp.org
+I (55635) nodo: sntp: inicio pool.ntp.org
+I (60545) nodo: med: T=30.9 HR=65.5 Td=23.7
+W (65635) nodo: sntp: fallo
+I (65635) nodo: sntp: inicio pool.ntp.org
+I (75635) nodo: sntp: inicio pool.ntp.org
+I (79585) nodo: sntp: sincronizado ts=1794147624
+I (16315) nodo: UDP logging -> 192.168.4.1:5555
+I (16315) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (16315) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (16325) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (7784) nodo: UDP logging -> 192.168.4.1:5555
+I (7784) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (7784) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (7784) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (7794) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (7804) nodo: mqtt: intento 1
+E (7814) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (7814) transport_base: Failed to open a new connection: 32772
+E (7824) mqtt_client: Error transport connect
+I (7824) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (8284) nodo: sntp: inicio pool.ntp.org
+I (8824) nodo: mqtt: intento 2
+I (8824) mqtt_client: Client force reconnect requested
+I (8824) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (8844) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (8844) transport_base: Failed to open a new connection: 32772
+E (8844) mqtt_client: Error transport connect
+I (8844) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (5145) nodo: UDP logging -> 192.168.4.1:5555
+I (5145) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5195) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5195) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5155) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5205) nodo: mqtt: intento 1
+E (5215) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (5225) transport_base: Failed to open a new connection: 32772
+E (5225) mqtt_client: Error transport connect
+I (5225) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (5695) nodo: sntp: inicio pool.ntp.org
+I (6225) nodo: mqtt: intento 2
+I (6225) mqtt_client: Client force reconnect requested
+I (6225) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (6245) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (6245) transport_base: Failed to open a new connection: 32772
+E (6245) mqtt_client: Error transport connect
+I (6255) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (5125) nodo: UDP logging -> 192.168.4.1:5555
+I (5125) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5125) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5125) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5135) nodo: mqtt: intento 1
+I (5135) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+E (5155) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (5165) transport_base: Failed to open a new connection: 32772
+E (5165) mqtt_client: Error transport connect
+I (5165) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (5625) nodo: sntp: inicio pool.ntp.org
+I (6165) nodo: mqtt: intento 2
+I (6165) mqtt_client: Client force reconnect requested
+I (6165) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (6175) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (6185) transport_base: Failed to open a new connection: 32772
+E (6185) mqtt_client: Error transport connect
+I (6185) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (8185) nodo: mqtt: intento 3
+I (8185) mqtt_client: Client force reconnect requested
+I (8185) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (8205) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (8205) transport_base: Failed to open a new connection: 32772
+E (8215) mqtt_client: Error transport connect
+I (8215) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (12215) nodo: mqtt: intento 4
+I (12215) mqtt_client: Client force reconnect requested
+I (12215) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (12235) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (12235) transport_base: Failed to open a new connection: 32772
+E (12235) mqtt_client: Error transport connect
+I (12245) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (15635) nodo: sntp: inicio pool.ntp.org
+I (20245) nodo: mqtt: intento 5
+I (20245) mqtt_client: Client force reconnect requested
+I (20245) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (20255) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (20265) transport_base: Failed to open a new connection: 32772
+E (20265) mqtt_client: Error transport connect
+I (20265) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (25635) nodo: sntp: inicio pool.ntp.org
+W (35635) nodo: sntp: fallo
+I (35635) nodo: sntp: inicio pool.ntp.org
+I (36265) nodo: mqtt: intento 6
+I (36265) mqtt_client: Client force reconnect requested
+I (36265) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (36285) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (36285) transport_base: Failed to open a new connection: 32772
+E (36285) mqtt_client: Error transport connect
+I (36285) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (45635) nodo: sntp: inicio pool.ntp.org
+I (55635) nodo: sntp: inicio pool.ntp.org
+I (60535) nodo: udplog: descartadas=0 reintentadas=1 cola_llena=0
+I (60545) nodo: med: T=31.0 HR=65.2 Td=23.7
+W (65635) nodo: sntp: fallo
+I (65635) nodo: sntp: inicio pool.ntp.org
+I (68285) nodo: mqtt: intento 7
+I (68295) mqtt_client: Client force reconnect requested
+I (68295) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (68305) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (68305) transport_base: Failed to open a new connection: 32772
+E (68305) mqtt_client: Error transport connect
+I (68315) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (75635) nodo: sntp: inicio pool.ntp.org
+I (85635) nodo: sntp: inicio pool.ntp.org
+W (95635) nodo: sntp: fallo
+I (95645) nodo: sntp: inicio pool.ntp.org
+I (105645) nodo: sntp: inicio pool.ntp.org
+I (115645) nodo: sntp: inicio pool.ntp.org
+I (120545) nodo: med: T=31.0 HR=65.2 Td=23.7
+W (125645) nodo: sntp: fallo
+I (125645) nodo: sntp: inicio pool.ntp.org
+I (128315) nodo: mqtt: intento 8
+I (128315) mqtt_client: Client force reconnect requested
+I (128315) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (128325) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (128335) transport_base: Failed to open a new connection: 32772
+E (128335) mqtt_client: Error transport connect
+I (128335) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (135645) nodo: sntp: inicio pool.ntp.org
+I (145645) nodo: sntp: inicio pool.ntp.org
+W (155645) nodo: sntp: fallo
+I (155645) nodo: sntp: inicio pool.ntp.org
+I (165645) nodo: sntp: inicio pool.ntp.org
+I (175645) nodo: sntp: inicio pool.ntp.org
+I (180545) nodo: med: T=31.0 HR=65.4 Td=23.7
+W (185645) nodo: sntp: fallo
+I (185655) nodo: sntp: inicio pool.ntp.org
+I (188335) nodo: mqtt: intento 9
+I (188335) mqtt_client: Client force reconnect requested
+I (188335) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (188355) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (188355) transport_base: Failed to open a new connection: 32772
+E (188355) mqtt_client: Error transport connect
+I (188355) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
