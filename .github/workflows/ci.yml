@@ -56,7 +56,7 @@ jobs:
           fetch-depth: 0          # el historial completo también se escanea
       - name: Install pinned gitleaks
         run: |
-          curl -sSfL -o gl.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL --retry 3 --retry-all-errors --retry-delay 10 -o gl.tgz "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
           echo "${GITLEAKS_SHA256}  gl.tgz" | sha256sum -c -
           tar xzf gl.tgz gitleaks
       - name: Scan tree and history
