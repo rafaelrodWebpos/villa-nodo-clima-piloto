@@ -1233,6 +1233,16 @@ tests:
       del banco, 10 ciclos: en cada uno, 3 medidas en vivo y un status;
       intervalos entre medidas en [59, 61] s; ningún uptime_s menor ni bloqueo
     impl: tests/bench/test_log.py::test_tc_log_03_udp_log_to_nowhere   # --ci-variant bench-sin-receptor (H-67)
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-08
+    ci_run: 42417737075   # build.yml, workflow_dispatch ref=sntp variant=bench-sin-receptor
+    evidence: test-results/20261108T025600Z-ef118af/TC-LOG-03.md
+    observed: >
+      «UDP logging -> 192.168.4.250:5555» (control positivo de la variante) y
+      «udplog: descartadas=5»: 10 ciclos con las 3 medidas y status cada uno,
+      intervalos entre temperaturas de 59,99 a 60,00 s, uptime_s creciente de 4 a
+      660 (sin reinicio ni bloqueo)
   - id: TC-LOG-07
     shape: atomic
     kind: standard
@@ -1248,6 +1258,15 @@ tests:
       imagen de producción (build.yml, cada push) y presentes en la de banco del
       mismo commit (build.yml, workflow_dispatch variant=bench)
     impl: scripts/ci/c_log_02.py
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-07
+    ci_run: 42417733022   # production; bench 42417735201; bench-sin-receptor 42417737075
+    observed: >
+      imagen de producción: «wdt-test» y «wdt: bloqueando medicion» ausentes; imagen
+      de banco y bench-sin-receptor del mismo commit: presentes; fuente: ningún
+      hallazgo fuera de CONFIG_NODO_BENCH_BUILD. El paso de fuente (ci.yml) corre en
+      main al fusionar; en la rama se ejecutó en local
   - id: TC-LOG-04
     shape: atomic
     kind: standard
@@ -1741,6 +1760,14 @@ tests:
       (llegada del primer status de la última sesión − uptime_s − 2 s, como en
       FR-CON-05) con "ts": null, y ese status lleva hora_valida = false
     impl: tests/bench/test_time.py::test_tc_time_05_publish_without_time
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-08
+    ci_run: 42417735201   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-ef118af
+    evidence: test-results/20261108T000941Z-ef118af/TC-TIME-05.md
+    observed: >
+      primera medida a 6,1 s del encendido estimado con "ts": null; status con
+      hora_valida = false
   - id: TC-TIME-06
     shape: atomic
     kind: standard
@@ -1755,6 +1782,19 @@ tests:
       líneas consecutivas (marcas del DUT) son ≤ 15 s, también tras un
       «sntp: fallo»
     impl: tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time
+    status: successful
+    commit: ef118af   # rama sntp (H-68), sin fusionar a main
+    date: 2026-11-08
+    ci_run: 42417735201   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-ef118af
+    evidence: test-results/20261108T000941Z-ef118af/TC-TIME-06.md
+    observed: >
+      primera «sntp: inicio pool.ntp.org» a 0,5 s de wifi_up; 20 peticiones en 5 min,
+      los 19 intervalos de 15,0 s (en el límite, ≤ 15 s); 10 «sntp: fallo» (uno cada
+      30 s) sin dejar de pedir
+    history: >
+      xfail estricto declarado en 491e4fb (main, sin cliente SNTP); por el plan H-68
+      no se ejecutó en banco antes del cliente: la evidencia de que main no tenía SNTP
+      es el código (ninguna línea sntp: en main/ ni components/ en 491e4fb)
   - id: TC-MQTT-01
     shape: atomic
     kind: standard
