@@ -1945,6 +1945,14 @@ tests:
       hora_valida = true; nunca ts < fecha de build. Necesita una acción física (corte
       del USB-C, el propietario a los avisos del banco)
     impl: tests/bench/test_bench_plus.py::test_tc_time_03_power_cut_with_sntp_blocked
+    history: >
+      2026-11-08, ab384dd (test-results/20261108T193705Z-ab384dd/): rojo por una
+      comprobación del test que no es del contrato — se exigía reset = poweron en el primer
+      status tras el reenchufe y llegó reset = usb (uptime_s = 1, placa sin alimentación
+      22 s). Todo lo del contrato se cumplió: con SNTP bloqueado 300 s, 5 status con
+      hora_valida = false y 15 medidas con "ts": null sin faltar ninguna; al desbloquear,
+      «sntp: sincronizado» ≈ 3,8 s después, primera medida con ts a 62,5 s (ts − llegada
+      +0,71 s) y hora_valida = true. Parado para que el propietario decida (H-75)
   - id: TC-TIME-08
     shape: atomic
     kind: standard
