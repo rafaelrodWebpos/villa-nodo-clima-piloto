@@ -1945,6 +1945,17 @@ tests:
       hora_valida = true; nunca ts < fecha de build. Necesita una acción física (corte
       del USB-C, el propietario a los avisos del banco)
     impl: tests/bench/test_bench_plus.py::test_tc_time_03_power_cut_with_sntp_blocked
+    status: successful
+    commit: c32b832   # comprobación del corte de H-76; evidencia de la ejecución sobre ab384dd, reevaluada sin repetir el corte
+    date: 2026-11-08
+    ci_run: 42495454952   # build.yml, workflow_dispatch variant=bench version=0.0.0-17dc543
+    evidence: test-results/20261108T193705Z-ab384dd/TC-TIME-03-reevaluacion.md
+    observed: >
+      corte real: slot ausente 22 s y uptime_s = 1 en el primer status. Con SNTP bloqueado
+      300 s: 5 status con hora_valida = false y 15 medidas con "ts": null, sin faltar
+      ninguna. Al desbloquear: «sntp: sincronizado» ≈ 3,8 s después; primera medida con ts a
+      62,5 s (ts − llegada +0,71 s); hora_valida = true. Observación del banco: tras el
+      reenchufe, reset = usb y no poweron (pariente de CR-TB-12)
     history: >
       2026-11-08, ab384dd (test-results/20261108T193705Z-ab384dd/): rojo por una
       comprobación del test que no es del contrato — se exigía reset = poweron en el primer
