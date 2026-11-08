@@ -1,0 +1,59 @@
++17.93 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-40,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++17.94 s retain=0 qos=1 homeassistant/sensor/clima-f3c6d4/temperatura/config {"name":"Temperatura","unique_id":"clima-f3c6d4_temperatura","state_topic":"sitio1/zona1/clima-f3c6d4/temperatura","value_template":"{{ value_json.v }}","unit_of_measurement":"°C","device_class":"temperature","state_class":"measurement","expire_after":180,"availability_topic":"sitio1/zona1/clima-f3c6d4/status","availability_template":"{{ value_json.estado }}","payload_available":"online","payload_not_available":"offline","device":{"identifiers":["clima-f3c6d4"],"name":"Clima sitio1 zona1","model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.0.0-47a52ea-bench"}}
++17.94 s retain=0 qos=1 homeassistant/sensor/clima-f3c6d4/humedad/config {"name":"Humedad","unique_id":"clima-f3c6d4_humedad","state_topic":"sitio1/zona1/clima-f3c6d4/humedad","value_template":"{{ value_json.v }}","unit_of_measurement":"%","device_class":"humidity","state_class":"measurement","expire_after":180,"availability_topic":"sitio1/zona1/clima-f3c6d4/status","availability_template":"{{ value_json.estado }}","payload_available":"online","payload_not_available":"offline","device":{"identifiers":["clima-f3c6d4"],"name":"Clima sitio1 zona1","model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.0.0-47a52ea-bench"}}
++17.95 s retain=0 qos=1 homeassistant/sensor/clima-f3c6d4/punto_rocio/config {"name":"Punto de rocío","unique_id":"clima-f3c6d4_punto_rocio","state_topic":"sitio1/zona1/clima-f3c6d4/punto_rocio","value_template":"{{ value_json.v }}","unit_of_measurement":"°C","device_class":"temperature","state_class":"measurement","expire_after":180,"availability_topic":"sitio1/zona1/clima-f3c6d4/status","availability_template":"{{ value_json.estado }}","payload_available":"online","payload_not_available":"offline","device":{"identifiers":["clima-f3c6d4"],"name":"Clima sitio1 zona1","model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.0.0-47a52ea-bench"}}
++17.95 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++18.00 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.9,"u":"%","ts":null}
++18.01 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++73.21 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++73.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.9,"u":"%","ts":null}
++73.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++73.26 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-38,"reset":"usb","uptime_s":60,"lecturas":2,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++133.21 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.6,"u":"°C","ts":null}
++133.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.9,"u":"%","ts":null}
++133.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++133.26 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-42,"reset":"usb","uptime_s":120,"lecturas":3,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++193.21 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++193.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.9,"u":"%","ts":null}
++193.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++193.26 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-41,"reset":"usb","uptime_s":180,"lecturas":4,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++253.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++253.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.8,"u":"%","ts":null}
++253.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.1,"u":"°C","ts":null}
++253.26 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-39,"reset":"usb","uptime_s":240,"lecturas":5,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++313.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++313.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.8,"u":"%","ts":null}
++313.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.1,"u":"°C","ts":null}
++313.26 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-41,"reset":"usb","uptime_s":300,"lecturas":6,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++373.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.6,"u":"°C","ts":null}
++373.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.8,"u":"%","ts":null}
++373.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++373.25 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-42,"reset":"usb","uptime_s":360,"lecturas":7,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++374.16 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"offline"}
++677.61 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-39,"reset":"usb","uptime_s":664,"lecturas":12,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++677.62 s retain=0 qos=1 homeassistant/sensor/clima-f3c6d4/temperatura/config {"name":"Temperatura","unique_id":"clima-f3c6d4_temperatura","state_topic":"sitio1/zona1/clima-f3c6d4/temperatura","value_template":"{{ value_json.v }}","unit_of_measurement":"°C","device_class":"temperature","state_class":"measurement","expire_after":180,"availability_topic":"sitio1/zona1/clima-f3c6d4/status","availability_template":"{{ value_json.estado }}","payload_available":"online","payload_not_available":"offline","device":{"identifiers":["clima-f3c6d4"],"name":"Clima sitio1 zona1","model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.0.0-47a52ea-bench"}}
++677.63 s retain=0 qos=1 homeassistant/sensor/clima-f3c6d4/humedad/config {"name":"Humedad","unique_id":"clima-f3c6d4_humedad","state_topic":"sitio1/zona1/clima-f3c6d4/humedad","value_template":"{{ value_json.v }}","unit_of_measurement":"%","device_class":"humidity","state_class":"measurement","expire_after":180,"availability_topic":"sitio1/zona1/clima-f3c6d4/status","availability_template":"{{ value_json.estado }}","payload_available":"online","payload_not_available":"offline","device":{"identifiers":["clima-f3c6d4"],"name":"Clima sitio1 zona1","model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.0.0-47a52ea-bench"}}
++677.64 s retain=0 qos=1 homeassistant/sensor/clima-f3c6d4/punto_rocio/config {"name":"Punto de rocío","unique_id":"clima-f3c6d4_punto_rocio","state_topic":"sitio1/zona1/clima-f3c6d4/punto_rocio","value_template":"{{ value_json.v }}","unit_of_measurement":"°C","device_class":"temperature","state_class":"measurement","expire_after":180,"availability_topic":"sitio1/zona1/clima-f3c6d4/status","availability_template":"{{ value_json.estado }}","payload_available":"online","payload_not_available":"offline","device":{"identifiers":["clima-f3c6d4"],"name":"Clima sitio1 zona1","model":"Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41","sw_version":"0.0.0-47a52ea-bench"}}
++677.65 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++677.70 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":69.1,"u":"%","ts":null}
++677.70 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++733.21 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++733.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":69.3,"u":"%","ts":null}
++733.26 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.3,"u":"°C","ts":null}
++733.26 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-41,"reset":"usb","uptime_s":720,"lecturas":13,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++793.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++793.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":69.2,"u":"%","ts":null}
++793.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.3,"u":"°C","ts":null}
++793.25 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-38,"reset":"usb","uptime_s":780,"lecturas":14,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++853.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.5,"u":"°C","ts":null}
++853.24 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":69.0,"u":"%","ts":null}
++853.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++853.25 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-39,"reset":"usb","uptime_s":840,"lecturas":15,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++913.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.6,"u":"°C","ts":null}
++913.24 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.9,"u":"%","ts":null}
++913.24 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++913.24 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-38,"reset":"usb","uptime_s":900,"lecturas":16,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++973.20 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":30.6,"u":"°C","ts":null}
++973.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":68.9,"u":"%","ts":null}
++973.25 s retain=0 qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":24.2,"u":"°C","ts":null}
++973.25 s retain=0 qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-47a52ea-bench","rssi":-38,"reset":"usb","uptime_s":960,"lecturas":17,"err_sensor":0,"ota":"ninguno","hora_valida":false}

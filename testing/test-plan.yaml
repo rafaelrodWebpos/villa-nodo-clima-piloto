@@ -1843,6 +1843,13 @@ tests:
       noche; NODO_WDT_HUMO=1 hace una corrida de humo de 15 min con un corte de
       broker, que no cuenta como resultado
     impl: tests/bench/test_wdt.py::test_tc_wdt_01_24h_stability
+    smoke: >
+      corrida de humo (NODO_WDT_HUMO=1, no es resultado) sobre 47a52ea, 2026-11-08,
+      test-results/20261108T125114Z-47a52ea/: 16 ciclos con un corte de broker de 5 min;
+      Δlecturas = 16, 12 ciclos en OPERATIVO y 12 publicaciones por medida, status de
+      vuelta a 3,6 s, uptime_s monótono, reset = usb, 0 boot: y 0 task_wdt; el test
+      funciona. El primer intento no empezó: HTTP 500 de la API de GitHub al seguir el
+      build (run 42481890517, que acabó en verde y se grabó con --firmware-dir)
   - id: TC-TIME-05
     shape: atomic
     kind: standard
