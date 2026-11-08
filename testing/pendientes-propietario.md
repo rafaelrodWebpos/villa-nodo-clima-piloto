@@ -14,13 +14,3 @@ lleva el contexto y las opciones; cuando se resuelve, se marca con la fecha y lo
   esperar al segundo aviso (unos 3 min) y volver a conectarlo. Unos 5 minutos en total.
 - **Estado.** Aplazada por el propietario el 2026-11-07 (opción 2): se hace cuando él esté
   frente al banco.
-
-## 2026-11-07 · JRN-01.7 con la imagen nueva (acción física)
-
-- **Contexto.** Aclaración de H-66 (plan H-68): la imagen de la rama `sntp` (cliente SNTP,
-  comandos E13 y watchdog de 30 s) se fusiona a main después de la auditoría del propietario
-  y de JRN-01.7 en verde con ella. JRN-01.7 necesita un corte manual: desenchufar el USB-C del
-  lado de la placa y volver a enchufarlo a los avisos del banco.
-- **Acción.** Con el propietario frente al banco: lanzar JRN-01.7 (y, si se quiere, TC-CFG-02 y
-  TC-MQTT-04, 6 cortes en total como el 2026-11-07) con la imagen de la rama `sntp`.
-- **Estado.** Pendiente; no se hace en el turno de noche.
