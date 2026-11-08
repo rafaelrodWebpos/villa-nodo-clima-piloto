@@ -1918,6 +1918,17 @@ tests:
       resincronización (≈ 1 h después de sincronizar); ninguna sincronización ni
       reinicio durante el bloqueo. Complementa la fila host TC-TIME-07
     impl: tests/bench/test_bench_plus.py::test_tc_time_04_resync_failure_keeps_time
+    status: successful
+    commit: 5b899fa
+    date: 2026-11-08
+    ci_run: 42495454952   # build.yml, workflow_dispatch variant=bench version=0.0.0-17dc543
+    evidence: test-results/20261108T155258Z-5b899fa/TC-TIME-04.md
+    observed: >
+      sincronizado a 9,1 s de uptime; SNTP bloqueado 2 h: 120 status, todos con
+      hora_valida = true; 360 medidas, todas con ts entero; resincronización a la hora
+      (3615 s) con 3 peticiones cada 10 s y «sntp: fallo» a los 30 s exactos, y la
+      siguiente 1 h después del fallo (7245 s → fallo a 7275 s); 0 sincronizaciones y 0
+      arranques durante el bloqueo
   - id: TC-TIME-03
     shape: atomic
     kind: standard
