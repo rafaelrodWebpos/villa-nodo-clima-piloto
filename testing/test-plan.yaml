@@ -1477,6 +1477,23 @@ tests:
       reloj del DUT), T = 30,1 °C, HR ≈ 72 %, Td = 24,4, ninguna inválida, la
       primera ya tras el arranque. La ejecución sobre 5f93e6d no cuenta: contó
       dos veces una línea repetida por el buffer del banco (corregido en 3ddee73)
+  - id: TC-SEN-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-SEN-03]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-operator-prompt, sht41-wiring, sda-disconnect, dut-board]
+    expect: >
+      OPERATIVO publicando medidas válidas; a los avisos del banco el operador
+      desconecta el Dupont de SDA durante 3 ciclos y lo reconecta: con SDA suelto
+      no llega ningún mensaje de temperatura, humedad ni punto_rocio (ni 0, −45,
+      −6, NaN ni el último valor); err_sensor del status sube 3 (± 1); tras
+      reconectar llegan las tres medidas válidas en ≤ 61 s (tolerancia un ciclo);
+      sin reinicio (uptime_s creciente, mismo reset, ningún boot: nuevo en la
+      consola). Cleanup: SDA conectado
+    impl: tests/bench/test_sen.py::test_tc_sen_04_sda_disconnect_recovery
   - id: TC-HW-01
     shape: atomic
     kind: standard
