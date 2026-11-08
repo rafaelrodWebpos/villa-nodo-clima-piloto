@@ -1494,6 +1494,17 @@ tests:
       sin reinicio (uptime_s creciente, mismo reset, ningún boot: nuevo en la
       consola). Cleanup: SDA conectado
     impl: tests/bench/test_sen.py::test_tc_sen_04_sda_disconnect_recovery
+    status: successful
+    commit: ebd8262
+    date: 2026-11-08
+    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (la imagen que ya estaba en el DUT; mismo firmware que main tras la fusión)
+    evidence: test-results/20261108T120956Z-ebd8262/TC-SEN-04.md
+    observed: >
+      SDA suelto ≈ 152 s (desconexión confirmada a 24,3 s del aviso, reconexión a
+      29,7 s): 3 status con err_sensor 1, 2, 3 (Δ = 3) y 0 medidas en vivo; en la
+      consola 3 «med: invalida (nack)»; tras reconectar, temperatura 30,3 °C,
+      humedad 69,5 % y punto_rocio 24,1 °C a 30,3 s; status siguiente con
+      uptime_s = 300 y el mismo reset (usb), un solo arranque en la consola
   - id: TC-HW-01
     shape: atomic
     kind: standard
