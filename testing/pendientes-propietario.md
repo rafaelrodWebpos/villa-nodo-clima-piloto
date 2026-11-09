@@ -24,5 +24,5 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
 - **Acción.** Contrastar la referencia y, después, 30 min de estabilización y 10 lecturas de
   la referencia a ± 30 s de cada publicación.
 - **Estado.** Preparado (H-77, 2026-11-09): referencia WH32B de la WS-2000, contrastada solo al
-  75 % con la prueba de la sal; test TC-SEN-05 escrito, sin lanzar. Falta decidir si cuenta sin el
-  punto del 33 % (hoy el FSD lo da por no válido y el test sale not done).
+  75 % con la prueba de la sal; test TC-SEN-05 escrito, sin lanzar. FSD 0.9.7 (H-77): la prueba de
+  la sal basta para la HR; la temperatura es informativa. Falta lanzarlo con el propietario.

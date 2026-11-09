@@ -214,11 +214,17 @@ PAREJAS = 10
 VENTANA_LECTURA_S = 30            # la lectura de la referencia, a ± 30 s de la llegada
 MAX_INTENTOS = 20                 # publicaciones como mucho para juntar 10 parejas seguidas
 TOL_T, TOL_HR = 0.5, 3.0
-# Contraste de la referencia (WH32B interior de la WS-2000, H-77): prueba de la sal al 75 %
-# a 29,7 °C, corrección 0; sin punto del 33 %. El FSD (NFR-SEN-01, «No debe ocurrir») no
-# admite una referencia sin los dos puntos: mientras sea así, el resultado se registra y se
-# marca not done.
-CONTRASTE = {"75": "prueba de la sal, 75 % HR a 29,7 °C, corrección 0", "33": None}
+# Contraste de la referencia (WH32B interior de la WS-2000, H-77). FSD 0.9.7: la HR vale con
+# los sobres del 33 % y 75 % o con la prueba de sal saturada (NaCl, 75 %); la temperatura es
+# informativa mientras la referencia no esté contrastada en temperatura.
+CONTRASTE_HR = {"sobre 33 %": None, "sobre 75 %": None,
+                "sal saturada (NaCl, 75 %)": "2026-11-09: 75 % HR a 29,7 °C, corrección 0"}
+CONTRASTE_T = None                # el WH32B declara ± 1 °C de fábrica; sin contraste propio
+
+
+def _hr_contrastada():
+    return bool(CONTRASTE_HR["sal saturada (NaCl, 75 %)"]
+                or (CONTRASTE_HR["sobre 33 %"] and CONTRASTE_HR["sobre 75 %"]))
 AVISO_COLOCAR = ("NFR-SEN-01: ¿está el WH32B junto al SHT41 (a 2-5 cm, a la misma altura, sin "
                  "tocarlo, ambos a 5 cm o más de la placa, sin sol ni corrientes)? Pulsa Hecho y "
                  "no lo toques más: empiezan 30 min de estabilización")
@@ -242,7 +248,9 @@ def _leer_referencia(path, n):
 
 def test_tc_sen_05_accuracy_vs_reference(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
     """TC-SEN-05 · NFR-SEN-01 — tras 30 min de estabilización, 10 publicaciones seguidas, cada
-    una con una lectura del WH32B a ± 30 s de su llegada: diferencias medias ≤ 0,5 °C y ≤ 3 %HR."""
+    una con una lectura del WH32B a ± 30 s de su llegada: diferencia media de HR ≤ 3 %HR; la de
+    temperatura ≤ 0,5 °C si la referencia está contrastada en temperatura, si no, informativa
+    (FSD 0.9.7)."""
     import json
     from test_mqtt import _a_operativo, _nodo, _suscribir, configurado
     tb = testbench
@@ -253,8 +261,11 @@ def test_tc_sen_05_accuracy_vs_reference(testbench, dut_slot, dut_mac, firmware,
               spec="TC-SEN villa-nodo-clima-piloto") as c, \
             configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
         c.note("- referencia: sensor interior WH32B de la WS-2000, leído en la consola por el "
-               "propietario; resolución 0,1 °C y 1 % HR",
-               *[f"- contraste al {p} %: {v or 'no hecho'}" for p, v in CONTRASTE.items()], "")
+               "propietario; resolución 0,1 °C y 1 % HR; ± 1 °C declarado de fábrica",
+               *[f"- contraste de HR, {k}: {v or 'no hecho'}" for k, v in CONTRASTE_HR.items()],
+               f"- contraste de temperatura: {CONTRASTE_T or 'no hecho (la temperatura es informativa)'}", "")
+        if not _hr_contrastada():
+            pytest.skip("not done: referencia sin contrastar en HR (FSD 0.9.7, NFR-SEN-01)")
         banco.broker_on()
         with _suscribir(tb, nodo) as sub:
             _a_operativo(tb, dut_slot, banco, c)
@@ -317,12 +328,12 @@ def test_tc_sen_05_accuracy_vs_reference(testbench, dut_slot, dut_mac, firmware,
                "|---|---|---|---|---|---|---|---|",
                *[f"| {i + 1} | {p['dt']:+} | {p['T']} | {r[0]} | {a:+} | {p['HR']} | {r[1]} | {b:+} |"
                  for i, (p, r, a, b) in enumerate(zip(parejas, ref, dT, dH))], "",
-               f"- diferencia media: ΔT = {mT:+.2f} °C (tolerancia ± {TOL_T}), ΔHR = {mH:+.2f} % (± {TOL_HR})",
+               f"- diferencia media de HR: {mH:+.2f} % (tolerancia ± {TOL_HR})",
+               f"- diferencia media de temperatura: {mT:+.2f} °C ("
+               + (f"tolerancia ± {TOL_T})" if CONTRASTE_T else "informativa: referencia sin contrastar en temperatura)"),
                f"- máximas: |ΔT| = {max(map(abs, dT)):.2f} °C, |ΔHR| = {max(map(abs, dH)):.2f} %")
-        if not all(CONTRASTE.values()):
-            # Con una referencia sin los dos puntos el FSD no admite ni verde ni rojo.
-            pytest.skip("not done: referencia sin contrastar al 33 % HR (FSD NFR-SEN-01, «No debe ocurrir»); "
-                        f"ΔT medio {mT:+.2f} °C, ΔHR medio {mH:+.2f} % (informativo)")
-        assert abs(mT) <= TOL_T, f"ΔT medio {mT:+.2f} °C fuera de ± {TOL_T}"
         assert abs(mH) <= TOL_HR, f"ΔHR medio {mH:+.2f} % fuera de ± {TOL_HR}"
-        c.passed(f"ΔT medio {mT:+.2f} °C, ΔHR medio {mH:+.2f} % en {PAREJAS} parejas")
+        if CONTRASTE_T:
+            assert abs(mT) <= TOL_T, f"ΔT medio {mT:+.2f} °C fuera de ± {TOL_T}"
+        c.passed(f"ΔHR medio {mH:+.2f} % (± {TOL_HR}) en {PAREJAS} parejas; ΔT medio {mT:+.2f} °C"
+                 + ("" if CONTRASTE_T else " (informativo)"))

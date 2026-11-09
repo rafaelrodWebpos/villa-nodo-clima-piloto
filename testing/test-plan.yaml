@@ -317,8 +317,9 @@ capabilities:
       H-77 (propietario, 2026-11-09): la referencia es el sensor interior WH32B de la
       WS-2000, leído en su consola (resolución 0,1 °C y 1 % HR). Contrastado ese día con la
       prueba de la sal: 75 % HR a 29,7 °C, corrección 0. Los sobres del 33 % y 75 % no
-      llegaron y el punto del 33 % no se hará; la temperatura no está contrastada. Con un
-      solo punto, el FSD (NFR-SEN-01, «No debe ocurrir») no admite el resultado
+      llegaron y el punto del 33 % no se hará; la temperatura no está contrastada (± 1 °C
+      declarado de fábrica). FSD 0.9.7: con la sal saturada la HR vale; la temperatura es
+      informativa
   field-site:
     what: el nodo instalado en la vivienda con su router, broker y HA (nivel field)
     available: unproven
@@ -1527,10 +1528,11 @@ tests:
       de la placa); tras 30 min de estabilización, 10 publicaciones seguidas, cada una
       con una lectura de la referencia por el propietario a ± 30 s de su llegada (aviso
       del banco al llegar; el clic marca la hora; si una se sale, la serie vuelve a
-      empezar, como mucho 20 publicaciones): diferencia media ≤ 0,5 °C y ≤ 3 % HR. Las
-      lecturas las dicta el propietario por el chat y Claude las escribe en
-      TC-SEN-05-referencia.txt. Con la referencia sin contrastar al 33 % y al 75 %, not
-      done con las diferencias como dato informativo (FSD, «No debe ocurrir»)
+      empezar, como mucho 20 publicaciones): diferencia media de HR ≤ 3 %HR; la de
+      temperatura ≤ 0,5 °C si la referencia está contrastada en temperatura, y si no,
+      registrada como informativa (FSD 0.9.7). Las lecturas las dicta el propietario por
+      el chat y Claude las escribe en TC-SEN-05-referencia.txt. Referencia sin contrastar
+      en HR (ni sobres del 33 % y 75 % ni sal saturada NaCl 75 %): not done
     impl: tests/bench/test_sen.py::test_tc_sen_05_accuracy_vs_reference
   - id: TC-SEN-04
     shape: atomic
