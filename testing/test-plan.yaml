@@ -311,8 +311,8 @@ capabilities:
     what: pre-releases ota-test-* del repo con las imágenes de prueba OTA (FSD §22.0)
     available: unproven
   reference-instrument:
-    what: termohigrómetro de referencia para NFR-SEN-01, contrastado con sobres de calibración de HR del 33 % y del 75 %
-    available: unproven
+    what: termohigrómetro de referencia para NFR-SEN-01, contrastado en HR con sobres del 33 % y 75 % o con sal saturada (NaCl, 75 %) (FSD 0.9.7)
+    available: yes
     observed: >
       H-77 (propietario, 2026-11-09): la referencia es el sensor interior WH32B de la
       WS-2000, leído en su consola (resolución 0,1 °C y 1 % HR). Contrastado ese día con la
@@ -2257,6 +2257,24 @@ phase_closures:
       - FR-POR-02 (parte de example.com) descansa en la evidencia manual H-51; vence si cambia components/portal (CR-TB-09 abierta)
       - la fila de banco de C-HW-08 queda fuera de §3.1 por FSD 0.9.6
       - 8 no bloqueantes en fsd_pending, sin versión abierta
+  - phase: 2
+    date: 2026-11-09
+    commit: da3f9ba   # último criterio ejecutable (NFR-SEN-01, TC-SEN-05) registrado; firmware final en 7fb10da = imagen 0.0.0-17dc543-bench
+    fsd_version: 0.9.7
+    record: testing/cierre-fase-2.md
+    criteria: todos los criterios ejecutables de §3.2 con test en verde; 5 filas bloqueadas por capacidades del banco en no
+    approved_by: propietario (H-79, 2026-11-09)
+    blocked_by_bench:   # bloqueados por el banco, no fallidos; se retoman al ampliar el fork (sesión aparte)
+      - {requirement: FR-TIME-02, row: bench+, test: TC-TIME-08, capability: bench-serial-write}
+      - {requirement: NFR-WDT-01, row: target, test: null, capability: bench-serial-write}
+      - {requirement: FR-MQTT-07, row: bench, test: null, capability: bench-mqtt-auth, cr: CR-TB-03}
+      - {requirement: FR-LOG-01, row: bench, test: TC-LOG-04, capability: bench-traffic-capture, cr: CR-TB-04}
+      - {requirement: FR-LOG-02, row: captura, test: null, capability: bench-traffic-capture, cr: CR-TB-04}
+    caveats:
+      - §3.2 [user] no deja salir la fase con capacidades derivadas en no; H-79 la cierra como excepción del propietario
+      - 13 tests bench tienen su último verde sobre un firmware anterior a 7fb10da (lista en el registro); 7 de ellos antes del cliente SNTP y del watchdog
+      - TC-TIME-03 (H-76) y TC-WDT-01 (H-78) en verde por reevaluación de su evidencia
+      - NFR-SEN-01 con la temperatura informativa (FSD 0.9.7)
 
 release_verify:
   first_tag: v0.0.1   # decisión del propietario (H-37, 2026-11-03): el primer tag de release; el tag lo crea él cuando /build anuncie Ready for shipment
