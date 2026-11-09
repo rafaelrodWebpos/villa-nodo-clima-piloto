@@ -1534,6 +1534,17 @@ tests:
       el chat y Claude las escribe en TC-SEN-05-referencia.txt. Referencia sin contrastar
       en HR (ni sobres del 33 % y 75 % ni sal saturada NaCl 75 %): not done
     impl: tests/bench/test_sen.py::test_tc_sen_05_accuracy_vs_reference
+    status: successful
+    commit: 0565b10
+    date: 2026-11-09
+    ci_run: 42495454952   # build.yml, workflow_dispatch variant=bench version=0.0.0-17dc543
+    evidence: test-results/20261109T204137Z-0565b10/TC-SEN-05.md
+    observed: >
+      WH32B de la WS-2000 (contrastado en HR con la sal saturada, 75 % a 29,7 °C) a 2-5 cm
+      del SHT41, 30 min de estabilización; 10 parejas seguidas con la lectura a +5,6 …
+      +14,4 s de la llegada (la primera lectura, a 45,2 s, quedó fuera y la serie volvió
+      a empezar): ΔHR medio +1,19 %HR (máx. 2,0; tolerancia ± 3), PASS; ΔT medio
+      +0,37 °C (máx. 0,5), informativo por FSD 0.9.7. Referencia: T 30,0-30,2 °C, HR 74 %
   - id: TC-SEN-04
     shape: atomic
     kind: standard
