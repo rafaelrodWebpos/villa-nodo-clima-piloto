@@ -23,4 +23,6 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
   depuración fila 5, abierta: contraste con los sobres del 33 % y 75 % sin hacer).
 - **Acción.** Contrastar la referencia y, después, 30 min de estabilización y 10 lecturas de
   la referencia a ± 30 s de cada publicación.
-- **Estado.** Pendiente.
+- **Estado.** Preparado (H-77, 2026-11-09): referencia WH32B de la WS-2000, contrastada solo al
+  75 % con la prueba de la sal; test TC-SEN-05 escrito, sin lanzar. Falta decidir si cuenta sin el
+  punto del 33 % (hoy el FSD lo da por no válido y el test sale not done).

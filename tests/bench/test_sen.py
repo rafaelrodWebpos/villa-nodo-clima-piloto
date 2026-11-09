@@ -204,3 +204,125 @@ def test_tc_sen_04_sda_disconnect_recovery(testbench, dut_slot, dut_mac, firmwar
         assert len(boots) <= 1, f"el nodo se reinició: {boots}"
         c.passed(f"0 medidas con SDA suelto, Δerr_sensor={derr}, tres medidas válidas a {t_rec:.1f} s de "
                  f"reconectar (≤ {SEN03_LIMITE_S} s{'' if t_rec <= SEN03_LIMITE_S else ', dentro de la tolerancia'}); sin reinicio")
+
+
+# --------------------------------------------------------------------------
+# TC-SEN-05 · NFR-SEN-01 (H-77): exactitud frente al instrumento de referencia
+# --------------------------------------------------------------------------
+ESTABILIZACION_S = 30 * 60
+PAREJAS = 10
+VENTANA_LECTURA_S = 30            # la lectura de la referencia, a ± 30 s de la llegada
+MAX_INTENTOS = 20                 # publicaciones como mucho para juntar 10 parejas seguidas
+TOL_T, TOL_HR = 0.5, 3.0
+# Contraste de la referencia (WH32B interior de la WS-2000, H-77): prueba de la sal al 75 %
+# a 29,7 °C, corrección 0; sin punto del 33 %. El FSD (NFR-SEN-01, «No debe ocurrir») no
+# admite una referencia sin los dos puntos: mientras sea así, el resultado se registra y se
+# marca not done.
+CONTRASTE = {"75": "prueba de la sal, 75 % HR a 29,7 °C, corrección 0", "33": None}
+AVISO_COLOCAR = ("NFR-SEN-01: ¿está el WH32B junto al SHT41 (a 2-5 cm, a la misma altura, sin "
+                 "tocarlo, ambos a 5 cm o más de la placa, sin sol ni corrientes)? Pulsa Hecho y "
+                 "no lo toques más: empiezan 30 min de estabilización")
+AVISO_LEER = ("LEE AHORA LA CONSOLA WS-2000: temperatura y humedad INTERIOR. Apunta la lectura "
+              "{n} de {total} y pulsa Hecho en menos de 30 s")
+ESPERA_LECTURAS_S = 1800          # Claude escribe el archivo con lo que dicta el propietario
+
+
+def _leer_referencia(path, n):
+    """n líneas «T HR» (coma o punto decimal) del archivo que escribe Claude con lo que dicta
+    el propietario."""
+    filas = []
+    for ln in path.read_text().splitlines():
+        ln = ln.split("#", 1)[0].strip().replace(",", ".")
+        if ln:
+            t, hr = ln.split()[:2]
+            filas.append((float(t), float(hr)))
+    assert len(filas) == n, f"{path.name}: {len(filas)} lecturas, se esperaban {n}"
+    return filas
+
+
+def test_tc_sen_05_accuracy_vs_reference(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-SEN-05 · NFR-SEN-01 — tras 30 min de estabilización, 10 publicaciones seguidas, cada
+    una con una lectura del WH32B a ± 30 s de su llegada: diferencias medias ≤ 0,5 °C y ≤ 3 %HR."""
+    import json
+    from test_mqtt import _a_operativo, _nodo, _suscribir, configurado
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    base = f"sitio1/zona1/{nodo}"
+    ref_path = run_dir / "TC-SEN-05-referencia.txt"
+    with case(tb, "TC-SEN-05", "Exactitud frente a la referencia", run_dir,
+              spec="TC-SEN villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        c.note("- referencia: sensor interior WH32B de la WS-2000, leído en la consola por el "
+               "propietario; resolución 0,1 °C y 1 % HR",
+               *[f"- contraste al {p} %: {v or 'no hecho'}" for p, v in CONTRASTE.items()], "")
+        banco.broker_on()
+        with _suscribir(tb, nodo) as sub:
+            _a_operativo(tb, dut_slot, banco, c)
+            c.step("Aviso: colocar el WH32B junto al SHT41")
+            assert tb.human_interaction(AVISO_COLOCAR, timeout=120), "not confirmed: colocación"
+            t_col = time.time()
+            c.step(f"Estabilización {ESTABILIZACION_S // 60} min")
+            while time.time() < t_col + ESTABILIZACION_S:
+                time.sleep(10)
+            assert _status_vivos(sub.mensajes(), base, t_col), "sin status en vivo durante la estabilización"
+
+            c.step(f"{PAREJAS} lecturas de la referencia, una por publicación")
+            parejas, intentos, visto = [], 0, time.time()
+            while len(parejas) < PAREJAS and intentos < MAX_INTENTOS:
+                nueva = None
+                fin = time.time() + 2 * CICLO_S
+                while nueva is None and time.time() < fin:
+                    nueva = next((m for m in _medidas_vivas(sub.mensajes(), base, visto)
+                                  if m["topic"].endswith("/temperatura")), None)
+                    time.sleep(0.5)
+                assert nueva, "ninguna publicación de temperatura en 2 ciclos"
+                visto = nueva["t"] + 1
+                intentos += 1
+                n = len(parejas) + 1
+                ok = tb.human_interaction(AVISO_LEER.format(n=n, total=PAREJAS), timeout=VENTANA_LECTURA_S + 15)
+                t_click = time.time()
+                hr = next((m for m in _medidas_vivas(sub.mensajes(), base, nueva["t"] - 5, nueva["t"] + 5)
+                           if m["topic"].endswith("/humedad")), None)
+                dt = t_click - nueva["t"]
+                if not ok or abs(dt) > VENTANA_LECTURA_S or hr is None:
+                    c.note(f"- publicación {intentos}: lectura fuera de ± {VENTANA_LECTURA_S} s o sin confirmar "
+                           f"(Δt = {dt:.1f} s, confirmado = {ok}); se vuelve a empezar la serie")
+                    parejas = []
+                    continue
+                parejas.append({"t": nueva["t"], "dt": round(dt, 1), "T": json.loads(nueva["payload"])["v"],
+                                "HR": json.loads(hr["payload"])["v"]})
+            assert len(parejas) == PAREJAS, f"solo {len(parejas)} parejas seguidas en {intentos} publicaciones"
+            msgs = sub.mensajes()
+        c.save_log("mqtt", [f"{m['t'] - t_col:+.2f} s retain={int(m['retain'])} {m['topic']} {m['payload']}"
+                            for m in msgs])
+
+        # Sin aviso largo del banco (CR-TB-11): el propietario dicta las lecturas por el chat y
+        # Claude las escribe en el archivo; el test espera a que estén las 10.
+        c.step(f"Esperar las {PAREJAS} lecturas de la referencia en {ref_path.name}")
+        ref_path.write_text("# T HR, una lectura por línea, en el orden de los avisos\n")
+        fin = time.time() + ESPERA_LECTURAS_S
+        while True:
+            try:
+                ref = _leer_referencia(ref_path, PAREJAS)
+                break
+            except (AssertionError, ValueError):
+                if time.time() > fin:
+                    pytest.skip(f"not done: sin las {PAREJAS} lecturas de la referencia en {ESPERA_LECTURAS_S // 60} min")
+                time.sleep(5)
+
+        dT = [round(p["T"] - r[0], 2) for p, r in zip(parejas, ref)]
+        dH = [round(p["HR"] - r[1], 2) for p, r in zip(parejas, ref)]
+        mT, mH = sum(dT) / PAREJAS, sum(dH) / PAREJAS
+        c.note("", "## Resultado", "", "| # | Δt lectura (s) | T nodo | T ref | ΔT | HR nodo | HR ref | ΔHR |",
+               "|---|---|---|---|---|---|---|---|",
+               *[f"| {i + 1} | {p['dt']:+} | {p['T']} | {r[0]} | {a:+} | {p['HR']} | {r[1]} | {b:+} |"
+                 for i, (p, r, a, b) in enumerate(zip(parejas, ref, dT, dH))], "",
+               f"- diferencia media: ΔT = {mT:+.2f} °C (tolerancia ± {TOL_T}), ΔHR = {mH:+.2f} % (± {TOL_HR})",
+               f"- máximas: |ΔT| = {max(map(abs, dT)):.2f} °C, |ΔHR| = {max(map(abs, dH)):.2f} %")
+        if not all(CONTRASTE.values()):
+            # Con una referencia sin los dos puntos el FSD no admite ni verde ni rojo.
+            pytest.skip("not done: referencia sin contrastar al 33 % HR (FSD NFR-SEN-01, «No debe ocurrir»); "
+                        f"ΔT medio {mT:+.2f} °C, ΔHR medio {mH:+.2f} % (informativo)")
+        assert abs(mT) <= TOL_T, f"ΔT medio {mT:+.2f} °C fuera de ± {TOL_T}"
+        assert abs(mH) <= TOL_HR, f"ΔHR medio {mH:+.2f} % fuera de ± {TOL_HR}"
+        c.passed(f"ΔT medio {mT:+.2f} °C, ΔHR medio {mH:+.2f} % en {PAREJAS} parejas")
