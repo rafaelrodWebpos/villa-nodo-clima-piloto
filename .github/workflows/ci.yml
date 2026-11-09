@@ -20,6 +20,8 @@ jobs:
           cmake -S tests/host -B build-host
           cmake --build build-host
           ctest --test-dir build-host --output-on-failure
+      - name: Reinicios en la consola (H-78)
+        run: python3 tests/host/test_consola.py
 
   test-plan:            # un plan que no carga pone la CI en rojo
     runs-on: ubuntu-latest

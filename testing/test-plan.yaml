@@ -1866,8 +1866,10 @@ tests:
       fila bench de NFR-WDT-01 y aceptación 22.1-2 (H-71): OPERATIVO 24 h con 3
       cortes de broker y 2 de Wi-Fi (AP del banco apagado) de 5 min intercalados,
       todos por API (sin acción física ni bench-serial-write); uptime_s creciente
-      en todos los status en vivo y reset sin cambio; ninguna línea boot:/rst: ni
-      task_wdt en la consola; Δlecturas = 1440 ± 2 (los ciclos de la ventana ± 2);
+      en todos los status en vivo y reset sin cambio; ningún retroceso del reloj de
+      esp_log en la ventana (H-78: los bloques idénticos que el banco vuelve a entregar
+      se descartan como relectura sin ocultar un reinicio real; host:
+      tests/host/test_consola.py) ni task_wdt en la consola; Δlecturas = 1440 ± 2 (los ciclos de la ventana ± 2);
       publicaciones por medida = ciclos en OPERATIVO (status en vivo) ± 2; tras
       cada corte, un status en vivo en ≤ 150 s; control positivo: med: en cada
       tramo de 10 min de la consola (si falta, not done). Se lanza en un turno de

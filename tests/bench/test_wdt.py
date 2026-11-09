@@ -5,8 +5,10 @@ un AP desechable nuevo, deja el nodo en OPERATIVO y lo observa 24 h con 3 cortes
 bench-serial-write. Deja el AP y el broker apagados al terminar.
 
 Observación:
-- NFR-WDT-01 (bench): uptime_s monótono en todos los status en vivo, reset sin cambio; ninguna
-  línea boot:/rst: tras el arranque inicial, en particular ninguna con reset=task_wdt.
+- NFR-WDT-01 (bench): uptime_s monótono en todos los status en vivo, reset sin cambio; ningún
+  retroceso del reloj de esp_log en la ventana (H-78: un reinicio es eso, no el texto «boot:»;
+  los bloques idénticos que el banco vuelve a entregar se descartan como relectura sin ocultar
+  un reinicio real, consola.py) y ninguna línea con task_wdt.
 - 22.1-2: Δlecturas = 1440 ± 2 en 24 h (en general, la duración en ciclos de 60 s ± 2);
   publicaciones por medida = ciclos en OPERATIVO ± 2 (ciclos en OPERATIVO = status en vivo:
   en OPERATIVO hay un status por ciclo, FR-MQTT-08; los ciclos sin OPERATIVO no publican);
@@ -24,6 +26,7 @@ import time
 import pytest
 
 from benchlib import case
+from consola import quitar_relecturas, reinicios
 from test_mqtt import MEDIDAS, _a_operativo, _nodo, _suscribir, configurado
 
 CICLO_S = 60
@@ -126,7 +129,10 @@ def test_tc_wdt_01_24h_stability(testbench, dut_slot, dut_mac, firmware, run_dir
         decrecientes = [(i, uptimes[i - 1], uptimes[i]) for i in range(1, len(uptimes))
                         if not (isinstance(uptimes[i], int) and isinstance(uptimes[i - 1], int) and uptimes[i] > uptimes[i - 1])]
         resets = sorted({s.get("reset") for _, s in st})
-        boots = [e["text"].strip() for e in ent if e.get("ts", 0) >= t_ini - CICLO_S and BOOT.search(e.get("text", ""))]
+        limpias, relecturas = quitar_relecturas(ent)
+        retrocesos = [limpias[k]["text"].strip() for k in reinicios(limpias)
+                      if limpias[k].get("ts", 0) >= t_ini - CICLO_S]
+        boots = [e["text"].strip() for e in limpias if e.get("ts", 0) >= t_ini - CICLO_S and BOOT.search(e.get("text", ""))]
         wdt = [e["text"].strip() for e in ent if "task_wdt" in e.get("text", "")]
         dt = ventana[-1][0] - ventana[0][0]
         ciclos = round(dt / CICLO_S)
@@ -139,7 +145,7 @@ def test_tc_wdt_01_24h_stability(testbench, dut_slot, dut_mac, firmware, run_dir
         for k in cortes:
             nxt = next((t for t, _ in st if t > k["t_vuelta"]), None)
             vueltas.append((k["tipo"], round(k["t_corte"] - t_ini), None if nxt is None else round(nxt - k["t_vuelta"], 1)))
-        n_med, huecos = _huecos_med(ent, t_ini, t_fin)
+        n_med, huecos = _huecos_med(limpias, t_ini, t_fin)
         c.note("", "## Resultado", "",
                f"- status en vivo: {len(st)} ({len(ventana)} en la ventana); primero: uptime_s={a['uptime_s']}, "
                f"lecturas={a['lecturas']}, err_sensor={a['err_sensor']}, reset={a['reset']}; último: "
@@ -151,11 +157,14 @@ def test_tc_wdt_01_24h_stability(testbench, dut_slot, dut_mac, firmware, run_dir
                *[f"- corte de {tipo} a t={tc} s: primer status en vivo a "
                  + (f"{v} s de devolverlo" if v is not None else "— (ninguno)") for tipo, tc, v in vueltas],
                f"- uptime_s no creciente: {decrecientes or 'ninguno'}; valores de reset: {resets}",
-               f"- líneas boot:/rst: en la ventana: {len(boots)}; líneas con task_wdt: {len(wdt)}",
+               f"- relecturas del banco descartadas: {len(relecturas)} bloque(s) de "
+               f"{[n for _, n, _ in relecturas]} líneas; retrocesos del reloj de esp_log en la ventana: "
+               f"{retrocesos or 'ninguno'}; líneas boot:/rst: en la ventana tras descartarlas: {len(boots)}; "
+               f"líneas con task_wdt: {len(wdt)}",
                f"- control de la consola: {n_med} líneas med: en la ventana; tramos de 10 min con < "
                f"{MED_MIN_POR_10MIN}: {huecos or 'ninguno'}")
         assert not wdt, f"reinicio por watchdog: {wdt[:3]}"
-        assert not boots, f"reinicio en la ventana: {boots[:3]}"
+        assert not retrocesos, f"reinicio en la ventana (retroceso del reloj de esp_log): {retrocesos[:3]}"
         assert not decrecientes, f"uptime_s no creciente: {decrecientes[:3]}"
         assert resets == [a["reset"]], f"reset cambió: {resets}"
         assert len(cortes) == len(CORTES), f"solo {len(cortes)} de {len(CORTES)} cortes hechos"
