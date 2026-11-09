@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.6
+fsd_version: 0.9.7
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -10,7 +10,7 @@ author: Rafael Rodriguez
 reviewers: []
 approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11); D23 aceptada por el propietario (2026-11-02)
 created: 2026-10-11
-last_updated: 2026-11-06
+last_updated: 2026-11-09
 change_history:
   - 0.1.0 (2026-10-11): versión inicial; incluye sincronización SNTP (FR-TIME-*) y lista OTA
     verificada contra la cadena de redirección real de GitHub Releases.
@@ -113,6 +113,10 @@ change_history:
     `last_updated`. (10) §3.2 cita los cuatro contratos con cortes. (11) Límite escrito de la
     fila bench de FR-POR-02. (12) C-HW-* y C-BLD-* pasan a criterio de salida de la Fase 1,
     salvo la fila bench de C-HW-08 (`bench-dual-console`).
+  - 0.9.7 (2026-11-09): NFR-SEN-01 y su contrato (propietario, H-77). La referencia vale si
+    está contrastada con los sobres del 33 % y del 75 %HR o con la prueba de sal saturada
+    (NaCl, 75 %HR); la humedad cuenta con ± 3 %HR. La temperatura se compara y se registra
+    como informativa mientras la referencia no esté contrastada en temperatura.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -872,7 +876,11 @@ HR = −6 + 125·S_RH/65535, con la HR recortada a [0, 100].
   ciclo con lectura válida, sin reiniciarse.
 - **NFR-SEN-01** [Should] [derived]: tras 30 min de estabilización, la
   temperatura y la HR publicadas deberán coincidir con las de un instrumento de
-  referencia situado junto al sensor dentro de **± 0,5 °C y ± 3 %HR**.
+  referencia situado junto al sensor dentro de **± 0,5 °C y ± 3 %HR**. La
+  referencia vale si está contrastada en HR con los sobres de calibración del 33 % y
+  del 75 %HR o con la prueba de sal saturada (NaCl, 75 %HR). Mientras no esté
+  contrastada en temperatura, la temperatura se compara y se registra como
+  informativa y el resultado lo decide la HR (0.9.7).
 
 ### 8.3 Contratos de verificación
 
@@ -904,7 +912,7 @@ verification:
 | FR-SEN-01 | Vectores crudos (S_T, S_RH) = (0, 0), (65535, 65535) y (0x6666, 0x8000) | T = −45,00 / 130,00 / 25,00 °C; HR = 0 (recortada) / 100 (recortada) / 56,50 % | HR fuera de [0, 100] | host |
 | FR-SEN-02 | Trama con el CRC de T alterado; trama con el CRC de HR alterado | Lectura inválida en ambos casos | Que una mitad válida se publique sola | host |
 | FR-SEN-01 | DUT con el sensor conectado, 3 ciclos | 3 líneas `med: T=<t> HR=<h> Td=<td>` (§18) con T ∈ [0, 50] °C | Alguna línea `med: invalida (…)` | target |
-| NFR-SEN-01 | Tras 30 min, comparar 10 publicaciones consecutivas, cada una con una lectura de la referencia tomada a ± 30 s de su llegada | Diferencias medias dentro de la tolerancia | Diferencia media > 0,5 °C o > 3 %HR; comparar contra un instrumento no contrastado con los sobres de 33 % y 75 %HR | bench (instrumento de referencia leído por el operador) |
+| NFR-SEN-01 | Tras 30 min, comparar 10 publicaciones consecutivas, cada una con una lectura de la referencia tomada a ± 30 s de su llegada | Diferencia media de HR dentro de ± 3 %HR; diferencia media de temperatura dentro de ± 0,5 °C si la referencia está contrastada en temperatura, y si no, registrada como informativa | Diferencia media > 3 %HR; diferencia media > 0,5 °C con la referencia contrastada en temperatura; comparar contra un instrumento no contrastado en HR ni con los sobres de 33 % y 75 %HR ni con la prueba de sal saturada (NaCl, 75 %HR) | bench (instrumento de referencia leído por el operador) |
 
 ## 9. Publicador MQTT
 
