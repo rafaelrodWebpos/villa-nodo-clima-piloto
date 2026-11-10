@@ -52,18 +52,31 @@ jobs:
 
       - name: Decide what to build
         id: plan
+        # SEC-09: los inputs llegan por env (nunca interpolados en el script) y se
+        # validan antes de usarlos.
+        env:
+          VARIANT_IN: ${{ inputs.variant }}
+          VERSION_IN: ${{ inputs.version }}
+          EVENT: ${{ github.event_name }}
         run: |
-          VARIANT="${{ github.event.inputs.variant || 'production' }}"
+          SEMVER='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$'
+          VARIANT="${VARIANT_IN:-production}"
+          case "$VARIANT" in production|bench|bench-sin-receptor) ;;
+            *) echo "::error title=SEC-09::variante no válida"; exit 1 ;; esac
           [ "$MULTI_VARIANT" = "true" ] || VARIANT=production
           # Un tag es siempre producción (C-LOG-01).
           [[ "$GITHUB_REF" == refs/tags/v* ]] && VARIANT=production
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            VERSION="$VERSION_IN"
           elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
           else
             VERSION="0.0.0-$(git rev-parse --short HEAD)"
+          fi
+
+          if ! [[ "$VERSION" =~ $SEMVER ]]; then
+            echo "::error title=SEC-09::versión no semver: se rechaza"; exit 1
           fi
 
           DEFAULTS="sdkconfig.defaults"
