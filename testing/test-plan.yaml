@@ -1856,6 +1856,15 @@ tests:
       wifi: intento (control positivo), ninguna T08 y la MAC del DUT no aparece entre las
       estaciones; después, con el AP con clave, T08 en ≤ 90 s
     impl: tests/bench/test_seguridad.py::test_tc_con_14_open_twin_rejected
+    status: successful
+    commit: 02de0f8
+    date: 2026-11-10
+    ci_run: 42918449688   # build.yml, workflow_dispatch variant=bench version=0.0.0-02de0f8
+    evidence: test-results/20261110T230652Z-02de0f8/TC-CON-14.md
+    observed: >
+      con el AP abierto gemelo 180 s: 10 intentos de unión, sin T08 ni asociación; con el AP
+      con clave, T08 a 20,6 s. Regresión en la misma ejecución: JRN-01.0 a JRN-01.4 en verde.
+      Una ejecución anterior se cortó (se cerró la ventana) antes de TC-CON-14 y se descartó
     history: >
       2026-11-10, control sobre la imagen anterior al arreglo (0.0.0-17dc543-bench,
       test-results/20261110T224654Z-316a70b/): también PASS — 10 intentos, sin T08 ni
