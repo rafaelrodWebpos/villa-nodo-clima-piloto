@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T23 (host, lógica de la tabla), filas implementadas: T01–T16.
+/* TC-CON-01 · T01–T25 (host, lógica de la tabla), filas implementadas: T01–T16, T24 y T25.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -139,6 +139,38 @@ int main(void)
     ESPERA(strcmp(con_nombre_estado(CON_CONECTANDO_WIFI), "CONECTANDO_WIFI") == 0, "nombre CONECTANDO_WIFI");
     ESPERA(strcmp(con_nombre_evento(CON_EV_FIN_ARRANQUE), "fin_arranque") == 0, "nombre fin_arranque");
 
-    printf("TC-CON-01 (T01–T16): %s\n", fallos ? "FALLO" : "ok");
+    /* T24: PORTAL + portal_vence -> ESPERA, cerrar el portal. No debe: mantener el AP, escribir en la NVS, reiniciar */
+    t = con_transicion(CON_PORTAL, CON_EV_PORTAL_VENCE, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T24") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_ESPERA && t.accion == CON_ACC_CERRAR_PORTAL, "T24: %d/%d", t.siguiente, t.accion);
+    ESPERA(t.accion != CON_ACC_PERSISTIR, "T24 escribe en la NVS");
+
+    /* T25: VALIDANDO + portal_vence -> VALIDANDO, aplazar el cierre. No debe: interrumpir la prueba */
+    t = con_transicion(CON_VALIDANDO, CON_EV_PORTAL_VENCE, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T25") == 0, "fila %s", t.fila ? t.fila : "NULL");
+    ESPERA(t.siguiente == CON_VALIDANDO && t.accion == CON_ACC_APLAZAR_CIERRE, "T25: %d/%d", t.siguiente, t.accion);
+    ESPERA(t.accion != CON_ACC_RESPONDER_NO_CONECTA && t.accion != CON_ACC_CERRAR_PORTAL, "T25 interrumpe la prueba");
+    /* ...y la prueba termina por T06 (vuelve a PORTAL, donde el evento repetido da T24) o por T05 */
+    t = con_transicion(CON_VALIDANDO, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.siguiente == CON_PORTAL, "T06 tras T25: %d", t.siguiente);
+    t = con_transicion(t.siguiente, CON_EV_PORTAL_VENCE, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T24") == 0 && t.siguiente == CON_ESPERA, "T24 tras T06: %s", t.fila ? t.fila : "NULL");
+    t = con_transicion(CON_VALIDANDO, CON_EV_WIFI_UP, (con_guardas_t){0});
+    ESPERA(t.siguiente == CON_ARRANQUE && t.accion == CON_ACC_PERSISTIR, "T05 tras T25: %d/%d", t.siguiente, t.accion);
+
+    /* ESPERA: ningún evento tiene fila (§6.4: todos imp); portal_vence fuera de PORTAL/VALIDANDO tampoco */
+    for (int ev = 0; ev < CON_N_EVENTOS; ev++) {
+        t = con_transicion(CON_ESPERA, (con_evento_t)ev, (con_guardas_t){0});
+        ESPERA(t.fila == NULL && t.siguiente == CON_ESPERA, "ESPERA + %s: fila %s", con_nombre_evento(ev), t.fila ? t.fila : "NULL");
+    }
+    const con_estado_t otros[] = {CON_ARRANQUE, CON_CONECTANDO_WIFI, CON_CONECTANDO_BROKER, CON_OPERATIVO};
+    for (unsigned i = 0; i < sizeof otros / sizeof otros[0]; i++) {
+        t = con_transicion(otros[i], CON_EV_PORTAL_VENCE, (con_guardas_t){0});
+        ESPERA(t.fila == NULL, "%s + portal_vence: fila %s", con_nombre_estado(otros[i]), t.fila);
+    }
+    ESPERA(strcmp(con_nombre_estado(CON_ESPERA), "ESPERA") == 0, "nombre ESPERA");
+    ESPERA(strcmp(con_nombre_evento(CON_EV_PORTAL_VENCE), "portal_vence") == 0, "nombre portal_vence");
+
+    printf("TC-CON-01 (T01–T16, T24, T25): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

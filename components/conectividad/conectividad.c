@@ -6,10 +6,11 @@
 
 static const char *const NOMBRE_ESTADO[CON_N_ESTADOS] = {
     "ARRANQUE", "PORTAL", "VALIDANDO", "CONECTANDO_WIFI",
-    "CONECTANDO_BROKER", "OPERATIVO", "OTA_DESCARGA",
+    "CONECTANDO_BROKER", "OPERATIVO", "OTA_DESCARGA", "ESPERA",
 };
 static const char *const NOMBRE_EVENTO[CON_N_EVENTOS] = {
     "fin_arranque", "envío", "wifi_up", "wifi_down", "backoff", "mqtt_up", "mqtt_down",
+    "portal_vence",
 };
 
 con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_guardas_t g)
@@ -19,6 +20,10 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
             ? (con_transicion_t){"T01", CON_CONECTANDO_WIFI, CON_ACC_ARRANCAR_STA}
             : (con_transicion_t){"T02", CON_PORTAL, CON_ACC_ARRANCAR_PORTAL};
     }
+    if (origen == CON_PORTAL && evento == CON_EV_PORTAL_VENCE)
+        return (con_transicion_t){"T24", CON_ESPERA, CON_ACC_CERRAR_PORTAL};
+    if (origen == CON_VALIDANDO && evento == CON_EV_PORTAL_VENCE)
+        return (con_transicion_t){"T25", CON_VALIDANDO, CON_ACC_APLAZAR_CIERRE};
     if (origen == CON_PORTAL && evento == CON_EV_ENVIO) {
         return g.envio_valido
             ? (con_transicion_t){"T04", CON_VALIDANDO, CON_ACC_PROBAR_UNION}

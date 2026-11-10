@@ -6,12 +6,13 @@
 
 typedef enum {
     CON_ARRANQUE, CON_PORTAL, CON_VALIDANDO, CON_CONECTANDO_WIFI,
-    CON_CONECTANDO_BROKER, CON_OPERATIVO, CON_OTA_DESCARGA, CON_N_ESTADOS
+    CON_CONECTANDO_BROKER, CON_OPERATIVO, CON_OTA_DESCARGA, CON_ESPERA, CON_N_ESTADOS
 } con_estado_t;
 
 typedef enum {
     CON_EV_FIN_ARRANQUE, CON_EV_ENVIO, CON_EV_WIFI_UP, CON_EV_WIFI_DOWN, CON_EV_BACKOFF,
     CON_EV_MQTT_UP, CON_EV_MQTT_DOWN,
+    CON_EV_PORTAL_VENCE,                 /* FR-POR-08: 10 min desde T02 (D24) */
     CON_N_EVENTOS                        /* el resto de §6.4 llega con sus filas */
 } con_evento_t;
 
@@ -31,6 +32,8 @@ typedef enum {
     CON_ACC_PROGRAMAR_REINTENTO_MQTT, /* T12/T15: programar un reintento MQTT con el backoff */
     CON_ACC_INTENTAR_MQTT,     /* T13: lanzar un intento de conexión MQTT */
     CON_ACC_RED_CAIDA,         /* T14/T16: detener los intentos MQTT; programar un reintento Wi-Fi */
+    CON_ACC_CERRAR_PORTAL,     /* T24: detener el HTTP y el DNS del portal y apagar el AP */
+    CON_ACC_APLAZAR_CIERRE,    /* T25: la prueba de unión sigue; el cierre se aplica al volver a PORTAL */
 } con_accion_t;
 
 typedef struct {

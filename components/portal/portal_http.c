@@ -21,6 +21,7 @@ static const char *TAG = "portal";
 static const char *s_id, *s_version;
 static portal_envio_cb_t s_al_enviar;
 static volatile portal_vista_t s_vista = PORTAL_VISTA_FORMULARIO;
+static httpd_handle_t s_srv;
 
 /* Valores no secretos del último envío válido, para volver a mostrarlos tras
  * T06 (FR-POR-05). Los secretos no se guardan aquí nunca. */
@@ -162,5 +163,11 @@ esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_
     /* Orden: «/» exacta antes que el comodín */
     ESP_ERROR_CHECK(httpd_register_uri_handler(srv, &raiz_get));
     ESP_ERROR_CHECK(httpd_register_uri_handler(srv, &raiz_post));
+    s_srv = srv;
     return httpd_register_uri_handler(srv, &otra_get);
+}
+
+void portal_http_detener(void)
+{
+    if (s_srv) { httpd_stop(s_srv); s_srv = NULL; }
 }

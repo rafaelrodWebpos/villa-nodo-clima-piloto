@@ -28,5 +28,8 @@ typedef portal_resp_t (*portal_envio_cb_t)(const char *const v[PORTAL_N_CAMPOS],
  * viva el servidor. */
 esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_cb_t al_enviar);
 
+/* Detiene el servidor HTTP (T24, FR-POR-08). */
+void portal_http_detener(void);
+
 /* Cambia lo que muestra GET / (T05, T06). */
 void portal_http_vista(portal_vista_t v);

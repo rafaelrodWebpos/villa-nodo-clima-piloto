@@ -66,6 +66,9 @@ static portal_config_t s_cfg;                  /* configuración leída de la NV
 static int s_intento;                          /* E4: <n> del intento de unión en curso */
 static const char *const *s_envio;             /* valores del envío, solo durante al_enviar */
 static esp_timer_handle_t s_t_validacion;      /* T06: 20 s sin IP */
+static esp_timer_handle_t s_t_portal;          /* T24: 10 min de portal desde T02 (FR-POR-08, D24) */
+static bool s_cierre_pendiente;                /* T25: el portal venció durante VALIDANDO */
+static esp_timer_handle_t s_t_cierre;          /* T24: el cierre corre fuera de s_lock */
 static esp_timer_handle_t s_t_reinicio;        /* T05: reinicio tras responder */
 static esp_timer_handle_t s_t_reintento;       /* T04: reintento de la unión dentro de los 20 s */
 static esp_timer_handle_t s_t_backoff;         /* T09/T10: backoff de Wi-Fi (FR-CON-02) */
@@ -80,6 +83,7 @@ static QueueHandle_t s_eventos_mqtt;           /* mqtt_up / mqtt_down hacia la t
 static char s_top_status[160];                 /* <sitio>/<zona>/<nodo>/status */
 
 #define VALIDACION_US   (20 * 1000 * 1000)     /* T06, D12: 20 s */
+#define PORTAL_US       (600LL * 1000 * 1000)  /* T24, D24: 10 min desde T02 */
 #define REINICIO_US     (4 * 1000 * 1000)      /* T05: ≤ 5 s desde la línea con: (D12); 4 s para que el teléfono vea «Conectado…» (H-41) */
 #define REINTENTO_US    (1 * 1000 * 1000)
 
@@ -538,6 +542,7 @@ static void persistir_y_reiniciar(void)
         soltar_sta();
         s_estado = CON_PORTAL;
         portal_http_vista(PORTAL_VISTA_NO_CONECTA);
+        if (s_cierre_pendiente) esp_timer_start_once(s_t_portal, 1000);   /* T25 → T24 */
         return;
     }
     ESP_LOGI(TAG, "nvs: config escrita");                     /* E10 */
@@ -557,6 +562,32 @@ static void no_conecta(void)
     memset(&s_pendiente, 0, sizeof s_pendiente);
     soltar_sta();
     portal_http_vista(PORTAL_VISTA_NO_CONECTA);
+    /* T25: si el portal venció durante la prueba, el evento se vuelve a emitir ya en
+     * PORTAL (lo dispara el temporizador, después de la línea con: de T06) y da T24 */
+    if (s_cierre_pendiente) esp_timer_start_once(s_t_portal, 1000);
+}
+
+static void al_vencer_portal(void *arg)
+{
+    transicion(CON_EV_PORTAL_VENCE, (con_guardas_t){0});   /* T24 o T25 */
+}
+
+/* Acción de T24: detener el HTTP y el DNS del portal y apagar el AP. La medición sigue;
+ * solo un reinicio vuelve a abrir el portal (FR-POR-08). No debe: tocar la NVS.
+ * httpd_stop espera a que termine el manejador en curso, y un envío lo hace esperando
+ * a s_lock: por eso la parada corre en otro disparo del temporizador, ya sin s_lock.
+ * Mientras tanto el estado ya es ESPERA y un envío no encuentra fila (§6.4, imp¹). */
+static void al_cerrar_portal(void *arg)
+{
+    portal_http_detener();
+    portal_dns_detener();
+    esp_wifi_stop();
+}
+
+static void cerrar_portal(void)
+{
+    s_cierre_pendiente = false;
+    esp_timer_start_once(s_t_cierre, 1000);
 }
 
 /* Opción DNS del servidor DHCP del AP (OFFER_DNS de lwip dhcpserver.h; el
@@ -637,6 +668,11 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(portal_dns_iniciar());
     ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version, al_enviar));
+    const esp_timer_create_args_t tpo = {.callback = al_vencer_portal, .name = "portal"};
+    ESP_ERROR_CHECK(esp_timer_create(&tpo, &s_t_portal));
+    const esp_timer_create_args_t tci = {.callback = al_cerrar_portal, .name = "cierre"};
+    ESP_ERROR_CHECK(esp_timer_create(&tci, &s_t_cierre));
+    ESP_ERROR_CHECK(esp_timer_start_once(s_t_portal, PORTAL_US));   /* FR-POR-08 */
 }
 
 static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
@@ -656,6 +692,8 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_PROGRAMAR_REINTENTO_MQTT: programar_reintento_mqtt(); break;
     case CON_ACC_INTENTAR_MQTT:        intentar_mqtt(); break;
     case CON_ACC_RED_CAIDA:            red_caida(); break;
+    case CON_ACC_CERRAR_PORTAL:        cerrar_portal(); break;
+    case CON_ACC_APLAZAR_CIERRE:       s_cierre_pendiente = true; break;   /* T25 */
     case CON_ACC_NINGUNA:              break;
     }
     /* E0 */

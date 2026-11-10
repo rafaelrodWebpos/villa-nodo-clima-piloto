@@ -70,3 +70,82 @@ def test_tc_con_14_open_twin_rejected(testbench, dut_slot, dut_mac, firmware, ru
         assert dt <= VUELTA_S, f"T08 a {dt:.1f} s, límite {VUELTA_S} s"
         c.passed(f"gemelo abierto rechazado {GEMELO_S} s ({len(intentos)} intentos, sin asociación); "
                  f"con clave, T08 a {dt:.1f} s")
+
+
+# --------------------------------------------------------------------------
+# TC-POR-12 · FR-POR-08, T24 (SEC-04): el portal se cierra a los 10 min (ESPERA)
+# --------------------------------------------------------------------------
+T02_LINEA = "con: ARRANQUE -> PORTAL (fin_arranque)"
+T24_LINEA = "con: PORTAL -> ESPERA (portal_vence)"
+PORTAL_MS, TOL_MS = 600_000, 5_000        # D24: 10 min desde T02, ± 5 s (FSD §6.6)
+ESCANEOS_TRAS = 3
+
+
+def _ms(texto):
+    m = re.match(r"\s*[IWE] \((\d+)\)", texto)
+    return int(m.group(1)) if m else None
+
+
+def _visible(tb, ssid):
+    return any(n.get("ssid") == ssid for n in tb.scan().get("networks") or [])
+
+
+def test_tc_por_12_portal_closes_after_10_min(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-POR-12 · FR-POR-08, T24 — sin configuración, el portal se cierra a 600 s ± 5 s de T02:
+    el AP desaparece, la medición sigue, nada en la NVS y sin reinicio; otro reset lo reabre."""
+    from benchlib import borrar_nvs
+    from consola import quitar_relecturas, reinicios
+    from test_mqtt import grabar
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    with case(tb, "TC-POR-12", "Portal cerrado a los 10 min (ESPERA)", run_dir,
+              spec="TC-POR villa-nodo-clima-piloto") as c:
+        c.note(f"- imagen: `{firmware['version']}` (variante {firmware['variant']}, run CI {firmware['ci_run']})", "")
+        assert not tb.ap_status().get("active"), "el AP del banco está activo: el escaneo comparte la radio"
+        c.step(f"Precondiciones: grabar la imagen de la CI en {dut_slot} y P-NVS-ERASE")
+        grabar(tb, dut_slot, firmware, c)
+        borrar_nvs(tb, dut_slot, tmp_path)
+        c.step("Reset; el DUT abre el portal (T02)")
+        t0 = time.time()
+        reg = Registro(tb, dut_slot, t0)
+        tb.serial_reset(dut_slot)
+        assert reg.esperar(re.escape(T02_LINEA), 60), "sin T02 tras el reset"
+        time.sleep(30)
+        antes = _visible(tb, nodo)
+        c.note(f"- a ~30 s de T02, `{nodo}` visible en el escaneo: {'sí' if antes else 'no'}")
+        assert antes, "control positivo: el AP del portal no se ve antes del cierre"
+
+        c.step("Esperar el cierre del portal (T24, ≈ 10 min desde T02)")
+        hit = reg.esperar(re.escape(T24_LINEA), 720)
+        assert hit, "sin «con: PORTAL -> ESPERA (portal_vence)» en 12 min"
+        tras = [_visible(tb, nodo) for _ in range(ESCANEOS_TRAS)]
+        time.sleep(75)                                    # un ciclo de medición después del cierre
+        ent, _ = quitar_relecturas(reg.leer())
+        txt = [e.get("text", "") for e in ent]
+        i24 = next(i for i, t in enumerate(txt) if T24_LINEA in t)
+        i02 = max(i for i, t in enumerate(txt[:i24]) if T02_LINEA in t)
+        dt_ms = _ms(txt[i24]) - _ms(txt[i02])
+        med_tras = [t for t in txt[i24:] if "nodo: med: " in t]
+        nvs = [t for t in txt if "nvs: config escrita" in t]
+        rein = [k for k in reinicios(ent) if k > i02]
+        c.note(f"- T02 → T24 en el reloj del DUT: {dt_ms} ms (esperado {PORTAL_MS} ± {TOL_MS})",
+               f"- escaneos tras el cierre: {['visible' if v else 'no' for v in tras]}",
+               f"- líneas med: después del cierre: {len(med_tras)}; `nvs: config escrita`: {len(nvs)}; "
+               f"reinicios tras T02: {len(rein)}")
+        assert abs(dt_ms - PORTAL_MS) <= TOL_MS, f"T24 a {dt_ms} ms de T02"
+        assert not any(tras), "el AP del portal sigue visible tras T24"
+        assert med_tras, "la medición no siguió en ESPERA"
+        assert not nvs, "se escribió la NVS"
+        assert not rein, "el DUT se reinició tras T02"
+
+        c.step("Otro reset: el portal vuelve a abrirse")
+        t1 = time.time()
+        tb.serial_reset(dut_slot)
+        assert reg.esperar(re.escape(T02_LINEA), 60, desde_ts=t1), "sin T02 tras el segundo reset"
+        time.sleep(5)
+        otra = any(_visible(tb, nodo) for _ in range(3))
+        c.save_log("serie", [e.get("text", "") for e in reg.leer()])
+        c.note(f"- tras el segundo reset, `{nodo}` visible: {'sí' if otra else 'no'}")
+        assert otra, "el portal no se reabre tras un reset"
+        c.passed(f"T24 a {dt_ms / 1000:.1f} s de T02; AP fuera en los {ESCANEOS_TRAS} escaneos; "
+                 f"{len(med_tras)} med: en ESPERA; sin NVS ni reinicio; reabierto tras un reset")

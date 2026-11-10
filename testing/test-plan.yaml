@@ -698,7 +698,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16]   # crece fila a fila: el contrato host de §6.6 cubre T01–T23
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T24, T25]   # crece fila a fila: el contrato host de §6.6 cubre T01–T25 (T24/T25: FSD 0.9.8)
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
@@ -1830,6 +1830,21 @@ tests:
       AP apagado 60 min: 0 líneas boot:/rst:, 60 med: en la ventana (ningún tramo de 10 min
       con menos de 5), 7 escaneos sin clima-*; primer status 32,8 s tras volver el AP con
       uptime_s = 3648 y reset = usb igual que antes
+  - id: TC-POR-12
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: S1   # puerta de seguridad S1 (FSD 0.9.8, §3.5)
+    tier: bench
+    verifies: [FR-POR-08, T24]
+    needs: [bench-driver, bench-flash, bench-portal-driver, bench-serial-monitor, dut-board]
+    expect: >
+      sin configuración (P-NVS-ERASE), reset: T02 y el AP clima-* visible; T24 («con:
+      PORTAL -> ESPERA (portal_vence)») a 600 s ± 5 s de T02 en el reloj del DUT; el AP
+      fuera en 3 escaneos seguidos; med: después del cierre; ninguna «nvs: config
+      escrita» ni reinicio tras T02 (retroceso del reloj, consola.py); tras otro reset,
+      el AP vuelve
+    impl: tests/bench/test_seguridad.py::test_tc_por_12_portal_closes_after_10_min
   - id: TC-CON-13
     shape: atomic
     kind: standard

@@ -1,5 +1,6 @@
 /* L1 portal — adaptador del DNS cautivo (UDP/53). La respuesta la construye
  * el núcleo puro portal_dns_respuesta (portal_cautivo.c, TC-POR-06). */
+#include <stdbool.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -9,6 +10,8 @@
 
 static const char *TAG = "portal";
 static const uint8_t IP_PORTAL[4] = {192, 168, 4, 1};    /* FSD §11.1 */
+static volatile int s_sock = -1;                          /* T24 lo cierra para terminar la tarea */
+static volatile bool s_detener;
 
 static void tarea_dns(void *arg)
 {
@@ -20,15 +23,29 @@ static void tarea_dns(void *arg)
         vTaskDelete(NULL);
         return;
     }
+    s_sock = s;
     uint8_t q[512], r[512];
-    for (;;) {
+    while (!s_detener) {
         struct sockaddr_in de;
         socklen_t largo = sizeof de;
         int n = recvfrom(s, q, sizeof q, 0, (struct sockaddr *)&de, &largo);
-        if (n <= 0) continue;
+        if (n <= 0) {
+            if (s_detener) break;
+            continue;
+        }
         size_t m = portal_dns_respuesta(q, (size_t)n, r, sizeof r, IP_PORTAL);
         if (m) sendto(s, r, m, 0, (struct sockaddr *)&de, largo);
     }
+    if (s_sock >= 0) { close(s_sock); s_sock = -1; }
+    vTaskDelete(NULL);
+}
+
+/* T24 (FR-POR-08): la tarea sale del bucle; shutdown despierta al recvfrom bloqueado. */
+void portal_dns_detener(void)
+{
+    s_detener = true;
+    int s = s_sock;
+    if (s >= 0) shutdown(s, SHUT_RDWR);
 }
 
 esp_err_t portal_dns_iniciar(void)
