@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.7
+fsd_version: 0.9.8
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -10,7 +10,7 @@ author: Rafael Rodriguez
 reviewers: []
 approval_status: decisiones D1–D22 y FR-OTA-11 aceptadas por el propietario (2026-10-11); D23 aceptada por el propietario (2026-11-02)
 created: 2026-10-11
-last_updated: 2026-11-09
+last_updated: 2026-11-10
 change_history:
   - 0.1.0 (2026-10-11): versión inicial; incluye sincronización SNTP (FR-TIME-*) y lista OTA
     verificada contra la cadena de redirección real de GitHub Releases.
@@ -117,6 +117,21 @@ change_history:
     está contrastada con los sobres del 33 % y del 75 %HR o con la prueba de sal saturada
     (NaCl, 75 %HR); la humedad cuenta con ± 3 %HR. La temperatura se compara y se registra
     como informativa mientras la referencia no esté contrastada en temperatura.
+  - 0.9.8 (2026-11-10): puerta de seguridad S1 (propietario, H-81 a H-84), a partir de la
+    auditoría de `testing/auditoria-seguridad-fase-2.md`. (1) SEC-04: estado ESPERA y filas
+    T24/T25; el portal dura 10 min desde T02 y luego se cierra hasta el siguiente reinicio
+    (FR-POR-08, D24). (2) SEC-05: un POST incompleto se corta con 408 (FR-POR-09, D25).
+    (3) SEC-06: el DNS y el HTTP del portal solo atienden por la IP del AP (FR-POR-10).
+    (4) SEC-07: el STA exige WPA2 como mínimo si hay clave y anuncia PMF (FR-CON-07); el
+    test de banco usa un AP gemelo abierto con el SSID de prueba del banco, nunca el de la
+    casa (H-83). (5) SEC-10, Fase 3: rollback del bootloader activado (C-BLD-04).
+    (6) SEC-11, Fase 3 (H-84): anti-downgrade para las releases `v*` en las dos imágenes
+    (FR-OTA-05); las pre-releases `ota-test-*` solo en la imagen de banco y fuera del
+    anti-downgrade (FR-OTA-13); URL validada con un análisis estricto (FR-OTA-14);
+    verificación del nombre del certificado (FR-OTA-03). NFR-OTA-01 alterna entre dos
+    `ota-test-*`; las pruebas OTA corren en la imagen de banco, y las alternativas field
+    con producción solo usan releases `v*` (§22.0). (7) Riesgos aceptados y revisión antes
+    de cada release (§19.3): SEC-01, SEC-02, SEC-03 y SEC-12 a SEC-15. (8) Puerta S1 en §3.5.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -241,6 +256,10 @@ defecto.
   bytes (3 MB) no cabe en un slot OTA, y el build debe fallar si se supera.
 - **C-BLD-03** [Must] [user]: el firmware debe construirse con **ESP-IDF 6.x**
   para el target `esp32s3`; la versión exacta se fija en el Method y en la CI.
+- **C-BLD-04** [Must] [derived] (Fase 3, SEC-10): el bootloader y la aplicación deben
+  construirse con el rollback de aplicación activado
+  (`CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y`), del que dependen FR-OTA-07 y T23. Cambiar
+  el bootloader exige grabar por USB. El anti-rollback por eFuse no se adopta (§19.3).
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
@@ -255,6 +274,7 @@ defecto.
 | C-BLD-01 | `gen_esp32part.py` sobre la tabla de la imagen | Coincide fila a fila con la tabla de §2.2 | Tabla por defecto del toolchain | other (CI) |
 | C-BLD-02 | Build de una imagen de 3 MB + 1 byte (prueba de la regla) | El build falla con un mensaje de tamaño | Que la imagen se genere | other (CI) |
 | C-BLD-03 | Log de la CI | ESP-IDF v6.x, target esp32s3 | Otra versión mayor | other (CI) |
+| C-BLD-04 | `sdkconfig` generado de cada imagen de la CI | `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` | «is not set» | other (CI) |
 
 ### 2.3 Arquitectura software
 
@@ -374,7 +394,7 @@ Cada fase se entra solo con lo que entregaron las anteriores.
 - **Entregables.** Actualización desde una release de GitHub con un comando
   MQTT, y rollback automático si la imagen nueva no alcanza OPERATIVO.
 - **Criterios de salida.** Pasan FR-OTA-*, NFR-OTA-01, FR-MQTT-09, NFR-SEC-02,
-  FR-CFG-01 (fila de OTA) y las filas T17–T23.
+  C-BLD-04, FR-CFG-01 (fila de OTA) y las filas T17–T23.
 - **Dependencias.** Salida a Internet desde la red de prueba (§22.0, capacidad
   `bench-ap-internet`, o el nivel field como alternativa). Fase 2, porque el comando llega por MQTT y la validación de
   la imagen exige alcanzar OPERATIVO. Además, al menos una release publicada en
@@ -392,6 +412,20 @@ Cada fase se entra solo con lo que entregaron las anteriores.
 El control de un aire acondicionado por IR se especificará con un delta de
 este FSD (`/define update`). Nada de este documento lo presupone. No hay pines
 reservados ni tópicos de comando definidos para él.
+
+### 3.5 Puerta de seguridad S1 (entre la Fase 2 y la Fase 3)
+
+- **Origen.** Auditoría de seguridad de cierre de la Fase 2
+  (`testing/auditoria-seguridad-fase-2.md`), decisiones H-81 a H-84 [user].
+- **Criterios de salida.** Antes de empezar la Fase 3 pasan FR-POR-08, FR-POR-09,
+  FR-POR-10, FR-CON-07 y las filas T24 y T25, y la regresión de banco de la Fase 1 y
+  de la Fase 2 que toque el cambio. Los cambios de la CI de SEC-08 y SEC-09 se
+  comprueban en la propia CI. SEC-10 y SEC-11 son requisitos de la Fase 3
+  (C-BLD-04, FR-OTA-05, FR-OTA-13, FR-OTA-14, FR-OTA-03) y no se implementan en S1.
+- **Salvedad.** Cambiar `components/portal` caduca la evidencia manual H-51 de
+  FR-POR-02 (§22.0). La prueba con el teléfono se repite una sola vez al final de la
+  Fase 3, con las demás pruebas físicas de esa fase (H-83); hasta entonces FR-POR-02
+  queda con la evidencia caducada, declarada como salvedad.
 
 ---
 
@@ -436,7 +470,7 @@ reservados ni tópicos de comando definidos para él.
 
 ### 4.4 Decisiones de valores
 
-D1–D23 están **aceptadas** por el propietario y son normativas. No hay
+D1–D25 están **aceptadas** por el propietario y son normativas. No hay
 decisiones abiertas.
 
 | # | Valor | Requisitos |
@@ -463,6 +497,8 @@ decisiones abiertas.
 | D20 | `ota_repo` = `rafaelrodWebpos/villa-nodo-clima-piloto`. Es público y no identifica el lugar de instalación | FR-OTA-11 |
 | D21 | Límites de T01 (configuración → STA en ≤ 2 s) y de T02 (sin configuración → AP en ≤ 10 s) | T01, T02 |
 | D22 | El firmware no requiere PSRAM (permite usar la variante N8) | C-HW-03 |
+| D24 | Duración del portal: 10 min desde T02; después, ESPERA hasta el siguiente reinicio (H-82, opción A) | FR-POR-08, T24, T25 |
+| D25 | POST del portal: 3 esperas de lectura consecutivas sin datos (5 s cada una, la de `esp_http_server`) → 408 | FR-POR-09 |
 | D23 | Identificador de sitio configurable `sitio`, regex `^[a-z0-9_-]{1,32}$`, sin valor por defecto, primer nivel de los tópicos; `device.name` de Discovery = «Clima <sitio> <zona>»; `unique_id` sin el sitio [user] (2026-11-02) | FR-MQTT-01, FR-HA-02, FR-POR-03, C-CFG-01 |
 
 ---
@@ -540,6 +576,7 @@ pérdidas de Wi-Fi y de broker **sin reiniciarse** [user].
 | CONECTANDO_BROKER | Wi-Fi con IP; el cliente MQTT se intenta conectar con backoff | No |
 | OPERATIVO | MQTT conectado; se publican las medidas | No |
 | OTA_DESCARGA | Descarga y escritura de una imagen en curso | No |
+| ESPERA | Sin configuración válida y con el portal cerrado por tiempo (FR-POR-08): sin AP, sin DNS y sin HTTP; el ciclo de medición sigue. Solo se sale con un reinicio (reset o corte de alimentación) | No |
 
 Región ortogonal **Validación de imagen**: `PENDIENTE` (primer arranque de una
 imagen recién instalada) → `VÁLIDA`. Su estado persiste en `otadata`.
@@ -567,13 +604,15 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T14 | CONECTANDO_BROKER | wifi_down | — | CONECTANDO_WIFI | Detener los intentos MQTT; programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
 | T15 | OPERATIVO | mqtt_down | — | CONECTANDO_BROKER | Programar un reintento MQTT | 1 s | Reiniciar el nodo; desconectar el Wi-Fi |
 | T16 | OPERATIVO | wifi_down | — | CONECTANDO_WIFI | Programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
-| T17 | OPERATIVO | cmd_ota | Payload conforme a §12.1 (FR-OTA-09), URL inicial con esquema y host permitidos (FR-OTA-02) y con la ruta del repo (FR-OTA-11) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
+| T17 | OPERATIVO | cmd_ota | Payload conforme a §12.1 (FR-OTA-09), URL inicial bien formada (FR-OTA-14), con esquema y host permitidos (FR-OTA-02) y con la ruta del repo (FR-OTA-11, FR-OTA-13) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
 | T18 | OPERATIVO | cmd_ota | Incumple alguna regla de la guarda de T17, evaluadas en el orden payload → host → ruta; el motivo es la primera que falla | OPERATIVO | Publicar `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` | 2 s | Descargar; cambiar de partición |
 | T19 | OTA_DESCARGA | ota_ok | — | ARRANQUE (reinicio) | Publicar `status` con `ota` = `ok`, publicar `offline` y reiniciar en el nuevo slot | 5 s | Reiniciar sin cambiar de slot |
-| T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>` (redirecciones, FR-OTA-02; TLS, FR-OTA-03; imagen, FR-OTA-05; http y red, FR-OTA-12), `rechazado:host` (un salto de redirección a un host no permitido, FR-OTA-02) o `rechazado:misma_version` (FR-OTA-05); conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
+| T20 | OTA_DESCARGA | ota_err | — | OPERATIVO | Publicar `status` con `ota` = `error:<motivo>` (redirecciones, FR-OTA-02; TLS, FR-OTA-03; imagen, FR-OTA-05; http y red, FR-OTA-12), `rechazado:host` (un salto de redirección a un host no permitido o mal formado, FR-OTA-02, FR-OTA-14), `rechazado:misma_version` o `rechazado:version_anterior` (FR-OTA-05); conservar la imagen en ejecución | 2 s | Reiniciar; marcar el slot nuevo como arrancable |
 | T21 | OTA_DESCARGA | cmd_ota | — | OTA_DESCARGA | Publicar `ota` = `rechazado:ocupado` | 2 s | Abortar o reiniciar la descarga en curso |
 | T22 | OTA_DESCARGA | mqtt_down o wifi_down | — | CONECTANDO_BROKER o CONECTANDO_WIFI, según el evento | Abortar la descarga; conservar la imagen en ejecución; diagnóstico `ota` = `error:red` (FR-OTA-12; la línea `ota: estado error:red` se escribe en el momento del cambio y el `status` se publica al volver a OPERATIVO, FR-MQTT-09) | 2 s | Reiniciar; activar una imagen parcial |
 | T23 | (Validación) PENDIENTE | 300 s sin T11 desde el arranque | — | Reinicio → rollback | Reiniciar; el bootloader arranca la imagen anterior | 300 s | Seguir con la imagen no validada |
+| T24 | PORTAL | portal_vence (10 min desde T02, D24) | — | ESPERA | Detener el HTTP y el DNS del portal y apagar el AP | 2 s | Mantener el AP o el HTTP; escribir en la NVS; reiniciar |
+| T25 | VALIDANDO | portal_vence | — | VALIDANDO | Aplazar el cierre: la prueba de unión en curso sigue; si termina por T05, el nodo guarda y reinicia; si termina por T06, `portal_vence` se vuelve a emitir al llegar a PORTAL y se aplica T24 | — | Interrumpir la prueba de unión; responder «no se pudo conectar» por el cierre |
 
 **Acciones globales.** Si salta el watchdog de tareas (NFR-WDT-01), el nodo se
 reinicia desde cualquier estado. Es el único reinicio no ordenado por T05, T19
@@ -584,22 +623,24 @@ o T23.
 `Tnn` = la fila que lo trata · `ign` = se ignora y se registra a nivel debug ·
 `imp` = imposible por construcción (motivo al pie).
 
-| Estado \ Evento | fin_arranque | envío | wifi_up | wifi_down | backoff | mqtt_up | mqtt_down | cmd_ota | ota_ok/err |
-|---|---|---|---|---|---|---|---|---|---|
-| ARRANQUE | T01/T02 | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ |
-| PORTAL | imp⁶ | T03/T04 | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ |
-| VALIDANDO | imp⁶ | T07 | T05 | T06 | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ |
-| CONECTANDO_WIFI | imp⁶ | imp¹ | T08 | T09 | T10 | imp⁴ | imp⁴ | imp⁴ | imp⁵ |
-| CONECTANDO_BROKER | imp⁶ | imp¹ | ign | T14 | T13 | T11 | T12 | imp⁴ | imp⁵ |
-| OPERATIVO | imp⁶ | imp¹ | ign | T16 | ign⁷ | ign | T15 | T17/T18 | imp⁵ |
-| OTA_DESCARGA | imp⁶ | imp¹ | ign | T22 | ign⁷ | ign | T22 | T21 | T19/T20 |
+| Estado \ Evento | fin_arranque | envío | wifi_up | wifi_down | backoff | mqtt_up | mqtt_down | cmd_ota | ota_ok/err | portal_vence |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ARRANQUE | T01/T02 | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ |
+| PORTAL | imp⁶ | T03/T04 | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T24 |
+| VALIDANDO | imp⁶ | T07 | T05 | T06 | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T25 |
+| CONECTANDO_WIFI | imp⁶ | imp¹ | T08 | T09 | T10 | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ |
+| CONECTANDO_BROKER | imp⁶ | imp¹ | ign | T14 | T13 | T11 | T12 | imp⁴ | imp⁵ | imp⁸ |
+| OPERATIVO | imp⁶ | imp¹ | ign | T16 | ign⁷ | ign | T15 | T17/T18 | imp⁵ | imp⁸ |
+| OTA_DESCARGA | imp⁶ | imp¹ | ign | T22 | ign⁷ | ign | T22 | T21 | T19/T20 | imp⁸ |
+| ESPERA | imp⁶ | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁹ |
 
 ¹ El servidor HTTP del portal solo existe en PORTAL y VALIDANDO.
 ² El STA no está iniciado. ³ No hay temporizador de backoff armado.
 ⁴ El cliente MQTT no está conectado; no se pueden recibir comandos.
 ⁵ No hay descarga en curso. ⁶ Se emite una sola vez por arranque.
 ⁷ Un temporizador residual se cancela al entrar en OPERATIVO; si dispara, se
-ignora.
+ignora. ⁸ El temporizador del portal solo se arma en T02, y un nodo configurado no
+pasa por T02. ⁹ ESPERA solo se alcanza por T24, ya emitido.
 
 Un comando OTA entregado con el flag retain no genera el evento `cmd_ota`: se
 ignora y se registra (FR-OTA-04). Las redirecciones, el certificado, la
@@ -625,6 +666,11 @@ y sus fallos llegan como `ota_err` (T20).
 - **FR-CON-06** [Must] [derived]: un nodo configurado no deberá volver a PORTAL
   por fallos de conexión; solo vuelve a PORTAL si la NVS no contiene una
   configuración válida.
+- **FR-CON-07** [Must] [derived] (SEC-07): con `wifi_pass` no vacía, el STA deberá
+  exigir como mínimo WPA2-PSK (umbral de autenticación) y anunciar PMF como capaz, de
+  modo que no se una a una red abierta con el mismo SSID («evil twin»). Con
+  `wifi_pass` vacía (red abierta, §17) admite una red abierta. Aplica en
+  CONECTANDO_WIFI y en la prueba de unión de VALIDANDO.
 
 ### 6.6 Contratos de verificación
 
@@ -707,7 +753,11 @@ verification:
 | FR-CON-02 | MQTT: broker detenido 5 min con el Wi-Fi activo; se mide cada intervalo desde una línea `con: … -> CONECTANDO_BROKER (mqtt_down)` hasta el siguiente inicio de intento, `con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)` o `mqtt: intento <n>` (§18) | Los 10 primeros intervalos dentro de ±10 % de 1, 2, 4, 8, 16, 32, 60, 60, 60, 60 s | Intentos en ráfaga (< 1 s); un intervalo fuera de ±10 % | bench |
 | FR-CON-05 | Cortar y devolver la alimentación a un DUT configurado, con Wi-Fi y broker disponibles (Fase 2) | Suscriptor conectado desde antes del corte; solo cuentan mensajes en vivo (retain = 0). Encendido estimado = llegada del primer `status` − `uptime_s` − 2 s (1 s porque `uptime_s` es entero y 1 s por el arranque previo a la aplicación). La primera medida en vivo llega ≤ 30 s después del encendido estimado. No depende de la consola (CR-TB-10). En este banco el EN no está cableado al DUT (2026-11-06), así que `poweron` solo puede venir del corte. | El primer `status` sin `reset` = `poweron`; una primera medida a más de 30 s del encendido estimado; pasar por PORTAL | bench |
 | FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP (desde el arranque en la Fase 1; después de conectar, pasando por T14 (broker caído) o T16 (desde OPERATIVO), en la Fase 2); esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
-| T01–T23 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
+| FR-CON-07 | Función que prepara la configuración del STA con clave vacía y con clave de 8–63 caracteres | Umbral `WIFI_AUTH_OPEN` con clave vacía y `WIFI_AUTH_WPA2_PSK` con clave; PMF `capable` = true en los dos | Umbral abierto con clave; PMF `required` (dejaría fuera routers sin PMF) | host |
+| FR-CON-07 | DUT configurado contra el AP desechable del banco con clave; el banco levanta en su lugar un AP abierto con el mismo SSID de prueba (nunca el SSID de la casa, H-83) durante 3 min; después, el AP con clave otra vez | Con el AP abierto: líneas `wifi: intento` y ninguna `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` ni asociación (la lista de estaciones del AP del banco no muestra la MAC del DUT); con el AP con clave: T08 en ≤ 90 s | Que el DUT obtenga IP del AP abierto | bench |
+| T24 | DUT sin configuración; reset y esperar 10 min sin enviar nada | `con: PORTAL -> ESPERA (portal_vence)` a 600 s ± 5 s de `con: ARRANQUE -> PORTAL (fin_arranque)`; el SSID `clima-*` desaparece de los escaneos en ≤ 2 s + un escaneo; las líneas `med:` siguen; tras otro reset, el AP vuelve | El AP o el HTTP siguen tras el cierre; `nvs: config escrita`; un reinicio sin reset | bench |
+| T25 | Núcleo: VALIDANDO + portal_vence; luego T06 y T05 | VALIDANDO sigue; tras T06, el evento repetido lleva a ESPERA por T24; con T05 se guarda y se reinicia | Abandonar la prueba de unión | host |
+| T01–T25 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
 | T01–T10 | Una prueba por fila con el portal y el AP reales del banco, sin broker (Fase 1); tras T08 el DUT queda en CONECTANDO_BROKER | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento` y `nvs: config escrita` (§18), dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita`; en T08, la Fase 1 observa solo la transición, su línea `con:` y que el AP `clima-*` no aparece en el escaneo; su acción se observa en la fila siguiente (Fase 2) | Lo indicado en la columna «No debe ocurrir» de la fila; en T08, «abrir el AP» (la parte MQTT es de la fila siguiente) | bench |
 | T08 (arranque de SNTP y MQTT), T11–T16 | Una prueba por fila con el AP y el broker reales del banco (Fase 2) | La línea `con:` de la fila (§18) y su acción, observada con `mqtt: intento`, `sntp:`, `wifi: intento`, `med:` y `ota: estado` (§18) o con `status`, dentro del límite; en T08, `sntp:` y `mqtt: intento 1` tras su línea `con:`; el reinicio de su backoff, con al menos 4 fallos de unión antes de T08, de modo que el último intervalo observado antes de T08 fue de 8 s o más: el siguiente `wifi: intento` llega en ≤ 2 s desde la línea `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (wifi_down)` de T14 | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
 | T18 | Comando OTA con un payload, un host o una ruta que incumplen la guarda de T17, por el broker del banco (Fase 3) | `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` y ninguna línea `con:` de descarga | Lo indicado en la columna «No debe ocurrir» de T18 | bench |
@@ -743,13 +793,27 @@ estado, versión → aceptar o rechazar con motivo) que se prueba en host.
   desde un comando enviado por la LAN.
 - **FR-OTA-03** [Must] [derived]: el nodo deberá abortar con `error:tls`
   cualquier descarga cuyo certificado de servidor no verifique contra el
-  bundle de CAs del firmware.
+  bundle de CAs del firmware, incluido el nombre del servidor (sin desactivar la
+  comprobación del nombre común ni de los nombres alternativos, SEC-11).
 - **FR-OTA-04** [Must] [derived]: el nodo deberá ignorar, sin actuar y con
   registro, todo mensaje de comando OTA entregado con el flag retain.
 - **FR-OTA-05** [Must] [derived]: el nodo deberá rechazar con `error:imagen`
   una imagen que no sea una aplicación ESP-IDF válida para `esp32s3` (cabecera,
   chip o SHA-256), y con `rechazado:misma_version` una cuya versión coincida
-  con la que está en ejecución.
+  con la que está en ejecución. Para las releases `v*`, en las dos imágenes, deberá
+  rechazar además con `rechazado:version_anterior` una versión semver menor que la
+  que está en ejecución (anti-downgrade, SEC-11, H-84). Las pre-releases `ota-test-*`
+  (FR-OTA-13) quedan fuera de esta regla.
+- **FR-OTA-13** [Must] [derived] (SEC-11, H-84): la imagen de producción deberá
+  rechazar con `rechazado:ruta` toda URL inicial de una pre-release de prueba
+  (`…/releases/download/ota-test-*/…`); solo la imagen de banco las acepta.
+- **FR-OTA-14** [Must] [derived] (SEC-11): la URL inicial y cada redirección deberán
+  analizarse de forma estricta antes de aplicar FR-OTA-02 y FR-OTA-11: esquema
+  exactamente `https`, host comparado entero y sin distinguir mayúsculas, sin
+  `usuario@`, sin puerto o con el 443, sin `%` en el host ni en la ruta, sin
+  segmentos `.` o `..`, sin `\` y sin caracteres de control. Una URL que no lo cumple
+  se rechaza con `rechazado:host` si el defecto está antes de la ruta, y con
+  `rechazado:ruta` si está en la ruta.
 - **FR-OTA-06** [Must] [user]: tras una descarga válida, el nodo deberá
   reiniciar en la imagen nueva y publicar su versión en el campo `fw` de
   `status` en ≤ **120 s** desde el final de la descarga.
@@ -846,9 +910,12 @@ verification:
 | FR-OTA-12 | Clasificador de fallos de descarga con: fallo de DNS, fallo de TCP, timeout, respuesta 404 y respuesta 500 | `error:red`, `error:red`, `error:red`, `error:http`, `error:http` | Otro motivo; `ok` | host |
 | FR-OTA-12 | Comando con la URL de un asset inexistente bajo `https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/<tag>/` | `ota: estado error:http`; `status` con `ota` = `error:http` y `fw` sin cambio | Reinicio; una línea `ota: <n> %` | bench⁺ · alt. field |
 | FR-OTA-05 | Imagen para esp32 (no S3); imagen truncada; imagen con la misma versión | `error:imagen`, `error:imagen`, `rechazado:misma_version` | Cambio de slot; reinicio | bench⁺ · alt. field |
+| FR-OTA-05 | Política de versión con (en ejecución, destino) = (1.2.0, 1.1.9), (1.2.0, 1.2.0), (1.2.0, 1.2.1) para releases `v*`, y (1.2.0, ota-test 0.0.1) en la imagen de banco | `rechazado:version_anterior`, `rechazado:misma_version`, aceptar, aceptar | Aceptar un downgrade de una release `v*` | host |
+| FR-OTA-13 | Política con la URL de una pre-release `ota-test-*` en la imagen de producción y en la de banco | `rechazado:ruta` en producción; aceptada en banco | Que producción la acepte | host + other (CI: la verificación de release comprueba que la imagen del tag la rechaza) |
+| FR-OTA-14 | Política con URLs con `usuario@`, `:8443`, `%2e`, `/../`, `\`, mayúsculas en el esquema, un control y un host con un sufijo extra (`github.com.evil.example`) | El motivo de rechazo de FR-OTA-14 en cada una | Aceptar alguna | host |
 | FR-OTA-06 | Comando con la release B válida | `status` con `fw` = B en ≤ 120 s desde el `status` con `ota` = `ok` | En los 310 s siguientes, un `status` con `fw` ≠ B o con `uptime_s` decreciente (rollback de una imagen buena) | bench⁺ · alt. field |
 | FR-OTA-10 | Segundo comando durante una descarga | `ota` pasa por `en_curso` → `rechazado:ocupado` → `ok`, y después `fw` = B | Aborto de la primera | bench⁺ · alt. field |
-| NFR-OTA-01 | OTA alternando entre B y A (A → B, B → A, …, para no caer en `rechazado:misma_version`) hasta reunir ≥ 3 intervalos entre lecturas con un extremo dentro de OTA_DESCARGA | Bench⁺: esos intervalos, medidos entre líneas `med:` (§18), en [55, 65] s. Field: Δ`lecturas` = ⌊Δ`uptime_s`/60⌋ ± 1 entre el último `status` previo al comando y el `status` con `ota` = `ok` | Ciclo perdido sin conexión caída | bench⁺ · alt. field |
+| NFR-OTA-01 | OTA en la imagen de banco alternando entre dos pre-releases `ota-test-*` (B1 → B2 → B1 …, fuera del anti-downgrade de FR-OTA-05, H-84) hasta reunir ≥ 3 intervalos entre lecturas con un extremo dentro de OTA_DESCARGA | Bench⁺: esos intervalos, medidos entre líneas `med:` (§18), en [55, 65] s. Field: Δ`lecturas` = ⌊Δ`uptime_s`/60⌋ ± 1 entre el último `status` previo al comando y el `status` con `ota` = `ok` | Ciclo perdido sin conexión caída | bench⁺ · alt. field |
 
 ---
 
@@ -951,7 +1018,7 @@ El firmware no contiene ningún prefijo de tópico fijo (C-CFG-01).
 | `uptime_s` | entero | Segundos desde el arranque |
 | `lecturas` | entero | Lecturas válidas desde el arranque |
 | `err_sensor` | entero | Lecturas inválidas desde el arranque |
-| `ota` | string | `ninguno`, `en_curso`, `ok`, `rechazado:<payload\|host\|ruta\|misma_version\|ocupado>` o `error:<redirecciones\|tls\|imagen\|http\|red>`: último evento OTA (decisión o resultado) desde el arranque [user] |
+| `ota` | string | `ninguno`, `en_curso`, `ok`, `rechazado:<payload\|host\|ruta\|misma_version\|version_anterior\|ocupado>` o `error:<redirecciones\|tls\|imagen\|http\|red>`: último evento OTA (decisión o resultado) desde el arranque [user] |
 | `hora_valida` | booleano | `true` si la hora es válida según FR-TIME-02 |
 
 ### 9.4 Requisitos
@@ -1068,8 +1135,21 @@ consulta A.
 - **FR-POR-06** [Must] [derived]: un envío válido con unión STA exitosa deberá
   persistir la configuración y reiniciar el nodo en ≤ **5 s**;
   tras el reinicio, el nodo arranca por T01.
-- **FR-POR-07** [Must] [derived]: fuera de PORTAL y VALIDANDO, el nodo no
-  deberá emitir ningún AP ni servir HTTP.
+- **FR-POR-07** [Must] [derived]: fuera de PORTAL y VALIDANDO (también en ESPERA),
+  el nodo no deberá emitir ningún AP ni servir HTTP.
+- **FR-POR-08** [Must] [user] (SEC-04, H-82 opción A): el portal deberá estar abierto
+  como máximo **10 min** desde T02 (D24). Al vencer, el nodo deberá apagar el AP y
+  detener el DNS y el HTTP del portal y pasar a ESPERA (T24), de la que solo sale con
+  un reinicio, que vuelve a abrir el portal otros 10 min. Una prueba de unión en curso
+  termina antes del cierre (T25).
+- **FR-POR-09** [Must] [derived] (SEC-05): un `POST /` cuyo cuerpo no llega completo
+  tras 3 esperas de lectura consecutivas sin datos (D25) deberá responderse con
+  `408 Request Timeout` y cerrar la conexión, sin generar el evento «envío» ni tocar
+  la NVS; el portal deberá seguir atendiendo a otros clientes.
+- **FR-POR-10** [Must] [derived] (SEC-06): el DNS y el HTTP del portal deberán atender
+  solo lo que llega dirigido a la IP del AP (192.168.4.1): el socket DNS se liga a esa
+  IP y el servidor HTTP cierra al aceptarla toda conexión cuya dirección local sea
+  otra (en VALIDANDO, la del STA en la red doméstica).
 
 ### 11.3 Contratos de verificación
 
@@ -1083,6 +1163,9 @@ consulta A.
 | FR-POR-05 | Envío con una contraseña Wi-Fi errónea | «no se pudo conectar» en ≤ 20 s (+ 5 s de tolerancia por el cambio de canal); el AP sigue visible; tras el caso, un reset muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita` | Persistir; reiniciar | bench |
 | FR-POR-06 | Envío con datos correctos | El AP desaparece en ≤ 5 s desde `con: VALIDANDO -> ARRANQUE (wifi_up)`; el log serie muestra, en orden, `boot:`, `cfg: sitio=<sitio enviado> zona=<zona enviada>`, `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` y `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` (§18) | Volver a PORTAL tras reiniciar | bench |
 | FR-POR-07 | DUT configurado (CONECTANDO_WIFI o posterior); escaneo y `GET http://<ip-dut>/` | Ningún SSID `clima-*`; conexión rechazada | Respuesta HTTP | bench |
+| FR-POR-08 | Como el contrato de T24 | Como T24 | Como T24 | bench |
+| FR-POR-09 | Función que decide, por cada resultado de lectura del cuerpo, si seguir, esperar otra vez o cortar: 2 esperas sin datos y luego datos; 3 esperas seguidas; error de socket | Seguir; 408 a la tercera espera; cortar sin respuesta | Esperar sin límite; 408 con datos llegando | host |
+| FR-POR-10 | Función que decide si se atiende una conexión según su dirección local: 192.168.4.1, la IP del STA, 0.0.0.0; revisión del `bind` del socket DNS | Solo 192.168.4.1 se atiende; DNS ligado a 192.168.4.1 | Atender por la IP del STA | host + other (revisión) |
 
 ## 12. Receptor de comandos OTA
 
@@ -1341,7 +1424,9 @@ plano en un datagrama UDP, al receptor del testbench. Se gobierna por Kconfig:
 **Riesgos aceptados.** (b) puede leer las credenciales MQTT y falsear medidas
 o comandos, pero no puede instalar un firmware fuera de los hosts permitidos.
 (c) puede leer las credenciales Wi-Fi enviadas al AP abierto durante el
-aprovisionamiento. (d) puede extraer las credenciales leyendo la flash. Una
+aprovisionamiento y, mientras el portal está abierto, configurar el nodo antes que
+el propietario (SEC-04); la ventana se limita a 10 min desde el arranque
+(FR-POR-08). (d) puede extraer las credenciales leyendo la flash. Una
 cuenta de GitHub comprometida puede distribuir firmware.
 
 ### 19.2 Requisitos
@@ -1354,13 +1439,31 @@ cuenta de GitHub comprometida puede distribuir firmware.
   deberán contener SSIDs, contraseñas, hosts de broker, zonas ni sitios.
 - **FR-SEC-03** [Must] [derived]: el nodo no deberá emitir `wifi_pass` ni
   `mqtt_pass` por el log serie, por el log UDP, por MQTT ni por HTTP.
-- Las reglas OTA de seguridad son FR-OTA-02, FR-OTA-03 y FR-OTA-04 (§7).
+- Las reglas OTA de seguridad son FR-OTA-02, FR-OTA-03, FR-OTA-04, FR-OTA-05,
+  FR-OTA-13 y FR-OTA-14 (§7); las del portal y del STA, FR-POR-08 a FR-POR-10 y
+  FR-CON-07.
 
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
 | NFR-SEC-01 | Escáner de secretos (p. ej., gitleaks) sobre el árbol y el historial, más una lista de patrones prohibidos guardada fuera del repo, en cada push | 0 hallazgos | Que la CI pase con hallazgos | other (CI) |
 | NFR-SEC-02 | Todas las releases y pre-releases publicadas (`v*`, `ota-test-*`) + `strings`, buscando los valores del banco (que residen fuera del repo) | 0 coincidencias | Cualquier coincidencia | other (CI) / bench |
 | FR-SEC-03 | Aprovisionar con contraseñas marcador únicas; capturar el log serie y el log UDP del arranque, del portal y de 3 ciclos, las respuestas HTTP del portal, y suscribirse a `#` | El marcador no aparece en ninguna captura | Una subcadena del marcador de ≥ 4 caracteres, en claro o en base64, en el log serie, el log UDP, el broker o las respuestas HTTP del portal | bench |
+
+### 19.3 Riesgos aceptados y revisión antes de cada release (auditoría S1)
+
+Hallazgos de `testing/auditoria-seguridad-fase-2.md` que no llevan código (H-82, H-84).
+
+| Hallazgo | Tratamiento | Qué se comprueba antes de cada release |
+|---|---|---|
+| SEC-01 — runner self-hosted con `--network=host` en un repositorio público | Riesgo aceptado con mitigación verificada el 2026-11-10: el repositorio exige aprobación de workflows para todos los colaboradores externos, y no había ningún runner registrado | Que la política siga en «todos los colaboradores externos»; que el runner se registre (`scripts/runner/register.sh`) solo durante la release y se pare después |
+| SEC-02 — MQTT por TCP plano, sin TLS (§4.3) | Riesgo aceptado | `mqtt_host` por IP si es posible; usuario MQTT con ACL mínima (`<sitio>/<zona>/<nodo>/#` y `homeassistant/sensor/<nodo>/#`) |
+| SEC-03 — sin Secure Boot, sin cifrado de flash ni de NVS, descarga ROM y JTAG abiertos (§4.3) | Riesgo aceptado: el nodo físico equivale a la clave del Wi-Fi (lo dice el manual) | Ninguna; se revisa si cambia el perfil de amenazas |
+| SEC-12 — imagen de banco: comandos serie, log UDP en claro, 512 B de pila por tarea en el gancho del log | Mitigado por la CI (marcador de variante, E13 solo en banco, un tag construye producción) | Que la imagen del tag sea de producción (lo comprueba la CI) |
+| SEC-13 — volcado de pánico por la consola | Riesgo aceptado (exige acceso físico, SEC-03) | Ninguna |
+| SEC-14 — huella: MAC parcial en el SSID, versión en `status` y Discovery | Riesgo aceptado | Ninguna |
+| SEC-15 — CVE y avisos de ESP-IDF 6.0.x y `espressif/mqtt` 1.1.0 | Revisión | Leer los «Espressif Security Advisories» de ESP-IDF 6.0.x y el changelog de `espressif/mqtt` posterior a la versión del `dependencies.lock` |
+| SEC-08 — publicación de la release con `gh release create` | Implementado; el job solo corre con un tag `v*` | En el primer tag, comprobar que la release lleva el `.bin` y el `.elf` del build verificado |
+| SEC-10 — anti-rollback por eFuse | No adoptado (queman eFuses); el rollback de aplicación es C-BLD-04 | Ninguna |
 
 ## 20. Build
 
@@ -1403,7 +1506,10 @@ repositorio: los tags `v*.*.*` para versiones de producto, y pre-releases de
 prueba con tags `ota-test-*` para las imágenes de prueba (versión B, imagen que
 no alcanza OPERATIVO construida con `CONFIG_NODO_TEST_SIN_MQTT=y`, imagen para
 otro chip, imagen truncada), fuera del espacio de nombres de las releases. Se
-ejecutan en bench⁺. Si el banco no puede dar salida a Internet, pasan a field
+ejecutan en bench⁺ y, como la imagen de producción rechaza las `ota-test-*`
+(FR-OTA-13, H-84), sobre la imagen de banco; la verificación de la release solo
+comprueba que la imagen del tag rechaza una `ota-test-*`. Las alternativas field
+con la imagen de producción solo usan releases `v*`. Si el banco no puede dar salida a Internet, pasan a field
 solo los contratos marcados «alt. field». No valen en field y quedan bloqueados
 en bench⁺ FR-OTA-08 y T22 (cortan el AP o el broker durante la descarga). No
 necesitan Internet y se quedan en bench FR-OTA-01, FR-OTA-04 (corta y
@@ -1443,6 +1549,8 @@ cobertura en este FSD.
 | Backoff inicial / techo | 1 s / 60 s | FR-CON-02 |
 | Keepalive MQTT | 60 s | FR-MQTT-05 |
 | Prueba de unión del portal | 20 s | FR-POR-05 |
+| Duración del portal | 10 min desde T02 | FR-POR-08 |
+| Lectura del cuerpo del POST del portal | 3 esperas de 5 s sin datos → 408 | FR-POR-09 |
 | Ventana de validación de imagen | 300 s | FR-OTA-07 |
 | Timeout del watchdog | 30 s | NFR-WDT-01 |
 | `expire_after` | 180 s | FR-HA-03 |

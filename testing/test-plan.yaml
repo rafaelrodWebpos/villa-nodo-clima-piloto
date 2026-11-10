@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.7
+fsd_version: 0.9.8
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -2296,8 +2296,11 @@ release_verify:
       used_by: [NFR-WDT-01, FR-TIME-02]
       note: ningún paso del journey los usa; se verifican fuera de verify, con la imagen de banco
   ota_note: >
-    JRN-02.* parten de la imagen de producción grabada y hacen OTA a las
-    pre-releases ota-test-*; ninguna depende de funciones de banco
+    FSD 0.9.8 (H-84): la imagen de producción rechaza las pre-releases ota-test-*
+    (FR-OTA-13), así que JRN-02.* y las pruebas OTA con ota-test-* corren sobre la
+    imagen de banco; en la verificación de release, la imagen del tag solo comprueba
+    que rechaza una ota-test-* y, si hace OTA, solo a releases v*. Antes: JRN-02.*
+    partían de la imagen de producción y hacían OTA a las ota-test-*
 
 # Comprobaciones de que cada nivel funciona. No verifican el FSD y no son tests
 # del plan; se listan para que la reconciliación no las tome por huérfanas.
