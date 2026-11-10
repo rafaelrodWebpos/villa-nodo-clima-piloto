@@ -1830,6 +1830,39 @@ tests:
       AP apagado 60 min: 0 líneas boot:/rst:, 60 med: en la ventana (ningún tramo de 10 min
       con menos de 5), 7 escaneos sin clima-*; primer status 32,8 s tras volver el AP con
       uptime_s = 3648 y reset = usb igual que antes
+  - id: TC-CON-13
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: S1   # puerta de seguridad S1 (FSD 0.9.8, §3.5)
+    tier: host
+    verifies: [FR-CON-07]
+    needs: [hosted-ci]
+    expect: >
+      con_sta_seguridad: con clave de 8, 21 y 63 caracteres, umbral WPA2-PSK, PMF capaz
+      y no requerido; con clave vacía o NULL, umbral abierto (SEC-07)
+    impl: tests/host/test_conectividad_sta.c
+  - id: TC-CON-14
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: S1
+    tier: bench
+    verifies: [FR-CON-07]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-serial-monitor, dut-board]
+    expect: >
+      DUT configurado contra el AP desechable con clave; el banco levanta un AP abierto con
+      el mismo SSID de prueba de la ejecución (nunca el de la casa, H-83) 180 s: ≥ 3 líneas
+      wifi: intento (control positivo), ninguna T08 y la MAC del DUT no aparece entre las
+      estaciones; después, con el AP con clave, T08 en ≤ 90 s
+    impl: tests/bench/test_seguridad.py::test_tc_con_14_open_twin_rejected
+    history: >
+      2026-11-10, control sobre la imagen anterior al arreglo (0.0.0-17dc543-bench,
+      test-results/20261110T224654Z-316a70b/): también PASS — 10 intentos, sin T08 ni
+      asociación; con clave, T08 a 20,5 s. ESP-IDF 6.0.2 ya sube el umbral a WPA2 cuando
+      hay clave («Password length matches WPA2 standards, authmode threshold changes from
+      OPEN to WPA2» en el log), así que SEC-07 no era explotable en esta versión; el
+      arreglo lo hace explícito y no depende de ese comportamiento por defecto
   - id: TC-CON-12
     shape: atomic
     kind: standard

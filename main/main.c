@@ -42,6 +42,7 @@
 #include "identidad.h"
 #include "medicion.h"
 #include "sht41.h"
+#include "conectividad_sta.h"
 #include "portal_config.h"
 #include "portal_dns.h"
 #include "portal_http.h"
@@ -255,11 +256,17 @@ static void crear_sta(void)
     if (!creado) { esp_netif_create_default_wifi_sta(); creado = true; }
 }
 
+/* FR-CON-07 (SEC-07): con clave, umbral WPA2-PSK (nunca una red abierta con el mismo
+ * SSID) y PMF capaz; sin clave, red abierta. Lo decide el núcleo puro. */
 static void configurar_sta(const portal_config_t *c)
 {
     wifi_config_t sta = {0};
     memcpy(sta.sta.ssid, c->wifi_ssid, strlen(c->wifi_ssid));
     memcpy(sta.sta.password, c->wifi_pass, strlen(c->wifi_pass));
+    const con_sta_seguridad_t seg = con_sta_seguridad(c->wifi_pass);
+    sta.sta.threshold.authmode = seg.umbral == CON_STA_UMBRAL_WPA2_PSK ? WIFI_AUTH_WPA2_PSK : WIFI_AUTH_OPEN;
+    sta.sta.pmf_cfg.capable = seg.pmf_capaz;
+    sta.sta.pmf_cfg.required = seg.pmf_requerido;
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &sta));
     memset(&sta, 0, sizeof sta);
 }

@@ -20,6 +20,11 @@ add_executable(test_conectividad test_conectividad.c ${COMP}/conectividad/conect
 target_include_directories(test_conectividad PRIVATE ${COMP}/conectividad/include)
 add_test(NAME TC-CON-01 COMMAND test_conectividad)
 
+# TC-CON-13 · FR-CON-07 (seguridad mínima del STA, SEC-07)
+add_executable(test_conectividad_sta test_conectividad_sta.c ${COMP}/conectividad/conectividad_sta.c)
+target_include_directories(test_conectividad_sta PRIVATE ${COMP}/conectividad/include)
+add_test(NAME TC-CON-13 COMMAND test_conectividad_sta)
+
 # TC-POR-01 · FR-POR-03 (generador del formulario)
 add_executable(test_portal_form test_portal_form.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_form PRIVATE ${COMP}/portal/include)
