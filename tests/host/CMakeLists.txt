@@ -35,6 +35,11 @@ add_executable(test_portal_lectura test_portal_lectura.c ${COMP}/portal/portal_l
 target_include_directories(test_portal_lectura PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-POR-13 COMMAND test_portal_lectura)
 
+# TC-POR-14 · FR-POR-10 (portal solo por la IP del AP, SEC-06)
+add_executable(test_portal_origen test_portal_origen.c ${COMP}/portal/portal_origen.c)
+target_include_directories(test_portal_origen PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-POR-14 COMMAND test_portal_origen)
+
 # TC-POR-03 · FR-POR-04 (validador de §17)
 add_executable(test_portal_validar test_portal_validar.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_validar PRIVATE ${COMP}/portal/include)

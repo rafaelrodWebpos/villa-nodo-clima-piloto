@@ -1876,6 +1876,22 @@ tests:
     regression: >
       envíos del portal sobre 0.0.0-e83d355-bench (test-results/20261110T234713Z-e83d355/),
       6 de 6 en verde: JRN-01.0, JRN-01.1, TC-POR-05, TC-POR-09, JRN-01.2 y TC-CON-07
+  - id: TC-POR-14
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: S1   # puerta de seguridad S1 (FSD 0.9.8, §3.5)
+    tier: host
+    verifies: [FR-POR-10]
+    needs: [hosted-ci]
+    expect: >
+      portal_origen_permitido: solo 192.168.4.1; rechaza la IP del STA en una red
+      doméstica, 0.0.0.0, otras IP de la red del AP, el orden de bytes invertido,
+      255.255.255.255 y NULL. Revisión: el socket DNS se liga a 192.168.4.1 y el HTTP
+      cierra en open_fn toda conexión con otra dirección local (SEC-06). Sin fila de
+      banco: con una sola radio, el banco no puede hablar con el DUT por la IP del STA
+      mientras está en VALIDANDO
+    impl: tests/host/test_portal_origen.c
   - id: TC-CON-13
     shape: atomic
     kind: standard

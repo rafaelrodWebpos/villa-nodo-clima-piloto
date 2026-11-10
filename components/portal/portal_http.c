@@ -9,6 +9,8 @@
 #include "portal_cautivo.h"
 #include "portal_form.h"
 #include "portal_lectura.h"
+#include "portal_origen.h"
+#include "lwip/sockets.h"
 #include "portal_http.h"
 #include "portal_textos.h"
 #include "portal_urlenc.h"
@@ -155,6 +157,29 @@ fin:
     return r;
 }
 
+/* FR-POR-10 (SEC-06): esp_http_server no se puede ligar a una IP; se cierra al aceptarla
+ * toda conexión cuya dirección local no sea la del AP (devolver un error la cierra). */
+static esp_err_t al_abrir(httpd_handle_t hd, int sockfd)
+{
+    (void)hd;
+    struct sockaddr_storage local;
+    socklen_t largo = sizeof local;
+    uint8_t ip[4] = {0};
+    if (getsockname(sockfd, (struct sockaddr *)&local, &largo) == 0) {
+        if (local.ss_family == AF_INET) {
+            memcpy(ip, &((struct sockaddr_in *)&local)->sin_addr.s_addr, 4);
+        } else if (local.ss_family == AF_INET6) {
+            const struct sockaddr_in6 *l6 = (const struct sockaddr_in6 *)&local;
+            const uint8_t *b = (const uint8_t *)&l6->sin6_addr;
+            static const uint8_t v4map[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
+            if (memcmp(b, v4map, 12) == 0) memcpy(ip, b + 12, 4);   /* ::ffff:a.b.c.d */
+        }
+    }
+    if (portal_origen_permitido(ip)) return ESP_OK;
+    ESP_LOGW(TAG, "conexión por otra interfaz rechazada");
+    return ESP_FAIL;
+}
+
 esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_cb_t al_enviar)
 {
     s_id = id;
@@ -162,7 +187,8 @@ esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_
     s_al_enviar = al_enviar;
     httpd_handle_t srv = NULL;
     httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
-    cfg.lru_purge_enable = true;                   /* SEC-05: con todos los huecos ocupados, se cierra la conexión más antigua */
+    cfg.lru_purge_enable = true;
+    cfg.open_fn = al_abrir;                        /* FR-POR-10 (SEC-06) */                   /* SEC-05: con todos los huecos ocupados, se cierra la conexión más antigua */
     cfg.uri_match_fn = httpd_uri_match_wildcard;   /* el comodín recoge las rutas de detección */
     esp_err_t err = httpd_start(&srv, &cfg);
     if (err != ESP_OK) {

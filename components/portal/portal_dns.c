@@ -1,30 +1,37 @@
 /* L1 portal — adaptador del DNS cautivo (UDP/53). La respuesta la construye
  * el núcleo puro portal_dns_respuesta (portal_cautivo.c, TC-POR-06). */
 #include <stdbool.h>
+#include <string.h>
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lwip/sockets.h"
 #include "portal_cautivo.h"
 #include "portal_dns.h"
+#include "portal_origen.h"
 
 static const char *TAG = "portal";
-static const uint8_t IP_PORTAL[4] = {192, 168, 4, 1};    /* FSD §11.1 */
 static volatile int s_sock = -1;                          /* T24 lo cierra para terminar la tarea */
 static volatile bool s_detener;
 
 static void tarea_dns(void *arg)
 {
+    /* FR-POR-10 (SEC-06): ligado a la IP del AP, no a INADDR_ANY: en VALIDANDO el nodo
+     * también tiene la IP del STA en la red doméstica, y por ahí no se contesta */
     int s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    struct sockaddr_in dir = {.sin_family = AF_INET, .sin_port = htons(53), .sin_addr.s_addr = htonl(INADDR_ANY)};
-    if (s < 0 || bind(s, (struct sockaddr *)&dir, sizeof dir) != 0) {
+    struct sockaddr_in dir = {.sin_family = AF_INET, .sin_port = htons(53)};
+    memcpy(&dir.sin_addr.s_addr, PORTAL_IP_AP, 4);
+    int r = -1;
+    for (int i = 0; s >= 0 && i < 20 && (r = bind(s, (struct sockaddr *)&dir, sizeof dir)) != 0; i++)
+        vTaskDelay(pdMS_TO_TICKS(500));             /* la IP del AP puede tardar en estar lista */
+    if (s < 0 || r != 0) {
         ESP_LOGE(TAG, "dns: no se pudo abrir UDP/53");
         if (s >= 0) close(s);
         vTaskDelete(NULL);
         return;
     }
     s_sock = s;
-    uint8_t q[512], r[512];
+    uint8_t q[512], resp[512];
     while (!s_detener) {
         struct sockaddr_in de;
         socklen_t largo = sizeof de;
@@ -33,8 +40,8 @@ static void tarea_dns(void *arg)
             if (s_detener) break;
             continue;
         }
-        size_t m = portal_dns_respuesta(q, (size_t)n, r, sizeof r, IP_PORTAL);
-        if (m) sendto(s, r, m, 0, (struct sockaddr *)&de, largo);
+        size_t m = portal_dns_respuesta(q, (size_t)n, resp, sizeof resp, PORTAL_IP_AP);
+        if (m) sendto(s, resp, m, 0, (struct sockaddr *)&de, largo);
     }
     if (s_sock >= 0) { close(s_sock); s_sock = -1; }
     vTaskDelete(NULL);
