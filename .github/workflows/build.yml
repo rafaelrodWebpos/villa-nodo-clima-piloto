@@ -32,7 +32,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: espressif/idf:v6.0.2
+    container: espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67   # SEC-08: por digest
     defaults:
       run:
         shell: bash
@@ -43,7 +43,7 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: git config --global --add safe.directory '*'
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
 
@@ -118,7 +118,7 @@ jobs:
           done
           cp build/sdkconfig out/sdkconfig.generated
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: firmware-v${{ steps.plan.outputs.version }}
           path: out/
@@ -131,8 +131,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') && github.repository_owner == 'rafaelrodWebpos'
     runs-on: [self-hosted, testbench]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: firmware-v${{ needs.build.outputs.version }}
           path: fw
@@ -153,13 +153,16 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: firmware-v${{ needs.build.outputs.version }}
           path: fw
-      - uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            fw/firmware_v*.bin
-            fw/firmware_v*.elf
-          generate_release_notes: true
+      # SEC-08: gh (preinstalado en el runner) en lugar de una acción de terceros
+      # con contents: write. Mismos ficheros y notas generadas que antes.
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag \
+            --title "$TAG" --generate-notes fw/firmware_v*.bin fw/firmware_v*.elf

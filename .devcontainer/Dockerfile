@@ -1,6 +1,7 @@
 # Un proyecto, un contenedor: toolchain, nivel bench y el runner del job
 # release-verify (docs/Method/project/arquitectura.md).
-FROM espressif/idf:v6.0.2
+# SEC-08: imagen base por digest (la etiqueta es mutable)
+FROM espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG RUNNER_VERSION=2.337.0
@@ -14,7 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # existe tras export.sh).
 COPY tests/bench/requirements.txt /tmp/bench-requirements.txt
 RUN python3 -m venv /opt/bench-venv \
-    && /opt/bench-venv/bin/pip install --no-cache-dir -r /tmp/bench-requirements.txt
+    && /opt/bench-venv/bin/pip install --no-cache-dir --require-hashes -r /tmp/bench-requirements.txt
 
 # TestbenchDriver (capacidad bench-driver del plan): pytest/testbench_driver.py
 # del repo del testbench, fijado a un commit y a su sha256. Solo usa la
