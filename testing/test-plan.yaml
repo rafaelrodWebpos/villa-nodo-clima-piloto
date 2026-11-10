@@ -1845,6 +1845,16 @@ tests:
       escrita» ni reinicio tras T02 (retroceso del reloj, consola.py); tras otro reset,
       el AP vuelve
     impl: tests/bench/test_seguridad.py::test_tc_por_12_portal_closes_after_10_min
+    status: successful
+    commit: 758ccbc
+    date: 2026-11-10
+    ci_run: 42922521308   # build.yml, workflow_dispatch variant=bench version=0.0.0-758ccbc
+    evidence: test-results/20261110T232408Z-758ccbc/TC-POR-12.md
+    observed: >
+      T24 a 600 000 ms de T02 en el reloj del DUT; el AP fuera en los 3 escaneos; 1 med:
+      en ESPERA; ninguna nvs: config escrita ni reinicio; tras otro reset, el AP vuelve.
+      Regresión del portal en la misma ejecución, en verde: JRN-01.0, JRN-01.1, JRN-01.2,
+      TC-POR-02, TC-POR-05, TC-POR-07, TC-POR-09, TC-POR-11 y TC-CON-07
   - id: TC-CON-13
     shape: atomic
     kind: standard
