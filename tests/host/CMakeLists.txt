@@ -30,6 +30,11 @@ add_executable(test_portal_form test_portal_form.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_form PRIVATE ${COMP}/portal/include)
 add_test(NAME TC-POR-01 COMMAND test_portal_form)
 
+# TC-POR-13 · FR-POR-09 (POST incompleto → 408, SEC-05)
+add_executable(test_portal_lectura test_portal_lectura.c ${COMP}/portal/portal_lectura.c)
+target_include_directories(test_portal_lectura PRIVATE ${COMP}/portal/include)
+add_test(NAME TC-POR-13 COMMAND test_portal_lectura)
+
 # TC-POR-03 · FR-POR-04 (validador de §17)
 add_executable(test_portal_validar test_portal_validar.c ${COMP}/portal/portal_validar.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_validar PRIVATE ${COMP}/portal/include)

@@ -8,6 +8,7 @@
 #include "esp_log.h"
 #include "portal_cautivo.h"
 #include "portal_form.h"
+#include "portal_lectura.h"
 #include "portal_http.h"
 #include "portal_textos.h"
 #include "portal_urlenc.h"
@@ -101,12 +102,22 @@ static esp_err_t post_raiz(httpd_req_t *req)
     char *html = malloc(HTML_MAX);
     esp_err_t r = ESP_OK;
     if (!body || !html) { r = httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL); goto fin; }
+    /* FR-POR-09 (SEC-05): sin límite, un cliente que declara el cuerpo y no lo manda
+     * retendría la tarea del servidor; a la tercera espera seguida, 408 y se corta */
     size_t leido = 0;
+    int esperas = 0;
     while (leido < req->content_len) {
         int n = httpd_req_recv(req, body + leido, req->content_len - leido);
-        if (n == HTTPD_SOCK_ERR_TIMEOUT) continue;
-        if (n <= 0) { r = ESP_FAIL; goto fin; }
-        leido += (size_t)n;
+        switch (portal_lectura_paso(n, n == HTTPD_SOCK_ERR_TIMEOUT, &esperas)) {
+        case PORTAL_LECTURA_DATOS:   leido += (size_t)n; break;
+        case PORTAL_LECTURA_ESPERAR: break;
+        case PORTAL_LECTURA_408:
+            log_pagina(req, "408");
+            httpd_resp_send_err(req, HTTPD_408_REQ_TIMEOUT, NULL);
+            r = ESP_FAIL;                          /* ESP_FAIL: el servidor cierra la conexión */
+            goto fin;
+        case PORTAL_LECTURA_CORTAR:  r = ESP_FAIL; goto fin;
+        }
     }
     body[leido] = '\0';
 
@@ -151,6 +162,7 @@ esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_
     s_al_enviar = al_enviar;
     httpd_handle_t srv = NULL;
     httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
+    cfg.lru_purge_enable = true;                   /* SEC-05: con todos los huecos ocupados, se cierra la conexión más antigua */
     cfg.uri_match_fn = httpd_uri_match_wildcard;   /* el comodín recoge las rutas de detección */
     esp_err_t err = httpd_start(&srv, &cfg);
     if (err != ESP_OK) {

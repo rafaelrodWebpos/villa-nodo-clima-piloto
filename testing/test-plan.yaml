@@ -1855,6 +1855,20 @@ tests:
       en ESPERA; ninguna nvs: config escrita ni reinicio; tras otro reset, el AP vuelve.
       Regresión del portal en la misma ejecución, en verde: JRN-01.0, JRN-01.1, JRN-01.2,
       TC-POR-02, TC-POR-05, TC-POR-07, TC-POR-09, TC-POR-11 y TC-CON-07
+  - id: TC-POR-13
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: S1   # puerta de seguridad S1 (FSD 0.9.8, §3.5)
+    tier: host
+    verifies: [FR-POR-09]
+    needs: [hosted-ci]
+    expect: >
+      portal_lectura_paso: 2 esperas y datos → seguir y el contador vuelve a 0; 3 esperas
+      seguidas → 408 a la tercera (nunca antes, nunca sin límite); datos llegando nunca
+      dan 408; cierre del cliente o error de socket → cortar sin respuesta (SEC-05, D25).
+      Sin fila de banco: el relé HTTP del banco no puede mandar un cuerpo a medias
+    impl: tests/host/test_portal_lectura.c
   - id: TC-CON-13
     shape: atomic
     kind: standard
