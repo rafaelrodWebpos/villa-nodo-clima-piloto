@@ -76,14 +76,34 @@ de nivel host y «other» corren en cada commit de la CI y están en verde en el
 
 - **Imagen de la evidencia.** Corrieron sobre el firmware final (7fb10da = 17dc543):
   TC-TIME-06, JRN-01.0…01.5 y TC-CON-08 (regresión del fork sobre 47a52ea), JRN-01.6,
-  TC-MED-06, TC-TIME-04, TC-TIME-03, TC-WDT-01 y TC-SEN-05. Los demás tienen su último verde
-  sobre un firmware anterior:
-  - sobre ef118af o la imagen de 3f2eac8, que solo difieren en el tick SNTP (15 s → 10 s,
-    H-71): TC-LOG-03, TC-TIME-05, JRN-01.7, TC-CFG-02, TC-MQTT-04 y TC-SEN-04;
-  - sobre 5d9228e, e231678 y 2bebc2a, anteriores al cliente SNTP (df76a0a) y al watchdog
-    (ef118af): TC-CON-09, TC-CON-10, TC-MQTT-03, TC-CON-11, TC-CON-12, TC-MED-01 y
-    TC-MED-02. Los cortes de broker y de Wi-Fi con recuperación se volvieron a ver sobre el
-    firmware final en TC-WDT-01 (5 cortes) y en TC-CON-08 (regresión del fork).
+  TC-MED-06, TC-TIME-04, TC-TIME-03, TC-WDT-01 y TC-SEN-05.
+- **Regresión sobre el firmware final (H-80, 2026-11-09).** Las 9 pruebas automáticas cuyo
+  último verde era anterior se repitieron, y las 9 salieron en verde:
+
+  | Test | Antes | Resultado sobre el firmware final |
+  |---|---|---|
+  | TC-MQTT-03 | 5d9228e | PASS — status → 3 configuraciones (§10.2, QoS 1) → medidas (QoS 0); retenidos correctos |
+  | TC-CON-09 | 5d9228e | PASS — T14; siguiente intento de unión a 1,0 s; sin intentos MQTT ni reinicio |
+  | TC-CON-10 | 5d9228e | PASS — T16; siguiente intento a 1,0 s; status primero y medida a 31,4 s del AP |
+  | TC-TIME-05 | ef118af | PASS — primera medida a 6,0 s del encendido estimado con ts = null; hora_valida = false |
+  | TC-MED-01 | 2bebc2a | PASS — 10 intervalos en [59,99, 60,01] s; deriva −0,02 s |
+  | TC-MED-02 | 2bebc2a | PASS — Δlecturas = 10 con Δuptime_s = 606; sin reinicio |
+  | TC-CON-11 | e231678 | PASS — AP apagado 60 min sin reinicio: uptime_s = 3648, reset = usb, 7 escaneos sin clima-* |
+  | TC-CON-12 | e231678 | PASS — broker parado 60 min sin reinicio: uptime_s = 3615, reset = usb |
+  | TC-LOG-03 | ef118af | PASS — 10 ciclos con 3 medidas y status; intervalos de 60,0 s; sin reinicio |
+
+  - Las 8 primeras corrieron sobre `0.0.0-17dc543-bench` (run 42495454952), en
+    `test-results/20261109T214211Z-07577fa/`.
+  - TC-LOG-03 necesita la variante `bench-sin-receptor` (H-67), que manda el log UDP a una IP
+    sin uso. Se construyó como `0.0.0-07577fa-bench-sin-receptor` (run 42704955980): de
+    17dc543 a 07577fa solo cambia `.github/workflows/ci.yml`, así que el código de la imagen es
+    el mismo. Evidencia en `test-results/20261110T002320Z-07577fa/`.
+- **Pruebas manuales no repetidas (salvedad declarada, H-80).** JRN-01.7, TC-CFG-02 y
+  TC-MQTT-04 (cortes de alimentación) y TC-SEN-04 (SDA suelto) tienen su último verde sobre
+  ef118af o la imagen de 3f2eac8. Ese firmware solo difiere del final en el tick SNTP (15 s →
+  10 s, H-71). Los cortes de alimentación se volvieron a ver sobre el firmware final en
+  TC-TIME-03 (USB-C desenchufado 22 s) y TC-WDT-01. El código del sensor (components/sht41,
+  components/medicion) no cambió desde entonces.
 - **Reevaluaciones.** TC-TIME-03 (H-76) y TC-WDT-01 (H-78) están en verde por reevaluación de
   su evidencia con una comprobación corregida; el rojo original queda en el historial.
 - **NFR-SEN-01.** La temperatura es informativa (FSD 0.9.7): el WH32B solo está contrastado en

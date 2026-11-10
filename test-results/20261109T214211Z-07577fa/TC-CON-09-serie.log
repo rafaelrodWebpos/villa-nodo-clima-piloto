@@ -1,0 +1,104 @@
+I (485) nodo: boot: clima-f3c6d4 fw=0.0.0-17dc543-bench reset=usb part=ota_0 img=valida
+I (485) nodo: nodo_clima 0.0.0-17dc543-bench
+I (495) nodo: NODO-BENCH-IMAGE
+I (535) nodo: cfg: sitio=sitio1 zona=zona1
+I (535) pp: pp rom version: e7ae62f
+I (535) net80211: net80211 rom version: e7ae62f
+I (545) wifi:wifi driver task: 3fcb008c, prio:23, stack:6656, core=0
+I (555) wifi:wifi firmware version: 00ad238
+I (555) wifi:wifi certification version: v7.0
+I (555) wifi:config NVS flash: enabled
+I (555) wifi:config nano formatting: disabled
+I (565) wifi:Init data frame dynamic rx buffer num: 32
+I (565) wifi:Init static rx mgmt buffer num: 5
+I (575) wifi:Init management short buffer num: 32
+I (575) wifi:Init dynamic tx buffer num: 32
+I (585) wifi:Init static tx FG buffer num: 2
+I (585) wifi:Init static rx buffer size: 1600
+I (585) wifi:Init static rx buffer num: 10
+I (595) wifi:Init dynamic rx buffer num: 32
+I (545) nodo: med: T=30.3 HR=74.7 Td=25.3
+I (605) wifi_init: rx ba win: 6
+I (605) wifi_init: accept mbox: 6
+I (605) wifi_init: tcpip mbox: 32
+I (605) wifi_init: udp mbox: 6
+I (615) wifi_init: tcp mbox: 6
+I (615) wifi_init: tcp tx win: 5760
+I (615) wifi_init: tcp rx win: 5760
+I (625) wifi_init: tcp mss: 1440
+I (625) wifi_init: WiFi IRAM OP enabled
+I (625) wifi_init: WiFi RX IRAM OP enabled
+W (635) wifi:Password length matches WPA2 standards, authmode threshold changes from OPEN to WPA2
+I (645) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (685) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (685) wifi:enable tsf
+I (695) nodo: wifi: intento 1
+I (695) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (695) nodo: Init complete
+I (695) main_task: Returned from app_main()
+I (3115) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (4115) nodo: wifi: intento 2
+I (4115) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (6535) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (8535) nodo: wifi: intento 3
+I (8535) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (10955) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (14955) nodo: wifi: intento 4
+I (14955) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (17375) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (25375) nodo: wifi: intento 5
+I (25375) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (27795) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (43795) nodo: wifi: intento 6
+I (43795) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (43805) wifi:state: init -> auth (0xb0)
+I (43815) wifi:state: auth -> assoc (0x0)
+I (43825) wifi:state: assoc -> run (0x10)
+I (43855) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (43855) wifi:security: WPA2-PSK, phy: bgn, rssi: -38, cipher(pairwise:0x3, group:0x3), pmf:0
+I (43865) wifi:pm start, type: 1
+I (43865) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (43865) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (43885) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (43925) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (43925) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (44895) nodo: UDP logging -> 192.168.4.1:5555
+I (44895) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (44895) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (44895) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (44905) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (44915) nodo: mqtt: intento 1
+E (44925) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (44935) transport_base: Failed to open a new connection: 32772
+E (44935) mqtt_client: Error transport connect
+I (44935) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (45395) nodo: sntp: inicio pool.ntp.org
+I (45935) nodo: mqtt: intento 2
+I (45935) mqtt_client: Client force reconnect requested
+I (45935) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (backoff)
+E (45945) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (45955) transport_base: Failed to open a new connection: 32772
+E (45955) mqtt_client: Error transport connect
+I (45955) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (45995) wifi:state: run -> init (0x3c0)
+I (46005) wifi:pm stop, total sleep time: 1602224 us / 2139923 us
+I (46005) wifi:<ba-del>idx:1, tid:0
+I (46005) wifi:<ba-del>idx:0, tid:7
+I (50955) nodo: con: CONECTANDO_BROKER -> CONECTANDO_WIFI (wifi_down)
+I (51955) nodo: wifi: intento 1
+I (51955) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (54375) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (56375) nodo: wifi: intento 2
+I (56375) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (58795) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (60535) nodo: udplog: descartadas=1 reintentadas=0 cola_llena=0
+I (60545) nodo: med: T=30.3 HR=74.6 Td=25.3
+I (62795) nodo: wifi: intento 3
+I (62795) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (65215) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (73215) nodo: wifi: intento 4
+I (73215) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (75635) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (91635) nodo: wifi: intento 5
+I (91635) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (94055) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)

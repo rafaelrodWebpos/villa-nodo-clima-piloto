@@ -2272,7 +2272,8 @@ phase_closures:
       - {requirement: FR-LOG-02, row: captura, test: null, capability: bench-traffic-capture, cr: CR-TB-04}
     caveats:
       - §3.2 [user] no deja salir la fase con capacidades derivadas en no; H-79 la cierra como excepción del propietario
-      - 13 tests bench tienen su último verde sobre un firmware anterior a 7fb10da (lista en el registro); 7 de ellos antes del cliente SNTP y del watchdog
+      - H-80 (2026-11-09) — 9 tests bench automáticos con último verde anterior a 7fb10da, repetidos sobre el firmware final y en verde (test-results/20261109T214211Z-07577fa/ con 0.0.0-17dc543-bench; TC-LOG-03 en test-results/20261110T002320Z-07577fa/ con 0.0.0-07577fa-bench-sin-receptor, mismo código)
+      - H-80 — 4 manuales no repetidos (JRN-01.7, TC-CFG-02, TC-MQTT-04, TC-SEN-04; último verde sobre ef118af/3f2eac8, que solo difiere en el tick SNTP): salvedad declarada en el registro
       - TC-TIME-03 (H-76) y TC-WDT-01 (H-78) en verde por reevaluación de su evidencia
       - NFR-SEN-01 con la temperatura informativa (FSD 0.9.7)
 
