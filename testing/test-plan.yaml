@@ -1869,6 +1869,13 @@ tests:
       dan 408; cierre del cliente o error de socket → cortar sin respuesta (SEC-05, D25).
       Sin fila de banco: el relé HTTP del banco no puede mandar un cuerpo a medias
     impl: tests/host/test_portal_lectura.c
+    status: successful
+    commit: e83d355
+    date: 2026-11-10
+    ci_run: 42925760885   # host tests + secret scan
+    regression: >
+      envíos del portal sobre 0.0.0-e83d355-bench (test-results/20261110T234713Z-e83d355/),
+      6 de 6 en verde: JRN-01.0, JRN-01.1, TC-POR-05, TC-POR-09, JRN-01.2 y TC-CON-07
   - id: TC-CON-13
     shape: atomic
     kind: standard
