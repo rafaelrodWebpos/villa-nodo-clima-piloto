@@ -68,7 +68,6 @@ static const char *const *s_envio;             /* valores del envío, solo duran
 static esp_timer_handle_t s_t_validacion;      /* T06: 20 s sin IP */
 static esp_timer_handle_t s_t_portal;          /* T24: 10 min de portal desde T02 (FR-POR-08, D24) */
 static bool s_cierre_pendiente;                /* T25: el portal venció durante VALIDANDO */
-static esp_timer_handle_t s_t_cierre;          /* T24: el cierre corre fuera de s_lock */
 static esp_timer_handle_t s_t_reinicio;        /* T05: reinicio tras responder */
 static esp_timer_handle_t s_t_reintento;       /* T04: reintento de la unión dentro de los 20 s */
 static esp_timer_handle_t s_t_backoff;         /* T09/T10: backoff de Wi-Fi (FR-CON-02) */
@@ -572,22 +571,28 @@ static void al_vencer_portal(void *arg)
     transicion(CON_EV_PORTAL_VENCE, (con_guardas_t){0});   /* T24 o T25 */
 }
 
-/* Acción de T24: detener el HTTP y el DNS del portal y apagar el AP. La medición sigue;
- * solo un reinicio vuelve a abrir el portal (FR-POR-08). No debe: tocar la NVS.
- * httpd_stop espera a que termine el manejador en curso, y un envío lo hace esperando
- * a s_lock: por eso la parada corre en otro disparo del temporizador, ya sin s_lock.
- * Mientras tanto el estado ya es ESPERA y un envío no encuentra fila (§6.4, imp¹). */
-static void al_cerrar_portal(void *arg)
+/* Acción de T24: apagar el AP y, después, detener el HTTP y el DNS del portal (FSD 0.9.9).
+ * La medición sigue; solo un reinicio vuelve a abrir el portal (FR-POR-08). No debe: tocar
+ * la NVS. httpd_stop espera a que termine el manejador en curso (un POST, ≤ 20 s por
+ * FR-POR-09), y un envío espera a s_lock: la parada corre en una tarea propia, sin s_lock
+ * y sin bloquear la tarea esp_timer (N-02, H-85). El AP se apaga primero, así que nadie
+ * nuevo llega al portal mientras tanto; el estado ya es ESPERA y un envío no encuentra
+ * fila (§6.4, imp¹). */
+static void tarea_cierre(void *arg)
 {
+    esp_wifi_stop();
     portal_http_detener();
     portal_dns_detener();
-    esp_wifi_stop();
+    vTaskDelete(NULL);
 }
 
 static void cerrar_portal(void)
 {
     s_cierre_pendiente = false;
-    esp_timer_start_once(s_t_cierre, 1000);
+    if (xTaskCreate(tarea_cierre, "cierre", 4096, NULL, 5, NULL) != pdPASS) {
+        ESP_LOGE(TAG, "portal: sin memoria para cerrar; se apaga el AP");
+        esp_wifi_stop();
+    }
 }
 
 /* Opción DNS del servidor DHCP del AP (OFFER_DNS de lwip dhcpserver.h; el
@@ -670,8 +675,6 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version, al_enviar));
     const esp_timer_create_args_t tpo = {.callback = al_vencer_portal, .name = "portal"};
     ESP_ERROR_CHECK(esp_timer_create(&tpo, &s_t_portal));
-    const esp_timer_create_args_t tci = {.callback = al_cerrar_portal, .name = "cierre"};
-    ESP_ERROR_CHECK(esp_timer_create(&tci, &s_t_cierre));
     ESP_ERROR_CHECK(esp_timer_start_once(s_t_portal, PORTAL_US));   /* FR-POR-08 */
 }
 
