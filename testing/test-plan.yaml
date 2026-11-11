@@ -1864,6 +1864,18 @@ tests:
       en ≤ 2 s desde la publicación (FR-MQTT-09, fila 1), con su E7 «ota: estado …» y su E0
       «con: OPERATIVO -> OPERATIVO (cmd_ota)»; ninguna línea «-> OTA_DESCARGA»
     impl: tests/bench/test_ota.py::test_tc_ota_06_rejections
+    status: successful
+    commit: 459013c
+    date: 2026-11-11
+    evidence: test-results/20261111T104030Z-459013c/TC-OTA-06.md
+    observed: >
+      status con rechazado:payload, rechazado:host y rechazado:ruta a 0,24, 0,25 y 0,27 s de la
+      publicación; E7 y E0 en los tres; ninguna OTA_DESCARGA
+    history: >
+      sobre 6a2ec75 (test-results/20261111T102656Z-6a2ec75/) salió rojo por un fallo del test: tomaba la hora de publicación
+      después de cerrar el publicador y descartaba el status del DUT, que llegaba antes; el
+      log serie mostraba E7 y E0 a los pocos ms. En la misma ejecución, JRN-01.0 a 01.4 y
+      TC-MQTT-03 en verde (regresión de la suscripción a cmd/ota)
   - id: TC-OTA-07
     shape: atomic
     kind: standard
@@ -1877,6 +1889,16 @@ tests:
       al volver el AP y tras T11: E8 «ota: ignorado retained», ningún E7 ni «-> OTA_DESCARGA»,
       y ota = ninguno en los status; al final se borra el retenido
     impl: tests/bench/test_ota.py::test_tc_ota_07_retained_command_ignored
+    status: successful
+    commit: 6f30ae4
+    date: 2026-11-11
+    evidence: test-results/20261111T104810Z-6f30ae4/TC-OTA-07.md
+    observed: >
+      con el AP apagado, comando válido publicado con retain; al reconectar, E8 «ota: ignorado
+      retained», ningún E7 ni OTA_DESCARGA, ota = ninguno
+    history: >
+      un intento anterior (test-results/20261111T104030Z-459013c/) se cayó por un error del test (contaba el
+      status offline del Last Will, que no lleva ota)
   - id: TC-HW-04
     shape: atomic
     kind: standard

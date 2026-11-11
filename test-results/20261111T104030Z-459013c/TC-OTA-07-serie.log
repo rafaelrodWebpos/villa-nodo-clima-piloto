@@ -1,0 +1,34 @@
+I (11887) nodo: wifi: intento 2
+I (11887) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (14307) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (18307) nodo: wifi: intento 3
+I (18307) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (18317) wifi:state: init -> auth (0xb0)
+I (18327) wifi:state: auth -> assoc (0x0)
+I (18337) wifi:state: assoc -> run (0x10)
+I (18357) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (18357) wifi:security: WPA2-PSK, phy: bgn, rssi: -26, cipher(pairwise:0x3, group:0x3), pmf:0
+I (18367) wifi:pm start, type: 1
+I (18367) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (18377) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (18397) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (18417) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (18417) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (18727) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (19407) nodo: UDP logging -> 192.168.4.1:5555
+I (19407) nodo: udplog: descartadas=1 reintentadas=0 cola_llena=0
+I (19407) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (19407) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (19417) nodo: mqtt: intento 1
+I (19497) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (19687) nodo: ota: ignorado retained
+I (19907) nodo: sntp: inicio pool.ntp.org
+I (29917) nodo: sntp: inicio pool.ntp.org
+W (39917) nodo: sntp: fallo
+I (39917) nodo: sntp: inicio pool.ntp.org
+I (49917) nodo: sntp: inicio pool.ntp.org
+I (59917) nodo: sntp: inicio pool.ntp.org
+I (60547) nodo: med: T=29.6 HR=72.2 Td=24.0
+W (69917) nodo: sntp: fallo
+I (69917) nodo: sntp: inicio pool.ntp.org
+I (79917) nodo: sntp: inicio pool.ntp.org
