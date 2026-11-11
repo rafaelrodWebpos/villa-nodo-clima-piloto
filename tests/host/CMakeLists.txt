@@ -33,6 +33,11 @@ add_test(NAME TC-OTA-02 COMMAND test_ota_politica TC-OTA-02)
 add_test(NAME TC-OTA-03 COMMAND test_ota_politica TC-OTA-03)
 add_test(NAME TC-OTA-04 COMMAND test_ota_politica TC-OTA-04)
 
+# TC-OTA-05 · FR-MQTT-09 (campo ota de status)
+add_executable(test_ota_diag test_ota_diag.c ${COMP}/ota/ota_diag.c ${COMP}/ota/ota_politica.c)
+target_include_directories(test_ota_diag PRIVATE ${COMP}/ota/include)
+add_test(NAME TC-OTA-05 COMMAND test_ota_diag)
+
 # TC-POR-01 · FR-POR-03 (generador del formulario)
 add_executable(test_portal_form test_portal_form.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_form PRIVATE ${COMP}/portal/include)

@@ -1828,6 +1828,21 @@ tests:
     expect: >
       ota_clasificar_fallo: DNS, TCP, timeout → error:red; 404 y 500 → error:http; 200 no es fallo; TLS → error:tls (§7.4)
     impl: tests/host/test_ota_politica.c (TC-OTA-04)
+  - id: TC-OTA-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: host
+    verifies: [FR-MQTT-09]
+    needs: [hosted-ci]
+    expect: >
+      ota_diag: arranca en «ninguno»; un cambio en OPERATIVO se publica ya y sin conexión
+      va con el status de T11 (T22: error:red, nunca en_curso tras reconectar); el mismo
+      valor no es un cambio; solo valores de §9.3 (incluido rechazado:version_anterior) y
+      todos los motivos de la política lo son. La fila bench (≤ 2 s; T22) llega con el
+      adaptador OTA
+    impl: tests/host/test_ota_diag.c
   - id: TC-HW-04
     shape: atomic
     kind: standard

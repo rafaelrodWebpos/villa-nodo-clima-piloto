@@ -43,6 +43,7 @@
 #include "medicion.h"
 #include "sht41.h"
 #include "conectividad_sta.h"
+#include "ota_diag.h"
 #include "portal_config.h"
 #include "portal_dns.h"
 #include "portal_http.h"
@@ -465,16 +466,38 @@ static void red_caida(void)
     programar_reintento();
 }
 
+static ota_diag_t s_ota;        /* campo `ota` de status (§9.3, FR-MQTT-09); bajo s_lock */
+
 static void publicar_status(void)
 {
     wifi_ap_record_t ap = {0};
     int rssi = esp_wifi_sta_get_ap_info(&ap) == ESP_OK ? ap.rssi : 0;
+    char ota[OTA_DIAG_MAX];
+    xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+    memcpy(ota, s_ota.valor, sizeof ota);
+    xSemaphoreGiveRecursive(s_lock);
     pub_status_t st = {.online = true, .fw = s_version, .rssi = rssi, .reset = causa_reset(),
                        .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000), .lecturas = s_lecturas,
-                       .err_sensor = s_err_sensor, .ota = "ninguno", .hora_valida = hora_valida()};   /* FR-TIME-02 */
+                       .err_sensor = s_err_sensor, .ota = ota, .hora_valida = hora_valida()};   /* FR-TIME-02 */
     char json[256];
     if (pub_status_json(json, sizeof json, &st) > 0)
         esp_mqtt_client_publish(s_mqtt, s_top_status, json, 0, 1, 1);          /* §9.2: QoS 1, retain */
+}
+
+/* FR-MQTT-09: cambio del campo `ota`. E7 «ota: estado <valor>» en cada cambio; con MQTT
+ * conectado (OPERATIVO u OTA_DESCARGA) se publica status enseguida (≤ 2 s); sin conexión
+ * va en el primer status de T11 (mqtt_listo lo publica siempre). La llamará el adaptador
+ * OTA (bloque 5 de la Fase 3); hasta entonces el campo se queda en «ninguno». */
+__attribute__((unused)) static void ota_estado(const char *valor)
+{
+    xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+    const bool conectado = s_estado == CON_OPERATIVO || s_estado == CON_OTA_DESCARGA;
+    const ota_diag_resultado_t r = ota_diag_cambiar(&s_ota, valor, conectado);
+    xSemaphoreGiveRecursive(s_lock);
+    if (r == OTA_DIAG_INVALIDO) { ESP_LOGE(TAG, "ota: valor de estado no válido"); return; }
+    if (r == OTA_DIAG_SIN_CAMBIO) return;
+    ESP_LOGI(TAG, "ota: estado %s", valor);                   /* E7 */
+    if (r == OTA_DIAG_PUBLICAR_YA) publicar_status();
 }
 
 /* Medidas de una lectura válida: QoS 0, retain (FR-MQTT-04); sin punto_rocio si no hay (FR-MED-04).
@@ -820,6 +843,7 @@ void app_main(void)
     ESP_LOGI(TAG, "%s", BENCH_MARKER);
 #endif
     s_lock = xSemaphoreCreateRecursiveMutex();
+    ota_diag_iniciar(&s_ota);                     /* §9.3: «ninguno» al arrancar */
     s_eventos_mqtt = xQueueCreate(8, sizeof(con_evento_t));
     xTaskCreate(tarea_gestor, "gestor", 6144, NULL, 6, NULL);   /* T11 serializa Discovery (§10.2) en su pila */
 
