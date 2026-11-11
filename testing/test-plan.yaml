@@ -698,7 +698,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T24, T25]   # crece fila a fila: el contrato host de §6.6 cubre T01–T25 (T24/T25: FSD 0.9.8)
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T24, T25, T26]   # crece fila a fila: el contrato host de §6.6 cubre T01–T26 (T24/T25: FSD 0.9.8; T26: 0.9.9)
     needs: [hosted-ci]
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado

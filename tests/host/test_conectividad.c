@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T25 (host, lógica de la tabla), filas implementadas: T01–T16, T24 y T25.
+/* TC-CON-01 · T01–T25 (host, lógica de la tabla), filas implementadas: T01–T16 y T24–T26.
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -158,6 +158,17 @@ int main(void)
     t = con_transicion(CON_VALIDANDO, CON_EV_WIFI_UP, (con_guardas_t){0});
     ESPERA(t.siguiente == CON_ARRANQUE && t.accion == CON_ACC_PERSISTIR, "T05 tras T25: %d/%d", t.siguiente, t.accion);
 
+    /* T26: PORTAL + envío con el cierre pendiente -> PORTAL, «ocupado». No debe: probar la unión (alargaría la ventana) */
+    for (int valido = 0; valido <= 1; valido++) {
+        t = con_transicion(CON_PORTAL, CON_EV_ENVIO, (con_guardas_t){.envio_valido = valido, .cierre_pendiente = true});
+        ESPERA(t.fila && strcmp(t.fila, "T26") == 0, "fila %s (válido=%d)", t.fila ? t.fila : "NULL", valido);
+        ESPERA(t.siguiente == CON_PORTAL && t.accion == CON_ACC_RESPONDER_OCUPADO, "T26: %d/%d", t.siguiente, t.accion);
+        ESPERA(t.accion != CON_ACC_PROBAR_UNION && t.accion != CON_ACC_PERSISTIR, "T26 prueba la unión o escribe");
+    }
+    /* sin cierre pendiente, T03/T04 como siempre */
+    t = con_transicion(CON_PORTAL, CON_EV_ENVIO, (con_guardas_t){.envio_valido = true});
+    ESPERA(t.fila && strcmp(t.fila, "T04") == 0, "sin cierre pendiente: %s", t.fila ? t.fila : "NULL");
+
     /* ESPERA: ningún evento tiene fila (§6.4: todos imp); portal_vence fuera de PORTAL/VALIDANDO tampoco */
     for (int ev = 0; ev < CON_N_EVENTOS; ev++) {
         t = con_transicion(CON_ESPERA, (con_evento_t)ev, (con_guardas_t){0});
@@ -171,6 +182,6 @@ int main(void)
     ESPERA(strcmp(con_nombre_estado(CON_ESPERA), "ESPERA") == 0, "nombre ESPERA");
     ESPERA(strcmp(con_nombre_evento(CON_EV_PORTAL_VENCE), "portal_vence") == 0, "nombre portal_vence");
 
-    printf("TC-CON-01 (T01–T16, T24, T25): %s\n", fallos ? "FALLO" : "ok");
+    printf("TC-CON-01 (T01–T16, T24–T26): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

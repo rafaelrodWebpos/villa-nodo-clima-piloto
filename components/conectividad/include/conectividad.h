@@ -24,7 +24,7 @@ typedef enum {
     CON_ACC_PROBAR_UNION,      /* T04: probar la unión STA (AP+STA) con los datos del formulario */
     CON_ACC_PERSISTIR,         /* T05: persistir la configuración, responder con éxito y reiniciar */
     CON_ACC_RESPONDER_NO_CONECTA, /* T06: responder «no se pudo conectar» y descartar los datos */
-    CON_ACC_RESPONDER_OCUPADO, /* T07: responder «ocupado» */
+    CON_ACC_RESPONDER_OCUPADO, /* T07, T26: responder «ocupado» */
     CON_ACC_RED_LISTA,         /* T08: reiniciar el backoff de Wi-Fi; arrancar SNTP y el cliente MQTT */
     CON_ACC_PROGRAMAR_REINTENTO, /* T09: programar un reintento Wi-Fi con el backoff (FR-CON-02) */
     CON_ACC_INTENTAR_UNION,    /* T10: lanzar un intento de unión */
@@ -39,6 +39,7 @@ typedef enum {
 typedef struct {
     bool config_valida;        /* guarda de T01/T02: configuración válida en NVS */
     bool envio_valido;         /* guarda de T03/T04: todos los campos válidos (§17) */
+    bool cierre_pendiente;     /* guarda de T26: el portal ya venció (T25) y su cierre está pendiente */
 } con_guardas_t;
 
 typedef struct {

@@ -188,7 +188,8 @@ static portal_resp_t al_enviar(const char *const v[PORTAL_N_CAMPOS], bool valido
 {
     xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
     s_envio = v;
-    con_transicion_t t = transicion(CON_EV_ENVIO, (con_guardas_t){.envio_valido = valido});
+    con_transicion_t t = transicion(CON_EV_ENVIO, (con_guardas_t){.envio_valido = valido,
+                                                                    .cierre_pendiente = s_cierre_pendiente});
     s_envio = NULL;
     xSemaphoreGiveRecursive(s_lock);
     switch (t.accion) {

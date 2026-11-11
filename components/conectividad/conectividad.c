@@ -25,6 +25,8 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
     if (origen == CON_VALIDANDO && evento == CON_EV_PORTAL_VENCE)
         return (con_transicion_t){"T25", CON_VALIDANDO, CON_ACC_APLAZAR_CIERRE};
     if (origen == CON_PORTAL && evento == CON_EV_ENVIO) {
+        if (g.cierre_pendiente)          /* T26 (FSD 0.9.9): nadie alarga la ventana de 10 min */
+            return (con_transicion_t){"T26", CON_PORTAL, CON_ACC_RESPONDER_OCUPADO};
         return g.envio_valido
             ? (con_transicion_t){"T04", CON_VALIDANDO, CON_ACC_PROBAR_UNION}
             : (con_transicion_t){"T03", CON_PORTAL, CON_ACC_RESPONDER_ERRORES};
