@@ -1,6 +1,14 @@
 # Plan de la Fase 3 — Actualización OTA (propuesta, sin empezar)
 
-- **Estado:** propuesta para el propietario. No se ha tocado el banco ni el firmware de la Fase 3.
+- **Estado:** APROBADO (H-86, 2026-11-10), con estas respuestas:
+  - **D1:** sí; las pre-releases `ota-test-*` se publican solo desde un workflow de la CI.
+  - **D2:** el primer tag es **v0.0.1**, como en H-37; v0.1.0 fue un error y no cambia nada.
+  - **D3, D4, D5 y D6:** sí. D4: las 4 pruebas manuales de H-80 se repiten en la visita física final.
+  - **D7:** sí; acciones actualizadas y fijadas por SHA, comprobando cada SHA contra su tag.
+  - **Condición nueva, puerta S6:** el cambio completo del fork villa-2 lo revisa un auditor
+    independiente, en solo lectura, ANTES de instalarlo en la Pi. Se prepara sin instalar y se
+    avisa al propietario cuando esté listo.
+  - El jueves 12 no se usa el banco ni se corren pruebas largas en la laptop (llega el SDR).
 - **Base:** FSD 0.9.9 (§3.3, §7, §12, §19.3, §22.0); puerta S1 cerrada (H-85, `c27ebfc`).
 - **Hoy en el repositorio:** de la Fase 3 solo hay dos pruebas declaradas, JRN-02.1 y JRN-02.2,
   sin implementar. No hay ninguna release ni pre-release publicada. El secreto `NODO_DENYLIST`
@@ -62,7 +70,7 @@ Faltan cinco capacidades: cuatro se resuelven en el fork y la quinta en este rep
 | # | Decisión | Propuesta |
 |---|---|---|
 | D1 | Publicar pre-releases `ota-test-*` en el repositorio público | Sí, solo desde un workflow de la CI (con `contents: write` solo en ese job). Imágenes de banco con versiones semver propias: B1, B2, sin-MQTT (FR-OTA-07), para esp32 no S3 y truncada (FR-OTA-05). Sin datos de la casa (NFR-SEC-02 las escanea). Marcadas como pre-release y con un nombre que diga «prueba» |
-| D2 | Primer tag | **Hay un conflicto:** el plan registra `first_tag: v0.0.1` (H-37, 2026-11-03), y ahora dices v0.1.0. Propongo v0.1.0 como nuevo primer tag, sustituyendo a H-37, y que lo crees tú cuando la Fase 3 esté en verde |
+| D2 | Primer tag | **Resuelto (H-86): v0.0.1.** Texto de la propuesta: hay un conflicto: el plan registra `first_tag: v0.0.1` (H-37, 2026-11-03), y ahora dices v0.1.0. Propongo v0.1.0 como nuevo primer tag, sustituyendo a H-37, y que lo crees tú cuando la Fase 3 esté en verde |
 | D3 | Tests con releases `v*` reales | En banco, las OTA de ida y vuelta usan `ota-test-*`. Los `v*` reales solo se usan en la verificación de la release. Así no hace falta publicar dos versiones `v*` solo para probar |
 | D4 | Pruebas manuales en la visita final | Repetir, en la misma visita que el iPhone, las 4 manuales que quedaron como salvedad en H-80 (JRN-01.7, TC-CFG-02 y TC-MQTT-04 con cortes del USB-C, y TC-SEN-04 con SDA). El firmware ha cambiado desde entonces (S1 y Fase 3) |
 | D5 | Runner self-hosted para la release (SEC-01) | Registrarlo solo durante la release y pararlo después, como dice §19.3 |
@@ -74,9 +82,9 @@ Faltan cinco capacidades: cuatro se resuelven en el fork y la quinta en este rep
 | Sesión | Dónde | Qué | Duración |
 |---|---|---|---|
 | S-A, aprobación | chat | Decisiones D1 a D7 y aprobación del plan | — |
-| S-B, instalación del fork | tu terminal (SSH a la Pi), sin tocar cables | Bloques A, B y C de la ampliación villa-2; luego yo corro la regresión | ~45 min tuyos |
+| S-B, instalación del fork | tu terminal (SSH a la Pi), sin tocar cables | Solo después de la revisión S6. Bloques A, B y C de la ampliación villa-2; luego yo corro la regresión | ~45 min tuyos |
 | S-C, visita física única | junto al banco | (1) Prueba del iPhone de FR-POR-02 (H-83). (2) Si apruebas D4: cortes del USB-C de JRN-01.7, TC-CFG-02 (5 cortes) y TC-MQTT-04, y el SDA de TC-SEN-04, todo con avisos del banco | ~1 h 30 min |
-| S-D, primer tag | tu terminal | Crear el tag v0.1.0 (D2) con el runner registrado (D5); la CI verifica y publica | ~30 min |
+| S-D, primer tag | tu terminal | Crear el tag v0.0.1 (D2, H-86) con el runner registrado (D5); la CI verifica y publica | ~30 min |
 
 No hay ninguna acción física entre la instalación del fork y la visita final. Todas las pruebas
 OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
