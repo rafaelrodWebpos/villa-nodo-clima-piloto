@@ -77,6 +77,8 @@ def test_tc_con_14_open_twin_rejected(testbench, dut_slot, dut_mac, firmware, ru
 # --------------------------------------------------------------------------
 T02_LINEA = "con: ARRANQUE -> PORTAL (fin_arranque)"
 T24_LINEA = "con: PORTAL -> ESPERA (portal_vence)"
+DNS_DETENIDO = "portal: dns detenido"     # E14 (FSD 0.9.9, N-01)
+DNS_MAX_MS = 5_000
 PORTAL_MS, TOL_MS = 600_000, 5_000        # D24: 10 min desde T02, ± 5 s (FSD §6.6)
 ESCANEOS_TRAS = 3
 
@@ -126,14 +128,18 @@ def test_tc_por_12_portal_closes_after_10_min(testbench, dut_slot, dut_mac, firm
         i02 = max(i for i, t in enumerate(txt[:i24]) if T02_LINEA in t)
         dt_ms = _ms(txt[i24]) - _ms(txt[i02])
         med_tras = [t for t in txt[i24:] if "nodo: med: " in t]
+        i_dns = next((i for i, t in enumerate(txt[i24:], i24) if DNS_DETENIDO in t), None)
+        dns_ms = None if i_dns is None else _ms(txt[i_dns]) - _ms(txt[i24])
         nvs = [t for t in txt if "nvs: config escrita" in t]
         rein = [k for k in reinicios(ent) if k > i02]
         c.note(f"- T02 → T24 en el reloj del DUT: {dt_ms} ms (esperado {PORTAL_MS} ± {TOL_MS})",
+               f"- `{DNS_DETENIDO}` (E14): " + ("ausente" if dns_ms is None else f"a {dns_ms} ms de T24"),
                f"- escaneos tras el cierre: {['visible' if v else 'no' for v in tras]}",
                f"- líneas med: después del cierre: {len(med_tras)}; `nvs: config escrita`: {len(nvs)}; "
                f"reinicios tras T02: {len(rein)}")
         assert abs(dt_ms - PORTAL_MS) <= TOL_MS, f"T24 a {dt_ms} ms de T02"
         assert not any(tras), "el AP del portal sigue visible tras T24"
+        assert dns_ms is not None and 0 <= dns_ms <= DNS_MAX_MS, f"el DNS no se detuvo en {DNS_MAX_MS} ms (E14): {dns_ms}"
         assert med_tras, "la medición no siguió en ESPERA"
         assert not nvs, "se escribió la NVS"
         assert not rein, "el DUT se reinició tras T02"
@@ -147,5 +153,5 @@ def test_tc_por_12_portal_closes_after_10_min(testbench, dut_slot, dut_mac, firm
         c.save_log("serie", [e.get("text", "") for e in reg.leer()])
         c.note(f"- tras el segundo reset, `{nodo}` visible: {'sí' if otra else 'no'}")
         assert otra, "el portal no se reabre tras un reset"
-        c.passed(f"T24 a {dt_ms / 1000:.1f} s de T02; AP fuera en los {ESCANEOS_TRAS} escaneos; "
+        c.passed(f"T24 a {dt_ms / 1000:.1f} s de T02; dns detenido a {dns_ms} ms; AP fuera en los {ESCANEOS_TRAS} escaneos; "
                  f"{len(med_tras)} med: en ESPERA; sin NVS ni reinicio; reabierto tras un reset")

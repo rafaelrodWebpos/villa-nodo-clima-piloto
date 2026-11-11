@@ -1847,7 +1847,8 @@ tests:
     needs: [bench-driver, bench-flash, bench-portal-driver, bench-serial-monitor, dut-board]
     expect: >
       sin configuración (P-NVS-ERASE), reset: T02 y el AP clima-* visible; T24 («con:
-      PORTAL -> ESPERA (portal_vence)») a 600 s ± 5 s de T02 en el reloj del DUT; el AP
+      PORTAL -> ESPERA (portal_vence)») a 600 s ± 5 s de T02 en el reloj del DUT; «portal:
+      dns detenido» (E14) a ≤ 5 s de T24 (N-01, FSD 0.9.9); el AP
       fuera en 3 escaneos seguidos; med: después del cierre; ninguna «nvs: config
       escrita» ni reinicio tras T02 (retroceso del reloj, consola.py); tras otro reset,
       el AP vuelve

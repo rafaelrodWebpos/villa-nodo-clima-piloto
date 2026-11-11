@@ -11,8 +11,7 @@
 #include "portal_origen.h"
 
 static const char *TAG = "portal";
-static volatile int s_sock = -1;                          /* T24 lo cierra para terminar la tarea */
-static volatile bool s_detener;
+static volatile bool s_detener;                           /* T24: la tarea sale del bucle */
 
 static void tarea_dns(void *arg)
 {
@@ -30,29 +29,28 @@ static void tarea_dns(void *arg)
         vTaskDelete(NULL);
         return;
     }
-    s_sock = s;
+    /* N-01 (H-85): en lwIP, shutdown() no vale para UDP; con una espera máxima de 1 s el
+     * bucle ve s_detener aunque no llegue ninguna consulta */
+    const struct timeval espera = {.tv_sec = 1, .tv_usec = 0};
+    setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, &espera, sizeof espera);
     uint8_t q[512], resp[512];
     while (!s_detener) {
         struct sockaddr_in de;
         socklen_t largo = sizeof de;
         int n = recvfrom(s, q, sizeof q, 0, (struct sockaddr *)&de, &largo);
-        if (n <= 0) {
-            if (s_detener) break;
-            continue;
-        }
+        if (n <= 0) continue;                       /* espera vencida: vuelve a mirar s_detener */
         size_t m = portal_dns_respuesta(q, (size_t)n, resp, sizeof resp, PORTAL_IP_AP);
         if (m) sendto(s, resp, m, 0, (struct sockaddr *)&de, largo);
     }
-    if (s_sock >= 0) { close(s_sock); s_sock = -1; }
+    close(s);
+    ESP_LOGI(TAG, "dns detenido");                  /* E14 (FSD 0.9.9) */
     vTaskDelete(NULL);
 }
 
-/* T24 (FR-POR-08): la tarea sale del bucle; shutdown despierta al recvfrom bloqueado. */
+/* T24 (FR-POR-08): la tarea sale del bucle en ≤ 1 s, cierra el socket y escribe E14. */
 void portal_dns_detener(void)
 {
     s_detener = true;
-    int s = s_sock;
-    if (s >= 0) shutdown(s, SHUT_RDWR);
 }
 
 esp_err_t portal_dns_iniciar(void)
