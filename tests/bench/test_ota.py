@@ -118,7 +118,8 @@ def test_tc_ota_07_retained_command_ignored(testbench, dut_slot, dut_mac, firmwa
                 e8 = reg.esperar(re.escape("ota: ignorado retained"), 30, desde_ts=t_on)
                 time.sleep(65)                              # un status de ciclo después
                 txt = [e.get("text", "") for e in reg.leer() if e.get("ts", 0) >= t_on]
-                otas = [st.get("ota") for _, st in _status(sub.mensajes(), base, t_on)]
+                otas = [st.get("ota") for _, st in _status(sub.mensajes(), base, t_on)
+                        if st.get("estado") == "online"]          # el Last Will («offline») no lleva ota
             c.save_log("serie", txt)
             e7 = [t for t in txt if "ota: estado" in t]
             descarga = [t for t in txt if DESCARGA in t]
