@@ -1916,15 +1916,18 @@ tests:
       mientras está en VALIDANDO
     impl: tests/host/test_portal_origen.c
     status: successful
-    commit: d64e5a3
+    commit: 2450ac1   # H-85: (local, remota); antes d64e5a3
     date: 2026-11-10
-    ci_run: 42926850861   # host tests + secret scan
+    ci_run: 42939798511   # host tests + secret scan
     regression: >
       portal completo sobre 0.0.0-d64e5a3-bench (test-results/20261110T235539Z-d64e5a3/),
       11 de 11 en verde: JRN-01.0 a 01.3, TC-POR-02, 05, 07, 09, 11, TC-CON-07 y TC-POR-12;
       ninguna «dns: no se pudo abrir UDP/53» (el bind a 192.168.4.1 funcionó) ni ninguna
       conexión del relé rechazada por open_fn. El DNS cautivo no tiene prueba de banco
-      (bench-portal-dns en no): lo cubre la prueba del teléfono de FR-POR-02 (H-83)
+      (bench-portal-dns en no): lo cubre la prueba del teléfono de FR-POR-02 (H-83).
+      H-85 (filtro por subred y SO_BINDTODEVICE, 2450ac1): portal completo 11 de 11 en verde
+      sobre 0.0.0-2450ac1-bench (test-results/20261111T013705Z-2450ac1/); ningún error al ligar el DNS a la
+      interfaz del AP ni rechazo falso del HTTP; «portal: dns detenido» a 1010 ms de T24
   - id: TC-CON-13
     shape: atomic
     kind: standard

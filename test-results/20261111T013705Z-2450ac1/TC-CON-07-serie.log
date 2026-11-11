@@ -1,0 +1,70 @@
+I (440) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (445) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (450) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (457) spi_flash: detected chip: gd
+I (459) spi_flash: flash io: dio
+I (463) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (468) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (476) main_task: Started on CPU0
+I (476) main_task: Calling app_main()
+I (486) nodo: boot: clima-f3c6d4 fw=0.0.0-2450ac1-bench reset=usb part=ota_0 img=valida
+I (486) nodo: nodo_clima 0.0.0-2450ac1-bench
+I (496) nodo: NODO-BENCH-IMAGE
+I (526) pp: pp rom version: e7ae62f
+I (526) net80211: net80211 rom version: e7ae62f
+I (536) wifi:wifi driver task: 3fcb0094, prio:23, stack:6656, core=0
+I (546) wifi:wifi firmware version: 00ad238
+I (546) wifi:wifi certification version: v7.0
+I (546) wifi:config NVS flash: enabled
+I (546) wifi:config nano formatting: disabled
+I (546) wifi:Init data frame dynamic rx buffer num: 32
+I (556) wifi:Init static rx mgmt buffer num: 5
+I (556) wifi:Init management short buffer num: 32
+I (566) wifi:Init dynamic tx buffer num: 32
+I (566) wifi:Init static tx FG buffer num: 2
+I (566) wifi:Init static rx buffer size: 1600
+I (576) wifi:Init static rx buffer num: 10
+I (576) wifi:Init dynamic rx buffer num: 32
+I (536) nodo: med: T=30.7 HR=70.2 Td=24.7
+I (586) wifi_init: rx ba win: 6
+I (586) wifi_init: accept mbox: 6
+I (586) wifi_init: tcpip mbox: 32
+I (596) wifi_init: udp mbox: 6
+I (596) wifi_init: tcp mbox: 6
+I (596) wifi_init: tcp tx win: 5760
+I (606) wifi_init: tcp rx win: 5760
+I (606) wifi_init: tcp mss: 1440
+I (606) wifi_init: WiFi IRAM OP enabled
+I (616) wifi_init: WiFi RX IRAM OP enabled
+I (626) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (666) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (666) wifi:Total power save buffer number: 16
+I (666) wifi:Init max length of beacon: 752/752
+I (676) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1
+I (686) nodo: con: ARRANQUE -> PORTAL (fin_arranque)
+I (686) nodo: Init complete
+I (686) main_task: Returned from app_main()
+I (5996) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
+I (5996) wifi:station: <mac> join, AID=1, bgn, 20
+I (6016) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6856) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (7526) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
+I (13026) wifi:mode : sta (3c:0f:02:f3:c6:d4) + softAP (3c:0f:02:f3:c6:d5)
+I (13026) wifi:enable tsf
+I (13046) nodo: wifi: intento 1
+I (13056) nodo: con: PORTAL -> VALIDANDO (envío)
+I (13056) portal: POST / -> probando
+I (13096) nodo: con: VALIDANDO -> VALIDANDO (envío)
+I (13096) portal: POST / -> ocupado
+I (13206) wifi:station: <mac> leave, AID = 1, reason = 8, bss_flags is 33721443, bss:0x3fca6368
+I (13206) wifi:<ba-del>idx:3, tid:0
+I (13216) wifi:<ba-del>idx:2, tid:7
+I (13216) wifi:new:<1,1>, old:<1,0>, ap:<1,1>, sta:<0,0>, prof:1, snd_ch_cfg:0x0
+I (13226) wifi:scan in process, ignore set current channel
+I (16896) nodo: wifi: intento 2
+I (20746) nodo: wifi: intento 3
+I (24596) nodo: wifi: intento 4
+I (28446) nodo: wifi: intento 5
+I (32296) nodo: wifi: intento 6
+I (33046) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (33066) nodo: con: VALIDANDO -> PORTAL (wifi_down)
