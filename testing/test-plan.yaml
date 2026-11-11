@@ -1774,6 +1774,14 @@ tests:
       el sdkconfig generado de cada imagen de la CI (producción y banco) tiene
       CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y; nunca «is not set» (SEC-10)
     impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+    status: successful
+    commit: 89a9f7b
+    date: 2026-11-10
+    ci_run: 42950598309   # Build Firmware (push): «ok C-BLD-04»; también el workflow_dispatch bench 42950597559
+    regression: >
+      bootloader nuevo grabado por el USB del banco (sin acción física) sobre
+      0.0.0-89a9f7b-bench, 13 de 13 en verde (test-results/20261111T031046Z-89a9f7b/):
+      JRN-01.0 a 01.4, TC-POR-02, 05, 07, 09, 11, TC-CON-07, TC-MQTT-03 y TC-CON-09
   - id: TC-OTA-01
     shape: atomic
     kind: standard
