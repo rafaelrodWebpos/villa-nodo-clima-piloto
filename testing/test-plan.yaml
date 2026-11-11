@@ -1865,6 +1865,8 @@ tests:
       TC-POR-02, TC-POR-05, TC-POR-07, TC-POR-09, TC-POR-11 y TC-CON-07.
       H-85, N-02 (cierre en tarea propia, AP primero; 308d490): JRN-01.0, JRN-01.1 y
       TC-POR-12 en verde (test-results/20261111T005328Z-308d490/)
+      H-85, N-01 (DNS detenido de verdad; fbb87c4): «portal: dns detenido» a 740 ms de T24;
+      JRN-01.0, JRN-01.1, TC-POR-07 y TC-POR-12 en verde (test-results/20261111T011057Z-fbb87c4/)
   - id: TC-POR-13
     shape: atomic
     kind: standard
