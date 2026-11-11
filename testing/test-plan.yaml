@@ -1872,8 +1872,10 @@ tests:
     needs: [hosted-ci]
     expect: >
       portal_lectura_paso: 2 esperas y datos → seguir y el contador vuelve a 0; 3 esperas
-      seguidas → 408 a la tercera (nunca antes, nunca sin límite); datos llegando nunca
-      dan 408; cierre del cliente o error de socket → cortar sin respuesta (SEC-05, D25).
+      seguidas → 408 a la tercera (nunca antes, nunca sin límite); «1 byte por espera» y
+      esperas alternas con bytes sueltos → 408 a ≤ 20 s (corte a los 15 s + una espera de
+      5 s, FSD 0.9.9, H-85); cuerpo completo dentro del plazo nunca da 408; cierre del
+      cliente o error de socket → cortar sin respuesta (SEC-05, D25).
       Sin fila de banco: el relé HTTP del banco no puede mandar un cuerpo a medias
     impl: tests/host/test_portal_lectura.c
     status: successful

@@ -6,6 +6,7 @@
 #include <string.h>
 #include "esp_http_server.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 #include "portal_cautivo.h"
 #include "portal_form.h"
 #include "portal_lectura.h"
@@ -104,13 +105,17 @@ static esp_err_t post_raiz(httpd_req_t *req)
     char *html = malloc(HTML_MAX);
     esp_err_t r = ESP_OK;
     if (!body || !html) { r = httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, NULL); goto fin; }
-    /* FR-POR-09 (SEC-05): sin límite, un cliente que declara el cuerpo y no lo manda
-     * retendría la tarea del servidor; a la tercera espera seguida, 408 y se corta */
+    /* FR-POR-09 (SEC-05): sin límite, un cliente que declara el cuerpo y no lo manda, o que
+     * lo manda byte a byte, retendría la tarea del servidor; a la tercera espera seguida o a
+     * los 20 s desde el inicio (D25), 408 y se corta */
     size_t leido = 0;
     int esperas = 0;
+    const int64_t t0 = esp_timer_get_time();
     while (leido < req->content_len) {
         int n = httpd_req_recv(req, body + leido, req->content_len - leido);
-        switch (portal_lectura_paso(n, n == HTTPD_SOCK_ERR_TIMEOUT, &esperas)) {
+        const int64_t ms = (esp_timer_get_time() - t0) / 1000;
+        const int completo = n > 0 && leido + (size_t)n >= req->content_len;
+        switch (portal_lectura_paso(n, n == HTTPD_SOCK_ERR_TIMEOUT, ms, completo, &esperas)) {
         case PORTAL_LECTURA_DATOS:   leido += (size_t)n; break;
         case PORTAL_LECTURA_ESPERAR: break;
         case PORTAL_LECTURA_408:
