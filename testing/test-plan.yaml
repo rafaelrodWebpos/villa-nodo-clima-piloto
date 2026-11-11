@@ -700,6 +700,10 @@ tests:
     tier: host
     verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T24, T25, T26]   # crece fila a fila: el contrato host de §6.6 cubre T01–T26 (T24/T25: FSD 0.9.8; T26: 0.9.9)
     needs: [hosted-ci]
+    regression: >
+      H-85, T26 (7a7402c): envíos del portal en verde sobre 0.0.0-7a7402c-bench — JRN-01.0
+      a 01.2, TC-POR-05, TC-POR-09 y TC-CON-07 (test-results/20261111T012827Z-7a7402c/); T26 solo se prueba en
+      host (el envío tendría que caer en el segundo entre T06 y T24)
     expect: >
       por fila: desde el estado de origen y con el evento y la guarda, el estado
       siguiente y la acción de §6.3, y su «No debe ocurrir» (T01 no abre el AP;
