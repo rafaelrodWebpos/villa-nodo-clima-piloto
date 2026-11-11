@@ -36,11 +36,12 @@ def _publicar(tb, topico, payload, retain=False):
     cli.connect(urlparse(tb.base_url).hostname, 1883, keepalive=30)
     cli.loop_start()
     try:
+        t0 = time.time()                    # antes de publicar: el DUT responde en ms, antes que el cierre
         cli.publish(topico, payload, qos=1, retain=retain).wait_for_publish(5)
     finally:
         cli.loop_stop()
         cli.disconnect()
-    return time.time()
+    return t0
 
 
 def _status(msgs, base, desde):
