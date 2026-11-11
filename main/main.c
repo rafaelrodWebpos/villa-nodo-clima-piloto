@@ -44,6 +44,7 @@
 #include "sht41.h"
 #include "conectividad_sta.h"
 #include "ota_diag.h"
+#include "ota_politica.h"
 #include "portal_config.h"
 #include "portal_dns.h"
 #include "portal_http.h"
@@ -79,7 +80,19 @@ static con_backoff_t s_backoff_mqtt;
 static esp_mqtt_client_handle_t s_mqtt;        /* creado en el primer T08 */
 static bool s_mqtt_activo;                     /* el cliente está arrancado (start sin stop) */
 static int s_intento_mqtt;                     /* E5: <n> del intento MQTT en curso */
-static QueueHandle_t s_eventos_mqtt;           /* mqtt_up / mqtt_down hacia la tarea del gestor */
+static QueueHandle_t s_eventos_mqtt;           /* mqtt_up / mqtt_down / cmd_ota hacia la tarea del gestor */
+static char s_top_cmd_ota[170];                /* <sitio>/<zona>/<nodo>/cmd/ota (FR-OTA-01) */
+
+typedef struct {                               /* elemento de la cola del gestor */
+    con_evento_t ev;
+    ota_motivo_t motivo;                       /* cmd_ota: OTA_OK o el rechazo de T18 */
+} evento_mqtt_t;
+static ota_motivo_t s_motivo_ota;              /* el de la fila T18 en curso (bajo s_lock) */
+#if CONFIG_NODO_BENCH_BUILD
+#define IMAGEN_BANCO true                      /* FR-OTA-13: solo la imagen de banco acepta ota-test-* */
+#else
+#define IMAGEN_BANCO false
+#endif
 static char s_top_status[160];                 /* <sitio>/<zona>/<nodo>/status */
 
 #define VALIDACION_US   (20 * 1000 * 1000)     /* T06, D12: 20 s */
@@ -397,23 +410,59 @@ static bool s_hay_medida;
 static bool s_ultima_ts_valido;                 /* ts de s_ultima (FR-TIME-03) */
 static int64_t s_ultima_ts;
 
+/* cmd/ota (§12): FR-OTA-04, un comando retained se ignora con E8 y no es evento; el resto
+ * pasa por la política pura (payload §12.1, FR-OTA-09; URL, FR-OTA-14/02/11/13) y llega
+ * al gestor como cmd_ota con su motivo. */
+static bool comando_ota(const esp_mqtt_event_handle_t e, evento_mqtt_t *out)
+{
+    if (e->topic_len != (int)strlen(s_top_cmd_ota) || strncmp(e->topic, s_top_cmd_ota, (size_t)e->topic_len) != 0)
+        return false;
+    if (e->retain) {
+        ESP_LOGI(TAG, "ota: ignorado retained");               /* E8 */
+        return false;
+    }
+    out->ev = CON_EV_CMD_OTA;
+    static char url[OTA_URL_MAX + 1];                          /* solo la tarea del cliente MQTT */
+    if (e->current_data_offset != 0 || e->total_data_len != e->data_len) {
+        out->motivo = OTA_RECHAZADO_PAYLOAD;                   /* troceado: mayor que cualquier payload válido */
+        return true;
+    }
+    out->motivo = ota_payload(e->data, (size_t)e->data_len, url, sizeof url);
+    if (out->motivo == OTA_OK) {
+        bool prueba;
+        out->motivo = ota_url_inicial(url, IMAGEN_BANCO, &prueba);   /* FR-OTA-13 */
+    }
+    return true;
+}
+
 static void al_evento_mqtt(void *arg, esp_event_base_t base, int32_t id, void *datos)
 {
-    con_evento_t ev;
-    if (id == MQTT_EVENT_CONNECTED) ev = CON_EV_MQTT_UP;
-    else if (id == MQTT_EVENT_DISCONNECTED) ev = CON_EV_MQTT_DOWN;
+    evento_mqtt_t ev = {.motivo = OTA_OK};
+    if (id == MQTT_EVENT_CONNECTED) ev.ev = CON_EV_MQTT_UP;
+    else if (id == MQTT_EVENT_DISCONNECTED) ev.ev = CON_EV_MQTT_DOWN;
+    else if (id == MQTT_EVENT_DATA) { if (!comando_ota(datos, &ev)) return; }
     else return;
     xQueueSend(s_eventos_mqtt, &ev, 0);
 }
 
 static void tarea_gestor(void *arg)
 {
-    con_evento_t ev;
+    evento_mqtt_t ev;
     ESP_ERROR_CHECK(esp_task_wdt_add(NULL));                 /* NFR-WDT-01: tarea de conectividad */
     for (;;) {
         esp_task_wdt_reset();
-        if (xQueueReceive(s_eventos_mqtt, &ev, pdMS_TO_TICKS(WDT_ALIMENTO_MS)) == pdTRUE)
-            transicion(ev, (con_guardas_t){0});
+        if (xQueueReceive(s_eventos_mqtt, &ev, pdMS_TO_TICKS(WDT_ALIMENTO_MS)) != pdTRUE) continue;
+        if (ev.ev != CON_EV_CMD_OTA) { transicion(ev.ev, (con_guardas_t){0}); continue; }
+        if (ev.motivo == OTA_OK) {
+            /* T17: la descarga (esp_https_ota) llega en el paso siguiente del bloque 5; hasta
+             * entonces un comando admitido no cambia de estado, para no quedarse en OTA_DESCARGA */
+            ESP_LOGW(TAG, "ota: comando admitido; descarga aún no implementada");
+            continue;
+        }
+        xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+        s_motivo_ota = ev.motivo;
+        transicion(CON_EV_CMD_OTA, (con_guardas_t){.ota_admitido = false});   /* T18 (o T21) */
+        xSemaphoreGiveRecursive(s_lock);
     }
 }
 
@@ -421,6 +470,7 @@ static void crear_mqtt(void)
 {
     if (s_mqtt) return;
     pub_topico(s_top_status, sizeof s_top_status, s_cfg.sitio, s_cfg.zona, s_id, "status");
+    pub_topico(s_top_cmd_ota, sizeof s_top_cmd_ota, s_cfg.sitio, s_cfg.zona, s_id, "cmd/ota");
     esp_mqtt_client_config_t c = {
         .broker.address = {.hostname = s_cfg.mqtt_host, .port = s_cfg.mqtt_port,
                            .transport = MQTT_TRANSPORT_OVER_TCP},
@@ -488,7 +538,7 @@ static void publicar_status(void)
  * conectado (OPERATIVO u OTA_DESCARGA) se publica status enseguida (≤ 2 s); sin conexión
  * va en el primer status de T11 (mqtt_listo lo publica siempre). La llamará el adaptador
  * OTA (bloque 5 de la Fase 3); hasta entonces el campo se queda en «ninguno». */
-__attribute__((unused)) static void ota_estado(const char *valor)
+static void ota_estado(const char *valor)
 {
     xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
     const bool conectado = s_estado == CON_OPERATIVO || s_estado == CON_OTA_DESCARGA;
@@ -535,6 +585,9 @@ static void mqtt_listo(void)
     s_intento_mqtt = 0;
     publicar_status();
     publicar_discovery();
+    /* FR-OTA-01: comandos OTA, QoS 1. Con clean_session un retained llega al suscribirse
+     * con el flag retain y se ignora (FR-OTA-04, E8). */
+    esp_mqtt_client_subscribe(s_mqtt, s_top_cmd_ota, 1);
     if (s_hay_medida && s_ultima.valida) publicar_medidas(&s_ultima, s_ultima_ts_valido, s_ultima_ts);
     esp_ota_img_states_t st;
     if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY)
@@ -724,11 +777,10 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_RED_CAIDA:            red_caida(); break;
     case CON_ACC_CERRAR_PORTAL:        cerrar_portal(); break;
     case CON_ACC_APLAZAR_CIERRE:       s_cierre_pendiente = true; break;   /* T25 */
-    /* T17–T23 (Fase 3): las filas ya están en el núcleo, pero hoy ningún evento cmd_ota,
-     * ota_ok, ota_err ni validacion_vence llega aquí. Sus acciones las implementa el
-     * adaptador OTA (bloque 5 del plan de la Fase 3), con la suscripción a cmd/ota. */
+    /* T18 ya es real (cmd/ota). T17, T19–T23: sus acciones llegan con la descarga
+     * (esp_https_ota), en el paso siguiente del bloque 5; hoy ningún evento las dispara. */
+    case CON_ACC_RECHAZAR_OTA:         ota_estado(ota_motivo_texto(s_motivo_ota)); break;   /* T18 */
     case CON_ACC_INICIAR_DESCARGA:
-    case CON_ACC_RECHAZAR_OTA:
     case CON_ACC_REINICIAR_NUEVA:
     case CON_ACC_OTA_FALLIDA:
     case CON_ACC_RECHAZAR_OCUPADO:
@@ -844,7 +896,7 @@ void app_main(void)
 #endif
     s_lock = xSemaphoreCreateRecursiveMutex();
     ota_diag_iniciar(&s_ota);                     /* §9.3: «ninguno» al arrancar */
-    s_eventos_mqtt = xQueueCreate(8, sizeof(con_evento_t));
+    s_eventos_mqtt = xQueueCreate(8, sizeof(evento_mqtt_t));
     xTaskCreate(tarea_gestor, "gestor", 6144, NULL, 6, NULL);   /* T11 serializa Discovery (§10.2) en su pila */
 
     esp_err_t err = nvs_flash_init();

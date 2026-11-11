@@ -1850,6 +1850,33 @@ tests:
     regression: >
       sin cambio visible (el campo sigue en «ninguno»): JRN-01.0 a 01.4, TC-MQTT-03 y
       TC-CON-08 en verde sobre 0.0.0-f18f864-bench (test-results/20261111T094607Z-f18f864/)
+  - id: TC-OTA-06
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench
+    verifies: [T18, FR-OTA-09, FR-MQTT-09]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      OPERATIVO; por cmd/ota: «no-json», {"url":"http://github.com/x"} y una URL de otro repo →
+      status en vivo con ota = rechazado:payload, rechazado:host y rechazado:ruta, cada uno
+      en ≤ 2 s desde la publicación (FR-MQTT-09, fila 1), con su E7 «ota: estado …» y su E0
+      «con: OPERATIVO -> OPERATIVO (cmd_ota)»; ninguna línea «-> OTA_DESCARGA»
+    impl: tests/bench/test_ota.py::test_tc_ota_06_rejections
+  - id: TC-OTA-07
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench
+    verifies: [FR-OTA-04]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      OPERATIVO; AP del banco apagado (el broker sigue); comando válido publicado con retain;
+      al volver el AP y tras T11: E8 «ota: ignorado retained», ningún E7 ni «-> OTA_DESCARGA»,
+      y ota = ninguno en los status; al final se borra el retenido
+    impl: tests/bench/test_ota.py::test_tc_ota_07_retained_command_ignored
   - id: TC-HW-04
     shape: atomic
     kind: standard
