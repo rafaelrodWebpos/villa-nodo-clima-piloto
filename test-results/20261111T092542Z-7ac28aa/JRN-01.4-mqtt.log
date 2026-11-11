@@ -1,0 +1,6 @@
++17.90 s retain=False qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-7ac28aa-bench","rssi":-25,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++17.93 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/temperatura {"v":29.4,"u":"°C","ts":null}
++17.98 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/humedad {"v":72.2,"u":"%","ts":null}
++17.98 s retain=False qos=0 sitio1/zona1/clima-f3c6d4/punto_rocio {"v":23.8,"u":"°C","ts":null}
++29.03 s retain=True qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-7ac28aa-bench","rssi":-25,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}
++29.03 s retain=True qos=1 sitio1/zona1/clima-f3c6d4/status {"estado":"online","fw":"0.0.0-7ac28aa-bench","rssi":-25,"reset":"usb","uptime_s":4,"lecturas":1,"err_sensor":0,"ota":"ninguno","hora_valida":false}
