@@ -1879,12 +1879,14 @@ tests:
       Sin fila de banco: el relé HTTP del banco no puede mandar un cuerpo a medias
     impl: tests/host/test_portal_lectura.c
     status: successful
-    commit: e83d355
+    commit: 038b813   # H-85: plazo total; antes e83d355
     date: 2026-11-10
-    ci_run: 42925760885   # host tests + secret scan
+    ci_run: 42933397032   # host tests + secret scan
     regression: >
       envíos del portal sobre 0.0.0-e83d355-bench (test-results/20261110T234713Z-e83d355/),
-      6 de 6 en verde: JRN-01.0, JRN-01.1, TC-POR-05, TC-POR-09, JRN-01.2 y TC-CON-07
+      6 de 6 en verde: JRN-01.0, JRN-01.1, TC-POR-05, TC-POR-09, JRN-01.2 y TC-CON-07.
+      H-85 (plazo total, 038b813): los mismos 6 de 6 en verde sobre 0.0.0-038b813-bench
+      (test-results/20261111T004519Z-038b813/)
   - id: TC-POR-14
     shape: atomic
     kind: standard
