@@ -5,6 +5,7 @@ TC-HW-08 (parte CI) · C-HW-08: consola de la imagen (c_hw_08.py sobre build/sdk
 TC-BLD-01 · C-BLD-01: gen_esp32part.py sobre la tabla de la imagen = tabla de FSD §2.2.
 TC-BLD-02 · C-BLD-02: check_sizes.py rechaza una app de 0x300001 bytes y acepta la real.
 TC-BLD-03 · C-BLD-03: ESP-IDF v6.x y target esp32s3.
+TC-BLD-04 · C-BLD-04: rollback de aplicación activado en el sdkconfig de la imagen (Fase 3).
 Uso: python3 build_checks.py <dir de build> <nombre de la app>"""
 import os, pathlib, re, subprocess, sys, tempfile
 
@@ -56,6 +57,9 @@ chk(r2.returncode == 0, "C-BLD-02 (control): la app real cabe", f"C-BLD-02 (cont
 v = subprocess.run(["idf.py", "--version"], capture_output=True, text=True).stdout.strip()
 chk(re.search(r"\bv6\.\d", v) is not None, f"C-BLD-03: {v}", f"C-BLD-03: versión {v!r}, no 6.x")
 chk('CONFIG_IDF_TARGET="esp32s3"' in sdk, "C-BLD-03: target esp32s3", "C-BLD-03: target distinto de esp32s3")
+# C-BLD-04 (Fase 3): el rollback del bootloader, del que dependen FR-OTA-07 y T23
+chk("CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y" in sdk, "C-BLD-04: rollback de aplicación activado",
+    "C-BLD-04: CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE no está activado")
 for m in ok: print("ok   ", m)
 for m in mal: print("FALLA", m)
 sys.exit(1 if mal else 0)

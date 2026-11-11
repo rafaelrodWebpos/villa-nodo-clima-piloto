@@ -1762,6 +1762,18 @@ tests:
     commit: 9f8d3f8
     date: 2026-11-06
     ci_run: 42294803194   # Build Firmware (push): build_checks.py, todas «ok»
+  - id: TC-BLD-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: other
+    verifies: [C-BLD-04]
+    needs: [hosted-ci]
+    expect: >
+      el sdkconfig generado de cada imagen de la CI (producción y banco) tiene
+      CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y; nunca «is not set» (SEC-10)
+    impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
   - id: TC-HW-04
     shape: atomic
     kind: standard
