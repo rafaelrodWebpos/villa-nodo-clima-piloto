@@ -6,6 +6,7 @@ import pathlib, re, sys
 root = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else ".")
 CAMPOS = re.compile(r"WIFI|SSID|PASS|MQTT|BROKER|USER|ZONA|SITIO", re.I)   # los 7 campos de cadena de §17
 MIME = ("text/", "application/", "image/", "multipart/")                   # literales con «/» que no son tópicos
+SUFIJOS = ("cmd/ota",)        # FSD §12.1: sufijo tras <sitio>/<zona>/<nodo>, no un prefijo (lista cerrada)
 mal = []
 
 # 1. Kconfig: opciones de §17 con un default de cadena no vacío
@@ -29,7 +30,7 @@ for f in list(root.glob("main/**/*.[ch]")) + list(root.glob("components/**/*.[ch
         if ln.lstrip().startswith("#include"):
             continue
         for lit in re.findall(r'"((?:[^"\\]|\\.)*)"', ln):
-            if re.match(r"[A-Za-z0-9_-]+/", lit) and not lit.startswith(MIME):
+            if re.match(r"[A-Za-z0-9_-]+/", lit) and not lit.startswith(MIME) and lit not in SUFIJOS:
                 mal.append(f"{f}:{n}: literal con prefijo de tópico «{lit}»")
 print("C-CFG-01:", "sin hallazgos" if not mal else f"{len(mal)} hallazgo(s)")
 for m in mal: print("  ", m)
