@@ -25,6 +25,14 @@ add_executable(test_conectividad_sta test_conectividad_sta.c ${COMP}/conectivida
 target_include_directories(test_conectividad_sta PRIVATE ${COMP}/conectividad/include)
 add_test(NAME TC-CON-13 COMMAND test_conectividad_sta)
 
+# TC-OTA-01 · FR-OTA-09, TC-OTA-02 · FR-OTA-14/02/11/13, TC-OTA-03 · FR-OTA-05, TC-OTA-04 · FR-OTA-12
+add_executable(test_ota_politica test_ota_politica.c ${COMP}/ota/ota_politica.c)
+target_include_directories(test_ota_politica PRIVATE ${COMP}/ota/include)
+add_test(NAME TC-OTA-01 COMMAND test_ota_politica TC-OTA-01)
+add_test(NAME TC-OTA-02 COMMAND test_ota_politica TC-OTA-02)
+add_test(NAME TC-OTA-03 COMMAND test_ota_politica TC-OTA-03)
+add_test(NAME TC-OTA-04 COMMAND test_ota_politica TC-OTA-04)
+
 # TC-POR-01 · FR-POR-03 (generador del formulario)
 add_executable(test_portal_form test_portal_form.c ${COMP}/portal/portal_form.c)
 target_include_directories(test_portal_form PRIVATE ${COMP}/portal/include)

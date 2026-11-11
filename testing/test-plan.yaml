@@ -1774,6 +1774,50 @@ tests:
       el sdkconfig generado de cada imagen de la CI (producción y banco) tiene
       CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y; nunca «is not set» (SEC-10)
     impl: .github/workflows/build.yml#build/Verify build constraints (scripts/ci/build_checks.py)
+  - id: TC-OTA-01
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: host
+    verifies: [FR-OTA-09]
+    needs: [hosted-ci]
+    expect: >
+      ota_payload: {"url":"…"} válido (con blancos y el escape \\/) se acepta; {}, {"url":5}, no-json, clave extra antes o después, url vacía, URL de 513 bytes, \\u, control, null → rechazado:payload; 512 bytes se aceptan (§12.3)
+    impl: tests/host/test_ota_politica.c (TC-OTA-01)
+  - id: TC-OTA-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: host
+    verifies: [FR-OTA-14, FR-OTA-02, FR-OTA-11, FR-OTA-13]
+    needs: [hosted-ci]
+    expect: >
+      ota_url_inicial y ota_url_redireccion: http y host ajeno → rechazado:host; otro repo, archive, solo el prefijo y URL inicial de release-assets → rechazado:ruta; ota-test-* → rechazado:ruta en producción y aceptada (marcada como prueba) en banco; los 17 casos de FR-OTA-14 (usuario@, :8443, puerto vacío, % en host o ruta, .., ., \\, esquema en mayúsculas, control, tabulador, sufijo .evil.example, fragmento, no ASCII) con su motivo; redirección a release-assets con consulta firmada (%) aceptada, objects.githubusercontent.com y http rechazados, la cuarta redirección → error:redirecciones (§7.4)
+    impl: tests/host/test_ota_politica.c (TC-OTA-02)
+  - id: TC-OTA-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: host
+    verifies: [FR-OTA-05]
+    needs: [hosted-ci]
+    expect: >
+      ota_version: (1.2.0, 1.1.9) rechazado:version_anterior, (1.2.0, 1.2.0) rechazado:misma_version, (1.2.0, 1.2.1) aceptar, (1.2.0, ota-test 0.0.1) aceptar en banco (H-84); precedencia semver (rc antes de la final, números de forma numérica, +build no cuenta, prefijo v); destino no semver → error:imagen (§7.4)
+    impl: tests/host/test_ota_politica.c (TC-OTA-03)
+  - id: TC-OTA-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: host
+    verifies: [FR-OTA-12]
+    needs: [hosted-ci]
+    expect: >
+      ota_clasificar_fallo: DNS, TCP, timeout → error:red; 404 y 500 → error:http; 200 no es fallo; TLS → error:tls (§7.4)
+    impl: tests/host/test_ota_politica.c (TC-OTA-04)
   - id: TC-HW-04
     shape: atomic
     kind: standard
