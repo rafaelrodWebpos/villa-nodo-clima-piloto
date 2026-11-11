@@ -15,6 +15,16 @@
   `pi/capture_controller.py`, `pi/mqtt_controller.py`, `pi/wifi_controller.py`, `pi/portal.py`,
   `pi/install.sh`, `pi/scripts/harness-volver-original.sh`, `pytest/testbench_driver.py`,
   `pytest/host/test_villa2.py`, `docs/fork-villa.md` y `docs/Harness-FSD.md`.
+- **S6: «sí, con condiciones»** (informe del auditor fuera del repo). Correcciones H-87 en la rama
+  `villa-2`, commit `a723456` encima de `dc00cbd`, CI del fork en verde (run 42998883166), sin
+  instalar:
+  - S6-01: token de la API.
+  - S6-03: ficheros bajo `/run/harness`.
+  - S6-04: INPUT de `eth0` hacia 192.168.4.0/24 descartado.
+  - S6-05 a S6-09.
+  - `harness-volver-original` lo deshace todo.
+  - S6-02 (broker solo en 192.168.4.1) queda pendiente de decisión del propietario: cortaría al
+    suscriptor MQTT de la laptop y al Home Assistant de prueba (H-52).
 - **Base:** FSD 0.9.9 (§3.3, §7, §12, §19.3, §22.0); puerta S1 cerrada (H-85, `c27ebfc`).
 - **Hoy en el repositorio:** de la Fase 3 solo hay dos pruebas declaradas, JRN-02.1 y JRN-02.2,
   sin implementar. No hay ninguna release ni pre-release publicada. El secreto `NODO_DENYLIST`

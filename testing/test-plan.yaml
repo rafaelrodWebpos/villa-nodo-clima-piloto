@@ -1843,6 +1843,13 @@ tests:
       todos los motivos de la política lo son. La fila bench (≤ 2 s; T22) llega con el
       adaptador OTA
     impl: tests/host/test_ota_diag.c
+    status: successful
+    commit: f18f864
+    date: 2026-11-11
+    ci_run: 42997460426   # host tests + secret scan
+    regression: >
+      sin cambio visible (el campo sigue en «ninguno»): JRN-01.0 a 01.4, TC-MQTT-03 y
+      TC-CON-08 en verde sobre 0.0.0-f18f864-bench (test-results/20261111T094607Z-f18f864/)
   - id: TC-HW-04
     shape: atomic
     kind: standard
