@@ -672,7 +672,9 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap));
     ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_ERROR_CHECK(portal_dns_iniciar());
+    char ifname[8] = "";
+    esp_netif_get_netif_impl_name(ap_netif, ifname);   /* FR-POR-10: el DNS se liga a esta interfaz */
+    ESP_ERROR_CHECK(portal_dns_iniciar(ifname));
     ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version, al_enviar));
     const esp_timer_create_args_t tpo = {.callback = al_vencer_portal, .name = "portal"};
     ESP_ERROR_CHECK(esp_timer_create(&tpo, &s_t_portal));

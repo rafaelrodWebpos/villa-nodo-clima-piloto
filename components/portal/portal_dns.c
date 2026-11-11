@@ -12,6 +12,7 @@
 
 static const char *TAG = "portal";
 static volatile bool s_detener;                           /* T24: la tarea sale del bucle */
+static char s_ifname[8];                                  /* interfaz lwIP del AP (SO_BINDTODEVICE) */
 
 static void tarea_dns(void *arg)
 {
@@ -23,6 +24,13 @@ static void tarea_dns(void *arg)
     int r = -1;
     for (int i = 0; s >= 0 && i < 20 && (r = bind(s, (struct sockaddr *)&dir, sizeof dir)) != 0; i++)
         vTaskDelay(pdMS_TO_TICKS(500));             /* la IP del AP puede tardar en estar lista */
+    /* FR-POR-10 (H-85): además, solo por la interfaz del AP. lwIP es de host débil y acepta
+     * por el STA un paquete dirigido a 192.168.4.1; udp_input descarta los de otra interfaz */
+    if (r == 0 && s_ifname[0]) {
+        struct ifreq ifr = {0};
+        strlcpy(ifr.ifr_name, s_ifname, sizeof ifr.ifr_name);
+        if (setsockopt(s, SOL_SOCKET, SO_BINDTODEVICE, &ifr, sizeof ifr) != 0) r = -1;
+    }
     if (s < 0 || r != 0) {
         ESP_LOGE(TAG, "dns: no se pudo abrir UDP/53");
         if (s >= 0) close(s);
@@ -39,6 +47,9 @@ static void tarea_dns(void *arg)
         socklen_t largo = sizeof de;
         int n = recvfrom(s, q, sizeof q, 0, (struct sockaddr *)&de, &largo);
         if (n <= 0) continue;                       /* espera vencida: vuelve a mirar s_detener */
+        uint8_t origen[4];
+        memcpy(origen, &de.sin_addr.s_addr, 4);
+        if (!portal_origen_permitido(PORTAL_IP_AP, origen)) continue;   /* FR-POR-10: solo 192.168.4.0/24 */
         size_t m = portal_dns_respuesta(q, (size_t)n, resp, sizeof resp, PORTAL_IP_AP);
         if (m) sendto(s, resp, m, 0, (struct sockaddr *)&de, largo);
     }
@@ -53,7 +64,8 @@ void portal_dns_detener(void)
     s_detener = true;
 }
 
-esp_err_t portal_dns_iniciar(void)
+esp_err_t portal_dns_iniciar(const char *ifname_ap)
 {
+    if (ifname_ap) strlcpy(s_ifname, ifname_ap, sizeof s_ifname);
     return xTaskCreate(tarea_dns, "portal_dns", 4096, NULL, 5, NULL) == pdPASS ? ESP_OK : ESP_FAIL;
 }

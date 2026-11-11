@@ -162,25 +162,33 @@ fin:
     return r;
 }
 
-/* FR-POR-10 (SEC-06): esp_http_server no se puede ligar a una IP; se cierra al aceptarla
- * toda conexión cuya dirección local no sea la del AP (devolver un error la cierra). */
+/* IPv4 de una dirección de socket, también la mapeada ::ffff:a.b.c.d del socket dual de
+ * esp_http_server; 0.0.0.0 si no es IPv4 (y entonces no se atiende). */
+static void ipv4_de(const struct sockaddr_storage *d, uint8_t ip[4])
+{
+    memset(ip, 0, 4);
+    if (d->ss_family == AF_INET) {
+        memcpy(ip, &((const struct sockaddr_in *)d)->sin_addr.s_addr, 4);
+    } else if (d->ss_family == AF_INET6) {
+        const uint8_t *b = (const uint8_t *)&((const struct sockaddr_in6 *)d)->sin6_addr;
+        static const uint8_t v4map[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
+        if (memcmp(b, v4map, 12) == 0) memcpy(ip, b + 12, 4);
+    }
+}
+
+/* FR-POR-10 (SEC-06, H-85): esp_http_server no se puede ligar a una IP ni a una interfaz;
+ * se cierra al aceptarla toda conexión que no vaya a 192.168.4.1 o no venga de
+ * 192.168.4.0/24 (devolver un error la cierra). Un origen falsificado de esa red no completa
+ * la conexión TCP: el SYN-ACK sale por el AP. */
 static esp_err_t al_abrir(httpd_handle_t hd, int sockfd)
 {
     (void)hd;
-    struct sockaddr_storage local;
-    socklen_t largo = sizeof local;
-    uint8_t ip[4] = {0};
-    if (getsockname(sockfd, (struct sockaddr *)&local, &largo) == 0) {
-        if (local.ss_family == AF_INET) {
-            memcpy(ip, &((struct sockaddr_in *)&local)->sin_addr.s_addr, 4);
-        } else if (local.ss_family == AF_INET6) {
-            const struct sockaddr_in6 *l6 = (const struct sockaddr_in6 *)&local;
-            const uint8_t *b = (const uint8_t *)&l6->sin6_addr;
-            static const uint8_t v4map[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
-            if (memcmp(b, v4map, 12) == 0) memcpy(ip, b + 12, 4);   /* ::ffff:a.b.c.d */
-        }
-    }
-    if (portal_origen_permitido(ip)) return ESP_OK;
+    struct sockaddr_storage local = {0}, remota = {0};
+    socklen_t ll = sizeof local, lr = sizeof remota;
+    uint8_t ip_l[4] = {0}, ip_r[4] = {0};
+    if (getsockname(sockfd, (struct sockaddr *)&local, &ll) == 0) ipv4_de(&local, ip_l);
+    if (getpeername(sockfd, (struct sockaddr *)&remota, &lr) == 0) ipv4_de(&remota, ip_r);
+    if (portal_origen_permitido(ip_l, ip_r)) return ESP_OK;
     ESP_LOGW(TAG, "conexión por otra interfaz rechazada");
     return ESP_FAIL;
 }

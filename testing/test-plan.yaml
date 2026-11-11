@@ -1905,10 +1905,13 @@ tests:
     verifies: [FR-POR-10]
     needs: [hosted-ci]
     expect: >
-      portal_origen_permitido: solo 192.168.4.1; rechaza la IP del STA en una red
-      doméstica, 0.0.0.0, otras IP de la red del AP, el orden de bytes invertido,
-      255.255.255.255 y NULL. Revisión: el socket DNS se liga a 192.168.4.1 y el HTTP
-      cierra en open_fn toda conexión con otra dirección local (SEC-06). Sin fila de
+      portal_origen_permitido(local, remota): solo (192.168.4.1, cliente de
+      192.168.4.0/24); rechaza otra dirección local (la IP del STA, 0.0.0.0, otra de la red
+      del AP, bytes invertidos), un cliente de fuera de 192.168.4.0/24 dirigido a
+      192.168.4.1 (el bypass de host débil de lwIP, H-85), la red, la difusión, el propio AP
+      y NULL. Revisión: el socket DNS se liga a 192.168.4.1 y a la interfaz del AP
+      (SO_BINDTODEVICE) y descarta orígenes de fuera; el HTTP cierra en open_fn toda
+      conexión con otra dirección local o remota (SEC-06, FSD 0.9.9). Sin fila de
       banco: con una sola radio, el banco no puede hablar con el DUT por la IP del STA
       mientras está en VALIDANDO
     impl: tests/host/test_portal_origen.c
