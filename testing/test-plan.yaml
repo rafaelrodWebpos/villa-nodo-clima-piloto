@@ -1093,19 +1093,26 @@ tests:
       responde 302 a http://192.168.4.1/ o el formulario de §17, nunca una
       respuesta que no venga del portal (la segunda mitad del contrato de FR-POR-02)
     impl: null   # bloqueado: bench-portal-dns en no (CR-TB-09)
-    status: successful   # por la alternativa manual de FSD 0.9.6 (§3.1, §22.0) mientras CR-TB-09 siga abierta
-    reason: el ejecutable de banco sigue bloqueado (bench-portal-dns en no, CR-TB-09); la fila se cumple con la evidencia manual vigente H-51
+    reason: >
+      sin estado vigente desde la puerta S1: la evidencia manual H-51 caducó al cambiar
+      components/portal (758ccbc, e83d355, d64e5a3; FSD 0.9.8 §3.5). Por decisión del
+      propietario (H-83), la prueba con el teléfono se repite una sola vez al final de la
+      Fase 3, con las demás pruebas físicas de esa fase; hasta entonces FR-POR-02 queda
+      con la evidencia caducada, declarada como salvedad. El ejecutable de banco sigue
+      bloqueado (bench-portal-dns en no, CR-TB-09). Antes: successful por H-51
     manual_alt:
       allowed_by: FSD 0.9.4 §22.0 y §3.1 (alt. manual mientras CR-TB-09 siga abierta)
-      evidence: H-51   # vigente
+      evidence: H-51   # CADUCADA (puerta S1)
       evidence_commit: 9f8d3f8   # imagen grabada; components/portal sin cambios desde 9c382b9
       scope: [components/portal]   # o lo que sirva FR-POR-02; si cambia, la evidencia vence
-      valid: true
+      valid: false
+      expired_by: [758ccbc, e83d355, d64e5a3]   # SEC-04, SEC-05, SEC-06 (H-82)
       history:
         - {evidence: H-40, evidence_commit: ea41d50, valid: false, expired_by: [17161d3, e6a1bcd, 9c382b9]}
       renew: >
-        repetir la prueba con un teléfono real sobre el commit vigente antes de
-        cerrar la Fase 1 o publicar un release (regla del propietario, 2026-11-06)
+        H-83: una sola vez al final de la Fase 3, con las demás pruebas físicas de esa
+        fase, sobre el commit vigente. Antes (regla del propietario, 2026-11-06): repetir
+        la prueba con un teléfono real antes de cerrar la Fase 1 o publicar un release
     manual_evidence: >
       H-40, propietario, 2026-11-04, sobre ea41d50: iPhone con los datos móviles
       apagados y la red olvidada; al unirse a clima-f3c6d4 la ventana del portal
@@ -1892,6 +1899,16 @@ tests:
       banco: con una sola radio, el banco no puede hablar con el DUT por la IP del STA
       mientras está en VALIDANDO
     impl: tests/host/test_portal_origen.c
+    status: successful
+    commit: d64e5a3
+    date: 2026-11-10
+    ci_run: 42926850861   # host tests + secret scan
+    regression: >
+      portal completo sobre 0.0.0-d64e5a3-bench (test-results/20261110T235539Z-d64e5a3/),
+      11 de 11 en verde: JRN-01.0 a 01.3, TC-POR-02, 05, 07, 09, 11, TC-CON-07 y TC-POR-12;
+      ninguna «dns: no se pudo abrir UDP/53» (el bind a 192.168.4.1 funcionó) ni ninguna
+      conexión del relé rechazada por open_fn. El DNS cautivo no tiene prueba de banco
+      (bench-portal-dns en no): lo cubre la prueba del teléfono de FR-POR-02 (H-83)
   - id: TC-CON-13
     shape: atomic
     kind: standard
