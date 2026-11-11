@@ -2,7 +2,12 @@
 
 - **Origen:** `testing/auditoria-seguridad-fase-2.md` (auditoría independiente sobre `d4236cc`);
   decisiones del propietario H-81 a H-84; FSD 0.9.8 (§3.5, §19.3).
-- **Estado:** todos los criterios de §3.5 en verde (2026-11-10). La Fase 3 no se ha empezado.
+- **Estado: CERRADA** (H-85, 2026-11-10). El propietario dio por verificada la ronda corta H-85
+  (abajo): todos los criterios de §3.5 del FSD 0.9.9 en verde, la regresión de banco en verde y
+  la verificación independiente sin pendientes abiertos. Último commit de la puerta: 7e11a75.
+- **Salvedad que sigue abierta:** FR-POR-02 con la evidencia manual H-51 caducada; la prueba del
+  teléfono se repite una sola vez al final de la Fase 3 (H-83).
+- La Fase 3 no se ha empezado.
 
 ## Hallazgos con cambio
 
