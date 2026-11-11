@@ -200,8 +200,8 @@ esp_err_t portal_http_iniciar(const char *id, const char *version, portal_envio_
     s_al_enviar = al_enviar;
     httpd_handle_t srv = NULL;
     httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
-    cfg.lru_purge_enable = true;
-    cfg.open_fn = al_abrir;                        /* FR-POR-10 (SEC-06) */                   /* SEC-05: con todos los huecos ocupados, se cierra la conexión más antigua */
+    cfg.lru_purge_enable = true;                   /* SEC-05: con todos los huecos ocupados, se cierra la conexión más antigua */
+    cfg.open_fn = al_abrir;                        /* FR-POR-10 (SEC-06) */
     cfg.uri_match_fn = httpd_uri_match_wildcard;   /* el comodín recoge las rutas de detección */
     esp_err_t err = httpd_start(&srv, &cfg);
     if (err != ESP_OK) {

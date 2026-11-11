@@ -78,6 +78,7 @@ def test_tc_con_14_open_twin_rejected(testbench, dut_slot, dut_mac, firmware, ru
 T02_LINEA = "con: ARRANQUE -> PORTAL (fin_arranque)"
 T24_LINEA = "con: PORTAL -> ESPERA (portal_vence)"
 DNS_DETENIDO = "portal: dns detenido"     # E14 (FSD 0.9.9, N-01)
+DNS_NO_DISPONIBLE = "portal: dns no disponible"   # E14 (N-03): el DNS no se pudo ligar en T02
 DNS_MAX_MS = 5_000
 PORTAL_MS, TOL_MS = 600_000, 5_000        # D24: 10 min desde T02, ± 5 s (FSD §6.6)
 ESCANEOS_TRAS = 3
@@ -131,6 +132,7 @@ def test_tc_por_12_portal_closes_after_10_min(testbench, dut_slot, dut_mac, firm
         i_dns = next((i for i, t in enumerate(txt[i24:], i24) if DNS_DETENIDO in t), None)
         dns_ms = None if i_dns is None else _ms(txt[i_dns]) - _ms(txt[i24])
         nvs = [t for t in txt if "nvs: config escrita" in t]
+        sin_dns = [t for t in txt if DNS_NO_DISPONIBLE in t]
         rein = [k for k in reinicios(ent) if k > i02]
         c.note(f"- T02 → T24 en el reloj del DUT: {dt_ms} ms (esperado {PORTAL_MS} ± {TOL_MS})",
                f"- `{DNS_DETENIDO}` (E14): " + ("ausente" if dns_ms is None else f"a {dns_ms} ms de T24"),
@@ -142,6 +144,7 @@ def test_tc_por_12_portal_closes_after_10_min(testbench, dut_slot, dut_mac, firm
         assert dns_ms is not None and 0 <= dns_ms <= DNS_MAX_MS, f"el DNS no se detuvo en {DNS_MAX_MS} ms (E14): {dns_ms}"
         assert med_tras, "la medición no siguió en ESPERA"
         assert not nvs, "se escribió la NVS"
+        assert not sin_dns, f"el DNS no se pudo ligar en T02 (E14): {sin_dns[:1]}"
         assert not rein, "el DUT se reinició tras T02"
 
         c.step("Otro reset: el portal vuelve a abrirse")
