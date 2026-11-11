@@ -701,6 +701,17 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_RED_CAIDA:            red_caida(); break;
     case CON_ACC_CERRAR_PORTAL:        cerrar_portal(); break;
     case CON_ACC_APLAZAR_CIERRE:       s_cierre_pendiente = true; break;   /* T25 */
+    /* T17–T23 (Fase 3): las filas ya están en el núcleo, pero hoy ningún evento cmd_ota,
+     * ota_ok, ota_err ni validacion_vence llega aquí. Sus acciones las implementa el
+     * adaptador OTA (bloque 5 del plan de la Fase 3), con la suscripción a cmd/ota. */
+    case CON_ACC_INICIAR_DESCARGA:
+    case CON_ACC_RECHAZAR_OTA:
+    case CON_ACC_REINICIAR_NUEVA:
+    case CON_ACC_OTA_FALLIDA:
+    case CON_ACC_RECHAZAR_OCUPADO:
+    case CON_ACC_ABORTAR_WIFI:
+    case CON_ACC_ABORTAR_MQTT:
+    case CON_ACC_ROLLBACK:             break;
     case CON_ACC_NINGUNA:              break;
     }
     /* E0 */

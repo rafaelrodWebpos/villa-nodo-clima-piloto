@@ -698,7 +698,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T24, T25, T26]   # crece fila a fila: el contrato host de §6.6 cubre T01–T26 (T24/T25: FSD 0.9.8; T26: 0.9.9)
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26]   # el contrato host de §6.6 cubre T01–T26; T17–T23 en el núcleo (Fase 3), sus acciones en el adaptador OTA
     needs: [hosted-ci]
     regression: >
       H-85, T26 (7a7402c): envíos del portal en verde sobre 0.0.0-7a7402c-bench — JRN-01.0

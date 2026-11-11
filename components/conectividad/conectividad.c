@@ -10,7 +10,7 @@ static const char *const NOMBRE_ESTADO[CON_N_ESTADOS] = {
 };
 static const char *const NOMBRE_EVENTO[CON_N_EVENTOS] = {
     "fin_arranque", "envío", "wifi_up", "wifi_down", "backoff", "mqtt_up", "mqtt_down",
-    "portal_vence",
+    "portal_vence", "cmd_ota", "ota_ok", "ota_err", "validacion_vence",
 };
 
 con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_guardas_t g)
@@ -19,6 +19,23 @@ con_transicion_t con_transicion(con_estado_t origen, con_evento_t evento, con_gu
         return g.config_valida
             ? (con_transicion_t){"T01", CON_CONECTANDO_WIFI, CON_ACC_ARRANCAR_STA}
             : (con_transicion_t){"T02", CON_PORTAL, CON_ACC_ARRANCAR_PORTAL};
+    }
+    /* T23 (región de validación, ortogonal a la principal): desde cualquier estado */
+    if (evento == CON_EV_VALIDACION_VENCE)
+        return g.imagen_pendiente ? (con_transicion_t){"T23", CON_ARRANQUE, CON_ACC_ROLLBACK}
+                                  : (con_transicion_t){NULL, origen, CON_ACC_NINGUNA};
+    if (origen == CON_OPERATIVO && evento == CON_EV_CMD_OTA)
+        return g.ota_admitido ? (con_transicion_t){"T17", CON_OTA_DESCARGA, CON_ACC_INICIAR_DESCARGA}
+                              : (con_transicion_t){"T18", CON_OPERATIVO, CON_ACC_RECHAZAR_OTA};
+    if (origen == CON_OTA_DESCARGA) {
+        switch (evento) {
+        case CON_EV_OTA_OK:    return (con_transicion_t){"T19", CON_ARRANQUE, CON_ACC_REINICIAR_NUEVA};
+        case CON_EV_OTA_ERR:   return (con_transicion_t){"T20", CON_OPERATIVO, CON_ACC_OTA_FALLIDA};
+        case CON_EV_CMD_OTA:   return (con_transicion_t){"T21", CON_OTA_DESCARGA, CON_ACC_RECHAZAR_OCUPADO};
+        case CON_EV_WIFI_DOWN: return (con_transicion_t){"T22", CON_CONECTANDO_WIFI, CON_ACC_ABORTAR_WIFI};
+        case CON_EV_MQTT_DOWN: return (con_transicion_t){"T22", CON_CONECTANDO_BROKER, CON_ACC_ABORTAR_MQTT};
+        default: break;                  /* wifi_up, backoff, mqtt_up: ign (§6.4) */
+        }
     }
     if (origen == CON_PORTAL && evento == CON_EV_PORTAL_VENCE)
         return (con_transicion_t){"T24", CON_ESPERA, CON_ACC_CERRAR_PORTAL};

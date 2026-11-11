@@ -13,6 +13,10 @@ typedef enum {
     CON_EV_FIN_ARRANQUE, CON_EV_ENVIO, CON_EV_WIFI_UP, CON_EV_WIFI_DOWN, CON_EV_BACKOFF,
     CON_EV_MQTT_UP, CON_EV_MQTT_DOWN,
     CON_EV_PORTAL_VENCE,                 /* FR-POR-08: 10 min desde T02 (D24) */
+    CON_EV_CMD_OTA,                      /* T17, T18, T21: comando OTA (no retained, FR-OTA-04) */
+    CON_EV_OTA_OK,                       /* T19: descarga y validación completas */
+    CON_EV_OTA_ERR,                      /* T20: fallo de la descarga o de la imagen */
+    CON_EV_VALIDACION_VENCE,             /* T23: 300 s sin T11 desde el arranque (región de validación) */
     CON_N_EVENTOS                        /* el resto de §6.4 llega con sus filas */
 } con_evento_t;
 
@@ -34,12 +38,22 @@ typedef enum {
     CON_ACC_RED_CAIDA,         /* T14/T16: detener los intentos MQTT; programar un reintento Wi-Fi */
     CON_ACC_CERRAR_PORTAL,     /* T24: detener el HTTP y el DNS del portal y apagar el AP */
     CON_ACC_APLAZAR_CIERRE,    /* T25: la prueba de unión sigue; el cierre se aplica al volver a PORTAL */
+    CON_ACC_INICIAR_DESCARGA,  /* T17: iniciar la descarga; ota = en_curso */
+    CON_ACC_RECHAZAR_OTA,      /* T18: status con ota = rechazado:<payload|host|ruta> */
+    CON_ACC_REINICIAR_NUEVA,   /* T19: ota = ok, offline y reiniciar en el slot nuevo */
+    CON_ACC_OTA_FALLIDA,       /* T20: ota = error:<motivo> o rechazado:…; conservar la imagen */
+    CON_ACC_RECHAZAR_OCUPADO,  /* T21: ota = rechazado:ocupado; la descarga sigue */
+    CON_ACC_ABORTAR_WIFI,      /* T22 (wifi_down): abortar la descarga, ota = error:red, reintento Wi-Fi */
+    CON_ACC_ABORTAR_MQTT,      /* T22 (mqtt_down): abortar la descarga, ota = error:red, reintento MQTT */
+    CON_ACC_ROLLBACK,          /* T23: reiniciar; el bootloader arranca la imagen anterior */
 } con_accion_t;
 
 typedef struct {
     bool config_valida;        /* guarda de T01/T02: configuración válida en NVS */
     bool envio_valido;         /* guarda de T03/T04: todos los campos válidos (§17) */
     bool cierre_pendiente;     /* guarda de T26: el portal ya venció (T25) y su cierre está pendiente */
+    bool ota_admitido;         /* guarda de T17/T18: payload, URL bien formada, host y ruta (FR-OTA-09/14/02/11/13) */
+    bool imagen_pendiente;     /* guarda de T23: la imagen en ejecución está PENDIENTE (región de validación) */
 } con_guardas_t;
 
 typedef struct {

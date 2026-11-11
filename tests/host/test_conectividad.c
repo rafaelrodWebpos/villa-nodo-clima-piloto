@@ -1,4 +1,4 @@
-/* TC-CON-01 · T01–T25 (host, lógica de la tabla), filas implementadas: T01–T16 y T24–T26.
+/* TC-CON-01 · T01–T25 (host, lógica de la tabla), filas implementadas: T01–T26 (T17–T23 en el núcleo; sus acciones, en el adaptador OTA).
  * Por fila: forzar el estado de origen, inyectar el evento, comprobar la guarda,
  * el estado siguiente, la acción y el «No debe ocurrir» (FSD §6.3, §6.6). */
 #include <stdio.h>
@@ -182,6 +182,63 @@ int main(void)
     ESPERA(strcmp(con_nombre_estado(CON_ESPERA), "ESPERA") == 0, "nombre ESPERA");
     ESPERA(strcmp(con_nombre_evento(CON_EV_PORTAL_VENCE), "portal_vence") == 0, "nombre portal_vence");
 
-    printf("TC-CON-01 (T01–T16, T24–T26): %s\n", fallos ? "FALLO" : "ok");
+    /* T17: OPERATIVO + cmd_ota admitido -> OTA_DESCARGA, iniciar la descarga */
+    t = con_transicion(CON_OPERATIVO, CON_EV_CMD_OTA, (con_guardas_t){.ota_admitido = true});
+    ESPERA(t.fila && strcmp(t.fila, "T17") == 0 && t.siguiente == CON_OTA_DESCARGA && t.accion == CON_ACC_INICIAR_DESCARGA,
+           "T17: %s %d/%d", t.fila ? t.fila : "NULL", t.siguiente, t.accion);
+    /* T18: OPERATIVO + cmd_ota que incumple la guarda -> OPERATIVO, rechazar. No debe: descargar */
+    t = con_transicion(CON_OPERATIVO, CON_EV_CMD_OTA, (con_guardas_t){.ota_admitido = false});
+    ESPERA(t.fila && strcmp(t.fila, "T18") == 0 && t.siguiente == CON_OPERATIVO && t.accion == CON_ACC_RECHAZAR_OTA,
+           "T18: %s %d/%d", t.fila ? t.fila : "NULL", t.siguiente, t.accion);
+    ESPERA(t.accion != CON_ACC_INICIAR_DESCARGA, "T18 descarga");
+    /* T19: OTA_DESCARGA + ota_ok -> ARRANQUE (reinicio en el slot nuevo) */
+    t = con_transicion(CON_OTA_DESCARGA, CON_EV_OTA_OK, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T19") == 0 && t.siguiente == CON_ARRANQUE && t.accion == CON_ACC_REINICIAR_NUEVA, "T19");
+    /* T20: OTA_DESCARGA + ota_err -> OPERATIVO, conservar la imagen. No debe: reiniciar */
+    t = con_transicion(CON_OTA_DESCARGA, CON_EV_OTA_ERR, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T20") == 0 && t.siguiente == CON_OPERATIVO && t.accion == CON_ACC_OTA_FALLIDA, "T20");
+    ESPERA(t.accion != CON_ACC_REINICIAR_NUEVA && t.accion != CON_ACC_ROLLBACK, "T20 reinicia");
+    /* T21: OTA_DESCARGA + cmd_ota -> OTA_DESCARGA, «ocupado». No debe: abortar la descarga en curso */
+    for (int adm = 0; adm <= 1; adm++) {
+        t = con_transicion(CON_OTA_DESCARGA, CON_EV_CMD_OTA, (con_guardas_t){.ota_admitido = adm});
+        ESPERA(t.fila && strcmp(t.fila, "T21") == 0 && t.siguiente == CON_OTA_DESCARGA && t.accion == CON_ACC_RECHAZAR_OCUPADO,
+               "T21 (admitido=%d)", adm);
+    }
+    /* T22: OTA_DESCARGA + wifi_down / mqtt_down -> CONECTANDO_WIFI / CONECTANDO_BROKER, abortar. No debe: reiniciar */
+    t = con_transicion(CON_OTA_DESCARGA, CON_EV_WIFI_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T22") == 0 && t.siguiente == CON_CONECTANDO_WIFI && t.accion == CON_ACC_ABORTAR_WIFI, "T22 wifi");
+    t = con_transicion(CON_OTA_DESCARGA, CON_EV_MQTT_DOWN, (con_guardas_t){0});
+    ESPERA(t.fila && strcmp(t.fila, "T22") == 0 && t.siguiente == CON_CONECTANDO_BROKER && t.accion == CON_ACC_ABORTAR_MQTT, "T22 mqtt");
+    /* T23: imagen PENDIENTE + 300 s sin T11 -> reinicio con rollback, desde cualquier estado; sin PENDIENTE, nada */
+    for (int e = 0; e < CON_N_ESTADOS; e++) {
+        t = con_transicion((con_estado_t)e, CON_EV_VALIDACION_VENCE, (con_guardas_t){.imagen_pendiente = true});
+        ESPERA(t.fila && strcmp(t.fila, "T23") == 0 && t.accion == CON_ACC_ROLLBACK, "T23 desde %s", con_nombre_estado(e));
+        t = con_transicion((con_estado_t)e, CON_EV_VALIDACION_VENCE, (con_guardas_t){0});
+        ESPERA(t.fila == NULL && t.siguiente == (con_estado_t)e, "T23 sin PENDIENTE desde %s", con_nombre_estado(e));
+    }
+    /* §6.4: OTA_DESCARGA ignora wifi_up, backoff y mqtt_up; cmd_ota es imp fuera de OPERATIVO/OTA_DESCARGA;
+     * ota_ok/ota_err son imp fuera de OTA_DESCARGA */
+    const con_evento_t ign_ota[] = {CON_EV_WIFI_UP, CON_EV_BACKOFF, CON_EV_MQTT_UP};
+    for (unsigned i = 0; i < sizeof ign_ota / sizeof ign_ota[0]; i++) {
+        t = con_transicion(CON_OTA_DESCARGA, ign_ota[i], (con_guardas_t){0});
+        ESPERA(t.fila == NULL && t.siguiente == CON_OTA_DESCARGA, "OTA_DESCARGA + %s", con_nombre_evento(ign_ota[i]));
+    }
+    for (int e = 0; e < CON_N_ESTADOS; e++) {
+        if (e != CON_OPERATIVO && e != CON_OTA_DESCARGA) {
+            t = con_transicion((con_estado_t)e, CON_EV_CMD_OTA, (con_guardas_t){.ota_admitido = true});
+            ESPERA(t.fila == NULL, "%s + cmd_ota: %s", con_nombre_estado(e), t.fila);
+        }
+        if (e != CON_OTA_DESCARGA) {
+            t = con_transicion((con_estado_t)e, CON_EV_OTA_OK, (con_guardas_t){0});
+            ESPERA(t.fila == NULL, "%s + ota_ok: %s", con_nombre_estado(e), t.fila);
+            t = con_transicion((con_estado_t)e, CON_EV_OTA_ERR, (con_guardas_t){0});
+            ESPERA(t.fila == NULL, "%s + ota_err: %s", con_nombre_estado(e), t.fila);
+        }
+    }
+    ESPERA(strcmp(con_nombre_estado(CON_OTA_DESCARGA), "OTA_DESCARGA") == 0, "nombre OTA_DESCARGA");
+    ESPERA(strcmp(con_nombre_evento(CON_EV_CMD_OTA), "cmd_ota") == 0 && strcmp(con_nombre_evento(CON_EV_OTA_OK), "ota_ok") == 0
+           && strcmp(con_nombre_evento(CON_EV_OTA_ERR), "ota_err") == 0, "nombres de evento de §18 (E0)");
+
+    printf("TC-CON-01 (T01–T26): %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }
