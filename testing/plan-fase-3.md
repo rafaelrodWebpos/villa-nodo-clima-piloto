@@ -9,6 +9,12 @@
     independiente, en solo lectura, ANTES de instalarlo en la Pi. Se prepara sin instalar y se
     avisa al propietario cuando esté listo.
   - El jueves 12 no se usa el banco ni se corren pruebas largas en la laptop (llega el SDR).
+- **villa-2 listo para la revisión S6 (2026-11-10):** rama `villa-2` del fork
+  `rafaelrodWebpos/Embedded-AI-Harness`, commit `dc00cbd` (un solo commit sobre villa-1, `8966260`),
+  CI del fork en verde (run 42950087306). Sin tag y sin instalar. Ficheros: `pi/dns_override.py`,
+  `pi/capture_controller.py`, `pi/mqtt_controller.py`, `pi/wifi_controller.py`, `pi/portal.py`,
+  `pi/install.sh`, `pi/scripts/harness-volver-original.sh`, `pytest/testbench_driver.py`,
+  `pytest/host/test_villa2.py`, `docs/fork-villa.md` y `docs/Harness-FSD.md`.
 - **Base:** FSD 0.9.9 (§3.3, §7, §12, §19.3, §22.0); puerta S1 cerrada (H-85, `c27ebfc`).
 - **Hoy en el repositorio:** de la Fase 3 solo hay dos pruebas declaradas, JRN-02.1 y JRN-02.2,
   sin implementar. No hay ninguna release ni pre-release publicada. El secreto `NODO_DENYLIST`
