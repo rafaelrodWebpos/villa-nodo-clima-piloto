@@ -48,3 +48,31 @@ colaboradores externos y ningún runner registrado.
   a 192.168.4.1.
 - **SEC-08, release.** `gh release create` solo corre con un tag `v*`: se comprobará en el primer
   tag (§19.3).
+
+## Verificación independiente y ronda corta H-85 (2026-11-10)
+
+Informe: `testing/verificacion-seguridad-fase-2.md` (S1 cerrable, sin puerta trasera, pendientes de
+severidad baja). Cambio agrupado del FSD: 0.9.9 (`ddf8016`).
+
+| Punto | Cambio | Commit | Comprobación | Regresión de banco |
+|---|---|---|---|---|
+| SEC-05, cliente lento | plazo total: corte a los 15 s, nunca más de 20 s con la última espera de 5 s (D25) | 038b813 | TC-POR-13 host con «1 byte por espera» y esperas alternas | 6 de 6 (`test-results/20261111T004519Z-038b813/`) |
+| N-02 | el cierre de T24 corre en una tarea propia y apaga el AP antes de `httpd_stop` | 308d490 | revisión | 3 de 3 con TC-POR-12 (`test-results/20261111T005328Z-308d490/`) |
+| N-01 | DNS con `SO_RCVTIMEO` de 1 s, `close()` y E14 «portal: dns detenido»; TC-POR-12 la exige a ≤ 5 s | fbb87c4 | E14 a 740 ms de T24 | 4 de 4 (`test-results/20261111T011057Z-fbb87c4/`) |
+| SEC-04(a) | T26: con el cierre pendiente, un envío se responde «ocupado» sin probar la unión | 7a7402c | TC-CON-01 host | 6 de 6 (`test-results/20261111T012827Z-7a7402c/`) |
+| SEC-06, host débil | DNS y HTTP solo para clientes de 192.168.4.0/24 dirigidos a 192.168.4.1; DNS ligado además a la interfaz del AP (`SO_BINDTODEVICE`) | 2450ac1 | TC-POR-14 host con (local, remota) | 11 de 11 (`test-results/20261111T013705Z-2450ac1/`) |
+| N-03, N-04 | el DNS se liga en T02 y devuelve el resultado real; si falla, E14 «portal: dns no disponible» sin abortar; comentarios recolocados | fc5103a | TC-POR-12 comprueba que no aparezca | 9 de 9 (`test-results/20261111T020527Z-fc5103a/`) |
+
+**Lo que el auditor dejó por verificar:**
+
+- **lwIP de ESP-IDF 6.0.2 (fuentes del contenedor `espressif/idf:v6.0.2`).**
+  - Es de host débil: si un paquete no es para la interfaz por la que entra, `ip4_input` recorre las demás (`ip4.c:612-633`). El desvío de SEC-06 era real.
+  - `shutdown()` sobre UDP devuelve `EOPNOTSUPP` (`sockets.c:2751`). N-01 era real.
+  - `SO_BINDTODEVICE` lo aplica `udp_input` (`udp.c:139`) y también lo admite la escucha TCP (`tcp_in.c:331`). Pero `esp_http_server` no da acceso a su socket de escucha, así que en el HTTP el filtro es por IP local y remota. Un origen falsificado de 192.168.4.0/24 no completa la conexión TCP, porque el SYN-ACK sale por el AP.
+- **Acciones y digest.** Cada SHA es el commit del tag de su comentario (checkout v4.4.0, upload-artifact v4.6.2, download-artifact v4.3.0, comprobado con la API de GitHub). El digest `sha256:0d8c9773…cb67` es el de `espressif/idf:v6.0.2` en el registro y en Docker Hub.
+
+**Observación del banco:** en la regresión de 2450ac1, 4 de unas 13 uniones del banco al AP del DUT
+no recibieron IP del DHCP a tiempo. El banco se quedó con una dirección de enlace local
+(169.254.x, en la evidencia) y la recibió al segundo intento. No se repitió en la regresión siguiente
+(fc5103a, con el mismo cambio): 7 de 7 al primer intento. Esa dirección es del propio banco; no es
+un dato de la red de la casa.
