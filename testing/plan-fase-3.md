@@ -126,3 +126,15 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
 - **Jueves 12:** llega el receptor SDR, que se prueba en la laptop y no en la Pi. Ese día solo hago trabajo sin banco ni acciones tuyas (bloques 4 y 5) y no lanzo pruebas largas que compitan con la laptop.
 - **Viernes 13 o después:** instalación del fork (S-B) y bloques 2 y 3.
 - **Semana siguiente:** bloques 6 y 7, la visita final (S-C) y el tag (S-D).
+
+## Pausa por presupuesto hasta el sábado 2026-11-14 (H-88) — dónde quedó
+
+- **Hecho:**
+  - D7, C-BLD-04, núcleo de la política OTA (TC-OTA-01 a 04), T17–T23 en el núcleo y FR-MQTT-09 (TC-OTA-05).
+  - Adaptador OTA, paso 1: `cmd/ota`, E8 y T18; TC-OTA-06 y TC-OTA-07 en verde (`459013c`, `6f30ae4`).
+- **Fork villa-2:** completo en `bb1ec0e` (rama `villa-2`), sin instalar. Pendiente:
+  - que el propietario confirme S6-02 tal como quedó (todas las interfaces y la cadena `HARNESS_MQTT_IN` solo para la laptop);
+  - que Claude lo verifique y dé los pasos 1–8 de `docs/fork-villa.md`.
+- **Rama `driver-fork-villa-2`:** se fusiona justo después de instalar.
+- **Siguiente al volver:** la descarga OTA (T17 con `esp_https_ota`, redirecciones validadas, versión, progreso, T19/T20/T22) y T23. Después, el workflow de las pre-releases `ota-test-*`.
+- **Banco libre al pausar:** AP y broker apagados, salida a Internet apagada, SNTP desbloqueado.
