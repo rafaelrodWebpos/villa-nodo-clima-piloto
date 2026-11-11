@@ -14,7 +14,7 @@ jobs:
   host-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Build and run host tier
         run: |
           cmake -S tests/host -B build-host
@@ -26,7 +26,7 @@ jobs:
   test-plan:            # un plan que no carga pone la CI en rojo
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Load testing/test-plan.yaml
         run: |
           python3 -m pip install --quiet --require-hashes -r scripts/ci/requirements.txt   # SEC-08
@@ -35,7 +35,7 @@ jobs:
   config-checks:        # revisión + CI (nivel other): TC-CFG-01 · C-CFG-01, TC-HW-04 · C-HW-04/05, TC-HW-07, TC-HW-08
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: C-CFG-01 sin valores iniciales ni prefijos de tópico literales
         run: python3 scripts/ci/c_cfg_01.py
       - name: C-HW-04/05 bus I²C en GPIO8/9 a 100 kHz
@@ -53,7 +53,7 @@ jobs:
       GITLEAKS_VERSION: 8.30.1
       GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0          # el historial completo también se escanea
       - name: Install pinned gitleaks
