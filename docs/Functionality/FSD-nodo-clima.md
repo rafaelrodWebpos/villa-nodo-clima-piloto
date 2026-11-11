@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.8
+fsd_version: 0.9.9
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -132,6 +132,17 @@ change_history:
     `ota-test-*`; las pruebas OTA corren en la imagen de banco, y las alternativas field
     con producción solo usan releases `v*` (§22.0). (7) Riesgos aceptados y revisión antes
     de cada release (§19.3): SEC-01, SEC-02, SEC-03 y SEC-12 a SEC-15. (8) Puerta S1 en §3.5.
+  - 0.9.9 (2026-11-10): verificación de S1 (propietario, H-85, opción A), a partir de
+    `testing/verificacion-seguridad-fase-2.md`. (1) SEC-05: además de las 3 esperas, un plazo
+    total de 20 s para recibir el cuerpo del POST desde su inicio (FR-POR-09, D25). (2) SEC-04
+    (a): con el cierre pendiente (T25), un envío en PORTAL se responde «ocupado» sin probar la
+    unión (T26); la ventana de 10 min no cambia. (3) N-02: T24 apaga el AP antes de detener el
+    HTTP y el DNS. (4) N-01 y N-03: E14 (`portal: dns detenido` al terminar el DNS en T24;
+    `portal: dns no disponible` si no se pudo ligar en T02). (5) SEC-06: el DNS y el HTTP
+    atienden solo a clientes de 192.168.4.0/24 dirigidos a 192.168.4.1, y el DNS se liga
+    además a la interfaz del AP; lwIP de ESP-IDF 6.0.2 acepta por cualquier interfaz un
+    paquete dirigido a una IP propia (host débil, `ip4_input`), comprobado en sus fuentes
+    (FR-POR-10).
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -418,10 +429,12 @@ reservados ni tópicos de comando definidos para él.
 - **Origen.** Auditoría de seguridad de cierre de la Fase 2
   (`testing/auditoria-seguridad-fase-2.md`), decisiones H-81 a H-84 [user].
 - **Criterios de salida.** Antes de empezar la Fase 3 pasan FR-POR-08, FR-POR-09,
-  FR-POR-10, FR-CON-07 y las filas T24 y T25, y la regresión de banco de la Fase 1 y
+  FR-POR-10, FR-CON-07 y las filas T24, T25 y T26, y la regresión de banco de la Fase 1 y
   de la Fase 2 que toque el cambio. Los cambios de la CI de SEC-08 y SEC-09 se
   comprueban en la propia CI. SEC-10 y SEC-11 son requisitos de la Fase 3
   (C-BLD-04, FR-OTA-05, FR-OTA-13, FR-OTA-14, FR-OTA-03) y no se implementan en S1.
+  La verificación independiente de S1 (`testing/verificacion-seguridad-fase-2.md`, H-85)
+  añadió en 0.9.9 el plazo total del POST, T26, E14 y el filtro por subred de FR-POR-10.
 - **Salvedad.** Cambiar `components/portal` caduca la evidencia manual H-51 de
   FR-POR-02 (§22.0). La prueba con el teléfono se repite una sola vez al final de la
   Fase 3, con las demás pruebas físicas de esa fase (H-83); hasta entonces FR-POR-02
@@ -498,7 +511,7 @@ decisiones abiertas.
 | D21 | Límites de T01 (configuración → STA en ≤ 2 s) y de T02 (sin configuración → AP en ≤ 10 s) | T01, T02 |
 | D22 | El firmware no requiere PSRAM (permite usar la variante N8) | C-HW-03 |
 | D24 | Duración del portal: 10 min desde T02; después, ESPERA hasta el siguiente reinicio (H-82, opción A) | FR-POR-08, T24, T25 |
-| D25 | POST del portal: 3 esperas de lectura consecutivas sin datos (5 s cada una, la de `esp_http_server`) → 408 | FR-POR-09 |
+| D25 | POST del portal: 3 esperas de lectura consecutivas sin datos (5 s cada una, la de `esp_http_server`) o 20 s desde el inicio del cuerpo, lo primero que llegue → 408 | FR-POR-09 |
 | D23 | Identificador de sitio configurable `sitio`, regex `^[a-z0-9_-]{1,32}$`, sin valor por defecto, primer nivel de los tópicos; `device.name` de Discovery = «Clima <sitio> <zona>»; `unique_id` sin el sitio [user] (2026-11-02) | FR-MQTT-01, FR-HA-02, FR-POR-03, C-CFG-01 |
 
 ---
@@ -611,7 +624,8 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T21 | OTA_DESCARGA | cmd_ota | — | OTA_DESCARGA | Publicar `ota` = `rechazado:ocupado` | 2 s | Abortar o reiniciar la descarga en curso |
 | T22 | OTA_DESCARGA | mqtt_down o wifi_down | — | CONECTANDO_BROKER o CONECTANDO_WIFI, según el evento | Abortar la descarga; conservar la imagen en ejecución; diagnóstico `ota` = `error:red` (FR-OTA-12; la línea `ota: estado error:red` se escribe en el momento del cambio y el `status` se publica al volver a OPERATIVO, FR-MQTT-09) | 2 s | Reiniciar; activar una imagen parcial |
 | T23 | (Validación) PENDIENTE | 300 s sin T11 desde el arranque | — | Reinicio → rollback | Reiniciar; el bootloader arranca la imagen anterior | 300 s | Seguir con la imagen no validada |
-| T24 | PORTAL | portal_vence (10 min desde T02, D24) | — | ESPERA | Detener el HTTP y el DNS del portal y apagar el AP | 2 s | Mantener el AP o el HTTP; escribir en la NVS; reiniciar |
+| T24 | PORTAL | portal_vence (10 min desde T02, D24) | — | ESPERA | Apagar el AP y, después, detener el HTTP y el DNS del portal (E14) | 2 s | Mantener el AP o el HTTP; escribir en la NVS; reiniciar |
+| T26 | PORTAL | envío | El portal ya venció y su cierre está pendiente (T25) | PORTAL | Responder «ocupado» sin validar ni probar la unión; el cierre (T24) llega en ≤ 2 s | 1 s | Iniciar una prueba de unión; escribir en la NVS; alargar la ventana de 10 min |
 | T25 | VALIDANDO | portal_vence | — | VALIDANDO | Aplazar el cierre: la prueba de unión en curso sigue; si termina por T05, el nodo guarda y reinicia; si termina por T06, `portal_vence` se vuelve a emitir al llegar a PORTAL y se aplica T24 | — | Interrumpir la prueba de unión; responder «no se pudo conectar» por el cierre |
 
 **Acciones globales.** Si salta el watchdog de tareas (NFR-WDT-01), el nodo se
@@ -626,7 +640,7 @@ o T23.
 | Estado \ Evento | fin_arranque | envío | wifi_up | wifi_down | backoff | mqtt_up | mqtt_down | cmd_ota | ota_ok/err | portal_vence |
 |---|---|---|---|---|---|---|---|---|---|---|
 | ARRANQUE | T01/T02 | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ |
-| PORTAL | imp⁶ | T03/T04 | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T24 |
+| PORTAL | imp⁶ | T03/T04/T26 | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T24 |
 | VALIDANDO | imp⁶ | T07 | T05 | T06 | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T25 |
 | CONECTANDO_WIFI | imp⁶ | imp¹ | T08 | T09 | T10 | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ |
 | CONECTANDO_BROKER | imp⁶ | imp¹ | ign | T14 | T13 | T11 | T12 | imp⁴ | imp⁵ | imp⁸ |
@@ -755,9 +769,10 @@ verification:
 | FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP (desde el arranque en la Fase 1; después de conectar, pasando por T14 (broker caído) o T16 (desde OPERATIVO), en la Fase 2); esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
 | FR-CON-07 | Función que prepara la configuración del STA con clave vacía y con clave de 8–63 caracteres | Umbral `WIFI_AUTH_OPEN` con clave vacía y `WIFI_AUTH_WPA2_PSK` con clave; PMF `capable` = true en los dos | Umbral abierto con clave; PMF `required` (dejaría fuera routers sin PMF) | host |
 | FR-CON-07 | DUT configurado contra el AP desechable del banco con clave; el banco levanta en su lugar un AP abierto con el mismo SSID de prueba (nunca el SSID de la casa, H-83) durante 3 min; después, el AP con clave otra vez | Con el AP abierto: líneas `wifi: intento` y ninguna `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` ni asociación (la lista de estaciones del AP del banco no muestra la MAC del DUT); con el AP con clave: T08 en ≤ 90 s | Que el DUT obtenga IP del AP abierto | bench |
-| T24 | DUT sin configuración; reset y esperar 10 min sin enviar nada | `con: PORTAL -> ESPERA (portal_vence)` a 600 s ± 5 s de `con: ARRANQUE -> PORTAL (fin_arranque)`; el SSID `clima-*` desaparece de los escaneos en ≤ 2 s + un escaneo; las líneas `med:` siguen; tras otro reset, el AP vuelve | El AP o el HTTP siguen tras el cierre; `nvs: config escrita`; un reinicio sin reset | bench |
+| T24 | DUT sin configuración; reset y esperar 10 min sin enviar nada | `con: PORTAL -> ESPERA (portal_vence)` a 600 s ± 5 s de `con: ARRANQUE -> PORTAL (fin_arranque)`; `portal: dns detenido` (E14) en ≤ 5 s; el SSID `clima-*` desaparece de los escaneos en ≤ 2 s + un escaneo; las líneas `med:` siguen; tras otro reset, el AP vuelve | El AP o el HTTP siguen tras el cierre; `nvs: config escrita`; un reinicio sin reset | bench |
 | T25 | Núcleo: VALIDANDO + portal_vence; luego T06 y T05 | VALIDANDO sigue; tras T06, el evento repetido lleva a ESPERA por T24; con T05 se guarda y se reinicia | Abandonar la prueba de unión | host |
-| T01–T25 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
+| T26 | Núcleo: PORTAL + envío válido con el cierre pendiente | PORTAL, responder «ocupado» | T04 (probar la unión) | host |
+| T01–T26 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
 | T01–T10 | Una prueba por fila con el portal y el AP reales del banco, sin broker (Fase 1); tras T08 el DUT queda en CONECTANDO_BROKER | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento` y `nvs: config escrita` (§18), dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita`; en T08, la Fase 1 observa solo la transición, su línea `con:` y que el AP `clima-*` no aparece en el escaneo; su acción se observa en la fila siguiente (Fase 2) | Lo indicado en la columna «No debe ocurrir» de la fila; en T08, «abrir el AP» (la parte MQTT es de la fila siguiente) | bench |
 | T08 (arranque de SNTP y MQTT), T11–T16 | Una prueba por fila con el AP y el broker reales del banco (Fase 2) | La línea `con:` de la fila (§18) y su acción, observada con `mqtt: intento`, `sntp:`, `wifi: intento`, `med:` y `ota: estado` (§18) o con `status`, dentro del límite; en T08, `sntp:` y `mqtt: intento 1` tras su línea `con:`; el reinicio de su backoff, con al menos 4 fallos de unión antes de T08, de modo que el último intervalo observado antes de T08 fue de 8 s o más: el siguiente `wifi: intento` llega en ≤ 2 s desde la línea `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (wifi_down)` de T14 | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
 | T18 | Comando OTA con un payload, un host o una ruta que incumplen la guarda de T17, por el broker del banco (Fase 3) | `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` y ninguna línea `con:` de descarga | Lo indicado en la columna «No debe ocurrir» de T18 | bench |
@@ -1143,13 +1158,19 @@ consulta A.
   un reinicio, que vuelve a abrir el portal otros 10 min. Una prueba de unión en curso
   termina antes del cierre (T25).
 - **FR-POR-09** [Must] [derived] (SEC-05): un `POST /` cuyo cuerpo no llega completo
-  tras 3 esperas de lectura consecutivas sin datos (D25) deberá responderse con
+  tras 3 esperas de lectura consecutivas sin datos, o en 20 s desde el inicio de la
+  lectura del cuerpo aunque lleguen datos poco a poco (D25), deberá responderse con
   `408 Request Timeout` y cerrar la conexión, sin generar el evento «envío» ni tocar
   la NVS; el portal deberá seguir atendiendo a otros clientes.
 - **FR-POR-10** [Must] [derived] (SEC-06): el DNS y el HTTP del portal deberán atender
-  solo lo que llega dirigido a la IP del AP (192.168.4.1): el socket DNS se liga a esa
-  IP y el servidor HTTP cierra al aceptarla toda conexión cuya dirección local sea
-  otra (en VALIDANDO, la del STA en la red doméstica).
+  solo a clientes de la red del AP (192.168.4.0/24) que se dirigen a la IP del AP
+  (192.168.4.1). El socket DNS se liga a esa IP y a la interfaz del AP
+  (`SO_BINDTODEVICE`), y descarta lo que llegue de otra subred. El servidor HTTP cierra
+  al aceptarla toda conexión cuya dirección local no sea 192.168.4.1 o cuya dirección
+  remota no esté en 192.168.4.0/24. Motivo: lwIP acepta por cualquier interfaz un paquete
+  dirigido a una IP propia (host débil); en VALIDANDO, un equipo de la red doméstica
+  podría llegar a 192.168.4.1 a través del STA. Una dirección de origen falsificada de
+  192.168.4.0/24 no sirve: la respuesta sale por el AP.
 
 ### 11.3 Contratos de verificación
 
@@ -1164,8 +1185,8 @@ consulta A.
 | FR-POR-06 | Envío con datos correctos | El AP desaparece en ≤ 5 s desde `con: VALIDANDO -> ARRANQUE (wifi_up)`; el log serie muestra, en orden, `boot:`, `cfg: sitio=<sitio enviado> zona=<zona enviada>`, `con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)` y `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` (§18) | Volver a PORTAL tras reiniciar | bench |
 | FR-POR-07 | DUT configurado (CONECTANDO_WIFI o posterior); escaneo y `GET http://<ip-dut>/` | Ningún SSID `clima-*`; conexión rechazada | Respuesta HTTP | bench |
 | FR-POR-08 | Como el contrato de T24 | Como T24 | Como T24 | bench |
-| FR-POR-09 | Función que decide, por cada resultado de lectura del cuerpo, si seguir, esperar otra vez o cortar: 2 esperas sin datos y luego datos; 3 esperas seguidas; error de socket | Seguir; 408 a la tercera espera; cortar sin respuesta | Esperar sin límite; 408 con datos llegando | host |
-| FR-POR-10 | Función que decide si se atiende una conexión según su dirección local: 192.168.4.1, la IP del STA, 0.0.0.0; revisión del `bind` del socket DNS | Solo 192.168.4.1 se atiende; DNS ligado a 192.168.4.1 | Atender por la IP del STA | host + other (revisión) |
+| FR-POR-09 | Función que decide, por cada resultado de lectura del cuerpo y el tiempo desde su inicio, si seguir, esperar otra vez o cortar: 2 esperas sin datos y luego datos; 3 esperas seguidas; 1 byte por espera; error de socket | Seguir; 408 a la tercera espera; 408 al pasar 20 s aunque lleguen datos; cortar sin respuesta | Esperar sin límite; 408 con el cuerpo completo dentro del plazo | host |
+| FR-POR-10 | Función que decide si se atiende una conexión según su dirección local y la del cliente: (192.168.4.1, 192.168.4.x), (la IP del STA, …), (192.168.4.1, una IP de la red doméstica), 0.0.0.0; revisión del `bind` y del `SO_BINDTODEVICE` del socket DNS | Solo (192.168.4.1, 192.168.4.0/24) se atiende; DNS ligado a 192.168.4.1 y a la interfaz del AP | Atender por la IP del STA o a un cliente de fuera de 192.168.4.0/24 | host + other (revisión) |
 
 ## 12. Receptor de comandos OTA
 
@@ -1356,6 +1377,7 @@ operativos, no secretos (§17).
 | E10 | `nvs: config escrita` | Al terminar la escritura atómica de la configuración en T05; en ningún otro caso |
 | E11 | `UDP logging -> <host>:<port>` | Con `CONFIG_NODO_UDP_LOG=y`, al obtener IP, como primera línea enviada por UDP (FR-LOG-02) |
 | E12 | `i2c: scan sda=<g> scl=<g> hz=<f> ack=<lista\|ninguno>` | Solo en el firmware de prueba de C-HW-04/05, tras escanear el bus |
+| E14 | `portal: dns detenido` · `portal: dns no disponible` | Al terminar la tarea del DNS cautivo en T24 · en T02, si el socket DNS no se pudo ligar; el portal sigue sin DNS cautivo (FR-POR-08, FR-POR-10) |
 
 **Comandos serie de la imagen de banco (E13) [user].** Solo con
 `CONFIG_NODO_BENCH_BUILD=y`, el nodo lee comandos terminados en salto de línea
@@ -1550,7 +1572,7 @@ cobertura en este FSD.
 | Keepalive MQTT | 60 s | FR-MQTT-05 |
 | Prueba de unión del portal | 20 s | FR-POR-05 |
 | Duración del portal | 10 min desde T02 | FR-POR-08 |
-| Lectura del cuerpo del POST del portal | 3 esperas de 5 s sin datos → 408 | FR-POR-09 |
+| Lectura del cuerpo del POST del portal | 3 esperas de 5 s sin datos o 20 s en total → 408 | FR-POR-09 |
 | Ventana de validación de imagen | 300 s | FR-OTA-07 |
 | Timeout del watchdog | 30 s | NFR-WDT-01 |
 | `expire_after` | 180 s | FR-HA-03 |
