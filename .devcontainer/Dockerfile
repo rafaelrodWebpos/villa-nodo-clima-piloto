@@ -23,7 +23,7 @@ RUN python3 -m venv /opt/bench-venv \
 # Fork villa-2 (H-87): el driver del fork, que envía el token X-Harness-Token
 # (TESTBENCH_TOKEN del .env) y trae los métodos de las capacidades nuevas.
 ARG TESTBENCH_REPO=rafaelrodWebpos/Embedded-AI-Harness
-ARG TESTBENCH_COMMIT=bb1ec0e43863747ef68e56cc7287806ad4f47df2
+ARG TESTBENCH_COMMIT=b5623c457f855ba961946d2a94e0cfac25ca6b25
 ARG TESTBENCH_DRIVER_SHA256=efef06678417f299bd7d4cb8ca5636bd5b06d1201de47ff69fa639d7cb76406f
 RUN site=$(/opt/bench-venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
     && curl -sSfL -o "$site/testbench_driver.py" \
