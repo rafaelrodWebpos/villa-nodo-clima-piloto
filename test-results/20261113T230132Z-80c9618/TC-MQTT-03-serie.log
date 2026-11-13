@@ -1,0 +1,69 @@
+I (487) nodo: boot: clima-f3c6d4 fw=0.0.0-80c9618-bench reset=usb part=ota_0 img=valida
+I (487) nodo: nodo_clima 0.0.0-80c9618-bench
+I (497) nodo: NODO-BENCH-IMAGE
+I (537) nodo: cfg: sitio=sitio1 zona=zona1
+I (537) pp: pp rom version: e7ae62f
+I (537) net80211: net80211 rom version: e7ae62f
+I (547) wifi:wifi driver task: 3fcb0394, prio:23, stack:6656, core=0
+I (557) wifi:wifi firmware version: 00ad238
+I (557) wifi:wifi certification version: v7.0
+I (557) wifi:config NVS flash: enabled
+I (557) wifi:config nano formatting: disabled
+I (567) wifi:Init data frame dynamic rx buffer num: 32
+I (567) wifi:Init static rx mgmt buffer num: 5
+I (577) wifi:Init management short buffer num: 32
+I (577) wifi:Init dynamic tx buffer num: 32
+I (587) wifi:Init static tx FG buffer num: 2
+I (587) wifi:Init static rx buffer size: 1600
+I (587) wifi:Init static rx buffer num: 10
+I (597) wifi:Init dynamic rx buffer num: 32
+I (547) nodo: med: T=29.9 HR=73.7 Td=24.7
+I (607) wifi_init: rx ba win: 6
+I (607) wifi_init: accept mbox: 6
+I (607) wifi_init: tcpip mbox: 32
+I (607) wifi_init: udp mbox: 6
+I (617) wifi_init: tcp mbox: 6
+I (617) wifi_init: tcp tx win: 5760
+I (617) wifi_init: tcp rx win: 5760
+I (627) wifi_init: tcp mss: 1440
+I (627) wifi_init: WiFi IRAM OP enabled
+I (627) wifi_init: WiFi RX IRAM OP enabled
+I (637) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (687) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (687) wifi:enable tsf
+I (687) nodo: wifi: intento 1
+I (687) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (697) nodo: Init complete
+I (697) main_task: Returned from app_main()
+I (3107) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (4107) nodo: wifi: intento 2
+I (4107) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (4127) wifi:state: init -> auth (0xb0)
+I (4137) wifi:state: auth -> assoc (0x0)
+I (4147) wifi:state: assoc -> run (0x10)
+I (4167) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (4167) wifi:security: WPA2-PSK, phy: bgn, rssi: -47, cipher(pairwise:0x3, group:0x3), pmf:0
+I (4177) wifi:pm start, type: 1
+I (4177) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (4187) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (4207) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (4267) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (4267) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (5217) nodo: UDP logging -> 192.168.4.1:5555
+I (5217) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5217) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5217) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5227) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5237) nodo: mqtt: intento 1
+I (5317) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5717) nodo: sntp: inicio pool.ntp.org
+I (15727) nodo: sntp: inicio pool.ntp.org
+I (25727) nodo: sntp: inicio pool.ntp.org
+W (35727) nodo: sntp: fallo
+I (35727) nodo: sntp: inicio pool.ntp.org
+I (45727) nodo: sntp: inicio pool.ntp.org
+I (55727) nodo: sntp: inicio pool.ntp.org
+I (60547) nodo: med: T=29.9 HR=74.0 Td=24.8
+W (65727) nodo: sntp: fallo
+I (65727) nodo: sntp: inicio pool.ntp.org
+I (75727) nodo: sntp: inicio pool.ntp.org
