@@ -50,8 +50,10 @@ def _api(method, path, body=None, timeout=20):
     """Petición cruda: devuelve (código HTTP, JSON). El driver del contenedor aún no trae
     los métodos del fork."""
     data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(_url() + path, data=data, method=method,
-                                 headers={"Content-Type": "application/json"} if data else {})
+    cab = {"Content-Type": "application/json"} if data else {}
+    if os.environ.get("TESTBENCH_TOKEN"):                 # villa-2 (S6-01): token de la API
+        cab["X-Harness-Token"] = os.environ["TESTBENCH_TOKEN"]
+    req = urllib.request.Request(_url() + path, data=data, method=method, headers=cab)
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.status, json.loads(r.read() or b"{}")
