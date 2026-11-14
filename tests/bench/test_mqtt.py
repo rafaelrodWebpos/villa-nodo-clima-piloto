@@ -92,7 +92,7 @@ def grabar(tb, slot, firmware, c):
 
 
 @contextlib.contextmanager
-def configurado(tb, slot, dut_mac, firmware, c, tmp_path):
+def configurado(tb, slot, dut_mac, firmware, c, tmp_path, mqtt_user="", mqtt_pass=""):
     """Precondición: imagen de la CI grabada y DUT aprovisionado con el broker del banco;
     AP y broker apagados. Devuelve el Banco, que se limpia al salir."""
     c.note(f"- imagen: `{firmware['version']}` (variante {firmware['variant']}, run CI {firmware['ci_run']})",
@@ -100,7 +100,8 @@ def configurado(tb, slot, dut_mac, firmware, c, tmp_path):
            f"`homeassistant/sensor/{_nodo(dut_mac)}/`", "")
     c.step(f"Precondiciones: grabar la imagen de la CI en {slot}")
     grabar(tb, slot, firmware, c)
-    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO)
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+                               mqtt_user=mqtt_user, mqtt_pass=mqtt_pass)
     assert not tb.mqtt_status().get("running"), "el broker del banco está activo: no es nuestro, no se toca"
     banco = Banco(tb, ssid, clave)
     try:

@@ -1334,7 +1334,7 @@ tests:
     expect: >
       imagen de producción en OPERATIVO, arranque y 3 ciclos con el tráfico UDP
       capturado: solo DHCP, DNS y SNTP; ningún datagrama al 5555 ni a otro destino
-    impl: null   # bloqueado: bench-traffic-capture en no (CR-TB-04). Mientras, la contraparte de producción en verify (release_verify)
+    impl: tests/bench/test_villa2.py::test_tc_log_04_no_udp_log_in_production
   - id: TC-CFG-01
     shape: atomic
     kind: standard
@@ -1935,6 +1935,44 @@ tests:
     commit: 765a7a8
     date: 2026-11-14
     evidence: test-results/20261114T110025Z-765a7a8/TC-OTA-09.md
+  - id: TC-WDT-02
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: target
+    verifies: [NFR-WDT-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-write, bench-serial-monitor, dut-board]
+    expect: >
+      imagen de banco en OPERATIVO; comando serie wdt-test (E13): «wdt: bloqueando medicion» y
+      boot: … reset=task_wdt en ≤ 30 s (+ 2 s y el arranque); nunca colgado
+    impl: tests/bench/test_villa2.py::test_tc_wdt_02_task_watchdog
+  - id: TC-MQTT-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-MQTT-07]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-auth, bench-serial-monitor, dut-board]
+    expect: >
+      DUT aprovisionado con usuario y clave MQTT; broker con autenticación que no acepta sus
+      credenciales 90 s: ≥ 3 intentos con backoff creciente y ningún T11; broker con sus
+      credenciales: T11; ninguna clave en la consola
+    impl: tests/bench/test_villa2.py::test_tc_mqtt_05_broker_authentication
+  - id: TC-LOG-08
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 2
+    tier: bench
+    verifies: [FR-LOG-02]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-traffic-capture, bench-serial-monitor, dut-board]
+    expect: >
+      imagen de banco; captura del tráfico del DUT en el arranque y 3 ciclos: los datagramas
+      al puerto 5555 van todos por unicast a 192.168.4.1 (control positivo: > 10); ninguno por
+      broadcast ni a otro destino
+    impl: tests/bench/test_villa2.py::test_tc_log_08_udp_log_unicast_only
   - id: TC-HW-04
     shape: atomic
     kind: standard
@@ -2357,7 +2395,7 @@ tests:
       y enviar el comando serie «reiniciar» (E13): boot: … reset=sw y hora_valida =
       false en los status tras el reinicio. Bloqueado por bench-serial-write (en no: el
       banco no la reporta por GET)
-    impl: null
+    impl: tests/bench/test_villa2.py::test_tc_time_08_reboot_without_sntp
   - id: TC-TIME-05
     shape: atomic
     kind: standard

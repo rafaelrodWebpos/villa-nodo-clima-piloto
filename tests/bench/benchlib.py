@@ -230,7 +230,7 @@ def primera(entradas, patron, desde_ts=0):
     return next((e for e in entradas if patron in e.get("text", "") and e.get("ts", 0) >= desde_ts), None)
 
 
-def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local"):
+def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
     """Precondición compartida: deja el DUT configurado contra un AP desechable del
     banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
     y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
@@ -247,7 +247,9 @@ def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local"):
     if not any("con: ARRANQUE -> PORTAL" in ln for ln in boot):
         pytest.skip("not done: el DUT no arrancó en PORTAL tras P-NVS-ERASE")
     form = {"wifi_ssid": ap_ssid, "wifi_pass": ap_clave, "mqtt_host": mqtt_host, "mqtt_port": "1883",
-            "mqtt_user": "", "mqtt_pass": "", "sitio": "sitio1", "zona": "zona1"}
+            "mqtt_user": mqtt_user, "mqtt_pass": mqtt_pass, "sitio": "sitio1", "zona": "zona1"}
+    if mqtt_pass:
+        c.secretos = list(getattr(c, "secretos", [])) + [(mqtt_pass, "<clave-mqtt-de-prueba>")]
     t_envio = time.time()
     joined = ap_on = False
     try:
