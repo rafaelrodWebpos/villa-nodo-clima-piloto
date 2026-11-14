@@ -654,13 +654,23 @@ tests:
     wave: 1
     phase: 3
     tier: bench+
-    verifies: [T17, T19, FR-OTA-02, FR-OTA-06]
+    verifies: [T17, T19, FR-OTA-02, FR-OTA-06, FR-CFG-01]
     needs: [bench-driver, bench-wifi-ap, bench-ap-internet, bench-mqtt-broker, github-test-releases, dut-board]
     expect: >
       comando OTA (no retained) con la URL releases/download/ota-test-*/ de la
       versión B; status pasa por ota = en_curso y ota = ok, y fw = B en ≤ 120 s
       desde el status con ota = ok
     impl: tests/bench/test_jrn02.py::test_jrn_02_1_ota_to_b1_and_b2
+    status: successful
+    commit: ada173a
+    date: 2026-11-14
+    evidence: test-results/20261114T135507Z-ada173a/JRN-02.1.md
+    history: >
+      cinco intentos en rojo antes (test-results/20261114T12*–13*), todos por defectos del
+      adaptador que esta prueba destapó: la Location se leía de la petición (rechazado:host),
+      get_url perdía la consulta firmada (error:http), búfer de 512 para la URL de ~900 bytes
+      (Out of buffer), T19 no publicaba el status con ok, y ota-test-1 llevaba el adaptador
+      viejo (ota-test-2 publicada). Arreglos: d579873, 498db4f, 4ea2a53, b041244 y 57c7eb3; ada173a apunta a ota-test-2
   - id: JRN-02.2
     shape: workflow
     kind: standard
@@ -2012,6 +2022,10 @@ tests:
     expect: >
       OTA con la imagen para esp32 y con la truncada de ota-test-2: status con ota = error:imagen en las dos; ninguna línea boot: (sin reinicio ni cambio de slot)
     impl: tests/bench/test_jrn02.py::test_tc_ota_10_bad_images
+    status: successful
+    commit: ada173a
+    date: 2026-11-14
+    evidence: test-results/20261114T135507Z-ada173a/TC-OTA-10.md
   - id: TC-OTA-11
     shape: atomic
     kind: standard
@@ -2023,6 +2037,10 @@ tests:
     expect: >
       OTA a B1; al ver «ota: 30 %» o más, AP apagado 30 s: T22 (OTA_DESCARGA -> CONECTANDO_WIFI), E7 error:red; el primer status tras volver el AP con ota = error:red y fw = A; un reset arranca A en su misma partición
     impl: tests/bench/test_jrn02.py::test_tc_ota_11_ap_lost_during_download
+    status: successful
+    commit: ada173a
+    date: 2026-11-14
+    evidence: test-results/20261114T135507Z-ada173a/TC-OTA-11.md
   - id: TC-OTA-12
     shape: atomic
     kind: standard
@@ -2034,6 +2052,10 @@ tests:
     expect: >
       OTA a B1 y, ya descargando, un segundo comando (B2): ota en status en_curso → rechazado:ocupado → ok, y después fw = B1
     impl: tests/bench/test_jrn02.py::test_tc_ota_12_busy_during_download
+    status: successful
+    commit: ada173a
+    date: 2026-11-14
+    evidence: test-results/20261114T135507Z-ada173a/TC-OTA-12.md
   - id: TC-HW-04
     shape: atomic
     kind: standard

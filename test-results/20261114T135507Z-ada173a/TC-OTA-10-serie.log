@@ -1,0 +1,46 @@
+I (5243) nodo: UDP logging -> 192.168.4.1:5555
+I (5243) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5243) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5243) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5253) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5263) nodo: mqtt: intento 1
+I (5353) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5443) nodo: ota: estado en_curso
+I (5453) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (5743) nodo: sntp: inicio pool.ntp.org
+I (7273) nodo: sntp: sincronizado ts=1794665053
+I (7863) esp-x509-crt-bundle: Certificate validated
+I (9943) esp-x509-crt-bundle: Certificate validated
+I (11123) esp-x509-crt-bundle: Certificate validated
+I (11743) esp_https_ota: Starting OTA...
+I (11743) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (11753) nodo: ota: estado error:imagen
+I (11763) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)
+I (15683) nodo: ota: estado en_curso
+I (15693) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (17913) esp-x509-crt-bundle: Certificate validated
+I (20023) esp-x509-crt-bundle: Certificate validated
+I (20993) esp-x509-crt-bundle: Certificate validated
+I (21643) esp_https_ota: Starting OTA...
+I (21643) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (21703) nodo: ota: 0 %
+I (22763) nodo: ota: 10 %
+I (24013) nodo: ota: 20 %
+I (25273) nodo: ota: 30 %
+I (26303) nodo: ota: 40 %
+I (27393) nodo: ota: 50 %
+I (28683) nodo: ota: 60 %
+I (30013) nodo: ota: 70 %
+I (31123) nodo: ota: 80 %
+I (32403) nodo: ota: 90 %
+I (33343) nodo: ota: 100 %
+I (33343) esp_image: segment 0: paddr=00320020 vaddr=3c0c0020 size=394dch (234716) map
+I (33393) esp_image: segment 1: paddr=00359504 vaddr=3fc98b00 size=061bch ( 25020) 
+I (33403) esp_image: segment 2: paddr=0035f6c8 vaddr=40374000 size=00950h (  2384) 
+I (33413) esp_image: segment 3: paddr=00360020 vaddr=42000020 size=b8a78h (756344) map
+I (33563) esp_image: segment 4: paddr=00418aa0 vaddr=40374950 size=14120h ( 82208) 
+I (33583) esp_image: segment 5: paddr=0042cbc8 vaddr=50000000 size=00024h (    36) 
+E (33583) esp_image: Checksum failed. Calculated 0xcb read 0x17
+E (33583) esp_ota_ops: New image failed verification
+I (33593) nodo: ota: estado error:imagen
+I (33603) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)
