@@ -158,6 +158,13 @@ jobs:
             exit 1; }
       - name: Journey on the released bytes
         run: /opt/bench-venv/bin/python -m pytest tests/bench -m journey --firmware-dir fw -q
+      - name: FR-OTA-13 — the released image rejects ota-test-*
+        # TC-OTA-14: con los mismos bytes; sin skip (la imagen del tag es la de producción)
+        run: |
+          set -o pipefail      # sin «shell: bash» el paso no lleva pipefail y tee ocultaría el fallo
+          /opt/bench-venv/bin/python -m pytest -q -rs --firmware-dir fw \
+            tests/bench/test_ota.py::test_tc_ota_14_production_rejects_test_prerelease | tee /tmp/fr-ota-13.txt
+          ! grep -q SKIPPED /tmp/fr-ota-13.txt
 
   release:
     needs: [build, verify]

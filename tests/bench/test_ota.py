@@ -207,3 +207,38 @@ def test_tc_ota_09_untrusted_certificate_tls_error(testbench, dut_slot, dut_mac,
             except Exception:
                 pass
         c.passed("T17, T20 y error:tls sin ninguna línea «ota: n %»; sin reinicio")
+
+
+def test_tc_ota_14_production_rejects_test_prerelease(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-OTA-14 · FR-OTA-13 — la imagen de producción rechaza una ota-test-* con rechazado:ruta
+    y no pasa a OTA_DESCARGA. Corre en el job verify, sobre los bytes de la release."""
+    if firmware.get("variant") != "production":
+        pytest.skip("FR-OTA-13 se comprueba en la imagen de producción (en banco ota-test-* se acepta)")
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    base = f"sitio1/zona1/{nodo}"
+    url = REPO + "ota-test-2/firmware_b1.bin"
+    with case(tb, "TC-OTA-14", "Producción rechaza una pre-release ota-test-*", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        with _suscribir(tb, nodo) as sub:
+            _, reg = _a_operativo(tb, dut_slot, banco, c)
+            time.sleep(3)
+            c.step("Publicar en cmd/ota la URL de ota-test-2")
+            t_pub = _publicar(tb, f"{base}/cmd/ota", json.dumps({"url": url}).encode())
+            llegada = None
+            fin = time.time() + 10
+            while llegada is None and time.time() < fin:
+                llegada = next(((t, st) for t, st in _status(sub.mensajes(), base, t_pub)
+                                if st.get("ota") == "rechazado:ruta"), None)
+                time.sleep(0.2)
+            time.sleep(5)
+            txt = [e.get("text", "") for e in reg.leer()]
+        c.save_log("serie", txt)
+        descarga = [t for t in txt if DESCARGA in t]
+        dt = None if llegada is None else llegada[0] - t_pub
+        c.note(f"- {firmware['version']} (producción): status ota = rechazado:ruta a "
+               + ("—" if dt is None else f"{dt:.2f} s") + f"; OTA_DESCARGA: {'sí' if descarga else 'no'}")
+        assert not descarga, f"pasó a OTA_DESCARGA: {descarga[:1]}"
+        assert dt is not None and dt <= PLAZO_S, f"sin rechazado:ruta en {PLAZO_S} s ({dt})"
+        c.passed(f"rechazado:ruta a {dt:.2f} s; sin OTA_DESCARGA")

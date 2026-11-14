@@ -2069,6 +2069,19 @@ tests:
       comando ~10 s antes de la medida siguiente: en cada una, el intervalo entre la última
       med: antes de la descarga y la primera dentro de OTA_DESCARGA (reloj del DUT) en [55, 65] s
     impl: tests/bench/test_jrn02.py::test_nfr_ota_01_measurement_period_during_download
+  - id: TC-OTA-14
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench
+    verifies: [FR-OTA-13]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      la imagen de producción (los bytes del tag, en el job verify de build.yml) responde a un
+      cmd/ota con la URL de ota-test-2 con status ota = rechazado:ruta en ≤ 2 s y no pasa a
+      OTA_DESCARGA; en la imagen de banco la prueba se salta y el job falla si se salta
+    impl: tests/bench/test_ota.py::test_tc_ota_14_production_rejects_test_prerelease
   - id: TC-SEC-03
     shape: atomic
     kind: standard
