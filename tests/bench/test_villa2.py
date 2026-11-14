@@ -168,11 +168,11 @@ def test_tc_log_08_udp_log_unicast_only(testbench, dut_slot, dut_mac, firmware, 
             configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
         c.step("Captura del tráfico del DUT durante el arranque y 3 ciclos")
         udp, _ = _captura_arranque(tb, dut_slot, dut_mac, banco, c)
-    log = [f for f in udp if f["dport"] == LOG_PORT]
-    malos = [f for f in log if f["dst"] != LOG_HOST or f["kind"] != "unicast"]
-    assert log and sum(f["packets"] for f in log) > 10, f"control positivo: casi no hay log UDP: {log}"
-    assert not malos, f"log UDP por broadcast o a otro destino: {malos}"
-    c.passed(f"{sum(f['packets'] for f in log)} datagramas de log, todos unicast a {LOG_HOST}:{LOG_PORT}")
+        log = [f for f in udp if f["dport"] == LOG_PORT]
+        malos = [f for f in log if f["dst"] != LOG_HOST or f["kind"] != "unicast"]
+        assert log and sum(f["packets"] for f in log) > 10, f"control positivo: casi no hay log UDP: {log}"
+        assert not malos, f"log UDP por broadcast o a otro destino: {malos}"
+        c.passed(f"{sum(f['packets'] for f in log)} datagramas de log, todos unicast a {LOG_HOST}:{LOG_PORT}")
 
 
 def test_tc_log_04_no_udp_log_in_production(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
@@ -184,7 +184,7 @@ def test_tc_log_04_no_udp_log_in_production(testbench, dut_slot, dut_mac, firmwa
             configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
         c.step("Captura del tráfico del DUT durante el arranque y 3 ciclos (imagen de producción)")
         udp, flujos = _captura_arranque(tb, dut_slot, dut_mac, banco, c)
-    otros = [f for f in udp if f["dport"] not in UDP_PERMITIDOS]
-    assert any(f["proto"] == "TCP" and f["dport"] == 1883 for f in flujos), "control positivo: no se ve el MQTT del DUT"
-    assert not otros, f"UDP fuera de DHCP/DNS/SNTP: {otros}"
-    c.passed("por UDP solo " + ", ".join(sorted({str(f['dport']) for f in udp})) + "; ningún datagrama al 5555")
+        otros = [f for f in udp if f["dport"] not in UDP_PERMITIDOS]
+        assert any(f["proto"] == "TCP" and f["dport"] == 1883 for f in flujos), "control positivo: no se ve el MQTT del DUT"
+        assert not otros, f"UDP fuera de DHCP/DNS/SNTP: {otros}"
+        c.passed("por UDP solo " + ", ".join(sorted({str(f['dport']) for f in udp})) + "; ningún datagrama al 5555")
