@@ -891,26 +891,51 @@ static void tarea_medicion(void *arg)
  * instalado solo para recibir (sin búfer de transmisión: el log sigue saliendo
  * por la consola como siempre). */
 #include "driver/uart.h"
+#include "hal/usb_serial_jtag_ll.h"   /* E13 por USJ: lectura de la FIFO por sondeo */
 #define CMD_UART CONFIG_ESP_CONSOLE_UART_NUM
 #define CMD_MAX  32
+
+/* Una línea de comando (E13): se acumula hasta \n; \r se ignora. */
+typedef struct { char linea[CMD_MAX]; size_t n; } lector_cmd_t;
+
+static void comando_byte(lector_cmd_t *l, uint8_t c)
+{
+    if (c == '\r') return;
+    if (c != '\n') { if (l->n < sizeof l->linea - 1) l->linea[l->n++] = (char)c; return; }
+    l->linea[l->n] = '\0';
+    l->n = 0;
+    if (strcmp(l->linea, "wdt-test") == 0) {
+        ESP_LOGW(TAG, "wdt: bloqueando medicion");         /* E13 → NFR-WDT-01 */
+        s_wdt_bloquear = true;
+    } else if (strcmp(l->linea, "reiniciar") == 0) {
+        esp_restart();                                     /* E13: la siguiente boot: con reset=sw */
+    }
+}
 
 static void tarea_comandos(void *arg)
 {
     (void)arg;
-    char linea[CMD_MAX];
-    size_t n = 0;
+    static lector_cmd_t l;
     for (;;) {
         uint8_t c;
-        if (uart_read_bytes(CMD_UART, &c, 1, portMAX_DELAY) != 1) continue;
-        if (c == '\r') continue;
-        if (c != '\n') { if (n < sizeof linea - 1) linea[n++] = (char)c; continue; }
-        linea[n] = '\0';
-        n = 0;
-        if (strcmp(linea, "wdt-test") == 0) {
-            ESP_LOGW(TAG, "wdt: bloqueando medicion");         /* E13 → NFR-WDT-01 */
-            s_wdt_bloquear = true;
-        } else if (strcmp(linea, "reiniciar") == 0) {
-            esp_restart();                                     /* E13: la siguiente boot: con reset=sw */
+        if (uart_read_bytes(CMD_UART, &c, 1, portMAX_DELAY) == 1) comando_byte(&l, c);
+    }
+}
+
+/* E13 también por el USB-Serial/JTAG (propietario, 2026-11-14, opción a; FSD en fsd_pending):
+ * el banco solo expone ese puerto. Se lee la FIFO de recepción por sondeo, sin instalar el
+ * driver, para no tocar la salida de consola por ese mismo puerto (la que lee el banco). */
+static void tarea_comandos_usj(void *arg)
+{
+    (void)arg;
+    static lector_cmd_t l;
+    for (;;) {
+        uint8_t buf[64];
+        if (usb_serial_jtag_ll_rxfifo_data_available()) {
+            uint32_t n = usb_serial_jtag_ll_read_rxfifo(buf, sizeof buf);
+            for (uint32_t i = 0; i < n; i++) comando_byte(&l, buf[i]);
+        } else {
+            vTaskDelay(pdMS_TO_TICKS(20));
         }
     }
 }
@@ -921,6 +946,7 @@ static void comandos_iniciar(void)
         xTaskCreate(tarea_comandos, "comandos", 3072, NULL, 3, NULL);
     else
         ESP_LOGE(TAG, "comandos: uart %d sin driver", CMD_UART);
+    xTaskCreate(tarea_comandos_usj, "comandos_usj", 3072, NULL, 3, NULL);
 }
 #endif
 

@@ -5,4 +5,4 @@ idf_component_register(SRCS "main.c"
                        PRIV_REQUIRES esp_app_format app_update esp_hw_support esp_system
                                      esp_event esp_netif esp_wifi nvs_flash
                                      identidad conectividad ota portal udplog sht41 medicion diagnostico publicador ha_discovery hora esp_timer freertos lwip esp_driver_uart
-                                     espressif__mqtt)
+                                     esp_hal_usb espressif__mqtt)
