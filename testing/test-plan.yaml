@@ -1954,9 +1954,13 @@ tests:
       imagen de banco en OPERATIVO; comando serie wdt-test (E13): «wdt: bloqueando medicion» y
       boot: … reset=task_wdt en ≤ 30 s (+ 2 s y el arranque); nunca colgado
     impl: tests/bench/test_villa2.py::test_tc_wdt_02_task_watchdog
-    reason: >
-      bloqueado por la misma causa que TC-TIME-08 (bench-serial-write llega al USJ; E13 lee de
-      UART0); pendiente del propietario
+    status: successful
+    commit: 6d274d6
+    date: 2026-11-14
+    evidence: test-results/20261114T121916Z-6d274d6/TC-WDT-02.md
+    observed: >
+      wdt-test por el USB-Serial/JTAG (E13 también por USJ en la imagen de banco, opción a del
+      propietario): reset=task_wdt a 29,6 s de «wdt: bloqueando medicion»
   - id: TC-MQTT-05
     shape: atomic
     kind: standard
@@ -2420,11 +2424,16 @@ tests:
       false en los status tras el reinicio. Bloqueado por bench-serial-write (en no: el
       banco no la reporta por GET)
     impl: tests/bench/test_villa2.py::test_tc_time_08_reboot_without_sntp
-    reason: >
-      bloqueado (2026-11-14): bench-serial-write escribe en el USB-Serial/JTAG (/dev/ttyACM0, el
-      único puerto del slot) y E13 lee de UART0 (CH343); «reiniciar» no llegó
-      (test-results/20261114T111647Z-9279b81/). Pendiente del propietario: FSD (E13 también por
-      USJ) o banco (puerto del CH343 en un slot)
+    status: successful
+    commit: e425e14
+    date: 2026-11-14
+    evidence: test-results/20261114T122826Z-e425e14/TC-TIME-08.md
+    observed: >
+      tras sincronizar, SNTP bloqueado y «reiniciar» por el USJ: boot con reset=sw y
+      hora_valida = false en los status siguientes, sin resincronizar
+    history: >
+      sobre 6d274d6 (test-results/20261114T121916Z-6d274d6/) el test contó la línea de
+      sincronización del arranque anterior, que llegó con marca posterior al comando; corregido
   - id: TC-TIME-05
     shape: atomic
     kind: standard

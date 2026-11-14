@@ -38,4 +38,4 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
     que H-58 dejó sin aplicar por el riesgo de bloqueos.
   - (b) Banco: asignar el puerto del CH343 (VID:PID `1a86:55d3`) a un slot y escribir ahí. Es configuración
     de la Pi, a decidir por el propietario.
-- **Estado.** Pendiente de decisión. TC-TIME-08 y TC-WDT-02 quedan como «no hecho».
+- **Estado.** Resuelto (2026-11-14): opción (a). TC-TIME-08 y TC-WDT-02 en verde; el texto del FSD está en `fsd_pending` (E13-USJ).

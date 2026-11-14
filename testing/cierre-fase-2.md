@@ -118,5 +118,5 @@ de nivel host y «other» corren en cada commit de la CI y están en verde en el
 | FR-MQTT-07 (TC-MQTT-05) | verde | `test-results/20261114T111957Z-9279b81/` |
 | FR-LOG-02, captura (TC-LOG-08) | verde | `test-results/20261114T113226Z-ea2a955/` |
 | FR-LOG-01 (TC-LOG-04, imagen de producción) | verde | `test-results/20261114T113742Z-ea2a955/` |
-| FR-TIME-02 bench⁺ (TC-TIME-08) | bloqueado | `bench-serial-write` llega al USB-Serial/JTAG y E13 lee de UART0 (`testing/pendientes-propietario.md`) |
-| NFR-WDT-01, fila target (TC-WDT-02) | bloqueado | la misma causa |
+| FR-TIME-02 bench⁺ (TC-TIME-08) | verde (E13 también por USJ en la imagen de banco, opción a) | `test-results/20261114T122826Z-e425e14/` |
+| NFR-WDT-01, fila target (TC-WDT-02) | verde | `test-results/20261114T121916Z-6d274d6/` |
