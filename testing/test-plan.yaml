@@ -684,7 +684,7 @@ tests:
       CONFIG_NODO_TEST_SIN_MQTT=y, que no alcanza OPERATIVO; el log muestra su
       boot: … img=pendiente, ota: rollback y boot: … fw=B en ≤ 300 s, y status
       muestra fw = B
-    impl: null
+    impl: tests/bench/test_jrn02.py::test_jrn_02_2_rollback_when_new_image_never_operative
 
   - id: TC-ID-01
     shape: atomic
@@ -2056,6 +2056,34 @@ tests:
     commit: ada173a
     date: 2026-11-14
     evidence: test-results/20261114T135507Z-ada173a/TC-OTA-12.md
+  - id: TC-OTA-13
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [NFR-OTA-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, github-test-releases, dut-board]
+    expect: >
+      tres OTAs alternas A → B1 → B2 → B1 (ota-test-2, fuera del anti-downgrade, H-84), cada
+      comando ~10 s antes de la medida siguiente: en cada una, el intervalo entre la última
+      med: antes de la descarga y la primera dentro de OTA_DESCARGA (reloj del DUT) en [55, 65] s
+    impl: tests/bench/test_jrn02.py::test_nfr_ota_01_measurement_period_during_download
+  - id: TC-SEC-03
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: other
+    verifies: [NFR-SEC-02]
+    needs: [hosted-ci]
+    expect: >
+      el workflow ota-test.yml no publica si NODO_DENYLIST falta o si strings de alguna imagen
+      contiene un patrón de la instalación (paso «NFR-SEC-02» antes del job con contents: write)
+    impl: .github/workflows/ota-test.yml#build/NFR-SEC-02 — no installation pattern in the images
+    status: successful
+    date: 2026-11-14
+    ci_run: 43601354735   # ota-test-2: «sin patrones de la instalación en 5 imágenes»
   - id: TC-HW-04
     shape: atomic
     kind: standard

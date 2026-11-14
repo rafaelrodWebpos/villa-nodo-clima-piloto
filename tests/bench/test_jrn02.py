@@ -169,3 +169,78 @@ def test_tc_ota_12_busy_during_download(testbench, dut_slot, dut_mac, firmware, 
         assert seq[:3] == ["en_curso", "rechazado:ocupado", "ok"], f"secuencia: {seq}"
         assert fw, "fw no pasó a B1"
         c.passed("en_curso → rechazado:ocupado → ok y fw = B1")
+
+
+def test_jrn_02_2_rollback_when_new_image_never_operative(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """JRN-02.2 · FR-OTA-07, T23 — imagen sin MQTT: boot B pendiente, «ota: rollback» ≤ 300 s,
+    boot A, primer status fw = A y 15 min sin reinicio."""
+    tb = testbench
+    base = f"sitio1/zona1/{_nodo(dut_mac)}"
+    a = firmware["version"]
+    with case(tb, "JRN-02.2", "Rollback de una imagen que no llega a OPERATIVO", run_dir, spec="JRN-02 villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        with _suscribir(tb, _nodo(dut_mac)) as sub:
+            _, reg = _a_operativo(tb, dut_slot, banco, c, internet=True)
+            t = _ota(tb, base, "firmware_sin_mqtt.bin")
+            assert _esperar(sub, base, t, lambda s: s.get("ota") == "ok", 240), "sin ota = ok"
+            b = reg.esperar(r"fw=0\.0\.1-ota-test\.2\.3 .*img=pendiente", 60, desde_ts=t)
+            assert b, "sin boot de B con img=pendiente"
+            c.step("Esperar el rollback (T23, ≤ 300 s desde el boot de B)")
+            rb = reg.esperar(re.escape("ota: rollback"), 330, desde_ts=b["ts"])
+            assert rb, "sin «ota: rollback» en 330 s"
+            ba = reg.esperar(re.escape(f"fw={a} "), 60, desde_ts=rb["ts"])
+            assert ba, "no volvió a arrancar A"
+            st_a = _esperar(sub, base, ba["ts"], lambda s: True, 150)
+            assert st_a and st_a[1].get("fw") == a, f"primer status tras la vuelta: {st_a}"
+            c.step("15 min de vigilancia tras el primer status de A")
+            time.sleep(900)
+            st = [s for _, s in _vivos(sub, base, st_a[0])]
+            txt = [e.get("text", "") for e in reg.leer() if e.get("ts", 0) >= t]
+        c.save_log("serie", txt)
+        dt = rb["ts"] - b["ts"]
+        ups = [s.get("uptime_s") for s in st]
+        boots_despues = [x for x in txt[txt.index(ba["text"]) + 1:] if BOOT.search(x)] if ba["text"] in txt else []
+        c.note(f"- boot de B (pendiente) → «ota: rollback»: {dt:.1f} s (≤ 300 s)",
+               f"- de vuelta: {BOOT.search(ba['text']).group(0) if BOOT.search(ba['text']) else ba['text']}",
+               f"- 15 min: {len(st)} status, fw {sorted({s.get('fw') for s in st})}, uptime_s monótono: "
+               f"{all(y > x for x, y in zip(ups, ups[1:]))}; boot: posteriores {len(boots_despues)}")
+        assert dt <= 305, f"rollback a {dt:.1f} s"
+        assert len(st) >= 10 and all(s.get("fw") == a for s in st), "status sin fw = A"
+        assert all(y > x for x, y in zip(ups, ups[1:])) and not boots_despues, "reinicio tras la vuelta"
+        c.passed(f"rollback a {dt:.0f} s del boot de B; A estable 15 min")
+
+
+MED_MS = re.compile(r"\s*I \((\d+)\) nodo: med: ")
+
+
+def test_nfr_ota_01_measurement_period_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """NFR-OTA-01 — tres OTAs alternas con una medida dentro de OTA_DESCARGA: intervalos en [55, 65] s."""
+    tb = testbench
+    base = f"sitio1/zona1/{_nodo(dut_mac)}"
+    with case(tb, "TC-OTA-13", "Periodo de medición durante la descarga", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        intervalos = []
+        with _suscribir(tb, _nodo(dut_mac)) as sub:
+            _, reg = _a_operativo(tb, dut_slot, banco, c, internet=True)
+            for asset, ver in (("firmware_b1.bin", B1), ("firmware_b2.bin", B2), ("firmware_b1.bin", B1)):
+                m = reg.esperar(MED_MS.pattern, 90, desde_ts=time.time())     # una medida reciente de esta imagen
+                assert m, "sin med:"
+                time.sleep(max(0.0, m["ts"] + 50 - time.time()))              # ~10 s antes de la siguiente
+                t = _ota(tb, base, asset)
+                ok = reg.esperar(r"con: OTA_DESCARGA -> ARRANQUE \(ota_ok\)", 240, desde_ts=t)
+                assert ok, f"{ver}: la OTA no terminó"
+                txt = [e.get("text", "") for e in reg.leer() if m["ts"] - 1 <= e.get("ts", 0) <= ok["ts"] + 1]
+                ms = [int(MED_MS.match(x).group(1)) for x in txt if MED_MS.match(x)]
+                ini = next(x for x in txt if "-> OTA_DESCARGA (cmd_ota)" in x)
+                t_ini = int(re.match(r"\s*I \((\d+)\)", ini).group(1))
+                dentro = [x for x in ms if x >= t_ini]
+                if len(ms) >= 2 and dentro:
+                    intervalos.append(round((dentro[0] - ms[ms.index(dentro[0]) - 1]) / 1000, 2))
+                assert _esperar(sub, base, t, lambda s, v=ver: s.get("fw") == v, 180), f"no arrancó {ver}"
+                time.sleep(5)
+        c.note(f"- intervalos con una medida dentro de OTA_DESCARGA (s): {intervalos}")
+        assert len(intervalos) >= 3, f"solo {len(intervalos)} intervalos con una medida en la descarga"
+        assert all(55 <= x <= 65 for x in intervalos), f"fuera de [55, 65] s: {intervalos}"
+        c.passed(f"{len(intervalos)} intervalos en [55, 65] s: {intervalos}")
