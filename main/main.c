@@ -633,7 +633,8 @@ static void iniciar_descarga(void)
 /* T19: ota = ok, offline y reinicio en el slot nuevo (la imagen ya es arrancable). */
 static void reiniciar_nueva(void)
 {
-    ota_estado("ok");
+    ota_estado("ok");          /* E7; el estado ya es ARRANQUE, así que ota_estado no publica: */
+    publicar_status();         /* MQTT sigue conectado: status con ota = ok (T19, FR-MQTT-09) */
     esp_mqtt_client_publish(s_mqtt, s_top_status, PUB_LWT_OFFLINE, 0, 1, 1);
     esp_timer_start_once(s_t_reinicio, 2 * 1000 * 1000);            /* deja salir status y offline */
 }
