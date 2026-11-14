@@ -130,3 +130,80 @@ def test_tc_ota_07_retained_command_ignored(testbench, dut_slot, dut_mac, firmwa
         finally:
             _publicar(tb, topico, b"", retain=True)        # borrar el retenido
         c.passed("retenido ignorado con E8 al reconectar; sin E7 ni OTA_DESCARGA; ota = ninguno")
+
+
+def _secuencia(tb, dut_slot, banco, c, sub, base, url, internet):
+    """Publica un comando admitido y devuelve (t_pub, otas [(t, ota)], texto serie)."""
+    _, reg = _a_operativo(tb, dut_slot, banco, c, internet=internet)
+    time.sleep(3)
+    return reg, _publicar(tb, f"{base}/cmd/ota", json.dumps({"url": url}).encode())
+
+
+def _ota_vivos(sub, base, desde):
+    return [(t, st.get("ota")) for t, st in _status(sub.mensajes(), base, desde) if st.get("estado") == "online"]
+
+
+def _comprobar_fallo(c, reg, sub, base, t_pub, motivo, espera_s=90):
+    fin, otas = time.time() + espera_s, []
+    while time.time() < fin:
+        otas = _ota_vivos(sub, base, t_pub)
+        if any(o == f"error:{motivo}" for _, o in otas):
+            break
+        time.sleep(1)
+    time.sleep(3)
+    from consola import quitar_relecturas, reinicios
+    ent, _ = quitar_relecturas([e for e in reg.leer() if e.get("ts", 0) >= t_pub - 1])
+    txt = [e.get("text", "") for e in ent]
+    c.save_log("serie", txt)
+    en_curso = next((t for t, o in otas if o == "en_curso"), None)
+    progreso = [t for t in txt if re.search(r"nodo: ota: \d+ %", t)]
+    c.note(f"- ota en status: {[o for _, o in otas]}",
+           f"- en_curso a " + ("—" if en_curso is None else f"{en_curso - t_pub:.2f} s"),
+           f"- T17: {any('con: OPERATIVO -> OTA_DESCARGA (cmd_ota)' in t for t in txt)}; "
+           f"T20: {any('con: OTA_DESCARGA -> OPERATIVO (ota_err)' in t for t in txt)}; "
+           f"líneas «ota: n %»: {len(progreso)}; reinicios: {len(reinicios(ent))}")
+    assert en_curso is not None and en_curso - t_pub <= PLAZO_S, "ota = en_curso no llegó en ≤ 2 s (FR-OTA-01)"
+    assert any(o == f"error:{motivo}" for _, o in otas), f"sin ota = error:{motivo}"
+    assert any("con: OPERATIVO -> OTA_DESCARGA (cmd_ota)" in t for t in txt), "sin T17"
+    assert any("con: OTA_DESCARGA -> OPERATIVO (ota_err)" in t for t in txt), "sin T20"
+    assert any(f"ota: estado error:{motivo}" in t for t in txt), "sin E7 del error"
+    assert not progreso, f"hubo progreso de descarga: {progreso[:1]}"
+    assert not reinicios(ent), "el DUT se reinició"
+
+
+def test_tc_ota_08_missing_asset_http_error(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-OTA-08 · FR-OTA-12, FR-OTA-01, T17/T20 — asset inexistente: en_curso ≤ 2 s y error:http."""
+    tb = testbench
+    base = f"sitio1/zona1/{_nodo(dut_mac)}"
+    with case(tb, "TC-OTA-08", "Asset inexistente (error:http)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        with _suscribir(tb, _nodo(dut_mac)) as sub:
+            c.step("OPERATIVO con salida a Internet; comando con un asset inexistente")
+            reg, t_pub = _secuencia(tb, dut_slot, banco, c, sub, base, REPO + "ota-no-existe-0/no-existe.bin", True)
+            _comprobar_fallo(c, reg, sub, base, t_pub, "http")
+        c.passed("en_curso ≤ 2 s, T17, T20 y error:http; sin progreso ni reinicio")
+
+
+def test_tc_ota_09_untrusted_certificate_tls_error(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-OTA-09 · FR-OTA-03, T20 (tls) — github.com resuelto al HTTPS autofirmado del banco: error:tls."""
+    tb = testbench
+    base = f"sitio1/zona1/{_nodo(dut_mac)}"
+    with case(tb, "TC-OTA-09", "Certificado no confiable (error:tls)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        try:
+            with _suscribir(tb, _nodo(dut_mac)) as sub:
+                c.step("OPERATIVO sin Internet; DNS del banco: github.com -> HTTPS autofirmado (bench-dns-override)")
+                _, reg = _a_operativo(tb, dut_slot, banco, c)
+                st = tb.dns_override(True, "github.com")
+                assert st.get("enabled") and st.get("https"), f"dns_override no se activó: {st}"
+                time.sleep(3)
+                t_pub = _publicar(tb, f"{base}/cmd/ota", json.dumps({"url": REPO + "v0.0.1/firmware_v0.0.1.bin"}).encode())
+                _comprobar_fallo(c, reg, sub, base, t_pub, "tls")
+        finally:
+            try:
+                tb.dns_override(False)
+            except Exception:
+                pass
+        c.passed("T17, T20 y error:tls sin ninguna línea «ota: n %»; sin reinicio")

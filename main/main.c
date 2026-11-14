@@ -43,6 +43,7 @@
 #include "medicion.h"
 #include "sht41.h"
 #include "conectividad_sta.h"
+#include "ota_descarga.h"
 #include "ota_diag.h"
 #include "ota_politica.h"
 #include "portal_config.h"
@@ -85,9 +86,13 @@ static char s_top_cmd_ota[170];                /* <sitio>/<zona>/<nodo>/cmd/ota 
 
 typedef struct {                               /* elemento de la cola del gestor */
     con_evento_t ev;
-    ota_motivo_t motivo;                       /* cmd_ota: OTA_OK o el rechazo de T18 */
+    ota_motivo_t motivo;                       /* cmd_ota: OTA_OK o el rechazo; ota_err: el motivo de T20 */
+    bool es_prueba;                            /* cmd_ota admitido: pre-release ota-test-* */
+    char url[OTA_URL_MAX + 1];                 /* cmd_ota admitido */
 } evento_mqtt_t;
-static ota_motivo_t s_motivo_ota;              /* el de la fila T18 en curso (bajo s_lock) */
+static ota_motivo_t s_motivo_ota;              /* el de la fila T18/T20 en curso (bajo s_lock) */
+static evento_mqtt_t s_cmd_ota;                /* el comando de T17 (bajo s_lock) */
+static esp_timer_handle_t s_t_validacion_ota;  /* T23: 300 s sin T11 con la imagen PENDIENTE */
 #if CONFIG_NODO_BENCH_BUILD
 #define IMAGEN_BANCO true                      /* FR-OTA-13: solo la imagen de banco acepta ota-test-* */
 #else
@@ -429,8 +434,9 @@ static bool comando_ota(const esp_mqtt_event_handle_t e, evento_mqtt_t *out)
     }
     out->motivo = ota_payload(e->data, (size_t)e->data_len, url, sizeof url);
     if (out->motivo == OTA_OK) {
-        bool prueba;
+        bool prueba = false;
         out->motivo = ota_url_inicial(url, IMAGEN_BANCO, &prueba);   /* FR-OTA-13 */
+        if (out->motivo == OTA_OK) { strlcpy(out->url, url, sizeof out->url); out->es_prueba = prueba; }
     }
     return true;
 }
@@ -452,16 +458,18 @@ static void tarea_gestor(void *arg)
     for (;;) {
         esp_task_wdt_reset();
         if (xQueueReceive(s_eventos_mqtt, &ev, pdMS_TO_TICKS(WDT_ALIMENTO_MS)) != pdTRUE) continue;
-        if (ev.ev != CON_EV_CMD_OTA) { transicion(ev.ev, (con_guardas_t){0}); continue; }
-        if (ev.motivo == OTA_OK) {
-            /* T17: la descarga (esp_https_ota) llega en el paso siguiente del bloque 5; hasta
-             * entonces un comando admitido no cambia de estado, para no quedarse en OTA_DESCARGA */
-            ESP_LOGW(TAG, "ota: comando admitido; descarga aún no implementada");
-            continue;
-        }
         xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
         s_motivo_ota = ev.motivo;
-        transicion(CON_EV_CMD_OTA, (con_guardas_t){.ota_admitido = false});   /* T18 (o T21) */
+        con_guardas_t g = {0};
+        if (ev.ev == CON_EV_CMD_OTA) {
+            g.ota_admitido = ev.motivo == OTA_OK;                    /* T17 / T18 (T21 en descarga) */
+            if (g.ota_admitido) s_cmd_ota = ev;
+        } else if (ev.ev == CON_EV_VALIDACION_VENCE) {
+            esp_ota_img_states_t st;                                 /* guarda de T23 */
+            g.imagen_pendiente = esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK &&
+                                 st == ESP_OTA_IMG_PENDING_VERIFY;
+        }
+        transicion(ev.ev, g);
         xSemaphoreGiveRecursive(s_lock);
     }
 }
@@ -590,8 +598,40 @@ static void mqtt_listo(void)
     esp_mqtt_client_subscribe(s_mqtt, s_top_cmd_ota, 1);
     if (s_hay_medida && s_ultima.valida) publicar_medidas(&s_ultima, s_ultima_ts_valido, s_ultima_ts);
     esp_ota_img_states_t st;
-    if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY)
-        esp_ota_mark_app_valid_cancel_rollback();
+    if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY) {
+        esp_ota_mark_app_valid_cancel_rollback();                    /* T11: PENDIENTE -> VÁLIDA */
+        if (s_t_validacion_ota) esp_timer_stop(s_t_validacion_ota);
+        ESP_LOGI(TAG, "ota: imagen validada");                       /* E9 */
+    }
+}
+
+/* Resultado de la descarga (tarea ota) hacia el gestor: ota_ok (T19) u ota_err (T20). */
+static void al_fin_ota(ota_motivo_t m)
+{
+    evento_mqtt_t ev = {.ev = m == OTA_OK ? CON_EV_OTA_OK : CON_EV_OTA_ERR, .motivo = m};
+    xQueueSend(s_eventos_mqtt, &ev, portMAX_DELAY);
+}
+
+static void al_vencer_validacion_ota(void *arg)
+{
+    evento_mqtt_t ev = {.ev = CON_EV_VALIDACION_VENCE};
+    xQueueSend(s_eventos_mqtt, &ev, 0);                              /* T23 */
+}
+
+/* T17: ota = en_curso (FR-MQTT-09) y la descarga en su tarea. */
+static void iniciar_descarga(void)
+{
+    ota_estado("en_curso");
+    if (!ota_descarga_iniciar(s_cmd_ota.url, s_cmd_ota.es_prueba, s_version, al_fin_ota))
+        al_fin_ota(OTA_ERROR_RED);
+}
+
+/* T19: ota = ok, offline y reinicio en el slot nuevo (la imagen ya es arrancable). */
+static void reiniciar_nueva(void)
+{
+    ota_estado("ok");
+    esp_mqtt_client_publish(s_mqtt, s_top_status, PUB_LWT_OFFLINE, 0, 1, 1);
+    esp_timer_start_once(s_t_reinicio, 2 * 1000 * 1000);            /* deja salir status y offline */
 }
 
 static void al_primer_mqtt(void *arg)
@@ -777,21 +817,23 @@ static void ejecutar(con_estado_t origen, con_evento_t ev, con_transicion_t t)
     case CON_ACC_RED_CAIDA:            red_caida(); break;
     case CON_ACC_CERRAR_PORTAL:        cerrar_portal(); break;
     case CON_ACC_APLAZAR_CIERRE:       s_cierre_pendiente = true; break;   /* T25 */
-    /* T18 ya es real (cmd/ota). T17, T19–T23: sus acciones llegan con la descarga
-     * (esp_https_ota), en el paso siguiente del bloque 5; hoy ningún evento las dispara. */
     case CON_ACC_RECHAZAR_OTA:         ota_estado(ota_motivo_texto(s_motivo_ota)); break;   /* T18 */
-    case CON_ACC_INICIAR_DESCARGA:
-    case CON_ACC_REINICIAR_NUEVA:
-    case CON_ACC_OTA_FALLIDA:
-    case CON_ACC_RECHAZAR_OCUPADO:
-    case CON_ACC_ABORTAR_WIFI:
-    case CON_ACC_ABORTAR_MQTT:
-    case CON_ACC_ROLLBACK:             break;
+    case CON_ACC_INICIAR_DESCARGA:     iniciar_descarga(); break;                            /* T17 */
+    case CON_ACC_REINICIAR_NUEVA:      reiniciar_nueva(); break;                             /* T19 */
+    case CON_ACC_OTA_FALLIDA:          ota_estado(ota_motivo_texto(s_motivo_ota)); break;   /* T20 */
+    case CON_ACC_RECHAZAR_OCUPADO:     ota_estado("rechazado:ocupado"); break;               /* T21 */
+    case CON_ACC_ABORTAR_WIFI:         ota_descarga_abortar(); ota_estado("error:red"); red_caida(); break;   /* T22 */
+    case CON_ACC_ABORTAR_MQTT:         ota_descarga_abortar(); ota_estado("error:red"); programar_reintento_mqtt(); break;
+    case CON_ACC_ROLLBACK:                                                                   /* T23 */
+        ESP_LOGW(TAG, "ota: rollback");                                                      /* E9 */
+        esp_ota_mark_app_invalid_rollback_and_reboot();
+        break;
     case CON_ACC_NINGUNA:              break;
     }
-    /* E0 */
-    ESP_LOGI(TAG, "con: %s -> %s (%s)", con_nombre_estado(origen),
-             con_nombre_estado(t.siguiente), con_nombre_evento(ev));
+    /* E0 (salvo T23, que es de la región de validación, §18) */
+    if (ev != CON_EV_VALIDACION_VENCE)
+        ESP_LOGI(TAG, "con: %s -> %s (%s)", con_nombre_estado(origen),
+                 con_nombre_estado(t.siguiente), con_nombre_evento(ev));
 }
 
 /* Ciclo de medición (FSD §5.4; FR-MED-01/02): cada 60 s con el reloj
@@ -898,6 +940,14 @@ void app_main(void)
     ota_diag_iniciar(&s_ota);                     /* §9.3: «ninguno» al arrancar */
     s_eventos_mqtt = xQueueCreate(8, sizeof(evento_mqtt_t));
     xTaskCreate(tarea_gestor, "gestor", 6144, NULL, 6, NULL);   /* T11 serializa Discovery (§10.2) en su pila */
+    {   /* T23: una imagen PENDIENTE que no llega a T11 en 300 s vuelve a la anterior (FR-OTA-07, D15) */
+        esp_ota_img_states_t st;
+        if (esp_ota_get_state_partition(esp_ota_get_running_partition(), &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY) {
+            const esp_timer_create_args_t tv = {.callback = al_vencer_validacion_ota, .name = "validacion_ota"};
+            ESP_ERROR_CHECK(esp_timer_create(&tv, &s_t_validacion_ota));
+            ESP_ERROR_CHECK(esp_timer_start_once(s_t_validacion_ota, 300LL * 1000 * 1000));
+        }
+    }
 
     esp_err_t err = nvs_flash_init();
     if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {

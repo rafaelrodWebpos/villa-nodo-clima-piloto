@@ -149,7 +149,7 @@ capabilities:
       POST /api/mqtt/stop → ok, status parado (igual que antes)
   bench-mqtt-auth:
     what: broker MQTT del banco con autenticación por usuario y contraseña (FR-MQTT-07)
-    available: no
+    available: yes   # fork villa-2 (b5623c4) instalado y verificado (H-87)
     reason: /api/mqtt/status no reporta autenticación — petición CR-TB-03 (testing/testbench-change-requests.md)
   bench-operator-prompt:
     what: avisos bloqueantes al operador en la UI del banco (acciones físicas)
@@ -191,17 +191,17 @@ capabilities:
       sincroniza a 5,0 s. ap_stop y el arranque del portal lo desbloquean
   bench-dns-override:
     what: resolver un host permitido hacia un servidor HTTPS con certificado autofirmado (FR-OTA-03, T20 tls)
-    available: no
+    available: yes   # fork villa-2 (b5623c4) instalado y verificado (H-87)
     reason: el banco no reporta esta capacidad — petición CR-TB-05 (testing/testbench-change-requests.md)
   bench-traffic-capture:
     what: capturar el tráfico UDP que sale del DUT (FR-LOG-01, FR-LOG-02 fila de captura)
-    available: no
+    available: yes   # fork villa-2 (b5623c4) instalado y verificado (H-87)
     reason: >
       el banco solo reporta el receptor del puerto 5555, no una captura del
       tráfico — petición CR-TB-04 (testing/testbench-change-requests.md)
   bench-serial-write:
     what: escribir en la consola del DUT por el slot (comandos de la imagen de banco, FSD §18 E13)
-    available: no
+    available: yes   # fork villa-2 (b5623c4) instalado y verificado (H-87)
     reason: >
       el banco no la reporta por GET (GET /api/serial/write → 404), y lo que el
       banco no reporta queda en no (nota de testbench). Evidencia de que
@@ -1899,6 +1899,32 @@ tests:
     history: >
       un intento anterior (test-results/20261111T104030Z-459013c/) se cayó por un error del test (contaba el
       status offline del Last Will, que no lleva ota)
+  - id: TC-OTA-08
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [FR-OTA-12, FR-OTA-01, T17, T20]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, dut-board]
+    expect: >
+      OPERATIVO con salida a Internet; comando con la URL de un asset inexistente bajo la ruta
+      del repo: status con ota = en_curso en ≤ 2 s (FR-OTA-01), T17 y T20, E7 «ota: estado
+      error:http» y status con error:http; ninguna línea «ota: <n> %» ni reinicio
+    impl: tests/bench/test_ota.py::test_tc_ota_08_missing_asset_http_error
+  - id: TC-OTA-09
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench
+    verifies: [FR-OTA-03, T20]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-dns-override, dut-board]
+    expect: >
+      OPERATIVO; el DNS del banco resuelve github.com hacia su HTTPS autofirmado; comando con
+      una URL de release del repo: T17, T20, «ota: estado error:tls» y status con error:tls,
+      sin ninguna línea «ota: <n> %» antes; sin reinicio
+    impl: tests/bench/test_ota.py::test_tc_ota_09_untrusted_certificate_tls_error
   - id: TC-HW-04
     shape: atomic
     kind: standard
