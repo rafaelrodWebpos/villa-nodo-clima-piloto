@@ -63,13 +63,12 @@ static ota_motivo_t resolver(char *final, size_t cap)
         if (esp_http_client_fetch_headers(h) < 0) { esp_http_client_cleanup(h); return OTA_ERROR_RED; }
         int st = esp_http_client_get_status_code(h);
         if (st >= 300 && st < 400) {
-            char *loc = NULL;
-            if (esp_http_client_get_header(h, "Location", &loc) != ESP_OK || !loc || strlen(loc) >= cap) {
-                esp_http_client_cleanup(h);
-                return OTA_RECHAZADO_HOST;
-            }
-            strlcpy(final, loc, cap);
+            /* La Location de la RESPUESTA la guarda el cliente: set_redirection la aplica a su
+             * URL y get_url la devuelve (get_header solo lee cabeceras de la petición) */
+            esp_err_t er = esp_http_client_set_redirection(h);
+            if (er == ESP_OK) er = esp_http_client_get_url(h, final, (int)cap);
             esp_http_client_cleanup(h);
+            if (er != ESP_OK) return OTA_RECHAZADO_HOST;          /* sin Location o no cabe */
             continue;
         }
         esp_http_client_cleanup(h);
