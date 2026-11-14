@@ -1889,6 +1889,8 @@ tests:
       al volver el AP y tras T11: E8 «ota: ignorado retained», ningún E7 ni «-> OTA_DESCARGA»,
       y ota = ninguno en los status; al final se borra el retenido
     impl: tests/bench/test_ota.py::test_tc_ota_07_retained_command_ignored
+    regression: >
+      en verde de nuevo con la descarga real (test-results/20261114T110025Z-765a7a8/), con TC-OTA-06
     status: successful
     commit: 6f30ae4
     date: 2026-11-11
@@ -1912,6 +1914,10 @@ tests:
       del repo: status con ota = en_curso en ≤ 2 s (FR-OTA-01), T17 y T20, E7 «ota: estado
       error:http» y status con error:http; ninguna línea «ota: <n> %» ni reinicio
     impl: tests/bench/test_ota.py::test_tc_ota_08_missing_asset_http_error
+    status: successful
+    commit: 765a7a8
+    date: 2026-11-14
+    evidence: test-results/20261114T110025Z-765a7a8/TC-OTA-08.md
   - id: TC-OTA-09
     shape: atomic
     kind: standard
@@ -1925,6 +1931,10 @@ tests:
       una URL de release del repo: T17, T20, «ota: estado error:tls» y status con error:tls,
       sin ninguna línea «ota: <n> %» antes; sin reinicio
     impl: tests/bench/test_ota.py::test_tc_ota_09_untrusted_certificate_tls_error
+    status: successful
+    commit: 765a7a8
+    date: 2026-11-14
+    evidence: test-results/20261114T110025Z-765a7a8/TC-OTA-09.md
   - id: TC-HW-04
     shape: atomic
     kind: standard

@@ -1,0 +1,8 @@
+I (10233) nodo: ota: estado en_curso
+I (10243) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+E (10283) esp-tls-mbedtls: mbedtls_ssl_handshake returned -0x2700
+E (10283) esp-tls: Failed to open new connection
+E (10293) transport_base: Failed to open a new connection
+E (10303) HTTP_CLIENT: Connection failed, sock < 0
+I (10313) nodo: ota: estado error:tls
+I (10323) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)

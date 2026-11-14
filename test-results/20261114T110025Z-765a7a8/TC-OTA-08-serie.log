@@ -1,0 +1,6 @@
+I (7563) nodo: sntp: sincronizado ts=1794654385
+I (8473) nodo: ota: estado en_curso
+I (8493) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (11813) esp-x509-crt-bundle: Certificate validated
+I (13433) nodo: ota: estado error:http
+I (13443) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)
