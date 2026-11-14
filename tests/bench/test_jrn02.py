@@ -1,4 +1,4 @@
-"""Fase 3 — OTA contra la pre-release ota-test-1 (bench⁺, imagen de banco, FR-OTA-13). Atómicos:
+"""Fase 3 — OTA contra la pre-release ota-test-2 (la 1 llevaba el adaptador anterior a los arreglos de redirección) (bench⁺, imagen de banco, FR-OTA-13). Atómicos:
 cada test graba la imagen A de la CI, aprovisiona y deja el nodo en OPERATIVO con salida a Internet.
 
 JRN-02.1 · T17, T19, FR-OTA-02, FR-OTA-06, FR-CFG-01 (OTA), FR-OTA-05 (misma versión):
@@ -15,8 +15,8 @@ from benchlib import case
 from test_mqtt import _a_operativo, _nodo, _suscribir, configurado
 from test_ota import _publicar, _status
 
-REL = "https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/ota-test-1/"
-B1, B2 = "0.0.1-ota-test.1.1", "0.0.1-ota-test.1.2"
+REL = "https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/ota-test-2/"
+B1, B2 = "0.0.1-ota-test.2.1", "0.0.1-ota-test.2.2"
 BOOT = re.compile(r"nodo: boot: \S+ fw=(\S+) reset=(\w+) part=(\w+) img=(\w+)")
 
 

@@ -2010,7 +2010,7 @@ tests:
     verifies: [FR-OTA-05]
     needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, github-test-releases, dut-board]
     expect: >
-      OTA con la imagen para esp32 y con la truncada de ota-test-1: status con ota = error:imagen en las dos; ninguna línea boot: (sin reinicio ni cambio de slot)
+      OTA con la imagen para esp32 y con la truncada de ota-test-2: status con ota = error:imagen en las dos; ninguna línea boot: (sin reinicio ni cambio de slot)
     impl: tests/bench/test_jrn02.py::test_tc_ota_10_bad_images
   - id: TC-OTA-11
     shape: atomic
