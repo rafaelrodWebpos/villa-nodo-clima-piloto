@@ -1,0 +1,4 @@
+# Imagen de prueba de FR-OTA-07 (pre-release ota-test-*): sin cliente MQTT, nunca alcanza
+# OPERATIVO y el bootloader vuelve a la anterior (T23). Se aplica sobre sdkconfig.defaults y
+# sdkconfig.bench.defaults. Nunca en una release.
+CONFIG_NODO_TEST_SIN_MQTT=y

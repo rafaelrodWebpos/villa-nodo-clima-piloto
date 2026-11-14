@@ -1,0 +1,94 @@
+# Pre-releases de prueba ota-test-<serie> (FSD §22.0, D1 de H-86): solo desde aquí. Imágenes
+# de banco (FR-OTA-13: solo la imagen de banco acepta ota-test-*), con versiones propias:
+#   firmware_b1.bin / firmware_b2.bin  versión B1 y B2 (FR-OTA-02/06/10, NFR-OTA-01)
+#   firmware_sin_mqtt.bin              no alcanza OPERATIVO (FR-OTA-07, T23)
+#   firmware_esp32.bin                 aplicación para esp32, no S3 (FR-OTA-05: error:imagen)
+#   firmware_truncada.bin              B1 cortada a la mitad (FR-OTA-05: error:imagen)
+# Antes de publicar, NFR-SEC-02: ningún patrón de la instalación en los binarios.
+name: ota-test pre-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      serie:
+        description: 'Número de serie (1-999): publica la pre-release ota-test-<serie>'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      serie: ${{ steps.v.outputs.serie }}
+    steps:
+      - name: Trust the workspace
+        run: git config --global --add safe.directory '*'
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Validate the input   # SEC-09: por env y con regex
+        id: v
+        env:
+          SERIE_IN: ${{ inputs.serie }}
+        run: |
+          [[ "$SERIE_IN" =~ ^[1-9][0-9]{0,2}$ ]] || { echo "::error::serie no válida"; exit 1; }
+          echo "serie=$SERIE_IN" >> "$GITHUB_OUTPUT"
+      - name: Build the test images
+        env:
+          SERIE: ${{ steps.v.outputs.serie }}
+        run: |
+          . $IDF_PATH/export.sh >/dev/null
+          mkdir -p out
+          build() {   # nombre, versión, defaults
+            idf.py -B "b-$1" -DSDKCONFIG="$PWD/b-$1/sdkconfig" -DSDKCONFIG_DEFAULTS="$3" -DPROJECT_VER="$2" set-target esp32s3 >/dev/null
+            idf.py -B "b-$1" -DSDKCONFIG="$PWD/b-$1/sdkconfig" -DSDKCONFIG_DEFAULTS="$3" -DPROJECT_VER="$2" build >/dev/null
+            cp "b-$1/nodo_clima.bin" "out/firmware_$1.bin"
+          }
+          BANCO="sdkconfig.defaults;sdkconfig.bench.defaults"
+          build b1 "0.0.1-ota-test.$SERIE.1" "$BANCO"
+          build b2 "0.0.1-ota-test.$SERIE.2" "$BANCO"
+          build sin_mqtt "0.0.1-ota-test.$SERIE.3" "$BANCO;sdkconfig.ota-test-sin-mqtt.defaults"
+          cp -r "$IDF_PATH/examples/get-started/hello_world" hw
+          idf.py -C hw -B hw/build set-target esp32 >/dev/null
+          idf.py -C hw -B hw/build build >/dev/null
+          cp hw/build/hello_world.bin out/firmware_esp32.bin
+          head -c $(( $(stat -c %s out/firmware_b1.bin) / 2 )) out/firmware_b1.bin > out/firmware_truncada.bin
+          ls -l out
+      - name: NFR-SEC-02 — no installation pattern in the images
+        env:
+          DENYLIST: ${{ secrets.NODO_DENYLIST }}
+        run: |
+          if [ -z "$DENYLIST" ]; then echo "::error title=NFR-SEC-02::NODO_DENYLIST sin definir: no se publica"; exit 1; fi
+          printf '%s\n' "$DENYLIST" | sed '/^$/d' > /tmp/deny
+          for f in out/*.bin; do
+            if strings "$f" | grep -F -i -q -f /tmp/deny; then echo "::error title=NFR-SEC-02::patrón en $f"; exit 1; fi
+          done
+          echo "sin patrones de la instalación en $(ls out | wc -l) imágenes"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ota-test-${{ steps.v.outputs.serie }}
+          path: out/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ota-test-${{ needs.build.outputs.serie }}
+          path: out
+      - name: Publish the pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ota-test-${{ needs.build.outputs.serie }}
+        run: |
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease \
+            --title "$TAG (imágenes de prueba OTA, no instalar)" \
+            --notes "Pre-release de prueba (FSD §22.0): solo la imagen de banco la acepta (FR-OTA-13)." \
+            out/*.bin

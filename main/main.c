@@ -382,7 +382,11 @@ static void red_lista(void)
     esp_timer_stop(s_t_backoff_mqtt);
     con_backoff_reiniciar(&s_backoff_mqtt);
     s_intento_mqtt = 0;
+#if CONFIG_NODO_TEST_SIN_MQTT
+    ESP_LOGW(TAG, "mqtt: desactivado (imagen de prueba de FR-OTA-07)");   /* nunca OPERATIVO: T23 */
+#else
     esp_timer_start_once(s_t_primer_mqtt, 1000);   /* tras la línea con: de T08 (§6.6), muy dentro de su 1 s */
+#endif
     esp_timer_stop(s_t_sntp);
     esp_timer_start_once(s_t_sntp, 500 * 1000);     /* primera petición tras la línea con: de T08 (FR-TIME-06) */
 }

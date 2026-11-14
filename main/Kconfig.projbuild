@@ -7,6 +7,14 @@ menu "Nodo clima"
             Selecciona la imagen de banco. La activa sdkconfig.bench.defaults;
             la CI comprueba que la imagen de producción no la lleva (FSD C-LOG-01).
 
+    config NODO_TEST_SIN_MQTT
+        bool "Imagen de prueba sin cliente MQTT (pre-release ota-test-*, FR-OTA-07)"
+        default n
+        help
+            No arranca el cliente MQTT, así que la imagen nunca alcanza OPERATIVO y el
+            bootloader vuelve a la anterior a los 300 s (T23). Solo en la pre-release de
+            prueba de FR-OTA-07 (FSD §17); nunca en una release.
+
     config NODO_UDP_LOG
         bool "Copia del log por UDP hacia el testbench (FSD §18.1)"
         default n
