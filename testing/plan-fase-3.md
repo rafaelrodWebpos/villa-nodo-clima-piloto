@@ -138,3 +138,22 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
 - **Rama `driver-fork-villa-2`:** se fusiona justo después de instalar.
 - **Siguiente al volver:** la descarga OTA (T17 con `esp_https_ota`, redirecciones validadas, versión, progreso, T19/T20/T22) y T23. Después, el workflow de las pre-releases `ota-test-*`.
 - **Banco libre al pausar:** AP y broker apagados, salida a Internet apagada, SNTP desbloqueado.
+
+## Avance 2026-11-14
+
+- **Descarga OTA real** en el firmware: T17, T19–T23, redirecciones validadas, versión antes de escribir,
+  «ota: n %» y rollback a los 300 s.
+- **Pre-releases** por `.github/workflows/ota-test.yml`, con el escaneo NFR-SEC-02 antes de publicar:
+  `ota-test-1` y `ota-test-2` (la 2 es la buena: la 1 llevaba el adaptador anterior).
+- **En verde:**
+  - TC-OTA-01 a TC-OTA-12 (TC-OTA-05 en host) y JRN-02.1.
+  - Las 5 filas pendientes de la Fase 2: TC-TIME-08, TC-WDT-02, TC-MQTT-05, TC-LOG-08 y TC-LOG-04.
+    TC-TIME-08 y TC-WDT-02 usan E13 también por USB-Serial/JTAG (opción a; el texto del FSD está en
+    `fsd_pending` como E13-USJ).
+- **Siguiente:**
+  - JRN-02.2 (FR-OTA-07, T23: la imagen sin MQTT vuelve a A).
+  - NFR-OTA-01 (periodo de medición durante la descarga).
+  - Fila TC-SEC-03 (NFR-SEC-02 en el workflow).
+  - FR-OTA-13 en la verificación de release.
+  - El cambio agrupado del FSD (E13-USJ).
+  - Después, la visita física final (iPhone y las 4 manuales) y el tag v0.0.1.
