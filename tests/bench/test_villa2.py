@@ -63,10 +63,12 @@ def test_tc_time_08_reboot_without_sntp(testbench, dut_slot, dut_mac, firmware, 
         reset = BOOT.search(boot["text"]).group(1)
         hv = [s.get("hora_valida") for s in st]
         c.note(f"- boot tras «reiniciar»: reset={reset}", f"- hora_valida en los status tras el reinicio: {hv}",
-               f"- «sntp: sincronizado» tras el reinicio: {sum(bool(SINC.search(t)) for t in txt)}")
+               f"- «sntp: sincronizado» tras el reinicio: "
+               f"{sum(bool(SINC.search(t)) for t in txt[next((i for i, t in enumerate(txt) if BOOT.search(t)), 0):])}")
         assert reset == "sw", f"reset={reset}, esperado sw"
         assert len(hv) >= 2 and not any(hv), f"hora_valida tras el reinicio: {hv}"
-        assert not any(SINC.search(t) for t in txt), "se sincronizó con SNTP bloqueado"
+        i_boot = next((i for i, t in enumerate(txt) if BOOT.search(t)), 0)   # solo tras el reinicio
+        assert not any(SINC.search(t) for t in txt[i_boot:]), "se sincronizó con SNTP bloqueado"
         c.passed(f"reset=sw; hora_valida = false en {len(hv)} status sin SNTP")
 
 
