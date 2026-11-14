@@ -309,7 +309,7 @@ capabilities:
       conectada al broker del banco por la LAN; nada se instala en el Pi del banco
   github-test-releases:
     what: pre-releases ota-test-* del repo con las imágenes de prueba OTA (FSD §22.0)
-    available: unproven
+    available: yes   # ota-test-1 publicada por .github/workflows/ota-test.yml (run 43595621244), 5 imágenes
   reference-instrument:
     what: termohigrómetro de referencia para NFR-SEN-01, contrastado en HR con sobres del 33 % y 75 % o con sal saturada (NaCl, 75 %) (FSD 0.9.7)
     available: yes
@@ -660,7 +660,7 @@ tests:
       comando OTA (no retained) con la URL releases/download/ota-test-*/ de la
       versión B; status pasa por ota = en_curso y ota = ok, y fw = B en ≤ 120 s
       desde el status con ota = ok
-    impl: null
+    impl: tests/bench/test_jrn02.py::test_jrn_02_1_ota_to_b1_and_b2
   - id: JRN-02.2
     shape: workflow
     kind: standard
@@ -2001,6 +2001,39 @@ tests:
     history: >
       sobre 9279b81 pytest pasó pero el informe decía FAIL: las aserciones estaban fuera del
       bloque case (corregido en ea2a955)
+  - id: TC-OTA-10
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [FR-OTA-05]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, github-test-releases, dut-board]
+    expect: >
+      OTA con la imagen para esp32 y con la truncada de ota-test-1: status con ota = error:imagen en las dos; ninguna línea boot: (sin reinicio ni cambio de slot)
+    impl: tests/bench/test_jrn02.py::test_tc_ota_10_bad_images
+  - id: TC-OTA-11
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [FR-OTA-08, T22, FR-MQTT-09]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, github-test-releases, bench-wifi-ap-outage, dut-board]
+    expect: >
+      OTA a B1; al ver «ota: 30 %» o más, AP apagado 30 s: T22 (OTA_DESCARGA -> CONECTANDO_WIFI), E7 error:red; el primer status tras volver el AP con ota = error:red y fw = A; un reset arranca A en su misma partición
+    impl: tests/bench/test_jrn02.py::test_tc_ota_11_ap_lost_during_download
+  - id: TC-OTA-12
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [FR-OTA-10, T21]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, github-test-releases, dut-board]
+    expect: >
+      OTA a B1 y, ya descargando, un segundo comando (B2): ota en status en_curso → rechazado:ocupado → ok, y después fw = B1
+    impl: tests/bench/test_jrn02.py::test_tc_ota_12_busy_during_download
   - id: TC-HW-04
     shape: atomic
     kind: standard
