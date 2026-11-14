@@ -47,6 +47,8 @@ static void config_http(esp_http_client_config_t *c, const char *url)
         .disable_auto_redirect = true,                  /* cada salto se valida aquí (FR-OTA-02/14) */
         .keep_alive_enable = false,
         .event_handler = al_evento_http,
+        .buffer_size = 2048,                            /* cabeceras de respuesta largas (Location firmada) */
+        .buffer_size_tx = URL_SALTO_MAX + 256,          /* la línea de petición lleva la URL firmada (~900 B) */
     };
 }
 
