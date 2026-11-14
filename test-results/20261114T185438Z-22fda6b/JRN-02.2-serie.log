@@ -1,0 +1,312 @@
+I (5233) nodo: UDP logging -> 192.168.4.1:5555
+I (5233) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5233) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5243) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5253) nodo: mqtt: intento 1
+I (5333) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5733) nodo: sntp: inicio pool.ntp.org
+I (6413) nodo: ota: estado en_curso
+I (6423) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (6823) nodo: sntp: sincronizado ts=1794682562
+I (8743) esp-x509-crt-bundle: Certificate validated
+I (11013) esp-x509-crt-bundle: Certificate validated
+I (12033) esp-x509-crt-bundle: Certificate validated
+I (12703) esp_https_ota: Starting OTA...
+I (12703) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (12753) nodo: ota: 0 %
+I (15163) nodo: ota: 10 %
+I (17453) nodo: ota: 20 %
+I (19693) nodo: ota: 30 %
+I (22103) nodo: ota: 40 %
+I (24843) nodo: ota: 50 %
+I (27033) nodo: ota: 60 %
+I (29373) nodo: ota: 70 %
+I (31643) nodo: ota: 80 %
+I (33623) nodo: ota: 90 %
+I (35543) nodo: ota: 100 %
+I (35543) esp_image: segment 0: paddr=00320020 vaddr=3c0c0020 size=3951ch (234780) map
+I (35593) esp_image: segment 1: paddr=00359544 vaddr=3fc98b00 size=061bch ( 25020) 
+I (35603) esp_image: segment 2: paddr=0035f708 vaddr=40374000 size=00910h (  2320) 
+I (35603) esp_image: segment 3: paddr=00360020 vaddr=42000020 size=b8a84h (756356) map
+I (35753) esp_image: segment 4: paddr=00418aac vaddr=40374910 size=14160h ( 82272) 
+I (35773) esp_image: segment 5: paddr=0042cc14 vaddr=50000000 size=00024h (    36) 
+I (35783) esp_image: segment 0: paddr=00320020 vaddr=3c0c0020 size=3951ch (234780) map
+I (35833) esp_image: segment 1: paddr=00359544 vaddr=3fc98b00 size=061bch ( 25020) 
+I (35843) esp_image: segment 2: paddr=0035f708 vaddr=40374000 size=00910h (  2320) 
+I (35853) esp_image: segment 3: paddr=00360020 vaddr=42000020 size=b8a84h (756356) map
+I (36003) esp_image: segment 4: paddr=00418aac vaddr=40374910 size=14160h ( 82272) 
+I (36023) esp_image: segment 5: paddr=0042cc14 vaddr=50000000 size=00024h (    36) 
+I (36073) nodo: ota: estado ok
+I (36083) nodo: con: OTA_DESCARGA -> ARRANQUE (ota_ok)
+I (38083) wifi:state: run -> init (0x0)
+I (38093) wifi:pm stop, total sleep time: 10818698 us / 33893918 us
+I (38093) wifi:<ba-del>idx:1, tid:0
+I (38093) wifi:<ba-del>idx:0, tid:7
+E (38103) transport_base: tcp_read error, errno=Software caused connection abort
+E (38103) mqtt_client: esp_mqtt_handle_transport_read_error: transport_read() error: errno=113
+E (38113) mqtt_client: mqtt_process_receive: mqtt_message_receive() returned -2
+I (38293) wifi:flush txq
+I (38293) wifi:stop sw txq
+I (38293) wifi:lmac stop hw txq
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037dfc9
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2f9c
+entry 0x403c8908
+I (26) boot: ESP-IDF v6.0.2 2nd stage bootloader
+I (26) boot: compile time Nov 14 2026 18:53:24
+I (27) boot: Multicore bootloader
+I (27) boot: chip revision: v0.2
+I (30) boot: efuse block revision: v1.4
+I (33) boot.esp32s3: Boot SPI Speed : 40MHz
+I (37) boot.esp32s3: SPI Mode       : DIO
+I (41) boot.esp32s3: SPI Flash Size : 8MB
+I (44) boot: Enabling RNG early entropy source...
+I (49) boot: Partition Table:
+I (52) boot: ## Label            Usage          Type ST Offset   Length
+I (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (64) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (71) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (77) boot:  3 ota_0            OTA app          00 10 00020000 00300000
+I (84) boot:  4 ota_1            OTA app          00 11 00320000 00300000
+I (91) boot: End of partition table
+I (127) esp_image: segment 0: paddr=00320020 vaddr=3c0c0020 size=3951ch (234780) map
+I (186) esp_image: segment 1: paddr=00359544 vaddr=3fc98b00 size=061bch ( 25020) load
+I (194) esp_image: segment 2: paddr=0035f708 vaddr=40374000 size=00910h (  2320) load
+I (195) esp_image: segment 3: paddr=00360020 vaddr=42000020 size=b8a84h (756356) map
+I (388) esp_image: segment 4: paddr=00418aac vaddr=40374910 size=14160h ( 82272) load
+I (413) esp_image: segment 5: paddr=0042cc14 vaddr=50000000 size=00024h (    36) load
+I (422) boot: Loaded app from partition at offset 0x320000
+I (423) boot: Disabling RNG early entropy source...
+I (433) cpu_start: Multicore app
+I (442) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (443) cpu_start: Pro cpu start user code
+I (443) cpu_start: cpu freq: 160000000 Hz
+I (444) app_init: Application information:
+I (448) app_init: Project name:     nodo_clima
+I (452) app_init: App version:      0.0.1-ota-test.2.3
+I (457) app_init: Compile time:     Nov 14 2026 13:50:09
+I (462) app_init: ELF file SHA256:  4fabb367d...
+I (466) app_init: ESP-IDF:          v6.0.2
+I (470) efuse_init: Min chip rev:     v0.0
+I (474) efuse_init: Max chip rev:     v0.99 
+I (478) efuse_init: Chip rev:         v0.2
+I (482) heap_init: Initializing. RAM available for dynamic allocation:
+I (488) heap_init: At 3FCA4F20 len 000447F0 (273 KiB): RAM
+I (493) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (498) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (503) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (510) spi_flash: detected chip: gd
+I (512) spi_flash: flash io: dio
+I (516) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (522) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (529) main_task: Started on CPU0
+I (529) main_task: Calling app_main()
+I (539) nodo: boot: clima-f3c6d4 fw=0.0.1-ota-test.2.3 reset=sw part=ota_1 img=pendiente
+I (539) nodo: nodo_clima 0.0.1-ota-test.2.3
+I (549) nodo: NODO-BENCH-IMAGE
+I (589) nodo: cfg: sitio=sitio1 zona=zona1
+I (589) pp: pp rom version: e7ae62f
+I (589) net80211: net80211 rom version: e7ae62f
+I (599) wifi:wifi driver task: 3fcb28a4, prio:23, stack:6656, core=0
+I (609) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (609) wifi:wifi firmware version: 00ad238
+I (609) wifi:wifi certification version: v7.0
+I (609) wifi:config NVS flash: enabled
+I (609) wifi:config nano formatting: disabled
+I (619) wifi:Init data frame dynamic rx buffer num: 32
+I (619) wifi:Init static rx mgmt buffer num: 5
+I (629) wifi:Init management short buffer num: 32
+I (629) wifi:Init dynamic tx buffer num: 32
+I (639) wifi:Init static tx FG buffer num: 2
+I (639) wifi:Init static rx buffer size: 1600
+I (639) wifi:Init static rx buffer num: 10
+I (649) wifi:Init dynamic rx buffer num: 32
+I (649) wifi_init: rx ba win: 6
+I (649) wifi_init: accept mbox: 6
+I (659) wifi_init: tcpip mbox: 32
+I (659) wifi_init: udp mbox: 6
+I (659) wifi_init: tcp mbox: 6
+I (669) wifi_init: tcp tx win: 5760
+I (669) wifi_init: tcp rx win: 5760
+I (669) wifi_init: tcp mss: 1440
+I (679) wifi_init: WiFi IRAM OP enabled
+I (679) wifi_init: WiFi RX IRAM OP enabled
+I (689) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (729) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (729) wifi:enable tsf
+I (729) nodo: wifi: intento 1
+I (739) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (739) wifi:state: init -> auth (0xb0)
+I (749) nodo: Init complete
+I (749) main_task: Returned from app_main()
+I (759) wifi:state: auth -> assoc (0x0)
+I (769) wifi:state: assoc -> run (0x10)
+I (789) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (789) wifi:security: WPA2-PSK, phy: bgn, rssi: -54, cipher(pairwise:0x3, group:0x3), pmf:0
+I (799) wifi:pm start, type: 1
+I (799) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (809) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (829) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (869) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (879) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (1839) nodo: UDP logging -> 192.168.4.1:5555
+I (1839) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1839) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+W (1839) nodo: mqtt: desactivado (imagen de prueba de FR-OTA-07)
+I (1849) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1849) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (2349) nodo: sntp: inicio pool.ntp.org
+I (7639) nodo: sntp: sincronizado ts=1794682601
+I (60599) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (120599) nodo: med: T=31.2 HR=74.2 Td=26.1
+I (180599) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (240599) nodo: med: T=31.3 HR=74.3 Td=26.1
+W (300549) nodo: ota: rollback
+I (300809) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (300819) esp_ota_ops: Rollback to previously worked partition.
+I (300819) wifi:state: run -> init (0x0)
+I (300819) wifi:pm stop, total sleep time: 286223437 us / 300021666 us
+I (300819) wifi:<ba-del>idx:1, tid:0
+I (300819) wifi:<ba-del>idx:0, tid:7
+I (301029) wifi:flush txq
+I (301029) wifi:stop sw txq
+I (301029) wifi:lmac stop hw txq
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037dfc9
+SPIWP:0xee
+mode:DIO, clock div:2
+load:0x3fce2820,len:0x14f0
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2f9c
+entry 0x403c8908
+I (26) boot: ESP-IDF v6.0.2 2nd stage bootloader
+I (26) boot: compile time Nov 14 2026 18:53:24
+I (27) boot: Multicore bootloader
+I (27) boot: chip revision: v0.2
+I (30) boot: efuse block revision: v1.4
+I (33) boot.esp32s3: Boot SPI Speed : 40MHz
+I (37) boot.esp32s3: SPI Mode       : DIO
+I (41) boot.esp32s3: SPI Flash Size : 8MB
+I (44) boot: Enabling RNG early entropy source...
+I (49) boot: Partition Table:
+I (52) boot: ## Label            Usage          Type ST Offset   Length
+I (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (64) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (71) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (77) boot:  3 ota_0            OTA app          00 10 00020000 00300000
+I (84) boot:  4 ota_1            OTA app          00 11 00320000 00300000
+I (91) boot: End of partition table
+I (94) esp_image: segment 0: paddr=00020020 vaddr=3c0c0020 size=394dch (234716) map
+I (160) esp_image: segment 1: paddr=00059504 vaddr=3fc98b00 size=061bch ( 25020) load
+I (168) esp_image: segment 2: paddr=0005f6c8 vaddr=40374000 size=00950h (  2384) load
+I (169) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=b8a78h (756344) map
+I (362) esp_image: segment 4: paddr=00118aa0 vaddr=40374950 size=14120h ( 82208) load
+I (387) esp_image: segment 5: paddr=0012cbc8 vaddr=50000000 size=00024h (    36) load
+I (396) boot: Loaded app from partition at offset 0x20000
+I (396) boot: Disabling RNG early entropy source...
+I (407) cpu_start: Multicore app
+I (415) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (417) cpu_start: Pro cpu start user code
+I (417) cpu_start: cpu freq: 160000000 Hz
+I (418) app_init: Application information:
+I (421) app_init: Project name:     nodo_clima
+I (426) app_init: App version:      0.0.0-22fda6b-bench
+I (430) app_init: Compile time:     Nov 14 2026 18:53:58
+I (436) app_init: ELF file SHA256:  ae778f6d8...
+I (440) app_init: ESP-IDF:          v6.0.2
+I (444) efuse_init: Min chip rev:     v0.0
+I (447) efuse_init: Max chip rev:     v0.99 
+I (451) efuse_init: Chip rev:         v0.2
+I (455) heap_init: Initializing. RAM available for dynamic allocation:
+I (462) heap_init: At 3FCA4F20 len 000447F0 (273 KiB): RAM
+I (467) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (472) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (477) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (484) spi_flash: detected chip: gd
+I (486) spi_flash: flash io: dio
+I (490) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (495) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (502) main_task: Started on CPU0
+I (502) main_task: Calling app_main()
+I (512) nodo: boot: clima-f3c6d4 fw=0.0.0-22fda6b-bench reset=sw part=ota_0 img=valida
+I (512) nodo: nodo_clima 0.0.0-22fda6b-bench
+I (522) nodo: NODO-BENCH-IMAGE
+I (562) nodo: cfg: sitio=sitio1 zona=zona1
+I (562) pp: pp rom version: e7ae62f
+I (562) net80211: net80211 rom version: e7ae62f
+I (572) wifi:wifi driver task: 3fcb288c, prio:23, stack:6656, core=0
+I (582) wifi:wifi firmware version: 00ad238
+I (582) wifi:wifi certification version: v7.0
+I (582) wifi:config NVS flash: enabled
+I (582) wifi:config nano formatting: disabled
+I (592) wifi:Init data frame dynamic rx buffer num: 32
+I (592) wifi:Init static rx mgmt buffer num: 5
+I (602) wifi:Init management short buffer num: 32
+I (602) wifi:Init dynamic tx buffer num: 32
+I (612) wifi:Init static tx FG buffer num: 2
+I (612) wifi:Init static rx buffer size: 1600
+I (612) wifi:Init static rx buffer num: 10
+I (622) wifi:Init dynamic rx buffer num: 32
+I (572) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (632) wifi_init: rx ba win: 6
+I (632) wifi_init: accept mbox: 6
+I (632) wifi_init: tcpip mbox: 32
+I (632) wifi_init: udp mbox: 6
+I (642) wifi_init: tcp mbox: 6
+I (642) wifi_init: tcp tx win: 5760
+I (642) wifi_init: tcp rx win: 5760
+I (652) wifi_init: tcp mss: 1440
+I (652) wifi_init: WiFi IRAM OP enabled
+I (652) wifi_init: WiFi RX IRAM OP enabled
+I (662) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (702) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (712) wifi:enable tsf
+I (712) nodo: wifi: intento 1
+I (712) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (712) nodo: Init complete
+I (712) main_task: Returned from app_main()
+I (722) wifi:state: init -> auth (0xb0)
+I (732) wifi:state: auth -> assoc (0x0)
+I (742) wifi:state: assoc -> run (0x10)
+I (762) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (762) wifi:security: WPA2-PSK, phy: bgn, rssi: -63, cipher(pairwise:0x3, group:0x3), pmf:0
+I (772) wifi:pm start, type: 1
+I (772) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (782) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (792) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (802) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (812) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (1822) nodo: UDP logging -> 192.168.4.1:5555
+I (1822) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1822) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1822) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1832) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (1842) nodo: mqtt: intento 1
+I (1912) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (2322) nodo: sntp: inicio pool.ntp.org
+I (3772) nodo: sntp: sincronizado ts=1794682899
+I (60562) nodo: udplog: descartadas=0 reintentadas=1 cola_llena=0
+I (60572) nodo: med: T=31.3 HR=74.4 Td=26.1
+I (120572) nodo: med: T=31.3 HR=74.4 Td=26.2
+I (180572) nodo: med: T=31.3 HR=74.3 Td=26.1
+I (240572) nodo: med: T=31.3 HR=74.0 Td=26.1
+I (300572) nodo: med: T=31.2 HR=74.0 Td=26.1
+I (360572) nodo: med: T=31.3 HR=74.0 Td=26.1
+I (420572) nodo: med: T=31.3 HR=74.1 Td=26.1
+I (480572) nodo: med: T=31.2 HR=74.2 Td=26.1
+I (540572) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (600572) nodo: med: T=31.2 HR=74.4 Td=26.1
+I (660572) nodo: med: T=31.2 HR=74.4 Td=26.1
+I (720572) nodo: med: T=31.2 HR=74.4 Td=26.1
+I (780572) nodo: med: T=31.2 HR=74.3 Td=26.1
+I (840572) nodo: med: T=31.2 HR=74.1 Td=26.1
+I (900572) nodo: med: T=31.2 HR=74.1 Td=26.1

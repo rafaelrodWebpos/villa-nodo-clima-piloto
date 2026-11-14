@@ -150,10 +150,12 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
   - Las 5 filas pendientes de la Fase 2: TC-TIME-08, TC-WDT-02, TC-MQTT-05, TC-LOG-08 y TC-LOG-04.
     TC-TIME-08 y TC-WDT-02 usan E13 también por USB-Serial/JTAG (opción a; el texto del FSD está en
     `fsd_pending` como E13-USJ).
+- **En verde (tarde):**
+  - JRN-02.2: «ota: rollback» a 300,0 s del boot de B; A estable 15 min, sin reinicios.
+  - TC-OTA-13 (NFR-OTA-01): intervalos de 60,02, 60,03 y 60,05 s con una medida dentro de la descarga.
+  - TC-SEC-03: el escaneo NFR-SEC-02 de `ota-test.yml` (ejecución 43601354735, 5 imágenes).
+  - TC-OTA-14 (FR-OTA-13): la imagen de producción rechaza `ota-test-2` con `rechazado:ruta` a 0,17 s.
+    Corre también en el job `verify` de la release, que falla si la prueba se salta.
 - **Siguiente:**
-  - JRN-02.2 (FR-OTA-07, T23: la imagen sin MQTT vuelve a A).
-  - NFR-OTA-01 (periodo de medición durante la descarga).
-  - Fila TC-SEC-03 (NFR-SEC-02 en el workflow).
-  - FR-OTA-13 en la verificación de release.
-  - El cambio agrupado del FSD (E13-USJ).
+  - El cambio agrupado del FSD (E13-USJ), en la próxima ronda.
   - Después, la visita física final (iPhone y las 4 manuales) y el tag v0.0.1.
