@@ -78,6 +78,11 @@ static void tc_ota_02(void)
     /* redirecciones (FR-OTA-02, T20): la de release-assets con su consulta firmada vale */
     const char *ra = "https://release-assets.githubusercontent.com/github-production-release-asset/1/2?sp=r&sv=2018&se=2026-11-10T22%3A00%3A00Z&sig=a%2Bb";
     ESPERA(ota_url_redireccion(ra, 1) == OTA_OK, "release-assets con consulta firmada");
+    /* la URL firmada real mide ~900 bytes (2026-11-14): sin límite de longitud en la política */
+    static char larga[1000];
+    snprintf(larga, sizeof larga, "https://release-assets.githubusercontent.com/github-production-release-asset/1/2?sig=");
+    for (size_t k = strlen(larga); k < sizeof larga - 1; k++) larga[k] = 'a';
+    ESPERA(ota_url_redireccion(larga, 1) == OTA_OK, "redirección de 999 bytes");
     ESPERA(ota_url_redireccion("https://objects.githubusercontent.com/x", 1) == OTA_RECHAZADO_HOST, "objects.githubusercontent.com (§7.3)");
     ESPERA(ota_url_redireccion("http://release-assets.githubusercontent.com/x", 1) == OTA_RECHAZADO_HOST, "salto a http");
     ESPERA(ota_url_redireccion("https://release-assets.githubusercontent.com/a/../b", 2) == OTA_RECHAZADO_HOST, "salto con .. → rechazado:host (T20)");

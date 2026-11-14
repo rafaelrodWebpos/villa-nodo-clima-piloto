@@ -13,6 +13,9 @@
 
 static const char *TAG = "nodo";
 #define TIMEOUT_MS 30000              /* FR-OTA-12: 30 s sin datos */
+/* §12.1 limita a 512 bytes la URL del comando, no las redirecciones: la URL firmada de
+ * release-assets.githubusercontent.com mide ~900 (medida el 2026-11-14) */
+#define URL_SALTO_MAX 2048
 
 static char s_url[OTA_URL_MAX + 1];
 static char s_en_ejecucion[32];
@@ -106,7 +109,7 @@ static ota_motivo_t descargar(const char *url)
 
 static void tarea_descarga(void *arg)
 {
-    static char final[OTA_URL_MAX + 1];
+    static char final[URL_SALTO_MAX];
     ota_motivo_t m = resolver(final, sizeof final);
     if (m == OTA_OK) m = descargar(final);
     if (!s_abortar && s_fin) s_fin(m);
