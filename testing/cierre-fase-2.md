@@ -110,3 +110,13 @@ de nivel host y «other» corren en cada commit de la CI y están en verde en el
   HR (sal saturada, 75 %).
 - **Observaciones del banco abiertas:** CR-TB-12 (doble arranque tras un reset; bloque de
   arranque repetido en TC-WDT-01), CR-TB-10, -11, -13, -14 y -15.
+
+## Adenda 2026-11-14: filas bloqueadas, con el banco villa-2
+
+| Fila | Estado | Evidencia |
+|---|---|---|
+| FR-MQTT-07 (TC-MQTT-05) | verde | `test-results/20261114T111957Z-9279b81/` |
+| FR-LOG-02, captura (TC-LOG-08) | verde | `test-results/20261114T113226Z-ea2a955/` |
+| FR-LOG-01 (TC-LOG-04, imagen de producción) | verde | `test-results/20261114T113742Z-ea2a955/` |
+| FR-TIME-02 bench⁺ (TC-TIME-08) | bloqueado | `bench-serial-write` llega al USB-Serial/JTAG y E13 lee de UART0 (`testing/pendientes-propietario.md`) |
+| NFR-WDT-01, fila target (TC-WDT-02) | bloqueado | la misma causa |

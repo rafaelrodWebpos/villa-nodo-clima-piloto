@@ -1335,6 +1335,13 @@ tests:
       imagen de producción en OPERATIVO, arranque y 3 ciclos con el tráfico UDP
       capturado: solo DHCP, DNS y SNTP; ningún datagrama al 5555 ni a otro destino
     impl: tests/bench/test_villa2.py::test_tc_log_04_no_udp_log_in_production
+    status: successful
+    commit: ea2a955
+    date: 2026-11-14
+    evidence: test-results/20261114T113742Z-ea2a955/TC-LOG-04.md
+    observed: >
+      imagen de producción 0.0.0-ea2a955: por UDP solo DNS (53) y DHCP (67); ningún datagrama
+      al 5555; MQTT por TCP como control positivo
   - id: TC-CFG-01
     shape: atomic
     kind: standard
@@ -1947,6 +1954,9 @@ tests:
       imagen de banco en OPERATIVO; comando serie wdt-test (E13): «wdt: bloqueando medicion» y
       boot: … reset=task_wdt en ≤ 30 s (+ 2 s y el arranque); nunca colgado
     impl: tests/bench/test_villa2.py::test_tc_wdt_02_task_watchdog
+    reason: >
+      bloqueado por la misma causa que TC-TIME-08 (bench-serial-write llega al USJ; E13 lee de
+      UART0); pendiente del propietario
   - id: TC-MQTT-05
     shape: atomic
     kind: standard
@@ -1960,6 +1970,13 @@ tests:
       credenciales 90 s: ≥ 3 intentos con backoff creciente y ningún T11; broker con sus
       credenciales: T11; ninguna clave en la consola
     impl: tests/bench/test_villa2.py::test_tc_mqtt_05_broker_authentication
+    status: successful
+    commit: 9279b81
+    date: 2026-11-14
+    evidence: test-results/20261114T111957Z-9279b81/TC-MQTT-05.md
+    observed: >
+      con credenciales rechazadas, 7 intentos con backoff 2,3 / 2,0 / 4,0 / 8,1 / 16,0 / 32,0 s y
+      ningún T11; con las aceptadas, T11; ninguna clave en la consola
   - id: TC-LOG-08
     shape: atomic
     kind: standard
@@ -1973,6 +1990,13 @@ tests:
       al puerto 5555 van todos por unicast a 192.168.4.1 (control positivo: > 10); ninguno por
       broadcast ni a otro destino
     impl: tests/bench/test_villa2.py::test_tc_log_08_udp_log_unicast_only
+    status: successful
+    commit: ea2a955
+    date: 2026-11-14
+    evidence: test-results/20261114T113226Z-ea2a955/TC-LOG-08.md
+    history: >
+      sobre 9279b81 pytest pasó pero el informe decía FAIL: las aserciones estaban fuera del
+      bloque case (corregido en ea2a955)
   - id: TC-HW-04
     shape: atomic
     kind: standard
@@ -2396,6 +2420,11 @@ tests:
       false en los status tras el reinicio. Bloqueado por bench-serial-write (en no: el
       banco no la reporta por GET)
     impl: tests/bench/test_villa2.py::test_tc_time_08_reboot_without_sntp
+    reason: >
+      bloqueado (2026-11-14): bench-serial-write escribe en el USB-Serial/JTAG (/dev/ttyACM0, el
+      único puerto del slot) y E13 lee de UART0 (CH343); «reiniciar» no llegó
+      (test-results/20261114T111647Z-9279b81/). Pendiente del propietario: FSD (E13 también por
+      USJ) o banco (puerto del CH343 en un slot)
   - id: TC-TIME-05
     shape: atomic
     kind: standard

@@ -27,3 +27,15 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
   75 % con la prueba de la sal; test TC-SEN-05 escrito, sin lanzar. FSD 0.9.7 (H-77): la prueba de
   la sal basta para la HR; la temperatura es informativa. Hecho el 2026-11-09: TC-SEN-05 en verde
   (ΔHR medio +1,19 %HR; ΔT medio +0,37 °C informativo).
+
+## 2026-11-14 · bench-serial-write no llega al lector de comandos E13 (bloquea TC-TIME-08 y TC-WDT-02)
+
+- **Contexto.** El banco solo expone el puerto `/dev/ttyACM0` del slot, que es el USB-Serial/JTAG del DUT.
+  El lector de comandos E13 lee de UART0 (el CH343), como dice el FSD (§18). Lo que escribe
+  `POST /api/serial/write` nunca llega al lector: en TC-TIME-08, «reiniciar» no produjo ninguna línea `boot:`.
+- **Opciones.**
+  - (a) FSD: que E13 también lea del USB-Serial/JTAG en la imagen de banco. Exige el driver de USJ,
+    que H-58 dejó sin aplicar por el riesgo de bloqueos.
+  - (b) Banco: asignar el puerto del CH343 (VID:PID `1a86:55d3`) a un slot y escribir ahí. Es configuración
+    de la Pi, a decidir por el propietario.
+- **Estado.** Pendiente de decisión. TC-TIME-08 y TC-WDT-02 quedan como «no hecho».
