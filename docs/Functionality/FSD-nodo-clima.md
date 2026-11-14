@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.9
+fsd_version: 0.9.10
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -143,6 +143,10 @@ change_history:
     además a la interfaz del AP; lwIP de ESP-IDF 6.0.2 acepta por cualquier interfaz un
     paquete dirigido a una IP propia (host débil, `ip4_input`), comprobado en sus fuentes
     (FR-POR-10).
+  - 0.9.10 (2026-11-14): E13 en la imagen de banco (propietario, 2026-11-14, opción a). El nodo
+    lee los comandos por la consola primaria (UART0) y también por el USB-Serial/JTAG (FIFO de
+    recepción por sondeo, sin driver), porque `bench-serial-write` solo llega al USB-Serial/JTAG.
+    La imagen de producción no cambia (C-LOG-02). Sin otros cambios.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -1381,7 +1385,8 @@ operativos, no secretos (§17).
 
 **Comandos serie de la imagen de banco (E13) [user].** Solo con
 `CONFIG_NODO_BENCH_BUILD=y`, el nodo lee comandos terminados en salto de línea
-por la consola primaria (UART0) y atiende estos dos:
+por la consola primaria (UART0) y también por el USB-Serial/JTAG (FIFO de recepción
+por sondeo, sin driver), y atiende estos dos:
 
 | Comando | Efecto | Línea | Contratos |
 |---|---|---|---|

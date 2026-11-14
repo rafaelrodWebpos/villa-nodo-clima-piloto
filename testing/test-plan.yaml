@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.9
+fsd_version: 0.9.10
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -2806,13 +2806,6 @@ release_verify:
 # Cambios del FSD pendientes para la próxima versión (regla del propietario,
 # 2026-11-05: una sola versión por ronda de checkers). fsd_applied guarda los ya aplicados.
 fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0.9.6); regla del propietario: no abren versión
-  - id: E13-USJ
-    origin: propietario, 2026-11-14 (opción a; bench-serial-write solo llega al USB-Serial/JTAG)
-    text: >
-      §18 E13: en la imagen de banco (CONFIG_NODO_BENCH_BUILD), el nodo lee los comandos por
-      la consola primaria (UART0) y también por el USB-Serial/JTAG (FIFO de recepción por
-      sondeo, sin driver). La imagen de producción no cambia (C-LOG-02). Va en el próximo
-      cambio agrupado del FSD; el firmware ya lo hace
   - from: checker puerta 01, cf744e1 (1, 9)
     issue: >
       historial: la entrada 0.9.4 dice «sin cambios en requisitos» y amplía los
@@ -2845,6 +2838,14 @@ fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0
       devuelve la respuesta tras un USB remove/add, que es lo que hacen los cortes
       de la Fase 2 (revisar al empezar esos tests)
 fsd_applied:
+  - applied_in: 0.9.10
+    id: E13-USJ
+    origin: propietario, 2026-11-14 (opción a; bench-serial-write solo llega al USB-Serial/JTAG)
+    text: >
+      §18 E13: en la imagen de banco (CONFIG_NODO_BENCH_BUILD), el nodo lee los comandos por
+      la consola primaria (UART0) y también por el USB-Serial/JTAG (FIFO de recepción por
+      sondeo, sin driver). La imagen de producción no cambia (C-LOG-02). El firmware ya lo
+      hacía
   - applied_in: 0.9.4
     from: checker puerta 01, c3ed691 (no bloqueante 1)
     issue: >
