@@ -2,6 +2,7 @@
  * núcleo puro (ota_politica.c). */
 #include "ota_descarga.h"
 #include <string.h>
+#include <strings.h>
 #include "esp_crt_bundle.h"
 #include "esp_tls_errors.h"
 #include "esp_http_client.h"
@@ -23,6 +24,20 @@ static bool s_es_prueba;
 static ota_fin_cb_t s_fin;
 static volatile bool s_abortar;
 
+/* Location de la respuesta, capturada por el manejador de eventos (esp_http_client_get_url
+ * reconstruye esquema://host:puerto/ruta y pierde la consulta firmada de GitHub). */
+typedef struct { char url[URL_SALTO_MAX]; bool hay, no_cabe; } location_t;
+static location_t s_loc;
+
+static esp_err_t al_evento_http(esp_http_client_event_t *e)
+{
+    if (e->event_id == HTTP_EVENT_ON_HEADER && e->header_key && strcasecmp(e->header_key, "Location") == 0) {
+        s_loc.hay = true;
+        s_loc.no_cabe = strlcpy(s_loc.url, e->header_value, sizeof s_loc.url) >= sizeof s_loc.url;
+    }
+    return ESP_OK;
+}
+
 static void config_http(esp_http_client_config_t *c, const char *url)
 {
     *c = (esp_http_client_config_t){
@@ -31,6 +46,7 @@ static void config_http(esp_http_client_config_t *c, const char *url)
         .timeout_ms = TIMEOUT_MS,
         .disable_auto_redirect = true,                  /* cada salto se valida aquí (FR-OTA-02/14) */
         .keep_alive_enable = false,
+        .event_handler = al_evento_http,
     };
 }
 
@@ -58,17 +74,15 @@ static ota_motivo_t resolver(char *final, size_t cap)
         config_http(&c, final);
         esp_http_client_handle_t h = esp_http_client_init(&c);
         if (!h) return OTA_ERROR_RED;
+        s_loc.hay = s_loc.no_cabe = false;
         esp_err_t e = esp_http_client_open(h, 0);
         if (e != ESP_OK) { ota_motivo_t m = motivo_conexion(h, e); esp_http_client_cleanup(h); return m; }
         if (esp_http_client_fetch_headers(h) < 0) { esp_http_client_cleanup(h); return OTA_ERROR_RED; }
         int st = esp_http_client_get_status_code(h);
         if (st >= 300 && st < 400) {
-            /* La Location de la RESPUESTA la guarda el cliente: set_redirection la aplica a su
-             * URL y get_url la devuelve (get_header solo lee cabeceras de la petición) */
-            esp_err_t er = esp_http_client_set_redirection(h);
-            if (er == ESP_OK) er = esp_http_client_get_url(h, final, (int)cap);
             esp_http_client_cleanup(h);
-            if (er != ESP_OK) return OTA_RECHAZADO_HOST;          /* sin Location o no cabe */
+            if (!s_loc.hay || s_loc.no_cabe || strlen(s_loc.url) >= cap) return OTA_RECHAZADO_HOST;
+            strlcpy(final, s_loc.url, cap);                       /* se valida al empezar el bucle */
             continue;
         }
         esp_http_client_cleanup(h);
