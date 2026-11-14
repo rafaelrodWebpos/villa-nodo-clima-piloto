@@ -11,6 +11,8 @@ import json
 import re
 import time
 
+import pytest
+
 from benchlib import case
 from test_mqtt import _a_operativo, _nodo, _suscribir, configurado
 from test_ota import _publicar, _status
@@ -244,3 +246,51 @@ def test_nfr_ota_01_measurement_period_during_download(testbench, dut_slot, dut_
         assert len(intervalos) >= 3, f"solo {len(intervalos)} intervalos con una medida en la descarga"
         assert all(55 <= x <= 65 for x in intervalos), f"fuera de [55, 65] s: {intervalos}"
         c.passed(f"{len(intervalos)} intervalos en [55, 65] s: {intervalos}")
+
+
+OTA_PCT = re.compile(r"nodo: ota: (\d+) %")
+AVISO_LISTO = ("TC-OTA-15: ponte junto a la placa. Al pulsar «Hecho» se manda la OTA y enseguida sale el "
+               "aviso de desenchufar el USB-C de la PLACA: hazlo en cuanto salga (la descarga dura ~30 s).")
+
+
+def test_tc_ota_15_power_cut_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-OTA-15 · T17 («no debe ocurrir»), H-89 — corte del USB-C de la placa durante la descarga:
+    arranca la imagen anterior (reset=poweron), sin rollback, y el primer status lleva fw = A."""
+    import cortes
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    base = f"sitio1/zona1/{nodo}"
+    a = firmware["version"]
+    with case(tb, "TC-OTA-15", "Corte de alimentación durante la descarga OTA", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        with _suscribir(tb, nodo) as sub:
+            _, reg = _a_operativo(tb, dut_slot, banco, c, internet=True)
+            c.step("Aviso previo: el operador se pone junto a la placa")
+            if not tb.human_interaction(AVISO_LISTO, timeout=cortes.ESPERA_OPERADOR_S):
+                pytest.skip("not done: el operador no confirmó el aviso previo")
+            t = _ota(tb, base, "firmware_b1.bin")
+            r = cortes.corte(tb, dut_slot, sub, nodo, "TC-OTA-15", 1, 1, c, banco)
+            antes = [e.get("text", "") for e in reg.leer() if t - 1 <= e.get("ts", 0) <= r["t_ausente"]]
+            pcts = [int(m.group(1)) for x in antes if (m := OTA_PCT.search(x))]
+            en_descarga = any("-> OTA_DESCARGA (cmd_ota)" in x for x in antes)
+            termino = any("OTA_DESCARGA -> ARRANQUE" in x for x in antes) or (pcts and pcts[-1] >= 100)
+            if not en_descarga or termino:
+                pytest.skip(f"not done: el corte no cayó dentro de la descarga (último ota: {pcts[-1:] or '—'} %); repetir")
+            st0 = r.get("status_json") or {}
+            c.step("Vigilar 330 s (T23 vence a los 300 s) que no haya rollback ni reinicio")
+            t_st = r["status"]["t"] if r.get("status") else time.time()
+            time.sleep(330)
+            st = [s for _, s in _vivos(sub, base, t_st)]
+        c.save_log("serie-antes-del-corte", antes)
+        ups = [s.get("uptime_s") for s in st]
+        c.note(cortes.resumen(r),
+               f"- último «ota: n %» antes del corte: {pcts[-1] if pcts else '—'} %",
+               f"- primer status tras el reenchufe: fw={st0.get('fw')} reset={st0.get('reset')} ota={st0.get('ota')}",
+               f"- 330 s después: {len(st)} status, fw {sorted({s.get('fw') for s in st})}, uptime_s monótono: "
+               f"{all(y > x for x, y in zip(ups, ups[1:]))}")
+        assert st0.get("fw") == a, f"primer status con fw={st0.get('fw')} (esperado {a})"
+        assert st0.get("reset") == "poweron", f"reset={st0.get('reset')}"
+        assert len(st) >= 4 and all(s.get("fw") == a for s in st), "status sin fw = A tras el corte"
+        assert all(y > x for x, y in zip(ups, ups[1:])), "reinicio (rollback) tras el corte"
+        c.passed(f"corte al {pcts[-1]} % de la descarga; arrancó A ({a}) con reset=poweron y siguió 330 s sin rollback")

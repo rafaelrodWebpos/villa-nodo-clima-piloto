@@ -2094,6 +2094,22 @@ tests:
     commit: bb814d2
     date: 2026-11-14
     evidence: test-results/20261114T192518Z-bb814d2/TC-OTA-14.md  # imagen de producción; rechazado:ruta a 0,17 s
+  - id: TC-OTA-15
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [T17]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, bench-operator-prompt, github-test-releases, dut-board]
+    expect: >
+      aprobada por el propietario (H-89): con la descarga de ota-test-2/firmware_b1.bin en curso
+      (último «ota: n %» < 100 y sin OTA_DESCARGA -> ARRANQUE), el operador desenchufa el USB-C de la
+      placa y lo vuelve a enchufar; el primer status en vivo lleva fw = A y reset = poweron, y en
+      330 s (T23 vence a los 300) todos los status llevan fw = A con uptime_s monótono: arranca la
+      imagen anterior y sin rollback (T17, «no debe ocurrir»: marcar arrancable el slot nuevo antes
+      de verificar la imagen completa). Si el corte cae fuera de la descarga, not done y se repite
+    impl: tests/bench/test_jrn02.py::test_tc_ota_15_power_cut_during_download
   - id: TC-SEC-03
     shape: atomic
     kind: standard
