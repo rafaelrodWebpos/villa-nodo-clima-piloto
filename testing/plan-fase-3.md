@@ -181,3 +181,33 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
 - **Dos pasos del journey quedan not done** si nadie los atiende; pytest los da por saltados y `verify` no falla:
   - JRN-01.5 necesita el Home Assistant de prueba levantado.
   - JRN-01.7 necesita a alguien en el banco para el corte del USB-C (el aviso espera 600 s).
+
+## Cierre de la Fase 3 y release v0.0.1 (2026-11-15)
+
+- **Release:** v0.0.1 publicada con `firmware_v0.0.1.bin` y `.elf`, desde el tag sobre `9106b3d` y FSD 0.9.11.
+- **Job `verify`:** 6 pruebas en verde y 1 not done (JRN-01.5, porque el runner no tiene el Home Assistant de prueba).
+- **Primer intento de `verify`:** falló por el `strip()` de `/api/flash` del banco (upstream #9/#10). Se arregló en el fork
+  (villa-2 `f50858b`) y se añadió una defensa en el proyecto (`tests/bench/grabado.py`).
+- **Registro:** cierre anotado en `phase_closures` de `testing/test-plan.yaml`.
+- **Pendiente antes de la instalación (S2):** A3-02 y A3-03 (auditoría H-91).
+- **Propuesta sin aplicar:** subir ESP-IDF a 6.0.3 (`testing/propuesta-esp-idf-6.0.3.md`).
+
+## Issues abiertos del upstream que nos tocan (revisión del 2026-11-15)
+
+Revisión de nueve issues de SensorsIot/Embedded-AI-Harness. Los números CR-TB son los del registro del
+propietario y solo se citan cuando ya existen.
+
+| Issue | Qué dice | ¿Nos afecta? | Mitigación que tenemos | Qué falta |
+|---|---|---|---|---|
+| #52 | `/api/flash` aplica solo la primera opción de una línea de `flash_args`: se graba a 40 MHz | **Sí, en parte.** No mandamos `flash_args`; esptool deja la cabecera del bootloader en 40 MHz y el arranque dice «Boot SPI Speed: 40MHz», pero el build pide 80m. El banco no prueba la velocidad de producción | Ninguna. El rendimiento es menor, no hay fallo funcional | Arreglo en el fork: leer todas las opciones de la línea, y que el proyecto mande `flash_args` |
+| #57 | El primer arranque después de `/api/flash` no se graba en el log | **Sí** (lo vimos; CR-TB-10 va en la misma línea) | JRN-01.0 y las demás pruebas hacen su propio reset y capturan después de grabar; no dependen del arranque del grabado | Nada para nosotros |
+| #58 | Un reset por JTAG justo después de `/api/flash` a veces no reinicia | Posible: nuestro slot es USB-Serial/JTAG. No lo hemos visto | JRN-01.0 exige una línea `rst:` y, si no aparece, falla en lugar de pasar en falso | Un reintento automático, solo si llega a pasarnos |
+| #47 | `serial/reset` en un ESP32-S3 con USB nativo reinicia dos veces y pierde el principio del segundo arranque | **Sí** (CR-TB-12) | `_after_last_reset` y `ultimo_arranque` en `benchlib` | Nada |
+| #15 | En placas con USB nativo, el reset entra en modo bootloader y la captura falla | Poco: nuestros resets arrancan la app; la placa tiene además el CH343 | — | Vigilar |
+| #54 | El AP del banco rechaza la reconexión de una estación que se reinició sin desconectarse | Riesgo en los cortes, TC-OTA-15 y el reinicio de T19. No lo hemos visto: JRN-02.1 reconecta bien | Los cortes apagan y encienden el AP (H-63); cada prueba usa un AP desechable nuevo | Si aparece, reiniciar el AP en las pruebas de reinicio |
+| #28 | El AP no mantiene la asociación (brcmf `stop_ap -52`, Pi 4 con trixie) | No observado; nuestras pruebas de AP han sido estables | — | Vigilar el log del kernel si una prueba de AP falla sin causa |
+| #30 | `serial/output?lines=N` devuelve las líneas más viejas | Sí, si se pide sin `since` | `Registro` y `esperar_lineas` siempre pasan `since` y leen por tramos | Nada |
+| #23 | `serial/monitor` trunca las ventanas largas | Poco: solo lo usamos para capturas cortas del arranque (`_boot_capture`) | Para ventanas largas usamos `serial/output` con `since` | Nada |
+
+**Regla nueva (CLAUDE.md, punto 5):** antes de pasar de 10 a 15 min diagnosticando un fallo del banco o de las herramientas, buscar
+primero en los issues y PR del upstream y en los de ESP-IDF.

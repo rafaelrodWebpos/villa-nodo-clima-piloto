@@ -2837,6 +2837,18 @@ phase_closures:
       - H-80 — 4 manuales no repetidos (JRN-01.7, TC-CFG-02, TC-MQTT-04, TC-SEN-04; último verde sobre ef118af/3f2eac8, que solo difiere en el tick SNTP): salvedad declarada en el registro
       - TC-TIME-03 (H-76) y TC-WDT-01 (H-78) en verde por reevaluación de su evidencia
       - NFR-SEN-01 con la temperatura informativa (FSD 0.9.7)
+  - phase: 3
+    date: 2026-11-15
+    commit: 9106b3d   # tag v0.0.1; release publicada el 2026-11-15 (build.yml run 43742680820, verify relanzado tras el fork f50858b)
+    fsd_version: 0.9.11
+    release: {tag: v0.0.1, assets: [firmware_v0.0.1.bin, firmware_v0.0.1.elf], verify: "6 en verde, 1 not done (JRN-01.5 sin HA de prueba en el runner)"}
+    criteria: criterios de §3.3 (FR-OTA-*, NFR-OTA-01, FR-MQTT-09, NFR-SEC-02, C-BLD-04) con test en verde; visita física final en verde (iPhone H-83, H-80 repetidas, TC-OTA-15 H-89)
+    approved_by: propietario (2026-11-15; release v0.0.1 publicada)
+    caveats:
+      - FR-POR-02 se sostiene con la evidencia manual H-83 sobre b2fffa7 (CR-TB-09 abierta); vence si cambia components/portal o el DNS
+      - auditoría H-91: A3-02 y A3-03 pendientes antes de la instalación (S2); A3-01, A3-04 y A3-05 corregidos
+      - el primer verify falló por el strip() de /api/flash del banco (upstream #9/#10); fork villa-2 f50858b y defensa en tests/bench/grabado.py
+      - ESP-IDF 6.0.2 afectado por GHSA-ch63-jxm5-vmvf (no explotable con CONFIG_LWIP_DNS_MAX_HOST_IP=1); subida a 6.0.3 propuesta en testing/propuesta-esp-idf-6.0.3.md
 
 release_verify:
   first_tag: v0.0.1   # decisión del propietario (H-37, 2026-11-03): el primer tag de release; el tag lo crea él cuando /build anuncie Ready for shipment
