@@ -168,3 +168,16 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
   - El banco no lo podía ver (CR-TB-09).
 - **Texto del FSD de FR-POR-10:** queda en `fsd_pending` (FR-POR-10-PKTINFO).
 - **Siguiente:** la auditoría de seguridad S3 y, después, el tag v0.0.1 (lo crea el propietario).
+
+## Auditoría H-91 y ensayo del job verify (2026-11-15)
+
+- **Arreglos de H-91:** A3-01, A3-04 y A3-05 (`1a3d75b`). A3-02 y A3-03 quedan pendientes antes de S2.
+- **Runner:** pasa `TESTBENCH_TOKEN` (`cfb249a`).
+- **Ensayo de verify** con la imagen de producción de `cfb249a`, sin tag:
+  - Primer intento: JRN-01.3 en rojo, porque faltaba la contraparte de producción del log UDP.
+  - Arreglo: `2089b02`.
+  - Repetición: JRN-01.0 a 01.4 en verde y TC-OTA-14 en verde (`test-results/20261115T171420Z-2089b02/`
+    y `test-results/20261115T173112Z-2089b02/`).
+- **Dos pasos del journey quedan not done** si nadie los atiende; pytest los da por saltados y `verify` no falla:
+  - JRN-01.5 necesita el Home Assistant de prueba levantado.
+  - JRN-01.7 necesita a alguien en el banco para el corte del USB-C (el aviso espera 600 s).

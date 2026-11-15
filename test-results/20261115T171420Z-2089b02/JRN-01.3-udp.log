@@ -1,0 +1,561 @@
+I (20173) nodo: UDP logging -> 192.168.4.1:5555
+I (20173) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (20173) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: UDP logging -> 192.168.4.1:5555
+I (5233) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5233) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5243) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5253) nodo: mqtt: intento 1
+I (5353) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5733) nodo: sntp: inicio pool.ntp.org
+I (15743) nodo: sntp: inicio pool.ntp.org
+I (1926) nodo: UDP logging -> 192.168.4.1:5555
+I (1926) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1926) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1926) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1936) nodo: mqtt: intento 1
+I (2016) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11163) nodo: UDP logging -> 192.168.4.1:5555
+I (11163) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (11163) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (11163) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (11173) nodo: mqtt: intento 1
+I (11183) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (11273) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (22223) nodo: UDP logging -> 192.168.4.1:5555
+I (22223) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (22223) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (22233) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5233) nodo: UDP logging -> 192.168.4.1:5555
+I (5233) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5233) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5243) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5253) nodo: mqtt: intento 1
+I (5343) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5733) nodo: sntp: inicio pool.ntp.org
+I (15743) nodo: sntp: inicio pool.ntp.org
+I (1876) nodo: UDP logging -> 192.168.4.1:5555
+I (1876) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1926) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1926) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1936) nodo: mqtt: intento 1
+I (2006) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (2426) nodo: sntp: inicio pool.ntp.org
+I (11163) nodo: UDP logging -> 192.168.4.1:5555
+I (11163) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (11163) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (11163) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (11173) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (11183) nodo: mqtt: intento 1
+I (11273) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11663) nodo: sntp: inicio pool.ntp.org
+I (1926) nodo: UDP logging -> 192.168.4.1:5555
+I (1926) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1926) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1926) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1936) nodo: mqtt: intento 1
+I (2016) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (2426) nodo: sntp: inicio pool.ntp.org
+I (16083) nodo: UDP logging -> 192.168.4.1:5555
+I (16083) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (16083) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (16083) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (16093) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (16103) nodo: mqtt: intento 1
+I (16173) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (16583) nodo: sntp: inicio pool.ntp.org
+I (1916) nodo: UDP logging -> 192.168.4.1:5555
+I (1916) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1916) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1916) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1926) nodo: mqtt: intento 1
+I (2016) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11143) nodo: UDP logging -> 192.168.4.1:5555
+I (11143) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (11143) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (11143) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (11153) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (11163) nodo: mqtt: intento 1
+I (11243) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11643) nodo: sntp: inicio pool.ntp.org
+I (21653) nodo: sntp: inicio pool.ntp.org
+I (1826) nodo: UDP logging -> 192.168.4.1:5555
+I (1826) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1876) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1876) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1876) nodo: mqtt: intento 1
+I (1976) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11143) nodo: UDP logging -> 192.168.4.1:5555
+I (11143) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (11143) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (11143) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (11153) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (11163) nodo: mqtt: intento 1
+I (11243) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11643) nodo: sntp: inicio pool.ntp.org
+I (1926) nodo: UDP logging -> 192.168.4.1:5555
+I (1926) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1926) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1926) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1936) nodo: mqtt: intento 1
+I (2426) nodo: sntp: inicio pool.ntp.org
+I (2776) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (16073) nodo: UDP logging -> 192.168.4.1:5555
+I (16073) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (16073) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (16073) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (16083) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (16093) nodo: mqtt: intento 1
+I (16203) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (16573) nodo: sntp: inicio pool.ntp.org
+I (16973) nodo: UDP logging -> 192.168.4.1:5555
+I (5243) nodo: UDP logging -> 192.168.4.1:5555
+I (5243) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5243) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5243) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5253) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5263) nodo: mqtt: intento 1
+I (5353) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5743) nodo: sntp: inicio pool.ntp.org
+I (15753) nodo: sntp: inicio pool.ntp.org
+I (25753) nodo: sntp: inicio pool.ntp.org
+W (35753) nodo: sntp: fallo
+I (35753) nodo: sntp: inicio pool.ntp.org
+I (45753) nodo: sntp: inicio pool.ntp.org
+I (55753) nodo: sntp: inicio pool.ntp.org
+I (60573) nodo: med: T=31.0 HR=76.0 Td=26.3
+W (65753) nodo: sntp: fallo
+I (65753) nodo: sntp: inicio pool.ntp.org
+I (75753) nodo: sntp: inicio pool.ntp.org
+I (85753) nodo: sntp: inicio pool.ntp.org
+W (95763) nodo: sntp: fallo
+I (95763) nodo: sntp: inicio pool.ntp.org
+I (105763) nodo: sntp: inicio pool.ntp.org
+I (115763) nodo: sntp: inicio pool.ntp.org
+W (120553) nodo: med: invalida (nack)
+W (125763) nodo: sntp: fallo
+I (125763) nodo: sntp: inicio pool.ntp.org
+I (135763) nodo: sntp: inicio pool.ntp.org
+I (145763) nodo: sntp: inicio pool.ntp.org
+W (155763) nodo: sntp: fallo
+I (155763) nodo: sntp: inicio pool.ntp.org
+I (165763) nodo: sntp: inicio pool.ntp.org
+I (175773) nodo: sntp: inicio pool.ntp.org
+W (180553) nodo: med: invalida (nack)
+W (185773) nodo: sntp: fallo
+I (185773) nodo: sntp: inicio pool.ntp.org
+I (195773) nodo: sntp: inicio pool.ntp.org
+I (205773) nodo: sntp: inicio pool.ntp.org
+W (215773) nodo: sntp: fallo
+I (215773) nodo: sntp: inicio pool.ntp.org
+I (225773) nodo: sntp: inicio pool.ntp.org
+I (235773) nodo: sntp: inicio pool.ntp.org
+W (240553) nodo: med: invalida (nack)
+W (245773) nodo: sntp: fallo
+I (245773) nodo: sntp: inicio pool.ntp.org
+I (255773) nodo: sntp: inicio pool.ntp.org
+I (265783) nodo: sntp: inicio pool.ntp.org
+W (275783) nodo: sntp: fallo
+I (275783) nodo: sntp: inicio pool.ntp.org
+I (285783) nodo: sntp: inicio pool.ntp.org
+I (295783) nodo: sntp: inicio pool.ntp.org
+I (300573) nodo: med: T=31.0 HR=76.1 Td=26.3
+W (305783) nodo: sntp: fallo
+I (305783) nodo: sntp: inicio pool.ntp.org
+I (18933) nodo: UDP logging -> 192.168.4.1:5555
+I (18933) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (18933) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (18943) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5243) nodo: UDP logging -> 192.168.4.1:5555
+I (5243) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5243) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5243) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5253) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5263) nodo: mqtt: intento 1
+I (5343) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5743) nodo: sntp: inicio pool.ntp.org
+I (7053) nodo: sntp: sincronizado ts=1794756810
+I (23653) nodo: ota: estado en_curso
+I (23663) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (25953) esp-x509-crt-bundle: Certificate validated
+I (27993) esp-x509-crt-bundle: Certificate validated
+I (1916) nodo: UDP logging -> 192.168.4.1:5555
+I (1916) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1916) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1916) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1926) nodo: mqtt: intento 1
+I (2006) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (2416) nodo: sntp: inicio pool.ntp.org
+I (11153) nodo: UDP logging -> 192.168.4.1:5555
+I (11153) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (11153) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (11153) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (11163) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (11173) nodo: mqtt: intento 1
+I (11253) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11653) nodo: sntp: inicio pool.ntp.org
+I (21663) nodo: sntp: inicio pool.ntp.org
+I (31663) nodo: sntp: inicio pool.ntp.org
+W (41663) nodo: sntp: fallo
+I (41663) nodo: sntp: inicio pool.ntp.org
+I (51663) nodo: sntp: inicio pool.ntp.org
+I (60573) nodo: med: T=30.9 HR=75.7 Td=26.1
+I (61663) nodo: sntp: inicio pool.ntp.org
+W (71663) nodo: sntp: fallo
+I (71663) nodo: sntp: inicio pool.ntp.org
+I (81663) nodo: sntp: inicio pool.ntp.org
+I (91663) nodo: sntp: inicio pool.ntp.org
+W (101673) nodo: sntp: fallo
+I (101673) nodo: sntp: inicio pool.ntp.org
+I (111673) nodo: sntp: inicio pool.ntp.org
+I (120573) nodo: med: T=30.9 HR=75.6 Td=26.1
+I (121673) nodo: sntp: inicio pool.ntp.org
+W (131673) nodo: sntp: fallo
+I (131673) nodo: sntp: inicio pool.ntp.org
+I (141673) nodo: sntp: inicio pool.ntp.org
+I (151673) nodo: sntp: inicio pool.ntp.org
+W (161673) nodo: sntp: fallo
+I (161673) nodo: sntp: inicio pool.ntp.org
+I (171673) nodo: sntp: inicio pool.ntp.org
+I (180573) nodo: med: T=30.9 HR=75.7 Td=26.1
+I (181683) nodo: sntp: inicio pool.ntp.org
+W (191683) nodo: sntp: fallo
+I (191683) nodo: sntp: inicio pool.ntp.org
+I (201683) nodo: sntp: inicio pool.ntp.org
+I (211683) nodo: sntp: inicio pool.ntp.org
+W (221683) nodo: sntp: fallo
+I (221683) nodo: sntp: inicio pool.ntp.org
+I (231683) nodo: sntp: inicio pool.ntp.org
+I (240573) nodo: med: T=30.9 HR=75.8 Td=26.1
+I (241683) nodo: sntp: inicio pool.ntp.org
+W (251683) nodo: sntp: fallo
+I (251683) nodo: sntp: inicio pool.ntp.org
+I (261683) nodo: sntp: inicio pool.ntp.org
+I (271693) nodo: sntp: inicio pool.ntp.org
+W (281693) nodo: sntp: fallo
+I (281693) nodo: sntp: inicio pool.ntp.org
+I (291693) nodo: sntp: inicio pool.ntp.org
+I (300573) nodo: med: T=30.9 HR=76.0 Td=26.1
+I (301693) nodo: sntp: inicio pool.ntp.org
+W (311693) nodo: sntp: fallo
+I (311693) nodo: sntp: inicio pool.ntp.org
+I (321693) nodo: sntp: inicio pool.ntp.org
+I (331693) nodo: sntp: inicio pool.ntp.org
+W (341693) nodo: sntp: fallo
+I (341693) nodo: sntp: inicio pool.ntp.org
+I (14583) nodo: UDP logging -> 192.168.4.1:5555
+I (14583) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (14583) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (14593) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (17753) nodo: UDP logging -> 192.168.4.1:5555
+I (17753) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (17753) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (17763) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5233) nodo: UDP logging -> 192.168.4.1:5555
+I (5233) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5233) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5243) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5253) nodo: mqtt: intento 1
+I (5333) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5733) nodo: sntp: inicio pool.ntp.org
+I (10923) nodo: sntp: sincronizado ts=1794758079
+I (19573) nodo: UDP logging -> 192.168.4.1:5555
+I (19573) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (19573) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: UDP logging -> 192.168.4.1:5555
+I (5233) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5233) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (5233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5243) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5253) nodo: mqtt: intento 1
+I (5343) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5733) nodo: sntp: inicio pool.ntp.org
+I (6573) nodo: sntp: sincronizado ts=1794758339
+I (14593) nodo: ota: estado en_curso
+I (14613) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (17103) esp-x509-crt-bundle: Certificate validated
+I (19283) esp-x509-crt-bundle: Certificate validated
+I (20253) esp-x509-crt-bundle: Certificate validated
+I (20923) esp_https_ota: Starting OTA...
+I (20923) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (20973) nodo: ota: 0 %
+I (22903) nodo: ota: 10 %
+I (25003) nodo: ota: 20 %
+I (27163) nodo: ota: 30 %
+I (29283) nodo: ota: 40 %
+I (31303) nodo: ota: 50 %
+I (1886) nodo: UDP logging -> 192.168.4.1:5555
+I (1886) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1936) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (1936) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1946) nodo: mqtt: intento 1
+I (2016) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11163) nodo: UDP logging -> 192.168.4.1:5555
+I (11163) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (11163) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (11163) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (11173) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (11183) nodo: mqtt: intento 1
+I (11263) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (11663) nodo: sntp: inicio pool.ntp.org
+I (21673) nodo: sntp: inicio pool.ntp.org
+I (31673) nodo: sntp: inicio pool.ntp.org
+W (41673) nodo: sntp: fallo
+I (41673) nodo: sntp: inicio pool.ntp.org
+I (51673) nodo: sntp: inicio pool.ntp.org
+I (60573) nodo: med: T=31.1 HR=75.0 Td=26.1
+I (61673) nodo: sntp: inicio pool.ntp.org
+W (71673) nodo: sntp: fallo
+I (71673) nodo: sntp: inicio pool.ntp.org
+I (81673) nodo: sntp: inicio pool.ntp.org
+I (91673) nodo: sntp: inicio pool.ntp.org
+W (101683) nodo: sntp: fallo
+I (101683) nodo: sntp: inicio pool.ntp.org
+I (111683) nodo: sntp: inicio pool.ntp.org
+I (120573) nodo: med: T=31.1 HR=74.8 Td=26.1
+I (121683) nodo: sntp: inicio pool.ntp.org
+W (131683) nodo: sntp: fallo
+I (131683) nodo: sntp: inicio pool.ntp.org
+I (141683) nodo: sntp: inicio pool.ntp.org
+I (151683) nodo: sntp: inicio pool.ntp.org
+W (161683) nodo: sntp: fallo
+I (161683) nodo: sntp: inicio pool.ntp.org
+I (171683) nodo: sntp: inicio pool.ntp.org
+I (180573) nodo: med: T=31.1 HR=74.5 Td=26.0
+I (181693) nodo: sntp: inicio pool.ntp.org
+W (191693) nodo: sntp: fallo
+I (191693) nodo: sntp: inicio pool.ntp.org
+I (201693) nodo: sntp: inicio pool.ntp.org
+I (211693) nodo: sntp: inicio pool.ntp.org
+W (221693) nodo: sntp: fallo
+I (221693) nodo: sntp: inicio pool.ntp.org
+I (231693) nodo: sntp: inicio pool.ntp.org
+I (240573) nodo: med: T=31.1 HR=74.3 Td=25.9
+I (241693) nodo: sntp: inicio pool.ntp.org
+W (251693) nodo: sntp: fallo
+I (251693) nodo: sntp: inicio pool.ntp.org
+I (261693) nodo: sntp: inicio pool.ntp.org
+I (271703) nodo: sntp: inicio pool.ntp.org
+W (281703) nodo: sntp: fallo
+I (281703) nodo: sntp: inicio pool.ntp.org
+I (291703) nodo: sntp: inicio pool.ntp.org
+I (300573) nodo: med: T=31.1 HR=74.2 Td=25.9
+I (301703) nodo: sntp: inicio pool.ntp.org
+W (311703) nodo: sntp: fallo
+I (311703) nodo: sntp: inicio pool.ntp.org
+I (321703) nodo: sntp: inicio pool.ntp.org
+I (331703) nodo: sntp: inicio pool.ntp.org
+W (341703) nodo: sntp: fallo
+I (5190) nodo: UDP logging -> 192.168.4.1:5555
+I (5190) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5190) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5190) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5200) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5210) nodo: mqtt: intento 1
+I (5430) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5690) nodo: sntp: inicio pool.ntp.org
+I (8360) nodo: sntp: sincronizado ts=1794759919
+I (1780) nodo: UDP logging -> 192.168.4.1:5555
+I (1780) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1780) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (1780) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1790) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (1800) nodo: mqtt: intento 1
+I (2030) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (2280) nodo: sntp: inicio pool.ntp.org
+I (12290) nodo: sntp: inicio pool.ntp.org
+I (22290) nodo: sntp: inicio pool.ntp.org
+W (32290) nodo: sntp: fallo
+I (32290) nodo: sntp: inicio pool.ntp.org
+I (42290) nodo: sntp: inicio pool.ntp.org
+I (52290) nodo: sntp: inicio pool.ntp.org
+W (62290) nodo: sntp: fallo
+I (62290) nodo: sntp: inicio pool.ntp.org
+I (72290) nodo: sntp: inicio pool.ntp.org
+I (82290) nodo: sntp: inicio pool.ntp.org
+W (92290) nodo: sntp: fallo
+I (92300) nodo: sntp: inicio pool.ntp.org
+I (102300) nodo: sntp: inicio pool.ntp.org
+I (112300) nodo: sntp: inicio pool.ntp.org
+W (122300) nodo: sntp: fallo
+I (122300) nodo: sntp: inicio pool.ntp.org
+I (132300) nodo: sntp: inicio pool.ntp.org
+I (15310) nodo: UDP logging -> 192.168.4.1:5555
+I (15310) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (15310) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (15320) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (1780) nodo: UDP logging -> 192.168.4.1:5555
+I (1780) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (1780) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (1780) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (1790) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (1800) nodo: mqtt: intento 1
+E (1810) esp-tls: [sock=55] delayed connect error: Connection reset by peer
+E (1820) transport_base: Failed to open a new connection: 32772
+E (1820) mqtt_client: Error transport connect
+I (1820) nodo: con: CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)
+I (5200) nodo: UDP logging -> 192.168.4.1:5555
+I (5200) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5200) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5200) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5210) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5220) nodo: mqtt: intento 1
+I (5400) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5700) nodo: sntp: inicio pool.ntp.org
+I (15700) nodo: sntp: inicio pool.ntp.org
+I (16990) nodo: UDP logging -> 192.168.4.1:5555
+I (16990) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (16990) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (17000) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5240) nodo: UDP logging -> 192.168.4.1:5555
+I (5240) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5240) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5240) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5250) nodo: mqtt: intento 1
+I (5260) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5740) nodo: sntp: inicio pool.ntp.org
+I (6220) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (15740) nodo: sntp: inicio pool.ntp.org
+I (25750) nodo: sntp: inicio pool.ntp.org
+W (35750) nodo: sntp: fallo
+I (35750) nodo: sntp: inicio pool.ntp.org
+I (45750) nodo: sntp: inicio pool.ntp.org
+I (55750) nodo: sntp: inicio pool.ntp.org
+I (60530) nodo: udplog: descartadas=0 reintentadas=1 cola_llena=0
+W (65750) nodo: sntp: fallo
+I (65750) nodo: sntp: inicio pool.ntp.org
+I (5100) nodo: UDP logging -> 192.168.4.1:5555
+I (5100) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5150) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5150) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5110) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5160) nodo: mqtt: intento 1
+I (5390) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5650) nodo: sntp: inicio pool.ntp.org
+I (5090) nodo: UDP logging -> 192.168.4.1:5555
+I (5090) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5090) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5090) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5100) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5110) nodo: mqtt: intento 1
+I (5350) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5590) nodo: sntp: inicio pool.ntp.org
+I (15600) nodo: sntp: inicio pool.ntp.org
+I (25600) nodo: sntp: inicio pool.ntp.org
+W (35600) nodo: sntp: fallo
+I (35600) nodo: sntp: inicio pool.ntp.org
+I (45600) nodo: sntp: inicio pool.ntp.org
+I (55600) nodo: sntp: inicio pool.ntp.org
+W (65600) nodo: sntp: fallo
+I (65600) nodo: sntp: inicio pool.ntp.org
+I (5090) nodo: UDP logging -> 192.168.4.1:5555
+I (5090) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5140) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5140) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5100) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5150) nodo: mqtt: intento 1
+I (5350) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5640) nodo: sntp: inicio pool.ntp.org
+I (5110) nodo: UDP logging -> 192.168.4.1:5555
+I (5110) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5110) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5110) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5120) nodo: mqtt: intento 1
+I (5130) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5610) nodo: sntp: inicio pool.ntp.org
+I (6090) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (15620) nodo: sntp: inicio pool.ntp.org
+I (25620) nodo: sntp: inicio pool.ntp.org
+W (35620) nodo: sntp: fallo
+I (35620) nodo: sntp: inicio pool.ntp.org
+I (45620) nodo: sntp: inicio pool.ntp.org
+I (55620) nodo: sntp: inicio pool.ntp.org
+I (60530) nodo: udplog: descartadas=0 reintentadas=1 cola_llena=0
+W (65620) nodo: sntp: fallo
+I (65620) nodo: sntp: inicio pool.ntp.org
+I (5130) nodo: UDP logging -> 192.168.4.1:5555
+I (5130) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5180) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5180) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5140) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5190) nodo: mqtt: intento 1
+I (5440) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5680) nodo: sntp: inicio pool.ntp.org
+I (5100) nodo: UDP logging -> 192.168.4.1:5555
+I (5100) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5100) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5100) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5110) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5120) nodo: mqtt: intento 1
+I (5350) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5600) nodo: sntp: inicio pool.ntp.org
+I (15600) nodo: sntp: inicio pool.ntp.org
+I (25610) nodo: sntp: inicio pool.ntp.org
+W (35610) nodo: sntp: fallo
+I (35610) nodo: sntp: inicio pool.ntp.org
+I (45610) nodo: sntp: inicio pool.ntp.org
+I (55610) nodo: sntp: inicio pool.ntp.org
+W (65610) nodo: sntp: fallo
+I (65610) nodo: sntp: inicio pool.ntp.org
+I (17340) nodo: UDP logging -> 192.168.4.1:5555
+I (17340) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (17350) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (17340) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5200) nodo: UDP logging -> 192.168.4.1:5555
+I (5200) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5200) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5200) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5210) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5220) nodo: mqtt: intento 1
+I (5450) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5700) nodo: sntp: inicio pool.ntp.org
+I (5110) nodo: UDP logging -> 192.168.4.1:5555
+I (5110) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5160) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5160) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5120) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5170) nodo: mqtt: intento 1
+I (5380) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5660) nodo: sntp: inicio pool.ntp.org
+I (5100) nodo: UDP logging -> 192.168.4.1:5555
+I (5100) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5100) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5100) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5110) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5120) nodo: mqtt: intento 1
+I (5360) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5600) nodo: sntp: inicio pool.ntp.org
+I (5090) nodo: UDP logging -> 192.168.4.1:5555
+I (5090) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5140) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5140) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5100) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5150) nodo: mqtt: intento 1
+I (5360) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5640) nodo: sntp: inicio pool.ntp.org
+I (5100) nodo: UDP logging -> 192.168.4.1:5555
+I (5100) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5100) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5100) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5110) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5120) nodo: mqtt: intento 1
+I (5340) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5600) nodo: sntp: inicio pool.ntp.org
+I (5101) nodo: UDP logging -> 192.168.4.1:5555
+I (5101) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5151) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5151) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5111) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5161) nodo: mqtt: intento 1
+I (5381) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (5651) nodo: sntp: inicio pool.ntp.org
+I (5110) nodo: UDP logging -> 192.168.4.1:5555
+I (5110) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (5110) esp_netif_handlers: sta ip: 192.168.4.5, mask: 255.255.255.0, gw: 192.168.4.1
+I (5110) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (5120) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (5130) nodo: mqtt: intento 1
+I (5360) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
