@@ -2104,7 +2104,8 @@ tests:
     needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, bench-operator-prompt, github-test-releases, dut-board]
     expect: >
       aprobada por el propietario (H-89): con la descarga de ota-test-2/firmware_b1.bin en curso
-      (último «ota: n %» < 100 y sin OTA_DESCARGA -> ARRANQUE), el operador desenchufa el USB-C de la
+      (al menos un «ota: n %» y el último < 100, sin OTA_DESCARGA -> ARRANQUE; el aviso sale al 10 %),
+      el operador desenchufa el USB-C de la
       placa y lo vuelve a enchufar; el primer status en vivo lleva fw = A y reset = poweron, y en
       330 s (T23 vence a los 300) todos los status llevan fw = A con uptime_s monótono: arranca la
       imagen anterior y sin rollback (T17, «no debe ocurrir»: marcar arrancable el slot nuevo antes

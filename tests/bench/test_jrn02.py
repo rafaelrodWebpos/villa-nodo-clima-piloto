@@ -249,8 +249,8 @@ def test_nfr_ota_01_measurement_period_during_download(testbench, dut_slot, dut_
 
 
 OTA_PCT = re.compile(r"nodo: ota: (\d+) %")
-AVISO_LISTO = ("TC-OTA-15: ponte junto a la placa. Al pulsar «Hecho» se manda la OTA y enseguida sale el "
-               "aviso de desenchufar el USB-C de la PLACA: hazlo en cuanto salga (la descarga dura ~30 s).")
+AVISO_LISTO = ("TC-OTA-15: ponte junto a la placa. Al pulsar «Hecho» se manda la OTA; unos 10 s después sale el "
+               "aviso de desenchufar el USB-C de la PLACA: hazlo en cuanto salga (quedan ~20 s de descarga).")
 
 
 def test_tc_ota_15_power_cut_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
@@ -270,12 +270,16 @@ def test_tc_ota_15_power_cut_during_download(testbench, dut_slot, dut_mac, firmw
             if not tb.human_interaction(AVISO_LISTO, timeout=cortes.ESPERA_OPERADOR_S):
                 pytest.skip("not done: el operador no confirmó el aviso previo")
             t = _ota(tb, base, "firmware_b1.bin")
+            # el aviso sale con la escritura ya empezada (≥ 10 %): queda ~20 s para desenchufar
+            # (2026-11-15: con el aviso enseguida, el corte cayó antes del primer «ota: 0 %»)
+            if not reg.esperar(r"nodo: ota: [1-9]0 %", 60, desde_ts=t):
+                pytest.skip("not done: la descarga no llegó al 10 % en 60 s")
             r = cortes.corte(tb, dut_slot, sub, nodo, "TC-OTA-15", 1, 1, c, banco)
             antes = [e.get("text", "") for e in reg.leer() if t - 1 <= e.get("ts", 0) <= r["t_ausente"]]
             pcts = [int(m.group(1)) for x in antes if (m := OTA_PCT.search(x))]
             en_descarga = any("-> OTA_DESCARGA (cmd_ota)" in x for x in antes)
             termino = any("OTA_DESCARGA -> ARRANQUE" in x for x in antes) or (pcts and pcts[-1] >= 100)
-            if not en_descarga or termino:
+            if not en_descarga or termino or not pcts:
                 pytest.skip(f"not done: el corte no cayó dentro de la descarga (último ota: {pcts[-1:] or '—'} %); repetir")
             st0 = r.get("status_json") or {}
             c.step("Vigilar 330 s (T23 vence a los 300 s) que no haya rollback ni reinicio")
