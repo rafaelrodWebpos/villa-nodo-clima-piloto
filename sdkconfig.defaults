@@ -30,3 +30,6 @@ CONFIG_ESP_TASK_WDT_PANIC=y
 # C-BLD-04 (Fase 3, SEC-10): rollback de aplicación en el bootloader; FR-OTA-07 y T23
 # dependen de él. El anti-rollback por eFuse no se adopta (FSD §19.3).
 CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+# FR-POR-10 (SEC-06): el DNS del portal lee con IP_PKTINFO el destino y la interfaz de entrada
+# de cada consulta (portal_dns.c)
+CONFIG_LWIP_NETBUF_RECVINFO=y

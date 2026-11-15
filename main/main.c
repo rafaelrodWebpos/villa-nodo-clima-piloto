@@ -767,6 +767,13 @@ static void arrancar_sta(void)
     intentar_union();
 }
 
+static esp_netif_t *s_ap_netif;
+
+static int indice_ap(void)
+{
+    return s_ap_netif ? esp_netif_get_netif_impl_index(s_ap_netif) : 0;
+}
+
 static void arrancar_portal(void)
 {
     wifi_base();
@@ -793,10 +800,9 @@ static void arrancar_portal(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap));
     ESP_ERROR_CHECK(esp_wifi_start());
-    char ifname[8] = "";
-    esp_netif_get_netif_impl_name(ap_netif, ifname);   /* FR-POR-10: el DNS se liga a esta interfaz */
+    s_ap_netif = ap_netif;                              /* FR-POR-10: el DNS filtra por esta interfaz */
     /* N-03: sin DNS el portal sigue (el formulario se alcanza por 192.168.4.1); E14 lo dice */
-    ESP_ERROR_CHECK_WITHOUT_ABORT(portal_dns_iniciar(ifname));
+    ESP_ERROR_CHECK_WITHOUT_ABORT(portal_dns_iniciar(indice_ap));
     ESP_ERROR_CHECK(portal_http_iniciar(s_id, s_version, al_enviar));
     const esp_timer_create_args_t tpo = {.callback = al_vencer_portal, .name = "portal"};
     ESP_ERROR_CHECK(esp_timer_create(&tpo, &s_t_portal));

@@ -2279,6 +2279,11 @@ tests:
       conexión con otra dirección local o remota (SEC-06, FSD 0.9.9). Sin fila de
       banco: con una sola radio, el banco no puede hablar con el DUT por la IP del STA
       mientras está en VALIDANDO
+      portal_dns_atender(destino, if_entrada, if_ap, origen) (visita del 2026-11-15, H-83: el
+      iPhone no recibía respuesta DNS con el socket ligado a 192.168.4.1 y a la interfaz): solo
+      la consulta del cliente de 192.168.4.0/24 a 192.168.4.1 que entra por la interfaz del AP;
+      rechaza la entrada por la interfaz del STA, la IP del STA, el bypass de host débil, el
+      origen de fuera, el índice 0 (interfaz del AP desconocida) y NULL
     impl: tests/host/test_portal_origen.c
     status: successful
     commit: 2450ac1   # H-85: (local, remota); antes d64e5a3
@@ -2822,6 +2827,14 @@ release_verify:
 # Cambios del FSD pendientes para la próxima versión (regla del propietario,
 # 2026-11-05: una sola versión por ronda de checkers). fsd_applied guarda los ya aplicados.
 fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0.9.6); regla del propietario: no abren versión
+  - id: FR-POR-10-PKTINFO
+    origin: visita física 2026-11-15 (H-83); arreglo aprobado por el propietario el mismo día
+    text: >
+      §11 FR-POR-10: el socket DNS ya no se liga a 192.168.4.1 ni a la interfaz del AP
+      (SO_BINDTODEVICE); se liga a INADDR_ANY y, por datagrama, IP_PKTINFO da el destino y la
+      interfaz de entrada: solo se contesta a 192.168.4.1, por la interfaz del AP y desde
+      192.168.4.0/24 (misma protección). Así ligado, el iPhone no recibía respuesta DNS.
+      CONFIG_LWIP_NETBUF_RECVINFO=y. Pendiente de aprobación del texto para el próximo cambio del FSD
   - from: checker puerta 01, cf744e1 (1, 9)
     issue: >
       historial: la entrada 0.9.4 dice «sin cambios en requisitos» y amplía los

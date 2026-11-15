@@ -27,6 +27,16 @@ int main(void)
                remotos_no[i][0], remotos_no[i][1], remotos_no[i][2], remotos_no[i][3]);
     ESPERA(!portal_origen_permitido(sta, cli_ok[0]), "por la IP del STA");
     ESPERA(!portal_origen_permitido(NULL, cli_ok[0]) && !portal_origen_permitido(ap, NULL), "NULL atendido");
+    /* DNS cautivo: además, por la interfaz del AP (IP_PKTINFO; visita del 2026-11-15) */
+    const int IF_AP = 2, IF_STA = 1;
+    ESPERA(portal_dns_atender(ap, IF_AP, IF_AP, cli_ok[0]), "consulta del iPhone (192.168.4.2 -> 192.168.4.1 por el AP) sin respuesta");
+    ESPERA(!portal_dns_atender(ap, IF_STA, IF_AP, cli_ok[0]), "consulta por la interfaz del STA atendida");
+    ESPERA(!portal_dns_atender(sta, IF_STA, IF_AP, remotos_no[0]), "consulta a la IP del STA atendida");
+    ESPERA(!portal_dns_atender(sta, IF_AP, IF_AP, cli_ok[0]), "consulta del AP a otra IP local atendida");
+    ESPERA(!portal_dns_atender(ap, IF_STA, IF_AP, remotos_no[0]), "bypass de host débil por el STA atendido");
+    ESPERA(!portal_dns_atender(ap, IF_AP, IF_AP, remotos_no[0]), "origen fuera de 192.168.4.0/24 atendido");
+    ESPERA(!portal_dns_atender(ap, 0, 0, cli_ok[0]), "interfaz del AP desconocida (índice 0) atendida");
+    ESPERA(!portal_dns_atender(NULL, IF_AP, IF_AP, cli_ok[0]) && !portal_dns_atender(ap, IF_AP, IF_AP, NULL), "NULL atendido");
     printf("TC-POR-14: %s\n", fallos ? "FALLO" : "ok");
     return fallos != 0;
 }

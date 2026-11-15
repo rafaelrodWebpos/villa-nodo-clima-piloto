@@ -11,3 +11,9 @@ bool portal_origen_permitido(const uint8_t ip_local[4], const uint8_t ip_remota[
     if (memcmp(ip_remota, PORTAL_IP_AP, 3) != 0) return false;             /* cliente de 192.168.4.0/24 */
     return ip_remota[3] != 0 && ip_remota[3] != 255 && ip_remota[3] != 1;  /* ni red, ni difusión, ni el propio AP */
 }
+
+bool portal_dns_atender(const uint8_t destino[4], int if_entrada, int if_ap, const uint8_t origen[4])
+{
+    if (if_ap <= 0 || if_entrada != if_ap) return false;                    /* solo por la interfaz del AP */
+    return portal_origen_permitido(destino, origen);
+}
