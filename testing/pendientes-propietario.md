@@ -47,4 +47,5 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
 - **Pendientes antes de la instalación (puerta S2), por decisión del propietario:**
   - A3-02: según el informe H-91.
   - A3-03: según el informe H-91.
-- **Estado.** Abiertos. No bloquean el tag v0.0.1; sí bloquean la instalación en la villa (S2).
+- **Estado.** Abiertos. No bloquean el tag v0.0.1; sí bloquean la instalación en la villa (S2). Van en el paquete
+  pendiente antes de S2 con ESP-IDF 6.0.3 y #52 (`testing/plan-fase-3.md`, aprobado el 2026-11-15).

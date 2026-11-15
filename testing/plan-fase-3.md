@@ -211,3 +211,19 @@ propietario y solo se citan cuando ya existen.
 
 **Regla nueva (CLAUDE.md, punto 5):** antes de pasar de 10 a 15 min diagnosticando un fallo del banco o de las herramientas, buscar
 primero en los issues y PR del upstream y en los de ESP-IDF.
+
+## Paquete pendiente antes de S2 (aprobado por el propietario el 2026-11-15; no empezado)
+
+Va todo junto, con una sola regresión de banco y una sola visita física, antes de la instalación (S2):
+
+1. **ESP-IDF a v6.0.3** (GHSA-ch63-jxm5-vmvf), según `testing/propuesta-esp-idf-6.0.3.md`.
+2. **A3-02 y A3-03** (auditoría H-91; `testing/pendientes-propietario.md`).
+3. **Upstream #52:**
+   - en el fork, `/api/flash` lee todas las opciones de la línea de `flash_args`;
+   - el proyecto manda `flash_args`, para que el banco grabe a 80 MHz como el build.
+   - El fork se reinstala en la Pi.
+4. **Una sola regresión completa en el banco**, más el ensayo de `verify` con la imagen de producción.
+5. **Una sola visita física:** repetir el iPhone (FR-POR-02), porque el cambio de lwIP/DNS vence H-83.
+6. **Tag nuevo** (por ejemplo v0.0.2), que lo crea el propietario.
+
+**Estado:** pendiente. No se empieza hasta que el propietario lo pida.
