@@ -58,3 +58,17 @@ del banco.
 Esperado: arranca la imagen anterior con `reset=poweron`, el primer status lleva `fw` = esa imagen
 y no hay rollback en 330 s. Si el corte cae cuando la descarga ya terminó, el resultado es not
 done: yo vuelvo a grabar la imagen y se repite.
+
+## Resultado (2026-11-15)
+
+| # | Prueba | Resultado | Evidencia |
+|---|---|---|---|
+| 1 | iPhone, FR-POR-02 (H-83) | En rojo con `fad73ef` (11:01 y 11:08): el DNS del portal no contestaba desde S1. Arreglo `b2fffa7` (IP_PKTINFO, misma protección SEC-06). En verde con `b2fffa7` a las 11:51 | `testing/test-plan.yaml`, TC-POR-08 (manual_evidence); regresión del portal en `test-results/20261115T154209Z-2b618eb/` y TC-POR-12 en `test-results/20261115T160658Z-2b618eb/` |
+| 2 | JRN-01.7 | PASS | `test-results/20261115T151120Z-fad73ef/` |
+| 3 | TC-CFG-02 | PASS (5 encendidos, ningún portal) | ídem |
+| 4 | TC-MQTT-04 | PASS (Last Will retenido en ≤ 83 s) | ídem |
+| 5 | TC-SEN-04 | PASS | ídem |
+| 6 | TC-OTA-15 | PASS con `b2fffa7`: corte al 50 %, arranca A con reset=poweron, 330 s sin rollback (antes: un FAIL por defecto de la prueba y un not done) | `test-results/20261115T155746Z-2b618eb/` |
+
+Las pruebas 2 a 5 corrieron sobre `fad73ef`; `b2fffa7` solo cambia el DNS del portal
+(`components/portal/portal_dns.c`, `portal_origen.c`, `main.c` y `CONFIG_LWIP_NETBUF_RECVINFO`).

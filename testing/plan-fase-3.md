@@ -159,3 +159,12 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
 - **Siguiente:**
   - El cambio agrupado del FSD (E13-USJ), en la próxima ronda.
   - Después, la visita física final (iPhone y las 4 manuales) y el tag v0.0.1.
+
+## Visita física final 2026-11-15
+
+- **Resultado:** las 6 pruebas en verde; el detalle está en `testing/visita-final-fase-3.md`.
+- **El iPhone (H-83) destapó un defecto de S1:** el DNS del portal no contestaba a un cliente real.
+  - Lo corrigió `b2fffa7`, con la misma protección SEC-06.
+  - El banco no lo podía ver (CR-TB-09).
+- **Texto del FSD de FR-POR-10:** queda en `fsd_pending` (FR-POR-10-PKTINFO).
+- **Siguiente:** la auditoría de seguridad S3 y, después, el tag v0.0.1 (lo crea el propietario).

@@ -1,0 +1,4 @@
+I (23653) nodo: ota: estado en_curso
+I (23663) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (25953) esp-x509-crt-bundle: Certificate validated
+I (27993) esp-x509-crt-bundle: Certificate validated

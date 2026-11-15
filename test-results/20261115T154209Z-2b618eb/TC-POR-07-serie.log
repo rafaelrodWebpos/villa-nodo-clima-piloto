@@ -1,0 +1,107 @@
+15:44:56.281 ESP-ROM:esp32s3-20210327
+15:44:56.281 Build:Mar 27 2021
+15:44:56.281 rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+15:44:56.281 Saved PC:0x40056f6f
+15:44:56.281 SPIWP:0xee
+15:44:56.281 mode:DIO, clock div:2
+15:44:56.281 load:0x3fce2820,len:0x14f0
+15:44:56.281 load:0x403c8700,len:0xda0
+15:44:56.281 load:0x403cb700,len:0x2f9c
+15:44:56.281 entry 0x403c8908
+15:44:56.281 I (27) boot: ESP-IDF v6.0.2 2nd stage bootloader
+15:44:56.281 I (27) boot: compile time Nov 15 2026 15:17:56
+15:44:56.281 I (27) boot: Multicore bootloader
+15:44:56.281 I (28) boot: chip revision: v0.2
+15:44:56.281 I (30) boot: efuse block revision: v1.4
+15:44:56.281 I (34) boot.esp32s3: Boot SPI Speed : 40MHz
+15:44:56.281 I (38) boot.esp32s3: SPI Mode       : DIO
+15:44:56.281 I (41) boot.esp32s3: SPI Flash Size : 8MB
+15:44:56.281 I (45) boot: Enabling RNG early entropy source...
+15:44:56.281 I (50) boot: Partition Table:
+15:44:56.281 I (52) boot: ## Label            Usage          Type ST Offset   Length
+15:44:56.281 I (58) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+15:44:56.281 I (65) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+15:44:56.281 I (71) boot:  2 phy_init         RF data          01 01 00011000 00001000
+15:44:56.281 I (78) boot:  3 ota_0            OTA app          00 10 00020000 00300000
+15:44:56.281 I (84) boot:  4 ota_1            OTA app          00 11 00320000 00300000
+15:44:56.281 I (91) boot: End of partition table
+15:44:56.281 I (94) esp_image: segment 0: paddr=00020020 vaddr=3c0c0020 size=394dch (234716) map
+15:44:56.281 I (161) esp_image: segment 1: paddr=00059504 vaddr=3fc98b00 size=061bch ( 25020) load
+15:44:56.281 I (168) esp_image: segment 2: paddr=0005f6c8 vaddr=40374000 size=00950h (  2384) load
+15:44:56.281 I (170) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=b8cd0h (756944) map
+15:44:56.281 I (363) esp_image: segment 4: paddr=00118cf8 vaddr=40374950 size=14120h ( 82208) load
+15:44:56.281 I (387) esp_image: segment 5: paddr=0012ce20 vaddr=50000000 size=00024h (    36) load
+15:44:56.281 I (397) boot: Loaded app from partition at offset 0x20000
+15:44:56.281 I (397) boot: Disabling RNG early entropy source...
+15:44:56.281 I (407) cpu_start: Multicore app
+15:44:56.281 I (416) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+15:44:56.281 I (417) cpu_start: Pro cpu start user code
+15:44:56.281 I (417) cpu_start: cpu freq: 160000000 Hz
+15:44:56.281 I (418) app_init: Application information:
+15:44:56.281 I (422) app_init: Project name:     nodo_clima
+15:44:56.281 I (426) app_init: App version:      0.0.0-b2fffa7-bench
+15:44:56.281 I (431) app_init: Compile time:     Nov 15 2026 15:18:29
+15:44:56.281 I (436) app_init: ELF file SHA256:  20cbd435c...
+15:44:56.281 I (441) app_init: ESP-IDF:          v6.0.2
+15:44:56.281 I (444) efuse_init: Min chip rev:     v0.0
+15:44:56.281 I (448) efuse_init: Max chip rev:     v0.99
+15:44:56.281 I (452) efuse_init: Chip rev:         v0.2
+15:44:56.281 I (456) heap_init: Initializing. RAM available for dynamic allocation:
+15:44:56.281 I (463) heap_init: At 3FCA4F20 len 000447F0 (273 KiB): RAM
+15:44:56.281 I (468) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+15:44:56.281 I (473) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+15:44:56.281 I (478) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+15:44:56.281 I (485) spi_flash: detected chip: gd
+15:44:56.281 I (487) spi_flash: flash io: dio
+15:44:56.281 I (491) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+15:44:56.281 I (496) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+15:44:56.281 I (503) main_task: Started on CPU0
+15:44:56.281 I (503) main_task: Calling app_main()
+15:44:56.281 I (513) nodo: boot: clima-f3c6d4 fw=0.0.0-b2fffa7-bench reset=usb part=ota_0 img=valida
+15:44:56.281 I (513) nodo: nodo_clima 0.0.0-b2fffa7-bench
+15:44:56.281 I (523) nodo: NODO-BENCH-IMAGE
+15:44:56.281 I (553) pp: pp rom version: e7ae62f
+15:44:56.281 I (553) net80211: net80211 rom version: e7ae62f
+15:44:56.281 I (563) wifi:wifi driver task: 3fcb2874, prio:23, stack:6656, core=0
+15:44:56.281 I (573) wifi:wifi firmware version: 00ad238
+15:44:56.281 I (573) wifi:wifi certification version: v7.0
+15:44:56.281 I (573) wifi:config NVS flash: enabled
+15:44:56.281 I (573) wifi:config nano formatting: disabled
+15:44:56.281 I (573) wifi:Init data frame dynamic rx buffer num: 32
+15:44:56.281 I (583) wifi:Init static rx mgmt buffer num: 5
+15:44:56.281 I (583) wifi:Init management short buffer num: 32
+15:44:56.281 I (593) wifi:Init dynamic tx buffer num: 32
+15:44:56.281 I (593) wifi:Init static tx FG buffer num: 2
+15:44:56.281 I (593) wifi:Init static rx buffer size: 1600
+15:44:56.281 I (603) wifi:Init static rx buffer num: 10
+15:44:56.281 I (603) wifi:Init dynamic rx buffer num: 32
+15:44:56.281 I (563) nodo: med: T=30.9 HR=76.7 Td=26.3
+15:44:56.281 I (613) wifi_init: rx ba win: 6
+15:44:56.281 I (613) wifi_init: accept mbox: 6
+15:44:56.281 I (613) wifi_init: tcpip mbox: 32
+15:44:56.281 I (623) wifi_init: udp mbox: 6
+15:44:56.281 I (623) wifi_init: tcp mbox: 6
+15:44:56.281 I (623) wifi_init: tcp tx win: 5760
+15:44:56.281 I (633) wifi_init: tcp rx win: 5760
+15:44:56.281 I (633) wifi_init: tcp mss: 1440
+15:44:56.281 I (633) wifi_init: WiFi IRAM OP enabled
+15:44:56.281 I (643) wifi_init: WiFi RX IRAM OP enabled
+15:44:56.281 I (653) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+15:44:56.281 I (693) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+15:44:56.281 I (703) wifi:Total power save buffer number: 16
+15:44:56.281 I (703) wifi:Init max length of beacon: 752/752
+15:44:56.281 I (703) wifi:Init max length of beacon: 752/752
+15:44:56.281 I (703) esp_netif_lwip: DHCP server started on interface WIFI_AP_DEF with IP: 192.168.4.1
+15:44:56.281 I (713) nodo: con: ARRANQUE -> PORTAL (fin_arranque)
+15:44:56.281 I (713) nodo: Init complete
+15:44:56.281 I (723) main_task: Returned from app_main()
+15:45:04.527 I (6063) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
+15:45:04.529 I (6063) wifi:station: <mac> join, AID=1, bgn, 20
+15:45:04.618 I (6153) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+15:45:04.773 I (6303) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+15:45:06.763 I (8293) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
+15:45:13.498 I (15033) portal: GET /generate_204 -> 302
+15:45:13.529 I (15063) portal: GET / -> formulario
+15:45:13.580 I (15113) portal: GET /hotspot-detect.html -> 302
+15:45:13.612 I (15143) portal: GET / -> formulario
+15:45:13.729 I (15263) wifi:station: <mac> leave, AID = 1, reason = 8, bss_flags is 33721443, bss:0x3fca7ac8

@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.10
+fsd_version: 0.9.11
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -147,6 +147,10 @@ change_history:
     lee los comandos por la consola primaria (UART0) y también por el USB-Serial/JTAG (FIFO de
     recepción por sondeo, sin driver), porque `bench-serial-write` solo llega al USB-Serial/JTAG.
     La imagen de producción no cambia (C-LOG-02). Sin otros cambios.
+  - 0.9.11 (2026-11-15): FR-POR-10 (propietario, 2026-11-15, tras H-83). El DNS del portal aplica
+    SEC-06 por consulta con `IP_PKTINFO` (destino 192.168.4.1, interfaz del AP y origen
+    192.168.4.0/24) en lugar de ligar el socket a esa IP y a la interfaz con `SO_BINDTODEVICE`,
+    porque así ligado no contestaba a un iPhone real. La protección es la misma. Sin otros cambios.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -1168,8 +1172,11 @@ consulta A.
   la NVS; el portal deberá seguir atendiendo a otros clientes.
 - **FR-POR-10** [Must] [derived] (SEC-06): el DNS y el HTTP del portal deberán atender
   solo a clientes de la red del AP (192.168.4.0/24) que se dirigen a la IP del AP
-  (192.168.4.1). El socket DNS se liga a esa IP y a la interfaz del AP
-  (`SO_BINDTODEVICE`), y descarta lo que llegue de otra subred. El servidor HTTP cierra
+  (192.168.4.1). El socket DNS escucha en todas las direcciones y, con cada consulta,
+  lee con `IP_PKTINFO` su destino y su interfaz de entrada: solo contesta si va a
+  192.168.4.1, entró por la interfaz del AP y viene de 192.168.4.0/24; lo demás se
+  descarta sin respuesta. Ligado a 192.168.4.1 y a la interfaz con `SO_BINDTODEVICE`, el
+  socket no contestaba a un iPhone real (H-83, 2026-11-15). El servidor HTTP cierra
   al aceptarla toda conexión cuya dirección local no sea 192.168.4.1 o cuya dirección
   remota no esté en 192.168.4.0/24. Motivo: lwIP acepta por cualquier interfaz un paquete
   dirigido a una IP propia (host débil); en VALIDANDO, un equipo de la red doméstica
@@ -1190,7 +1197,7 @@ consulta A.
 | FR-POR-07 | DUT configurado (CONECTANDO_WIFI o posterior); escaneo y `GET http://<ip-dut>/` | Ningún SSID `clima-*`; conexión rechazada | Respuesta HTTP | bench |
 | FR-POR-08 | Como el contrato de T24 | Como T24 | Como T24 | bench |
 | FR-POR-09 | Función que decide, por cada resultado de lectura del cuerpo y el tiempo desde su inicio, si seguir, esperar otra vez o cortar: 2 esperas sin datos y luego datos; 3 esperas seguidas; 1 byte por espera; error de socket | Seguir; 408 a la tercera espera; 408 al pasar 20 s aunque lleguen datos; cortar sin respuesta | Esperar sin límite; 408 con el cuerpo completo dentro del plazo | host |
-| FR-POR-10 | Función que decide si se atiende una conexión según su dirección local y la del cliente: (192.168.4.1, 192.168.4.x), (la IP del STA, …), (192.168.4.1, una IP de la red doméstica), 0.0.0.0; revisión del `bind` y del `SO_BINDTODEVICE` del socket DNS | Solo (192.168.4.1, 192.168.4.0/24) se atiende; DNS ligado a 192.168.4.1 y a la interfaz del AP | Atender por la IP del STA o a un cliente de fuera de 192.168.4.0/24 | host + other (revisión) |
+| FR-POR-10 | Función que decide si se atiende una conexión según su dirección local y la del cliente: (192.168.4.1, 192.168.4.x), (la IP del STA, …), (192.168.4.1, una IP de la red doméstica), 0.0.0.0; y, para el DNS, además la interfaz de entrada (la del AP, la del STA, desconocida); revisión del uso de `IP_PKTINFO` en el socket DNS | Solo (192.168.4.1, 192.168.4.0/24) se atiende; el DNS, además, solo por la interfaz del AP | Atender por la IP del STA o a un cliente de fuera de 192.168.4.0/24 | host + other (revisión) |
 
 ## 12. Receptor de comandos OTA
 

@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.10
+fsd_version: 0.9.11
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -629,10 +629,10 @@ tests:
       encendido estimado (llegada del primer status − uptime_s − 2 s)
     impl: tests/bench/test_jrn01.py::test_jrn_01_7_power_cut   # pone su propia precondición (JRN-01.6 bloqueado); cortes en tests/bench/cortes.py
     status: successful
-    commit: 3f2eac8   # rama sntp (H-69), merge de main sobre ef118af
-    date: 2026-11-08
-    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (H-69)
-    evidence: test-results/20261108T111528Z-3f2eac8/JRN-01.7.md
+    commit: fad73ef   # visita física final de la Fase 3 (D4, H-86), imagen 0.0.0-fad73ef-bench
+    date: 2026-11-15
+    ci_run: 43717650672   # build.yml, workflow_dispatch variant=bench version=0.0.0-fad73ef
+    evidence: test-results/20261115T151120Z-fad73ef/JRN-01.7.md   # antes: test-results/20261108T111528Z-3f2eac8/JRN-01.7.md (salvedad de H-80, resuelta)
     observed: >
       un corte del propietario con la imagen de la rama sntp (SNTP, E13 y
       watchdog de 30 s): Last Will retenido a 78,3 s; tras reenchufar, primer
@@ -1115,27 +1115,37 @@ tests:
       responde 302 a http://192.168.4.1/ o el formulario de §17, nunca una
       respuesta que no venga del portal (la segunda mitad del contrato de FR-POR-02)
     impl: null   # bloqueado: bench-portal-dns en no (CR-TB-09)
+    status: successful   # por la evidencia manual H-83 (alt. manual de §22.0)
+    date: 2026-11-15
     reason: >
-      sin estado vigente desde la puerta S1: la evidencia manual H-51 caducó al cambiar
-      components/portal (758ccbc, e83d355, d64e5a3; FSD 0.9.8 §3.5). Por decisión del
-      propietario (H-83), la prueba con el teléfono se repite una sola vez al final de la
-      Fase 3, con las demás pruebas físicas de esa fase; hasta entonces FR-POR-02 queda
-      con la evidencia caducada, declarada como salvedad. El ejecutable de banco sigue
-      bloqueado (bench-portal-dns en no, CR-TB-09). Antes: successful por H-51
+      el ejecutable de banco sigue bloqueado (bench-portal-dns en no, CR-TB-09). FR-POR-02 se
+      sostiene con la evidencia manual H-83 sobre b2fffa7; vence si cambia components/portal
+      (o lo que sirva FR-POR-02, como el DNS en main.c). Antes: H-51, caducada en la puerta S1
     manual_alt:
       allowed_by: FSD 0.9.4 §22.0 y §3.1 (alt. manual mientras CR-TB-09 siga abierta)
-      evidence: H-51   # CADUCADA (puerta S1)
-      evidence_commit: 9f8d3f8   # imagen grabada; components/portal sin cambios desde 9c382b9
+      evidence: H-83
+      evidence_commit: b2fffa7   # imagen 0.0.0-b2fffa7-bench
       scope: [components/portal]   # o lo que sirva FR-POR-02; si cambia, la evidencia vence
-      valid: false
-      expired_by: [758ccbc, e83d355, d64e5a3]   # SEC-04, SEC-05, SEC-06 (H-82)
+      valid: true
       history:
+        - {evidence: H-51, evidence_commit: 9f8d3f8, valid: false, expired_by: [758ccbc, e83d355, d64e5a3]}
         - {evidence: H-40, evidence_commit: ea41d50, valid: false, expired_by: [17161d3, e6a1bcd, 9c382b9]}
       renew: >
         H-83: una sola vez al final de la Fase 3, con las demás pruebas físicas de esa
         fase, sobre el commit vigente. Antes (regla del propietario, 2026-11-06): repetir
         la prueba con un teléfono real antes de cerrar la Fase 1 o publicar un release
     manual_evidence: >
+      H-83, propietario, 2026-11-15, en la visita final de la Fase 3: iPhone 14 Pro Max, iOS
+      27.2, datos móviles apagados. Primero sobre 0.0.0-fad73ef-bench (11:01 y 11:08 AST): la
+      ventana no se abrió y example.com se quedó cargando; el log mostró la asociación y el DHCP
+      pero ninguna petición HTTP (http://192.168.4.1/ sí daba el formulario): el DNS del portal no
+      contestaba desde S1 (socket ligado a 192.168.4.1 y SO_BINDTODEVICE). Arreglo b2fffa7
+      (IP_PKTINFO, misma protección SEC-06; TC-POR-14 host; regresión del portal en verde,
+      test-results/20261115T154209Z-2b618eb/). Sobre 0.0.0-b2fffa7-bench, 11:51 AST: la ventana del
+      portal se abrió sola con «Nodo clima» y en Safari http://example.com mostró el formulario.
+      Log del portal (AST): 11:51:23 unión, 11:51:27 GET /hotspot-detect.html -> 302 y GET / ->
+      formulario; 11:52:29 segunda unión con lo mismo y GET / -> formulario; ningún POST del
+      iPhone; el nodo siguió en PORTAL.
       H-40, propietario, 2026-11-04, sobre ea41d50: iPhone con los datos móviles
       apagados y la red olvidada; al unirse a clima-f3c6d4 la ventana del portal
       apareció sola, y http://example.com mostró el formulario «Nodo clima».
@@ -1388,10 +1398,10 @@ tests:
       el portal (FSD 0.9.6)
     impl: tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts   # reescrito sobre status (FSD 0.9.6); cortes en tests/bench/cortes.py
     status: successful
-    commit: 3f2eac8   # rama sntp (H-69), merge de main sobre ef118af
-    date: 2026-11-08
-    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (H-69)
-    evidence: test-results/20261108T111528Z-3f2eac8/TC-CFG-02.md
+    commit: fad73ef   # visita física final de la Fase 3 (D4, H-86), imagen 0.0.0-fad73ef-bench
+    date: 2026-11-15
+    ci_run: 43717650672   # build.yml, workflow_dispatch variant=bench version=0.0.0-fad73ef
+    evidence: test-results/20261115T151120Z-fad73ef/TC-CFG-02.md   # antes: test-results/20261108T111528Z-3f2eac8/TC-CFG-02.md (salvedad de H-80, resuelta)
     observed: >
       5 cortes del propietario con la imagen de la rama sntp: tras cada uno,
       primer status en vivo con reset = poweron y uptime_s = 1, primera medida a
@@ -1599,10 +1609,10 @@ tests:
       consola). Cleanup: SDA conectado
     impl: tests/bench/test_sen.py::test_tc_sen_04_sda_disconnect_recovery
     status: successful
-    commit: ebd8262
-    date: 2026-11-08
-    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (la imagen que ya estaba en el DUT; mismo firmware que main tras la fusión)
-    evidence: test-results/20261108T120956Z-ebd8262/TC-SEN-04.md
+    commit: fad73ef   # visita física final de la Fase 3 (D4, H-86), imagen 0.0.0-fad73ef-bench
+    date: 2026-11-15
+    ci_run: 43717650672   # build.yml, workflow_dispatch variant=bench version=0.0.0-fad73ef
+    evidence: test-results/20261115T151120Z-fad73ef/TC-SEN-04.md   # antes: test-results/20261108T120956Z-ebd8262/TC-SEN-04.md (salvedad de H-80, resuelta)
     observed: >
       SDA suelto ≈ 152 s (desconexión confirmada a 24,3 s del aviso, reconexión a
       29,7 s): 3 status con err_sensor 1, 2, 3 (Δ = 3) y 0 medidas en vivo; en la
@@ -2224,10 +2234,10 @@ tests:
       el AP vuelve
     impl: tests/bench/test_seguridad.py::test_tc_por_12_portal_closes_after_10_min
     status: successful
-    commit: 758ccbc
-    date: 2026-11-10
+    commit: 2b618eb   # firmware 0.0.0-b2fffa7-bench (arreglo del DNS, H-83)
+    date: 2026-11-15
     ci_run: 42922521308   # build.yml, workflow_dispatch variant=bench version=0.0.0-758ccbc
-    evidence: test-results/20261110T232408Z-758ccbc/TC-POR-12.md
+    evidence: test-results/20261115T160658Z-2b618eb/TC-POR-12.md   # antes: test-results/20261110T232408Z-758ccbc/TC-POR-12.md
     observed: >
       T24 a 600 000 ms de T02 en el reloj del DUT; el AP fuera en los 3 escaneos; 1 med:
       en ESPERA; ninguna nvs: config escrita ni reinicio; tras otro reset, el AP vuelve.
@@ -2287,8 +2297,8 @@ tests:
       origen de fuera, el índice 0 (interfaz del AP desconocida) y NULL
     impl: tests/host/test_portal_origen.c
     status: successful
-    commit: 2450ac1   # H-85: (local, remota); antes d64e5a3
-    date: 2026-11-10
+    commit: b2fffa7   # portal_dns_atender (visita del 2026-11-15); antes 2450ac1
+    date: 2026-11-15
     ci_run: 42939798511   # host tests + secret scan
     regression: >
       portal completo sobre 0.0.0-d64e5a3-bench (test-results/20261110T235539Z-d64e5a3/),
@@ -2695,10 +2705,10 @@ tests:
       retenido. Se mide en cada corte de JRN-01.7 y TC-CFG-02 de la misma sesión
     impl: tests/bench/test_mqtt.py::test_tc_mqtt_04_last_will_on_power_cut
     status: successful
-    commit: 3f2eac8   # rama sntp (H-69), merge de main sobre ef118af
-    date: 2026-11-08
-    ci_run: 42474661693   # build.yml, workflow_dispatch ref=sntp variant=bench version=0.0.0-3f2eac8 (H-69)
-    evidence: test-results/20261108T111528Z-3f2eac8/TC-MQTT-04.md
+    commit: fad73ef   # visita física final de la Fase 3 (D4, H-86), imagen 0.0.0-fad73ef-bench
+    date: 2026-11-15
+    ci_run: 43717650672   # build.yml, workflow_dispatch variant=bench version=0.0.0-fad73ef
+    evidence: test-results/20261115T151120Z-fad73ef/TC-MQTT-04.md   # antes: test-results/20261108T111528Z-3f2eac8/TC-MQTT-04.md (salvedad de H-80, resuelta)
     observed: >
       6 cortes (JRN-01.7 y TC-CFG-02) con la imagen de la rama sntp: Last Will
       en status a 78,3 / 79,4 / 81,4 / 63,3 / 81,1 / 80,4 s de la última muestra
@@ -2828,14 +2838,6 @@ release_verify:
 # Cambios del FSD pendientes para la próxima versión (regla del propietario,
 # 2026-11-05: una sola versión por ronda de checkers). fsd_applied guarda los ya aplicados.
 fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0.9.6); regla del propietario: no abren versión
-  - id: FR-POR-10-PKTINFO
-    origin: visita física 2026-11-15 (H-83); arreglo aprobado por el propietario el mismo día
-    text: >
-      §11 FR-POR-10: el socket DNS ya no se liga a 192.168.4.1 ni a la interfaz del AP
-      (SO_BINDTODEVICE); se liga a INADDR_ANY y, por datagrama, IP_PKTINFO da el destino y la
-      interfaz de entrada: solo se contesta a 192.168.4.1, por la interfaz del AP y desde
-      192.168.4.0/24 (misma protección). Así ligado, el iPhone no recibía respuesta DNS.
-      CONFIG_LWIP_NETBUF_RECVINFO=y. Pendiente de aprobación del texto para el próximo cambio del FSD
   - from: checker puerta 01, cf744e1 (1, 9)
     issue: >
       historial: la entrada 0.9.4 dice «sin cambios en requisitos» y amplía los
@@ -2868,6 +2870,15 @@ fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0
       devuelve la respuesta tras un USB remove/add, que es lo que hacen los cortes
       de la Fase 2 (revisar al empezar esos tests)
 fsd_applied:
+  - applied_in: 0.9.11
+    id: FR-POR-10-PKTINFO
+    origin: visita física 2026-11-15 (H-83); arreglo aprobado por el propietario el mismo día
+    text: >
+      §11 FR-POR-10: el socket DNS ya no se liga a 192.168.4.1 ni a la interfaz del AP
+      (SO_BINDTODEVICE); se liga a INADDR_ANY y, por datagrama, IP_PKTINFO da el destino y la
+      interfaz de entrada: solo se contesta a 192.168.4.1, por la interfaz del AP y desde
+      192.168.4.0/24 (misma protección). Así ligado, el iPhone no recibía respuesta DNS.
+      CONFIG_LWIP_NETBUF_RECVINFO=y. Texto aprobado por el propietario el 2026-11-15
   - applied_in: 0.9.10
     id: E13-USJ
     origin: propietario, 2026-11-14 (opción a; bench-serial-write solo llega al USB-Serial/JTAG)

@@ -1,0 +1,13 @@
+I (14593) nodo: ota: estado en_curso
+I (14613) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (17103) esp-x509-crt-bundle: Certificate validated
+I (19283) esp-x509-crt-bundle: Certificate validated
+I (20253) esp-x509-crt-bundle: Certificate validated
+I (20923) esp_https_ota: Starting OTA...
+I (20923) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (20973) nodo: ota: 0 %
+I (22903) nodo: ota: 10 %
+I (25003) nodo: ota: 20 %
+I (27163) nodo: ota: 30 %
+I (29283) nodo: ota: 40 %
+I (31303) nodo: ota: 50 %

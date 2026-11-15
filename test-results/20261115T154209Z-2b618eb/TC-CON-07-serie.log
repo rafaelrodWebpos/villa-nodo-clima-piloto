@@ -1,0 +1,24 @@
+I (6013) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
+I (6013) wifi:station: <mac> join, AID=1, bgn, 20
+I (6043) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (6833) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (6943) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
+I (12993) wifi:mode : sta (3c:0f:02:f3:c6:d4) + softAP (3c:0f:02:f3:c6:d5)
+I (12993) wifi:enable tsf
+I (13023) nodo: wifi: intento 1
+I (13023) nodo: con: PORTAL -> VALIDANDO (envío)
+I (13023) portal: POST / -> probando
+I (13083) nodo: con: VALIDANDO -> VALIDANDO (envío)
+I (13093) portal: POST / -> ocupado
+I (13223) wifi:station: <mac> leave, AID = 1, reason = 8, bss_flags is 33721443, bss:0x3fca7ac8
+I (13223) wifi:<ba-del>idx:3, tid:0
+I (13223) wifi:<ba-del>idx:2, tid:7
+I (13223) wifi:new:<1,1>, old:<1,0>, ap:<1,1>, sta:<0,0>, prof:1, snd_ch_cfg:0x0
+I (13233) wifi:scan in process, ignore set current channel
+I (16873) nodo: wifi: intento 2
+I (20723) nodo: wifi: intento 3
+I (24563) nodo: wifi: intento 4
+I (28413) nodo: wifi: intento 5
+I (32263) nodo: wifi: intento 6
+I (33023) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (33033) nodo: con: VALIDANDO -> PORTAL (wifi_down)
