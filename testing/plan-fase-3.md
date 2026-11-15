@@ -174,7 +174,8 @@ OTA se hacen por API (AP, broker, salida a Internet, DNS del banco).
 - **Arreglos de H-91:** A3-01, A3-04 y A3-05 (`1a3d75b`). A3-02 y A3-03 quedan pendientes antes de S2.
 - **Runner:** pasa `TESTBENCH_TOKEN` (`cfb249a`).
 - **Ensayo de verify** con la imagen de producción de `cfb249a`, sin tag:
-  - Primer intento: JRN-01.3 en rojo, porque faltaba la contraparte de producción del log UDP.
+  - Primer intento: JRN-01.3 en rojo, porque faltaba la contraparte de producción del log UDP
+    (`test-results/20261115T165557Z-cfb249a/`; TC-OTA-14 de ese intento en `test-results/20261115T171205Z-cfb249a/`).
   - Arreglo: `2089b02`.
   - Repetición: JRN-01.0 a 01.4 en verde y TC-OTA-14 en verde (`test-results/20261115T171420Z-2089b02/`
     y `test-results/20261115T173112Z-2089b02/`).
