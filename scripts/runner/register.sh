@@ -23,6 +23,7 @@ while true; do
   sudo -u runner "$RUNNER_DIR/config.sh" --unattended --ephemeral --replace \
        --url "https://github.com/$REPO" --token "$TOKEN" \
        --name "$NAME" --labels self-hosted,testbench --work _work
-  sudo -u runner --preserve-env=TESTBENCH_URL "$RUNNER_DIR/run.sh" || true
+  # El banco villa-2 exige el token en /api/* (S6-01): sin él, el journey de verify falla
+  sudo -u runner --preserve-env=TESTBENCH_URL,TESTBENCH_TOKEN "$RUNNER_DIR/run.sh" || true
   sleep 5
 done
