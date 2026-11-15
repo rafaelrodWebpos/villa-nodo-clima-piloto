@@ -2850,8 +2850,8 @@ release_verify:
       in_verify: >
         la parte UDP pasa a su contraparte de producción: el receptor UDP del
         banco no recibe nada del DUT durante los 3 ciclos. FR-LOG-01 completo
-        sigue sin verificar hasta bench-traffic-capture (CR-TB-04). Se
-        implementa al escribir JRN-01.3
+        sigue sin verificar hasta bench-traffic-capture (CR-TB-04). Implementado
+        el 2026-11-15, tras el ensayo de verify sobre cfb249a (JRN-01.3 fallaba en producción)
   not_in_journey:
     - feature: comandos serie E13 (wdt-test, reiniciar; C-LOG-02)
       used_by: [NFR-WDT-01, FR-TIME-02]

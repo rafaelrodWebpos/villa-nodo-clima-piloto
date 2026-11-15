@@ -241,7 +241,7 @@ def _ms(linea):
     return int(m.group(1)) if m else None
 
 
-def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
+def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir, firmware):
     """JRN-01.3 — tras el reinicio, el nodo configurado arranca el STA (T01), se une al AP
     del banco y copia su log por UDP al receptor del banco (FR-LOG-02) durante 3 ciclos."""
     from benchlib import esperar_lineas, primera
@@ -296,6 +296,18 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir):
         # T08 (Fase 1): su línea con: en ≤ 30 s y sin AP; MQTT y SNTP son de la Fase 2
         assert t_ip, "falta con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up) en 30 s"
         assert not primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO"), "OPERATIVO sin broker (T11 en la Fase 1)"
+
+        # Imagen de producción (job verify, release_verify del plan): sin log UDP (E11 solo con
+        # CONFIG_NODO_UDP_LOG=y); su contraparte es que el receptor no recibe nada del DUT
+        if firmware["variant"] == "production":
+            del_dut = [u for u in udp if (u.get("ts", 0) if isinstance(u, dict) else 0) >= t0]
+            meds = sorted({t.strip() for t in textos if "nodo: med: " in t})
+            c.note(f"- producción: {len(del_dut)} líneas en el receptor UDP en {CICLOS} ciclos; {len(meds)} med: en la consola")
+            assert not any("UDP logging -> " in t for t in textos), "la imagen de producción anuncia log UDP (E11)"
+            assert not del_dut, f"el receptor UDP recibió {len(del_dut)} líneas de la imagen de producción"
+            assert len(meds) >= CICLOS, f"solo {len(meds)} ciclos de medición en la ventana"
+            c.passed(f"T01 en {t01} ms, unido al AP del banco; producción sin log UDP en {CICLOS} ciclos")
+            return
 
         # FR-LOG-02: «UDP logging -> host:port» y cada línea serie en el receptor en ≤ 1 s
         def txt(u): return str(u.get("line", u.get("text", "")) if isinstance(u, dict) else u).strip()   # el receptor da «line»
