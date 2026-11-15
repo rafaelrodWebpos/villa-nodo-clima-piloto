@@ -45,7 +45,11 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
                for o, p in sorted(images.items(), key=lambda kv: int(kv[0], 16))], "")
         c.step(f"Grabando {len(images)} imágenes en {dut_slot} (NVS en blanco)")
         res = tb.flash(dut_slot, images, chip="esp32s3")
-        c.note(f"- respuesta: ok={res.get('ok')} returncode={res.get('returncode')}", "")
+        escritos = [ln.strip() for ln in (res.get("output") or "").splitlines() if ln.strip().startswith("Wrote ")]
+        c.note(f"- respuesta: ok={res.get('ok')} returncode={res.get('returncode')}",
+               *[f"- {ln}" for ln in escritos], "")
+        # grabado.envolver (fixture testbench): «Wrote N bytes» = lo enviado, por offset
+        assert "grabado inexacto" not in str(res.get("error", "")), res.get("error")
         assert res.get("ok") and res.get("returncode", 0) == 0, f"flash falló: {res.get('error') or res}"
 
         # Ejecución: captura del arranque (P-BOOT-CAPTURE)
@@ -57,6 +61,10 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
         # Resultado
         boot = _after_last_reset(lines)
         assert boot, "la captura no contiene ninguna línea rst: (el reset no se vio)"
+        # El bootloader rechaza una imagen alterada al grabarla (release v0.0.1, 2026-11-15)
+        rechazo = next((ln.strip() for ln in boot if "Image hash failed" in ln or "No bootable app partitions" in ln), None)
+        assert rechazo is None, (f"el bootloader rechaza la imagen grabada («{rechazo}»): la imagen enviada "
+                                 "es válida (CI), así que se alteró al grabarla; revisar /api/flash del banco")
         has_marker = any(bench_image_marker in ln for ln in boot)
         has_init = any(boot_marker in ln for ln in boot)
         ver = next((ln for ln in boot if re.search(r"nodo_clima \S+", ln)), "")

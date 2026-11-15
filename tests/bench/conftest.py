@@ -19,6 +19,8 @@ import time
 import pytest
 from testbench_driver import TestbenchDriver
 
+import grabado
+
 REPO = pathlib.Path(__file__).resolve().parents[2]
 PLAN = REPO / "testing" / "test-plan.yaml"
 GH_REPO = "rafaelrodWebpos/villa-nodo-clima-piloto"
@@ -78,6 +80,7 @@ def testbench():
     if not url:
         pytest.skip("not done: TESTBENCH_URL no definido (precondición)")
     tb = TestbenchDriver(url)
+    grabado.envolver(tb)   # bytes exactos en /api/flash y «Wrote N bytes» revisado (2026-11-15)
     try:
         tb.info()
     except Exception as e:  # banco apagado = precondición, no fallo del firmware

@@ -2852,6 +2852,14 @@ release_verify:
         banco no recibe nada del DUT durante los 3 ciclos. FR-LOG-01 completo
         sigue sin verificar hasta bench-traffic-capture (CR-TB-04). Implementado
         el 2026-11-15, tras el ensayo de verify sobre cfb249a (JRN-01.3 fallaba en producción)
+  grabado: >
+    2026-11-15, release v0.0.1: el verify falló porque POST /api/flash del banco recortaba
+    los blancos finales de cada binario (bytes.strip() en el fork hasta b5623c4) y la app
+    del tag termina en 0x0a. Arreglo del fork en villa-2 f50858b. Defensas del proyecto
+    para cualquier versión: tests/bench/grabado.py (fixture testbench) graba con 4 bytes
+    0xFF detrás si la imagen termina en un blanco y revisa «Wrote N bytes»; JRN-01.0
+    falla nombrando el grabado si el arranque dice «Image hash failed».
+    tests/host/test_grabado.py en ci.yml
   not_in_journey:
     - feature: comandos serie E13 (wdt-test, reiniciar; C-LOG-02)
       used_by: [NFR-WDT-01, FR-TIME-02]

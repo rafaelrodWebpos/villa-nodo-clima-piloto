@@ -22,6 +22,8 @@ jobs:
           ctest --test-dir build-host --output-on-failure
       - name: Reinicios en la consola (H-78)
         run: python3 tests/host/test_consola.py
+      - name: Grabado por el banco con los bytes exactos (release v0.0.1)
+        run: python3 tests/host/test_grabado.py
 
   test-plan:            # un plan que no carga pone la CI en rojo
     runs-on: ubuntu-latest
