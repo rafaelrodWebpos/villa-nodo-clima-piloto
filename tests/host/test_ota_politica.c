@@ -51,6 +51,14 @@ static void tc_ota_02(void)
     /* FR-OTA-13: ota-test-* solo en banco, y marcada como prueba */
     ESPERA(ota_url_inicial(REPO "ota-test-b1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "ota-test en producción");
     ESPERA(ota_url_inicial(REPO "ota-test-b1/x.bin", true, &prueba) == OTA_OK && prueba, "ota-test en banco");
+    /* A3-01 (auditoría H-91): el prefijo sin distinguir mayúsculas y sin segmentos vacíos */
+    ESPERA(ota_url_inicial(REPO "OTA-TEST-b1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "OTA-TEST en producción");
+    ESPERA(ota_url_inicial(REPO "Ota-Test-b1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "Ota-Test en producción");
+    ESPERA(ota_url_inicial(REPO "OTA-TEST-b1/x.bin", true, &prueba) == OTA_OK && prueba, "OTA-TEST en banco, marcada como prueba");
+    ESPERA(ota_url_inicial(REPO "/ota-test-b1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "segmento vacío antes del tag");
+    ESPERA(ota_url_inicial(REPO "v0.0.1//x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "segmento vacío en la ruta");
+    ESPERA(ota_url_inicial("https://github.com//rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/v0.0.1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "// al principio de la ruta");
+    ESPERA(ota_url_redireccion("https://release-assets.githubusercontent.com/a//b?x=%2F", 1) == OTA_RECHAZADO_HOST, "redirección con //");
     /* FR-OTA-14 (§7.4): usuario@, :8443, %2e, /../, \, mayúsculas en el esquema, control, sufijo extra */
     const struct { const char *url; ota_motivo_t m; } c14[] = {
         {"https://user@github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/v1/x", OTA_RECHAZADO_HOST},

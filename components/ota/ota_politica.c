@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 static const char *const TEXTO[] = {
     "ok", "rechazado:payload", "rechazado:host", "rechazado:ruta", "rechazado:misma_version",
@@ -75,7 +76,7 @@ typedef struct { char host[254]; const char *ruta; size_t ruta_len; } url_t;
 
 /* Esquema exacto «https», autoridad sin usuario@ ni %, puerto ausente o 443, host de
  * [a-z0-9.-] (sin distinguir mayúsculas). Ruta: empieza por /, sin %, sin \, sin
- * segmentos . o .., sin controles; la consulta (tras ?) puede llevar % (GitHub firma así
+ * segmentos ., .. ni vacíos (//), sin controles; la consulta (tras ?) puede llevar % (GitHub firma así
  * sus enlaces de release-assets). Sin fragmento. */
 static ota_motivo_t analizar(const char *s, url_t *u)
 {
@@ -107,6 +108,7 @@ static ota_motivo_t analizar(const char *s, url_t *u)
         const char *sig = memchr(seg + 1, '/', (size_t)(barra + rlen - seg - 1));
         size_t sl = (size_t)((sig ? sig : barra + rlen) - seg - 1);
         if ((sl == 1 && seg[1] == '.') || (sl == 2 && seg[1] == '.' && seg[2] == '.')) return OTA_RECHAZADO_RUTA;
+        if (sl == 0 && sig) return OTA_RECHAZADO_RUTA;                       /* «//» (A3-01, H-91) */
         if (!sig) break;
         seg = sig;
     }
@@ -133,7 +135,7 @@ ota_motivo_t ota_url_inicial(const char *url, bool imagen_banco, bool *es_prueba
     if (strcmp(u.host, "github.com") != 0 || u.ruta_len <= pl || strncmp(u.ruta, RUTA_REPO, pl) != 0)
         return OTA_RECHAZADO_RUTA;
     const char *tag = u.ruta + pl;
-    const bool prueba = strncmp(tag, PRUEBA, sizeof PRUEBA - 1) == 0;
+    const bool prueba = strncasecmp(tag, PRUEBA, sizeof PRUEBA - 1) == 0;  /* sin mayúsculas (A3-01, H-91) */
     if (prueba && !imagen_banco) return OTA_RECHAZADO_RUTA;                  /* FR-OTA-13 */
     if (es_prueba) *es_prueba = prueba;
     return OTA_OK;

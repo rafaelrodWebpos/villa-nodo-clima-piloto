@@ -37,6 +37,13 @@ jobs:
         run: |
           [[ "$SERIE_IN" =~ ^[1-9][0-9]{0,2}$ ]] || { echo "::error::serie no válida"; exit 1; }
           echo "serie=$SERIE_IN" >> "$GITHUB_OUTPUT"
+      - name: A3-04 (H-91) — the test versions stay below every v* release
+        env:
+          SERIE: ${{ steps.v.outputs.serie }}
+        run: |
+          TAGS=$(git ls-remote --tags "https://github.com/$GITHUB_REPOSITORY" 'refs/tags/v*' | sed 's|.*refs/tags/||; s|\^{}$||' | sort -u)
+          python3 scripts/ci/ota_prueba.py versiones "0.0.1-ota-test.$SERIE.1" "0.0.1-ota-test.$SERIE.2" \
+            "0.0.1-ota-test.$SERIE.3" -- $TAGS
       - name: Build the test images
         env:
           SERIE: ${{ steps.v.outputs.serie }}
@@ -51,6 +58,7 @@ jobs:
           BANCO="sdkconfig.defaults;sdkconfig.bench.defaults"
           build b1 "0.0.1-ota-test.$SERIE.1" "$BANCO"
           build b2 "0.0.1-ota-test.$SERIE.2" "$BANCO"
+          for n in b1 b2; do python3 scripts/ci/ota_prueba.py sin_mqtt "b-$n/sdkconfig" bench; done   # A3-05
           build sin_mqtt "0.0.1-ota-test.$SERIE.3" "$BANCO;sdkconfig.ota-test-sin-mqtt.defaults"
           cp -r "$IDF_PATH/examples/get-started/hello_world" hw
           idf.py -C hw -B hw/build set-target esp32 >/dev/null

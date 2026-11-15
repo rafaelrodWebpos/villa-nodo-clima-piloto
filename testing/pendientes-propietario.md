@@ -39,3 +39,12 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
   - (b) Banco: asignar el puerto del CH343 (VID:PID `1a86:55d3`) a un slot y escribir ahí. Es configuración
     de la Pi, a decidir por el propietario.
 - **Estado.** Resuelto (2026-11-14): opción (a). TC-TIME-08 y TC-WDT-02 en verde; el texto del FSD está en `fsd_pending` (E13-USJ).
+
+## 2026-11-15 · Auditoría de cierre de la Fase 3 (H-91): pendientes antes de la instalación (S2)
+
+- **Contexto.** El informe de H-91 está fuera del repositorio. Veredicto: sin puerta trasera, S1 sí y S3 sí con
+  condiciones. A3-01, A3-04 y A3-05 quedan corregidos en el firmware y en la CI.
+- **Pendientes antes de la instalación (puerta S2), por decisión del propietario:**
+  - A3-02: según el informe H-91.
+  - A3-03: según el informe H-91.
+- **Estado.** Abiertos. No bloquean el tag v0.0.1; sí bloquean la instalación en la villa (S2).

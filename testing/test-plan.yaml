@@ -1836,6 +1836,9 @@ tests:
     needs: [hosted-ci]
     expect: >
       ota_url_inicial y ota_url_redireccion: http y host ajeno → rechazado:host; otro repo, archive, solo el prefijo y URL inicial de release-assets → rechazado:ruta; ota-test-* → rechazado:ruta en producción y aceptada (marcada como prueba) en banco; los 17 casos de FR-OTA-14 (usuario@, :8443, puerto vacío, % en host o ruta, .., ., \\, esquema en mayúsculas, control, tabulador, sufijo .evil.example, fragmento, no ASCII) con su motivo; redirección a release-assets con consulta firmada (%) aceptada, objects.githubusercontent.com y http rechazados, la cuarta redirección → error:redirecciones (§7.4)
+      A3-01 (auditoría H-91): un segmento vacío (//) en la ruta → rechazado:ruta (y en una redirección,
+      rechazado:host); el prefijo ota-test- sin distinguir mayúsculas (OTA-TEST-*, Ota-Test-* en
+      producción → rechazado:ruta; en banco, aceptada como prueba)
     impl: tests/host/test_ota_politica.c (TC-OTA-02)
   - id: TC-OTA-03
     shape: atomic
@@ -2121,6 +2124,33 @@ tests:
       imagen anterior y sin rollback (T17, «no debe ocurrir»: marcar arrancable el slot nuevo antes
       de verificar la imagen completa). Si el corte cae fuera de la descarga, not done y se repite
     impl: tests/bench/test_jrn02.py::test_tc_ota_15_power_cut_during_download
+  - id: TC-SEC-04
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: other
+    verifies: [FR-OTA-05, FR-OTA-13]
+    needs: [hosted-ci]
+    expect: >
+      A3-04 (auditoría H-91): ota-test.yml no compila ni publica si alguna versión de prueba
+      (0.0.1-ota-test.<serie>.<n>) no queda por debajo, en precedencia semver, de v0.0.1 y de
+      todo tag v* publicado; la autoprueba de scripts/ci/ota_prueba.py (ci.yml) cubre por encima,
+      sin prerelease, otra prerelease y no semver
+    impl: scripts/ci/ota_prueba.py versiones (ota-test.yml) y autoprueba (ci.yml)
+  - id: TC-SEC-05
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: other
+    verifies: [FR-OTA-07]
+    needs: [hosted-ci]
+    expect: >
+      A3-05 (auditoría H-91): CONFIG_NODO_TEST_SIN_MQTT apagado en el sdkconfig de toda imagen de
+      build.yml (producción, la del tag incluida, y banco) y de B1 y B2 en ota-test.yml; la
+      autoprueba cubre el caso activado en producción y en banco
+    impl: scripts/ci/ota_prueba.py sin_mqtt (build.yml, ota-test.yml) y autoprueba (ci.yml)
   - id: TC-SEC-03
     shape: atomic
     kind: standard

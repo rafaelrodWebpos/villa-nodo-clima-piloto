@@ -116,6 +116,9 @@ jobs:
           fi
           echo "verified: ${{ steps.plan.outputs.variant }} image, marker $FOUND"
 
+      - name: A3-05 (H-91) CONFIG_NODO_TEST_SIN_MQTT apagado en la imagen
+        run: python3 scripts/ci/ota_prueba.py sin_mqtt build/sdkconfig "${{ steps.plan.outputs.variant }}"
+
       - name: C-LOG-02 comandos serie (E13) solo en la imagen de banco
         run: python3 scripts/ci/c_log_02.py imagen build/$APP_NAME.bin "${{ steps.plan.outputs.variant }}"
 
