@@ -1841,7 +1841,9 @@ tests:
       producción → rechazado:ruta; en banco, aceptada como prueba)
       A3-02 (auditoría H-91): un salto que vuelve a github.com pasa la ruta del repo y FR-OTA-13
       como la URL inicial (otro repo, archive, solo el prefijo y ota-test-* en producción →
-      rechazado:host; ota-test-* en banco y otra release v* del repo aceptados)
+      rechazado:host; ota-test-* en banco y otra release v* del repo aceptados); B-3 (revisión
+      2026-11-18): GITHUB.COM, github.com:443, // y % hacia otro repo (o escondiendo ota-test-*)
+      → rechazado:host; GITHUB.COM:443 a la ruta del repo, aceptado
     impl: tests/host/test_ota_politica.c (TC-OTA-02)
   - id: TC-OTA-03
     shape: atomic

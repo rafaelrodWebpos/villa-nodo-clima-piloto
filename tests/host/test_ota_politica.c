@@ -105,6 +105,16 @@ static void tc_ota_02(void)
     ESPERA(ota_url_redireccion(REPO "ota-test-2/firmware_b1.bin", 1, true) == OTA_OK, "salto a ota-test en banco");
     ESPERA(ota_url_redireccion(REPO, 1, false) == OTA_RECHAZADO_HOST, "salto a solo el prefijo");
     ESPERA(ota_url_redireccion(ra, 1, true) == OTA_OK, "release-assets en banco");
+    /* B-3 (revisión 2026-11-18): variantes del host y de la ruta no saltan la regla de A3-02 */
+    ESPERA(ota_url_redireccion("https://GITHUB.COM/otro/repo/releases/download/v1/x.bin", 1, false) == OTA_RECHAZADO_HOST, "GITHUB.COM a otro repo");
+    ESPERA(ota_url_redireccion("https://github.com:443/otro/repo/releases/download/v1/x.bin", 1, false) == OTA_RECHAZADO_HOST, "github.com:443 a otro repo");
+    ESPERA(ota_url_redireccion("https://GitHub.com:443/otro/repo/releases/download/v1/x.bin", 2, true) == OTA_RECHAZADO_HOST, "GitHub.com:443 a otro repo, en banco");
+    ESPERA(ota_url_redireccion("https://github.com//otro/repo/releases/download/v1/x.bin", 1, false) == OTA_RECHAZADO_HOST, "// a otro repo");
+    ESPERA(ota_url_redireccion("https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download//../../otro/repo/x.bin", 1, false) == OTA_RECHAZADO_HOST, "// y .. hacia otro repo");
+    ESPERA(ota_url_redireccion("https://github.com/otro%2Frepo/releases/download/v1/x.bin", 1, false) == OTA_RECHAZADO_HOST, "%% (barra codificada) a otro repo");
+    ESPERA(ota_url_redireccion("https://github.com/rafaelrodWebpos%2Fvilla-nodo-clima-piloto/releases/download/v1/x.bin", 1, false) == OTA_RECHAZADO_HOST, "%% imitando la ruta del repo");
+    ESPERA(ota_url_redireccion("https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/%6Fta-test-2/x.bin", 1, false) == OTA_RECHAZADO_HOST, "%% escondiendo ota-test en producción");
+    ESPERA(ota_url_redireccion("https://GITHUB.COM:443" "/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/v0.0.2/x.bin", 1, false) == OTA_OK, "GITHUB.COM:443 a la ruta del repo: aceptado");
 }
 
 static void tc_ota_03(void)
