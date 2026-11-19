@@ -45,7 +45,9 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
 - **Contexto.** El informe de H-91 está fuera del repositorio. Veredicto: sin puerta trasera, S1 sí y S3 sí con
   condiciones. A3-01, A3-04 y A3-05 quedan corregidos en el firmware y en la CI.
 - **Pendientes antes de la instalación (puerta S2), por decisión del propietario:**
-  - A3-02: según el informe H-91.
-  - A3-03: según el informe H-91.
+  - A3-02 (baja, `ota_politica.c`): un salto que volvía a github.com no se revisaba contra la ruta del repo ni contra
+    ota-test-*. **Corregido el 2026-11-18** (TC-OTA-02 ampliado).
+  - A3-03 (baja, robustez, `ota_descarga.c`): estado compartido entre una tarea abortada y una descarga nueva.
+    **Corregido el 2026-11-18** (contexto propio de cada tarea y turno `ota_turno`; TC-OTA-16).
 - **Estado.** Abiertos. No bloquean el tag v0.0.1; sí bloquean la instalación en la villa (S2). Van en el paquete
   pendiente antes de S2 con ESP-IDF 6.0.3 y #52 (`testing/plan-fase-3.md`, aprobado el 2026-11-15).

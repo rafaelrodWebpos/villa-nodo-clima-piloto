@@ -38,7 +38,9 @@ ota_motivo_t ota_url_inicial(const char *url, bool imagen_banco, bool *es_prueba
 
 /* FR-OTA-14 + FR-OTA-02 para cada redirección (sin la regla de la ruta del repo);
  * saltos = número de redirección (1, 2, 3…); la cuarta es error:redirecciones. */
-ota_motivo_t ota_url_redireccion(const char *url, int saltos);
+/* imagen_banco: como en ota_url_inicial. Un salto a github.com tiene que cumplir además la
+ * ruta del repo y FR-OTA-13 (A3-02, H-91); si no, rechazado:host. */
+ota_motivo_t ota_url_redireccion(const char *url, int saltos, bool imagen_banco);
 
 /* FR-OTA-05: versión de la imagen descargada frente a la que corre. es_prueba: pre-release
  * ota-test-* (sin anti-downgrade, H-84). Una versión que no es semver es error:imagen. */

@@ -124,6 +124,19 @@ static bool host_permitido(const char *h)
     return false;
 }
 
+/* FR-OTA-11 y FR-OTA-13 sobre una URL ya analizada con host github.com: ruta del repo y
+ * ota-test-* solo en la imagen de banco. */
+static ota_motivo_t ruta_repo(const url_t *u, bool imagen_banco, bool *es_prueba)
+{
+    const size_t pl = sizeof RUTA_REPO - 1;
+    if (u->ruta_len <= pl || strncmp(u->ruta, RUTA_REPO, pl) != 0) return OTA_RECHAZADO_RUTA;
+    const char *tag = u->ruta + pl;
+    const bool prueba = strncasecmp(tag, PRUEBA, sizeof PRUEBA - 1) == 0;  /* sin mayúsculas (A3-01, H-91) */
+    if (prueba && !imagen_banco) return OTA_RECHAZADO_RUTA;                  /* FR-OTA-13 */
+    if (es_prueba) *es_prueba = prueba;
+    return OTA_OK;
+}
+
 ota_motivo_t ota_url_inicial(const char *url, bool imagen_banco, bool *es_prueba)
 {
     if (es_prueba) *es_prueba = false;
@@ -131,24 +144,23 @@ ota_motivo_t ota_url_inicial(const char *url, bool imagen_banco, bool *es_prueba
     ota_motivo_t m = analizar(url, &u);
     if (m != OTA_OK) return m;
     if (!host_permitido(u.host)) return OTA_RECHAZADO_HOST;                  /* FR-OTA-02 */
-    const size_t pl = sizeof RUTA_REPO - 1;                                  /* FR-OTA-11 */
-    if (strcmp(u.host, "github.com") != 0 || u.ruta_len <= pl || strncmp(u.ruta, RUTA_REPO, pl) != 0)
-        return OTA_RECHAZADO_RUTA;
-    const char *tag = u.ruta + pl;
-    const bool prueba = strncasecmp(tag, PRUEBA, sizeof PRUEBA - 1) == 0;  /* sin mayúsculas (A3-01, H-91) */
-    if (prueba && !imagen_banco) return OTA_RECHAZADO_RUTA;                  /* FR-OTA-13 */
-    if (es_prueba) *es_prueba = prueba;
-    return OTA_OK;
+    if (strcmp(u.host, "github.com") != 0) return OTA_RECHAZADO_RUTA;        /* FR-OTA-11 */
+    return ruta_repo(&u, imagen_banco, es_prueba);
 }
 
-ota_motivo_t ota_url_redireccion(const char *url, int saltos)
+ota_motivo_t ota_url_redireccion(const char *url, int saltos, bool imagen_banco)
 {
     if (saltos > OTA_REDIRECCIONES_MAX) return OTA_ERROR_REDIRECCIONES;
     url_t u;
     ota_motivo_t m = analizar(url, &u);
     if (m == OTA_RECHAZADO_RUTA) return OTA_RECHAZADO_HOST;    /* T20: un salto malo es rechazado:host */
     if (m != OTA_OK) return m;
-    return host_permitido(u.host) ? OTA_OK : OTA_RECHAZADO_HOST;
+    if (!host_permitido(u.host)) return OTA_RECHAZADO_HOST;
+    /* A3-02 (H-91): un salto que vuelve a github.com pasa las mismas reglas de ruta del repo
+     * y de FR-OTA-13 que la URL inicial; si no las cumple, rechazado:host como todo salto malo */
+    if (strcmp(u.host, "github.com") == 0 && ruta_repo(&u, imagen_banco, NULL) != OTA_OK)
+        return OTA_RECHAZADO_HOST;
+    return OTA_OK;
 }
 
 /* ── FR-OTA-05: versión ─────────────────────────────────────────────────── */

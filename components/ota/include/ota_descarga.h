@@ -9,8 +9,13 @@
 
 typedef void (*ota_fin_cb_t)(ota_motivo_t motivo);
 
-/* Arranca la tarea de la descarga. en_ejecucion: versión de la imagen que corre. */
-bool ota_descarga_iniciar(const char *url, bool es_prueba, const char *en_ejecucion, ota_fin_cb_t fin);
+/* Arranca la tarea de la descarga. en_ejecucion: versión de la imagen que corre;
+ * imagen_banco: las redirecciones a github.com siguen FR-OTA-13 como la URL inicial (A3-02).
+ * false si no se puede: entre otros casos, mientras la tarea de una descarga abortada no
+ * haya salido (A3-03; main lo trata como T20 con error:red). */
+bool ota_descarga_iniciar(const char *url, bool es_prueba, bool imagen_banco, const char *en_ejecucion,
+                          ota_fin_cb_t fin);
 
-/* T22: aborta la descarga en curso sin cambiar la imagen arrancable; `fin` no se llama. */
+/* T22: aborta la descarga en curso sin cambiar la imagen arrancable; `fin` no se llama.
+ * La tarea sale en cuanto vuelve de la operación de red en curso (como mucho 30 s). */
 void ota_descarga_abortar(void);

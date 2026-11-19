@@ -626,7 +626,7 @@ static void al_vencer_validacion_ota(void *arg)
 static void iniciar_descarga(void)
 {
     ota_estado("en_curso");
-    if (!ota_descarga_iniciar(s_cmd_ota.url, s_cmd_ota.es_prueba, s_version, al_fin_ota))
+    if (!ota_descarga_iniciar(s_cmd_ota.url, s_cmd_ota.es_prueba, IMAGEN_BANCO, s_version, al_fin_ota))
         al_fin_ota(OTA_ERROR_RED);
 }
 

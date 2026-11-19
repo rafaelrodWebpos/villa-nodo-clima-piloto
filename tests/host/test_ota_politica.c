@@ -58,7 +58,7 @@ static void tc_ota_02(void)
     ESPERA(ota_url_inicial(REPO "/ota-test-b1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "segmento vacío antes del tag");
     ESPERA(ota_url_inicial(REPO "v0.0.1//x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "segmento vacío en la ruta");
     ESPERA(ota_url_inicial("https://github.com//rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/v0.0.1/x.bin", false, &prueba) == OTA_RECHAZADO_RUTA, "// al principio de la ruta");
-    ESPERA(ota_url_redireccion("https://release-assets.githubusercontent.com/a//b?x=%2F", 1) == OTA_RECHAZADO_HOST, "redirección con //");
+    ESPERA(ota_url_redireccion("https://release-assets.githubusercontent.com/a//b?x=%2F", 1, false) == OTA_RECHAZADO_HOST, "redirección con //");
     /* FR-OTA-14 (§7.4): usuario@, :8443, %2e, /../, \, mayúsculas en el esquema, control, sufijo extra */
     const struct { const char *url; ota_motivo_t m; } c14[] = {
         {"https://user@github.com/rafaelrodWebpos/villa-nodo-clima-piloto/releases/download/v1/x", OTA_RECHAZADO_HOST},
@@ -85,17 +85,26 @@ static void tc_ota_02(void)
     }
     /* redirecciones (FR-OTA-02, T20): la de release-assets con su consulta firmada vale */
     const char *ra = "https://release-assets.githubusercontent.com/github-production-release-asset/1/2?sp=r&sv=2018&se=2026-11-10T22%3A00%3A00Z&sig=a%2Bb";
-    ESPERA(ota_url_redireccion(ra, 1) == OTA_OK, "release-assets con consulta firmada");
+    ESPERA(ota_url_redireccion(ra, 1, false) == OTA_OK, "release-assets con consulta firmada");
     /* la URL firmada real mide ~900 bytes (2026-11-14): sin límite de longitud en la política */
     static char larga[1000];
     snprintf(larga, sizeof larga, "https://release-assets.githubusercontent.com/github-production-release-asset/1/2?sig=");
     for (size_t k = strlen(larga); k < sizeof larga - 1; k++) larga[k] = 'a';
-    ESPERA(ota_url_redireccion(larga, 1) == OTA_OK, "redirección de 999 bytes");
-    ESPERA(ota_url_redireccion("https://objects.githubusercontent.com/x", 1) == OTA_RECHAZADO_HOST, "objects.githubusercontent.com (§7.3)");
-    ESPERA(ota_url_redireccion("http://release-assets.githubusercontent.com/x", 1) == OTA_RECHAZADO_HOST, "salto a http");
-    ESPERA(ota_url_redireccion("https://release-assets.githubusercontent.com/a/../b", 2) == OTA_RECHAZADO_HOST, "salto con .. → rechazado:host (T20)");
-    ESPERA(ota_url_redireccion(ra, 3) == OTA_OK, "tercera redirección");
-    ESPERA(ota_url_redireccion(ra, 4) == OTA_ERROR_REDIRECCIONES, "cuarta redirección");
+    ESPERA(ota_url_redireccion(larga, 1, false) == OTA_OK, "redirección de 999 bytes");
+    ESPERA(ota_url_redireccion("https://objects.githubusercontent.com/x", 1, false) == OTA_RECHAZADO_HOST, "objects.githubusercontent.com (§7.3)");
+    ESPERA(ota_url_redireccion("http://release-assets.githubusercontent.com/x", 1, false) == OTA_RECHAZADO_HOST, "salto a http");
+    ESPERA(ota_url_redireccion("https://release-assets.githubusercontent.com/a/../b", 2, false) == OTA_RECHAZADO_HOST, "salto con .. → rechazado:host (T20)");
+    ESPERA(ota_url_redireccion(ra, 3, false) == OTA_OK, "tercera redirección");
+    ESPERA(ota_url_redireccion(ra, 4, false) == OTA_ERROR_REDIRECCIONES, "cuarta redirección");
+    /* A3-02 (H-91): un salto que vuelve a github.com pasa las reglas de la URL inicial */
+    ESPERA(ota_url_redireccion(REPO "v0.0.2/firmware_v0.0.2.bin", 1, false) == OTA_OK, "salto a otra release v* del repo");
+    ESPERA(ota_url_redireccion("https://github.com/otro/repo/releases/download/v1/x.bin", 1, false) == OTA_RECHAZADO_HOST, "salto a otro repo");
+    ESPERA(ota_url_redireccion("https://github.com/rafaelrodWebpos/villa-nodo-clima-piloto/archive/x", 1, false) == OTA_RECHAZADO_HOST, "salto a archive");
+    ESPERA(ota_url_redireccion(REPO "ota-test-2/firmware_b1.bin", 1, false) == OTA_RECHAZADO_HOST, "salto a ota-test en producción");
+    ESPERA(ota_url_redireccion(REPO "OTA-TEST-2/firmware_b1.bin", 2, false) == OTA_RECHAZADO_HOST, "salto a OTA-TEST en producción");
+    ESPERA(ota_url_redireccion(REPO "ota-test-2/firmware_b1.bin", 1, true) == OTA_OK, "salto a ota-test en banco");
+    ESPERA(ota_url_redireccion(REPO, 1, false) == OTA_RECHAZADO_HOST, "salto a solo el prefijo");
+    ESPERA(ota_url_redireccion(ra, 1, true) == OTA_OK, "release-assets en banco");
 }
 
 static void tc_ota_03(void)

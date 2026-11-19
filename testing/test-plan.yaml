@@ -1839,6 +1839,9 @@ tests:
       A3-01 (auditoría H-91): un segmento vacío (//) en la ruta → rechazado:ruta (y en una redirección,
       rechazado:host); el prefijo ota-test- sin distinguir mayúsculas (OTA-TEST-*, Ota-Test-* en
       producción → rechazado:ruta; en banco, aceptada como prueba)
+      A3-02 (auditoría H-91): un salto que vuelve a github.com pasa la ruta del repo y FR-OTA-13
+      como la URL inicial (otro repo, archive, solo el prefijo y ota-test-* en producción →
+      rechazado:host; ota-test-* en banco y otra release v* del repo aceptados)
     impl: tests/host/test_ota_politica.c (TC-OTA-02)
   - id: TC-OTA-03
     shape: atomic
@@ -2151,6 +2154,21 @@ tests:
       build.yml (producción, la del tag incluida, y banco) y de B1 y B2 en ota-test.yml; la
       autoprueba cubre el caso activado en producción y en banco
     impl: scripts/ci/ota_prueba.py sin_mqtt (build.yml, ota-test.yml) y autoprueba (ci.yml)
+  - id: TC-OTA-16
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: host
+    verifies: [FR-OTA-08]
+    needs: [hosted-ci]
+    expect: >
+      A3-03 (auditoría H-91), núcleo ota_turno: tras un aborto (T22), mientras la tarea vieja no
+      sale no se admite otra descarga (main lo trata como T20 con error:red); el intento
+      rechazado no borra el aborto, la tarea abortada no llama a fin() y la siguiente entra sin
+      el aborto y avisa al terminar. El adaptador guarda URL, Location y final en un contexto
+      propio de cada tarea
+    impl: tests/host/test_ota_turno.c (TC-OTA-16)
   - id: TC-SEC-03
     shape: atomic
     kind: standard
@@ -2888,6 +2906,12 @@ release_verify:
 # Cambios del FSD pendientes para la próxima versión (regla del propietario,
 # 2026-11-05: una sola versión por ronda de checkers). fsd_applied guarda los ya aplicados.
 fsd_pending:   # no bloqueantes del checker de la puerta 01 sobre cf744e1 (FSD 0.9.6); regla del propietario: no abren versión
+  - id: T20-SALTO-GITHUB
+    origin: auditoría H-91 (A3-02), 2026-11-18
+    text: >
+      §6.4 T20 y FR-OTA-02: decir que un salto de redirección a github.com también tiene que
+      cumplir la ruta del repo (FR-OTA-11) y FR-OTA-13, y que si no los cumple el motivo es
+      rechazado:host, como todo salto malo. El firmware ya lo hace (A3-02)
   - from: checker puerta 01, cf744e1 (1, 9)
     issue: >
       historial: la entrada 0.9.4 dice «sin cambios en requisitos» y amplía los

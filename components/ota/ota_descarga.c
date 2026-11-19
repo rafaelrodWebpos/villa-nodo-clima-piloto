@@ -1,6 +1,7 @@
 /* L1 ota — descarga de la imagen (FSD §7). Adaptador de ESP-IDF; las decisiones son del
- * núcleo puro (ota_politica.c). */
+ * núcleo puro (ota_politica.c, ota_turno.c). */
 #include "ota_descarga.h"
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 #include "esp_crt_bundle.h"
@@ -11,6 +12,7 @@
 #include "esp_ota_ops.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "ota_turno.h"
 
 static const char *TAG = "nodo";
 #define TIMEOUT_MS 30000              /* FR-OTA-12: 30 s sin datos */
@@ -18,27 +20,43 @@ static const char *TAG = "nodo";
  * release-assets.githubusercontent.com mide ~900 (medida el 2026-11-14) */
 #define URL_SALTO_MAX 2048
 
-static char s_url[OTA_URL_MAX + 1];
-static char s_en_ejecucion[32];
-static bool s_es_prueba;
-static ota_fin_cb_t s_fin;
-static volatile bool s_abortar;
-
 /* Location de la respuesta, capturada por el manejador de eventos (esp_http_client_get_url
  * reconstruye esquema://host:puerto/ruta y pierde la consulta firmada de GitHub). */
 typedef struct { char url[URL_SALTO_MAX]; bool hay, no_cabe; } location_t;
-static location_t s_loc;
+
+/* A3-03 (H-91): todo lo de una descarga vive en su contexto, propio de su tarea; nada se
+ * comparte con una descarga posterior. */
+typedef struct {
+    char url[OTA_URL_MAX + 1];
+    char en_ejecucion[32];
+    bool es_prueba, imagen_banco;
+    ota_fin_cb_t fin;
+    location_t loc;
+    char final[URL_SALTO_MAX];
+} descarga_t;
+
+static portMUX_TYPE s_cerrojo = portMUX_INITIALIZER_UNLOCKED;
+static ota_turno_t s_turno;           /* bajo s_cerrojo */
+
+static bool abortada(void)
+{
+    taskENTER_CRITICAL(&s_cerrojo);
+    bool a = s_turno.abortada;
+    taskEXIT_CRITICAL(&s_cerrojo);
+    return a;
+}
 
 static esp_err_t al_evento_http(esp_http_client_event_t *e)
 {
-    if (e->event_id == HTTP_EVENT_ON_HEADER && e->header_key && strcasecmp(e->header_key, "Location") == 0) {
-        s_loc.hay = true;
-        s_loc.no_cabe = strlcpy(s_loc.url, e->header_value, sizeof s_loc.url) >= sizeof s_loc.url;
+    location_t *loc = e->user_data;
+    if (loc && e->event_id == HTTP_EVENT_ON_HEADER && e->header_key && strcasecmp(e->header_key, "Location") == 0) {
+        loc->hay = true;
+        loc->no_cabe = strlcpy(loc->url, e->header_value, sizeof loc->url) >= sizeof loc->url;
     }
     return ESP_OK;
 }
 
-static void config_http(esp_http_client_config_t *c, const char *url)
+static void config_http(esp_http_client_config_t *c, const char *url, location_t *loc)
 {
     *c = (esp_http_client_config_t){
         .url = url,
@@ -47,6 +65,7 @@ static void config_http(esp_http_client_config_t *c, const char *url)
         .disable_auto_redirect = true,                  /* cada salto se valida aquí (FR-OTA-02/14) */
         .keep_alive_enable = false,
         .event_handler = al_evento_http,
+        .user_data = loc,
         .buffer_size = 2048,                            /* cabeceras de respuesta largas (Location firmada) */
         .buffer_size_tx = URL_SALTO_MAX + 256,          /* la línea de petición lleva la URL firmada (~900 B) */
     };
@@ -63,28 +82,29 @@ static ota_motivo_t motivo_conexion(esp_http_client_handle_t h, esp_err_t e)
     return ota_clasificar_fallo(OTA_FALLO_TCP, 0);
 }
 
-/* Recorre la cadena de redirecciones hasta la URL que responde 2xx; deja en final la última. */
-static ota_motivo_t resolver(char *final, size_t cap)
+/* Recorre la cadena de redirecciones hasta la URL que responde 2xx; deja en d->final la última. */
+static ota_motivo_t resolver(descarga_t *d)
 {
-    strlcpy(final, s_url, cap);
+    strlcpy(d->final, d->url, sizeof d->final);
     for (int salto = 0;; salto++) {
+        if (abortada()) return OTA_ERROR_RED;                                    /* T22 */
         if (salto > 0) {
-            ota_motivo_t m = ota_url_redireccion(final, salto);
+            ota_motivo_t m = ota_url_redireccion(d->final, salto, d->imagen_banco);   /* A3-02 */
             if (m != OTA_OK) return m;
         }
         esp_http_client_config_t c;
-        config_http(&c, final);
+        config_http(&c, d->final, &d->loc);
         esp_http_client_handle_t h = esp_http_client_init(&c);
         if (!h) return OTA_ERROR_RED;
-        s_loc.hay = s_loc.no_cabe = false;
+        d->loc.hay = d->loc.no_cabe = false;
         esp_err_t e = esp_http_client_open(h, 0);
         if (e != ESP_OK) { ota_motivo_t m = motivo_conexion(h, e); esp_http_client_cleanup(h); return m; }
         if (esp_http_client_fetch_headers(h) < 0) { esp_http_client_cleanup(h); return OTA_ERROR_RED; }
         int st = esp_http_client_get_status_code(h);
         if (st >= 300 && st < 400) {
             esp_http_client_cleanup(h);
-            if (!s_loc.hay || s_loc.no_cabe || strlen(s_loc.url) >= cap) return OTA_RECHAZADO_HOST;
-            strlcpy(final, s_loc.url, cap);                       /* se valida al empezar el bucle */
+            if (!d->loc.hay || d->loc.no_cabe) return OTA_RECHAZADO_HOST;
+            strlcpy(d->final, d->loc.url, sizeof d->final);                      /* se valida al empezar el bucle */
             continue;
         }
         esp_http_client_cleanup(h);
@@ -92,10 +112,10 @@ static ota_motivo_t resolver(char *final, size_t cap)
     }
 }
 
-static ota_motivo_t descargar(const char *url)
+static ota_motivo_t descargar(descarga_t *d)
 {
     esp_http_client_config_t c;
-    config_http(&c, url);
+    config_http(&c, d->final, &d->loc);
     esp_https_ota_config_t oc = {.http_config = &c};
     esp_https_ota_handle_t h = NULL;
     esp_err_t e = esp_https_ota_begin(&oc, &h);
@@ -103,10 +123,10 @@ static ota_motivo_t descargar(const char *url)
     esp_app_desc_t desc;
     ota_motivo_t m = OTA_OK;
     if (esp_https_ota_get_img_desc(h, &desc) != ESP_OK) m = OTA_ERROR_IMAGEN;
-    else m = ota_version(s_en_ejecucion, desc.version, s_es_prueba);           /* FR-OTA-05 */
+    else m = ota_version(d->en_ejecucion, desc.version, d->es_prueba);       /* FR-OTA-05 */
     int total = esp_https_ota_get_image_size(h), ultimo = -1;
     while (m == OTA_OK) {
-        if (s_abortar) { esp_https_ota_abort(h); return OTA_ERROR_RED; }      /* T22 */
+        if (abortada()) { esp_https_ota_abort(h); return OTA_ERROR_RED; }      /* T22 */
         e = esp_https_ota_perform(h);
         if (total > 0) {
             int pct = (int)(100LL * esp_https_ota_get_image_len_read(h) / total) / 10 * 10;
@@ -124,25 +144,46 @@ static ota_motivo_t descargar(const char *url)
 
 static void tarea_descarga(void *arg)
 {
-    static char final[URL_SALTO_MAX];
-    ota_motivo_t m = resolver(final, sizeof final);
-    if (m == OTA_OK) m = descargar(final);
-    if (!s_abortar && s_fin) s_fin(m);
+    descarga_t *d = arg;
+    ota_motivo_t m = resolver(d);
+    if (m == OTA_OK) m = descargar(d);
+    taskENTER_CRITICAL(&s_cerrojo);
+    bool avisar = ota_turno_avisar(&s_turno);
+    taskEXIT_CRITICAL(&s_cerrojo);
+    if (avisar && d->fin) d->fin(m);                   /* abortada (T22): sin aviso */
+    free(d);
+    taskENTER_CRITICAL(&s_cerrojo);
+    ota_turno_soltar(&s_turno);                        /* A3-03: ahora se admite otra descarga */
+    taskEXIT_CRITICAL(&s_cerrojo);
     vTaskDelete(NULL);
 }
 
-bool ota_descarga_iniciar(const char *url, bool es_prueba, const char *en_ejecucion, ota_fin_cb_t fin)
+bool ota_descarga_iniciar(const char *url, bool es_prueba, bool imagen_banco, const char *en_ejecucion,
+                          ota_fin_cb_t fin)
 {
-    strlcpy(s_url, url, sizeof s_url);
-    strlcpy(s_en_ejecucion, en_ejecucion ? en_ejecucion : "", sizeof s_en_ejecucion);
-    s_es_prueba = es_prueba;
-    s_fin = fin;
-    s_abortar = false;
+    descarga_t *d = calloc(1, sizeof *d);
+    if (!d) return false;
+    strlcpy(d->url, url ? url : "", sizeof d->url);
+    strlcpy(d->en_ejecucion, en_ejecucion ? en_ejecucion : "", sizeof d->en_ejecucion);
+    d->es_prueba = es_prueba;
+    d->imagen_banco = imagen_banco;
+    d->fin = fin;
+    taskENTER_CRITICAL(&s_cerrojo);
+    bool turno = ota_turno_tomar(&s_turno);            /* A3-03: la tarea anterior aún no salió → false */
+    taskEXIT_CRITICAL(&s_cerrojo);
+    if (!turno) { free(d); return false; }
     /* prioridad por debajo de la medición: NFR-OTA-01 (periodo 60 ± 5 s durante la descarga) */
-    return xTaskCreate(tarea_descarga, "ota", 8192, NULL, 3, NULL) == pdPASS;
+    if (xTaskCreate(tarea_descarga, "ota", 8192, d, 3, NULL) == pdPASS) return true;
+    free(d);
+    taskENTER_CRITICAL(&s_cerrojo);
+    ota_turno_soltar(&s_turno);
+    taskEXIT_CRITICAL(&s_cerrojo);
+    return false;
 }
 
 void ota_descarga_abortar(void)
 {
-    s_abortar = true;
+    taskENTER_CRITICAL(&s_cerrojo);
+    ota_turno_abortar(&s_turno);
+    taskEXIT_CRITICAL(&s_cerrojo);
 }
