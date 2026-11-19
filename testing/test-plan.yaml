@@ -2167,7 +2167,10 @@ tests:
       sale no se admite otra descarga (main lo trata como T20 con error:red); el intento
       rechazado no borra el aborto, la tarea abortada no llama a fin() y la siguiente entra sin
       el aborto y avisa al terminar. El adaptador guarda URL, Location y final en un contexto
-      propio de cada tarea
+      propio de cada tarea. B-1 (revisión 2026-11-18): un aborto nunca deja arrancable la imagen
+      nueva — antes de esp_https_ota_finish no se finaliza; entre finish y el cierre, la tarea
+      restaura el arranque (esp_ota_set_boot_partition de la partición en ejecución) y no avisa;
+      después del cierre, ota_descarga_abortar restaura, una sola vez
     impl: tests/host/test_ota_turno.c (TC-OTA-16)
   - id: TC-SEC-03
     shape: atomic

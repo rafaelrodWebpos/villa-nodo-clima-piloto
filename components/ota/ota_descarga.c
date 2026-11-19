@@ -46,6 +46,16 @@ static bool abortada(void)
     return a;
 }
 
+/* B-1: la imagen nueva ya es arrancable pero la descarga se abortó (T22): el arranque vuelve
+ * a la partición en ejecución, para que un reinicio posterior no cambie de imagen. */
+static void restaurar_arranque(void)
+{
+    const esp_partition_t *actual = esp_ota_get_running_partition();
+    esp_err_t e = actual ? esp_ota_set_boot_partition(actual) : ESP_FAIL;
+    ESP_LOGW("ota_descarga", "aborto tras escribir la imagen: arranque devuelto a %s (%s)",
+             actual ? actual->label : "?", esp_err_to_name(e));
+}
+
 static esp_err_t al_evento_http(esp_http_client_event_t *e)
 {
     location_t *loc = e->user_data;
@@ -112,7 +122,7 @@ static ota_motivo_t resolver(descarga_t *d)
     }
 }
 
-static ota_motivo_t descargar(descarga_t *d)
+static ota_motivo_t descargar(descarga_t *d, bool *escrita)
 {
     esp_http_client_config_t c;
     config_http(&c, d->final, &d->loc);
@@ -138,19 +148,26 @@ static ota_motivo_t descargar(descarga_t *d)
     }
     if (m != OTA_OK) { esp_https_ota_abort(h); return m; }
     if (!esp_https_ota_is_complete_data_received(h)) { esp_https_ota_abort(h); return OTA_ERROR_IMAGEN; }
+    taskENTER_CRITICAL(&s_cerrojo);
+    bool seguir = ota_turno_puede_finalizar(&s_turno);   /* B-1: el aborto, justo antes de finish */
+    taskEXIT_CRITICAL(&s_cerrojo);
+    if (!seguir) { esp_https_ota_abort(h); return OTA_ERROR_RED; }                 /* T22 */
     e = esp_https_ota_finish(h);                       /* cabecera, chip y SHA-256; marca arrancable */
+    *escrita = (e == ESP_OK);
     return e == ESP_OK ? OTA_OK : OTA_ERROR_IMAGEN;
 }
 
 static void tarea_descarga(void *arg)
 {
     descarga_t *d = arg;
+    bool escrita = false;
     ota_motivo_t m = resolver(d);
-    if (m == OTA_OK) m = descargar(d);
+    if (m == OTA_OK) m = descargar(d, &escrita);
     taskENTER_CRITICAL(&s_cerrojo);
-    bool avisar = ota_turno_avisar(&s_turno);
+    ota_cierre_t cierre = ota_turno_cerrar(&s_turno, escrita);   /* B-1: decidido bajo el cerrojo */
     taskEXIT_CRITICAL(&s_cerrojo);
-    if (avisar && d->fin) d->fin(m);                   /* abortada (T22): sin aviso */
+    if (cierre == OTA_CIERRE_RESTAURAR) restaurar_arranque();     /* abortada después de finish */
+    else if (cierre == OTA_CIERRE_AVISAR && d->fin) d->fin(m);    /* abortada (T22): sin aviso */
     free(d);
     taskENTER_CRITICAL(&s_cerrojo);
     ota_turno_soltar(&s_turno);                        /* A3-03: ahora se admite otra descarga */
@@ -184,6 +201,9 @@ bool ota_descarga_iniciar(const char *url, bool es_prueba, bool imagen_banco, co
 void ota_descarga_abortar(void)
 {
     taskENTER_CRITICAL(&s_cerrojo);
-    ota_turno_abortar(&s_turno);
+    ota_aborto_t a = ota_turno_abortar(&s_turno);
     taskEXIT_CRITICAL(&s_cerrojo);
+    /* B-1: la tarea ya cerró con la imagen escrita y avisó (ota_ok aún en la cola de main):
+     * T22 gana y la imagen nueva deja de ser la de arranque */
+    if (a == OTA_ABORTO_TARDE) restaurar_arranque();
 }
