@@ -31,6 +31,7 @@ ESPERA_OPERADOR_S = 600       # lo que se espera a que el operador desenchufe o 
 MUESTREO_S = 0.5
 ESCANEO_INTENTOS = 3          # H-61
 AP_APAGADO_ANTES_S = 3        # H-63: AP abajo antes de escanear (≈ 20 s con el escaneo)
+SEGUNDO_ARRANQUE_S = 30      # ventana tras el primer status para ver un reinicio del banco (#86)
 VUELTA_ESPERA_S = 150         # del AP de vuelta a un status en vivo (backoff de FR-CON-02)
 
 AVISO_DESENCHUFAR = ("Corte {n} de {total} ({tid}): desenchufa el cable USB-C del lado de la PLACA "
@@ -159,6 +160,20 @@ def corte(tb, slot, sub, nodo, tid, n, total, c, banco):
                           MEDIDA_LIMITE_S + 10)
         r["medida"] = med
         r["medida_s"] = (med["t"] - r["encendido"]) if med and r["encendido"] is not None else None
+    # 4b) Upstream #86 (fork villa-2 fb3c300): el proxy del banco no reinicia el DUT al abrir el
+    #     puerto tras el enchufe (rst:0x15). Un segundo arranque se vería como otro status en vivo,
+    #     con uptime_s pequeño, después del primero
+    r["segundo_arranque"] = None
+    if st:
+        time.sleep(SEGUNDO_ARRANQUE_S)
+        for m in en_vivo(sub.mensajes(), st["t"] + 0.5, tema=st["topic"]):
+            try:
+                up = json.loads(m["payload"]).get("uptime_s")
+            except (json.JSONDecodeError, AttributeError):
+                continue
+            if isinstance(up, int) and up <= SEGUNDO_ARRANQUE_S:
+                r["segundo_arranque"] = {"t_desde_enchufe": round(m["t"] - r["t_enchufe"], 1), "uptime_s": up}
+                break
     # 5) Nunca el portal (H-63): el banco no escanea con su AP arriba (CR-TB-14), así que se
     #    apaga el AP un momento, se escanea y se vuelve a encender. Un portal abierto al arrancar
     #    seguiría visible; un nodo configurado sin Wi-Fi nunca lo abre (FR-CON-06)
@@ -198,6 +213,7 @@ def resumen(r):
             f"uptime_s={st.get('uptime_s')} a {f(r['status']['t'] - r['t_enchufe'] if r.get('status') else None)} del reenchufe; "
             f"primera medida a {f(r.get('medida_s'))} del encendido estimado; clima-* en el escaneo: "
             f"{r['clima_ap'] or 'ninguno'}{' (escaneos fallidos: ' + ', '.join(r['escaneo_fallos']) + ')' if r.get('escaneo_fallos') else ''}"
+            f"; segundo arranque tras el enchufe (#86): {r.get('segundo_arranque') or 'ninguno'}"
             f"{'' if r.get('escaneo_ok') else ' — escaneo sin hacer'}; "
             f"vuelta a publicar {f(r.get('vuelta_s'))} tras encender el AP; avisos: {r['avisos']}")
 

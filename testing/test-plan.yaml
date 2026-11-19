@@ -2174,6 +2174,21 @@ tests:
       restaura el arranque (esp_ota_set_boot_partition de la partición en ejecución) y no avisa;
       después del cierre, ota_descarga_abortar restaura, una sola vez
     impl: tests/host/test_ota_turno.c (TC-OTA-16)
+  - id: TC-OTA-17
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench+
+    verifies: [FR-OTA-08]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-portal-driver, bench-mqtt-broker, bench-serial-monitor, bench-ap-internet, github-test-releases, dut-board]
+    expect: >
+      revisión 2026-11-18 (A3-03, B-1): con la descarga de B1 en ≥ 10 %, el banco corta la salida
+      a Internet (la descarga se queda esperando datos) y apaga y enciende el broker (T22,
+      error:red); un cmd_ota de B2 con la tarea vieja viva da error:red; tras devolver Internet y
+      35 s, un reset arranca A en su partición (la imagen abortada no es la de arranque) y un
+      cmd_ota de B2 termina en fw = B2; B1 no arranca nunca
+    impl: tests/bench/test_jrn02.py::test_tc_ota_17_abort_slow_download_then_new_command
   - id: TC-SEC-03
     shape: atomic
     kind: standard

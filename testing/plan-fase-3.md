@@ -262,3 +262,20 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
 
 - **Puerta 05 (aprobado por el propietario el 2026-11-18):** `testing/gates/05-shipped.md`, fila 1, pasa de
   `espressif/idf:v6.0.2` a `espressif/idf:v6.0.3` por la subida de ESP-IDF. No hay más cambios en las puertas.
+
+## Revisión independiente del 2026-11-18 (fork `f50858b..fb3c300` y `96a7bf7`): «sí con condiciones»
+
+- **Fork villa-2 `6dffd70`** (CI en verde, 543 pruebas):
+  - A-1: listas cerradas para `flash_mode`, `flash_freq` y `flash_size`, en `flash_args` y en los campos del formulario.
+  - A-2: offsets en hex o decimal, sin signo ni `_`, alineados a 0x1000 y por debajo del tamaño de la flash.
+  - A-3: una línea de `flash_args` con tokens de sobra da 400.
+  - El driver no cambia: el proyecto sigue fijado a `20b42df`.
+  - **Delta para la revisión:** `fb3c300..6dffd70`.
+- **Piloto:**
+  - B-1 (`6ccc383`): un aborto nunca deja arrancable la imagen nueva. TC-OTA-16 cubre las tres ventanas.
+  - B-3 (`cccee67`): TC-OTA-02 con `GITHUB.COM`, `:443`, `//` y `%` hacia otro repo.
+- **Comprobaciones nuevas para el domingo 22** (después de reinstalar el fork):
+  - **Enchufe sin `rst:0x15`:** `cortes.py` busca un segundo arranque en los 30 s siguientes al primer status, y
+    JRN-01.7 lo exige.
+  - **Grabado a 80 MHz con `flash_args`:** JRN-01.0 exige que la velocidad SPI de arranque sea la del build.
+  - **Aborto de una OTA lenta seguido de un `cmd_ota` nuevo:** TC-OTA-17 (bench+).

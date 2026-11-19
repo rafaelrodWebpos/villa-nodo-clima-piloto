@@ -69,7 +69,10 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
         has_init = any(boot_marker in ln for ln in boot)
         ver = next((ln for ln in boot if re.search(r"nodo_clima \S+", ln)), "")
         spi = next((ln.rsplit(":", 1)[-1].strip() for ln in boot if "Boot SPI Speed" in ln), "?")
-        c.note(f"- velocidad SPI de arranque: {spi} (upstream #52: 80MHz con el fork villa-2 20b42df o posterior)")
+        fa = (firmware["dir"] / "coldflash" / "flash_args").read_text()
+        m_freq = re.search(r"--flash[-_]freq[ =](\d+)m", fa)
+        spi_esperada = f"{m_freq.group(1)}MHz" if m_freq else None
+        c.note(f"- velocidad SPI de arranque: {spi} (build: {spi_esperada}; upstream #52, fork villa-2 20b42df o posterior)")
         c.note(f"- tras el último `rst:` ({len(boot)} líneas):",
                f"- `{bench_image_marker}`: {'sí' if has_marker else 'NO'}",
                f"- `{boot_marker}`: {'sí' if has_init else 'NO'}",
@@ -79,6 +82,9 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
         else:  # verify: imagen de producción del tag (release_verify en el plan)
             assert not has_marker, f"{bench_image_marker} aparece en la imagen de producción (C-LOG-01)"
         assert has_init, f"«{boot_marker}» no aparece en el arranque"
+        # upstream #52: el banco graba con las opciones del build (grabado.py manda flash_args)
+        assert spi_esperada is None or spi == spi_esperada, \
+            f"arranca a {spi} y el build pide {spi_esperada}: el banco no aplicó flash_args (#52)"
         assert firmware["version"] in ver, f"el log no muestra la versión {firmware['version']}"
         if firmware["commit"]:   # build de la CI pedido por el test: la versión nombra el commit
             c.note(f"- commit en la versión del arranque: `{firmware['commit']}`")
@@ -576,6 +582,8 @@ def test_jrn_01_7_power_cut(testbench, dut_slot, dut_mac, firmware, run_dir, tmp
         c.note("", "## Resultado", "", resumen(r))
         mal = errores(r, nodo)
         assert not mal, "; ".join(mal)
+        # upstream #86 (fork villa-2 fb3c300): el banco no reinicia el DUT al reabrir su puerto
+        assert not r.get("segundo_arranque"), f"segundo arranque tras el enchufe (rst:0x15 del banco): {r['segundo_arranque']}"
         falta = sin_hacer(r)
         if falta:
             pytest.skip("not done: " + "; ".join(falta))

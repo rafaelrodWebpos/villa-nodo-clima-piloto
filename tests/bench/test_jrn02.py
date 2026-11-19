@@ -298,3 +298,60 @@ def test_tc_ota_15_power_cut_during_download(testbench, dut_slot, dut_mac, firmw
         assert len(st) >= 4 and all(s.get("fw") == a for s in st), "status sin fw = A tras el corte"
         assert all(y > x for x, y in zip(ups, ups[1:])), "reinicio (rollback) tras el corte"
         c.passed(f"corte al {pcts[-1]} % de la descarga; arrancó A ({a}) con reset=poweron y siguió 330 s sin rollback")
+
+
+def test_tc_ota_17_abort_slow_download_then_new_command(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-OTA-17 · FR-OTA-08, T22, T20 — revisión 2026-11-18 (A3-03, B-1): una descarga lenta
+    (sin salida a Internet) se aborta por T22; un cmd_ota nuevo mientras la tarea vieja sigue
+    viva da error:red; la imagen abortada no queda arrancable (un reset arranca A en su
+    partición) y el cmd_ota siguiente termina en fw = B2, sin que B1 arranque nunca."""
+    tb = testbench
+    base = f"sitio1/zona1/{_nodo(dut_mac)}"
+    a = firmware["version"]
+    with case(tb, "TC-OTA-17", "Aborto de una OTA lenta y cmd_ota nuevo", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        with _suscribir(tb, _nodo(dut_mac)) as sub:
+            _, reg = _a_operativo(tb, dut_slot, banco, c, internet=True)
+            boot_a = reg.esperar(BOOT.pattern, 5)
+            part_a = BOOT.search(boot_a["text"]).group(3) if boot_a else None
+            t = _ota(tb, base, "firmware_b1.bin")
+            assert reg.esperar(r"nodo: ota: [1-9]0 %", 90, desde_ts=t), "la descarga no llegó al 10 %"
+            c.step("Cortar la salida a Internet: la descarga se queda esperando datos (≤ 30 s, FR-OTA-12)")
+            tb.ap_internet(False)
+            time.sleep(3)
+            c.step("Broker apagado y encendido: T22 aborta con la tarea aún dentro de la lectura")
+            t_off = time.time()
+            banco.broker_off()
+            assert reg.esperar(re.escape("con: OTA_DESCARGA -> CONECTANDO_BROKER (mqtt_down)"), 60, desde_ts=t_off), "sin T22"
+            banco.broker_on()
+            vuelta = _esperar(sub, base, t_off, lambda s: True, 90)
+            assert vuelta, "sin status tras volver el broker"
+            c.step("cmd_ota nuevo con la tarea vieja viva: error:red (A3-03)")
+            t2 = _ota(tb, base, "firmware_b2.bin")
+            seg = _esperar(sub, base, t2, lambda s: s.get("ota") in ("error:red", "en_curso"), 20)
+            c.step("Devolver Internet; esperar a que la tarea vieja salga (≤ 30 s)")
+            tb.ap_internet(True)
+            time.sleep(35)
+            c.step("Reset: la imagen abortada no es la de arranque (B-1)")
+            t_r = time.time()
+            tb.serial_reset(dut_slot)
+            boot_r = reg.esperar(BOOT.pattern, 60, desde_ts=t_r)
+            assert _esperar(sub, base, t_r, lambda s: True, 150), "sin status tras el reset"
+            c.step("cmd_ota de B2 con la tarea vieja ya fuera: termina en fw = B2")
+            t3 = _ota(tb, base, "firmware_b2.bin")
+            fin = _esperar(sub, base, t3, lambda s: s.get("fw") == B2, 300)
+            txt = [e.get("text", "") for e in reg.leer() if e.get("ts", 0) >= t]
+        c.save_log("serie", txt)
+        boots = [BOOT.search(x) for x in txt if BOOT.search(x)]
+        c.note(f"- segundo cmd_ota con la tarea vieja viva: ota = {seg[1].get('ota') if seg else '—'}",
+               f"- tras el reset: {boot_r['text'].strip() if boot_r else '—'} (A en {part_a})",
+               f"- arranques vistos: {[(b.group(1), b.group(3)) for b in boots]}",
+               f"- fw final: {fin[1].get('fw') if fin else '—'}")
+        assert any("ota: estado error:red" in x for x in txt), "sin E7 error:red del aborto"
+        assert seg and seg[1].get("ota") == "error:red", f"el cmd_ota con la tarea vieja viva no dio error:red: {seg}"
+        assert boot_r and BOOT.search(boot_r["text"]).group(1) == a, "tras el aborto, el reset no arrancó A"
+        assert BOOT.search(boot_r["text"]).group(3) == part_a, "la imagen abortada quedó como la de arranque (B-1)"
+        assert not any(b.group(1) == B1 for b in boots), "B1, abortada, llegó a arrancar"
+        assert fin, "el cmd_ota siguiente no terminó en fw = B2"
+        c.passed("T22 con la tarea colgada, error:red para el cmd_ota simultáneo, A sigue arrancando y B2 entra después")
