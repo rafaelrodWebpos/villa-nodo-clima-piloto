@@ -312,3 +312,12 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
      - una línea con un token de sobra y `--encrypt`.
 
 Al terminar, el broker y el AP quedaron apagados, como estaban. El SLOT2 no se tocó.
+
+## Fin de semana 21-22 (decisiones del propietario del 2026-11-19)
+
+- El orden y las horas están en `testing/regresion-6.0.3.md`:
+  - TC-WDT-01 de 24 h, lanzada en cuanto el propietario avise de que AGUA terminó (viernes ~18:15);
+  - luego, encadenadas, las tandas automáticas (sábado en la noche a domingo en la madrugada);
+  - el domingo, la visita de 1 h 15 min.
+- **Salvedad:** TC-SEN-03 y TC-SEN-05 no se repiten con ESP-IDF 6.0.3, porque el código del sensor no cambió. Vale su
+  último verde.
