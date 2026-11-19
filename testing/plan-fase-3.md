@@ -252,3 +252,6 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
 | #83 | `serial/reset` reinicia dos veces un DUT con USB nativo (al reiniciar el proxy) | **Sí** (CR-TB-12, igual que #47) | `benchlib`: `_after_last_reset` y `ultimo_arranque` | Nada |
 | #86 + PR #87 | El proxy RFC2217 reinicia el chip unos 2 s después de enchufar el USB (orden DTR/RTS) | **Probable** en las pruebas de corte: se ve un segundo arranque después del encendido. Nuestras pruebas de corte pasaron, porque leen el primer status (`reset=poweron`) | Las pruebas leen el primer status en vivo | Incorporar el arreglo de PR #87 (`plain_rfc2217_server.py`) al fork villa-2, en este paquete o después; necesita el visto bueno del propietario |
 | #80 | Se pierde la salida serie justo antes de un `esp_restart()` (visto en C6) | **Riesgo bajo** en JRN-02.2: «ota: rollback» va seguido del reinicio inmediato. Ha pasado, pero podría fallar a veces | T19 espera 2 s antes de reiniciar | Si JRN-02.2 falla por esa línea, aceptar también la evidencia por MQTT (el primer status de A) o dar ~200 ms antes del reinicio en T23 (cambio de firmware) |
+
+- **Puerta 05 (aprobado por el propietario el 2026-11-18):** `testing/gates/05-shipped.md`, fila 1, pasa de
+  `espressif/idf:v6.0.2` a `espressif/idf:v6.0.3` por la subida de ESP-IDF. No hay más cambios en las puertas.

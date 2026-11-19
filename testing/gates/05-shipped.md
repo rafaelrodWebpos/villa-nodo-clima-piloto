@@ -6,7 +6,7 @@
 
 | # | Debe ser cierto | Dónde mirar | Evidencia |
 |---|---|---|---|
-| 1 | La release `vX.Y.Z` se construyó a partir del commit etiquetado, en `espressif/idf:v6.0.2` | run de `Build Firmware` del tag | El job build en verde con ese `GITHUB_SHA` |
+| 1 | La release `vX.Y.Z` se construyó a partir del commit etiquetado, en `espressif/idf:v6.0.3` | run de `Build Firmware` del tag | El job build en verde con ese `GITHUB_SHA` |
 | 2 | El job verify se ejecutó con los bytes de esa ejecución y el journey pasó | mismo run, job `verify` | `success`; nada de `skipped` |
 | 3 | La release se publicó solo después de verify | job `release` | `needs: [build, verify]`, en verde |
 | 4 | La imagen publicada es la de producción: sin `NODO-BENCH-IMAGE` (C-LOG-01) | asset `firmware_vX.Y.Z.bin` | `! grep -q NODO-BENCH-IMAGE` |
