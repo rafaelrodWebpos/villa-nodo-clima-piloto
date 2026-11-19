@@ -227,4 +227,28 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
 5. **Una sola visita física:** repetir el iPhone (FR-POR-02), porque el cambio de lwIP/DNS vence H-83.
 6. **Tag nuevo** (por ejemplo v0.0.2), que lo crea el propietario.
 
-**Estado:** pendiente. No se empieza hasta que el propietario lo pida.
+**Estado (2026-11-18, adelantado por el propietario):**
+- (1) ESP-IDF 6.0.3: hecho en `1d6600e`.
+  - Imagen fijada por digest.
+  - `dependencies.lock` con idf 6.0.3.
+  - `build_checks` exige `LWIP_DNS_MAX_HOST_IP=1`.
+  - La app ocupa 0x108530 bytes (66 % libre).
+  - CI en verde.
+- (2) A3-02 y A3-03: falta el texto de los hallazgos. El informe H-91 está fuera del repo y hay que pedírselo al
+  propietario.
+- (3) #52:
+  - fork villa-2 `20b42df` con CI en verde: `pi/flash_args.py` y el driver `flash(flash_args=...)`;
+  - proyecto `32621f6`: driver fijado, `grabado.py` manda las opciones del build y JRN-01.0 anota la velocidad SPI.
+  - **Falta reinstalar el fork en la Pi** (tras la revisión del auditor del diff `f50858b..20b42df`).
+  - La comprobación de que arranca a 80 MHz se hace en la regresión.
+- Regresión completa y visita con el iPhone: domingo 22. El tag v0.0.2 lo crea el propietario.
+
+## Issues nuevos del upstream (revisión del 2026-11-18)
+
+| Issue | Qué dice | ¿Nos afecta? | Mitigación que tenemos | Qué falta |
+|---|---|---|---|---|
+| #82 | `ap_start` ignora el campo `password` y abre un AP sin clave | **No.** Nuestro driver manda `pass`, que es el campo que lee el portal. Además, el firmware pide WPA2 como mínimo (`threshold.authmode`) cuando hay clave, así que no se uniría a un AP abierto | — | Nada. Si se arregla en el upstream, que el portal acepte los dos nombres |
+| #84 | El SoftAP del banco ignora la reautenticación de una estación que se reinició sin desconectarse (reason 2) | **Riesgo real** en las pruebas de reinicio sin desconexión (cortes, TC-OTA-15, T19, T23 y la regresión del domingo). Es el mismo defecto que #54 | Cada prueba usa un AP desechable nuevo, y los cortes apagan y encienden el AP (H-63). Hasta ahora todas pasaron | Si en la regresión aparece «reason 2» repetido, reiniciar el AP en esa prueba (está en `cortes.py`) |
+| #83 | `serial/reset` reinicia dos veces un DUT con USB nativo (al reiniciar el proxy) | **Sí** (CR-TB-12, igual que #47) | `benchlib`: `_after_last_reset` y `ultimo_arranque` | Nada |
+| #86 + PR #87 | El proxy RFC2217 reinicia el chip unos 2 s después de enchufar el USB (orden DTR/RTS) | **Probable** en las pruebas de corte: se ve un segundo arranque después del encendido. Nuestras pruebas de corte pasaron, porque leen el primer status (`reset=poweron`) | Las pruebas leen el primer status en vivo | Incorporar el arreglo de PR #87 (`plain_rfc2217_server.py`) al fork villa-2, en este paquete o después; necesita el visto bueno del propietario |
+| #80 | Se pierde la salida serie justo antes de un `esp_restart()` (visto en C6) | **Riesgo bajo** en JRN-02.2: «ota: rollback» va seguido del reinicio inmediato. Ha pasado, pero podría fallar a veces | T19 espera 2 s antes de reiniciar | Si JRN-02.2 falla por esa línea, aceptar también la evidencia por MQTT (el primer status de A) o dar ~200 ms antes del reinicio en T23 (cambio de firmware) |
