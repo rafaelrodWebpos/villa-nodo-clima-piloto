@@ -293,3 +293,22 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
 | L-4 | handler de `/api/flash` | Reemplazar rutas solo en las posiciones de archivo de la línea de esptool |
 | L-5 | `docs/fork-villa.md` | Anotar que un `flash_args` con `--encrypt` (u otra opción fuera de la lista) da 400 |
 | T-1 | `pytest/host/` | Prueba del 400 de punta a punta (handler), dígitos Unicode y un `flash_args` real completo de ESP-IDF |
+
+## Fork villa-2 `6dffd70` instalado en la Pi (2026-11-19): comprobaciones en el SLOT1
+
+1. `/api/info`: `build = 6dffd70`.
+2. Seguridad y broker:
+   - Sin token, 401; con token, 200.
+   - `rules_ok: true`, `mqtt_lan_allowed: true`, `internet: false`.
+   - El broker respondió desde la laptop: un mensaje fue y volvió.
+3. **Grabado byte a byte:** un archivo de 5 bytes que termina en `\n` se graba con «Wrote 8 bytes», igual que uno
+   que termina en `X`.
+4. **#52 y la revisión:**
+   - La imagen de producción de `5ae8616` (ESP-IDF 6.0.3), grabada con el `flash_args` del build, arranca a
+     **80MHz** (JRN-01.0 en verde, `test-results/20261119T215410Z-5ae8616/`).
+   - Se rechazan con **HTTP 400** y su motivo:
+     - offsets 0x100 (sin alinear), -0x1000, 0x1_000 y 0x800000 (fuera de 8 MB);
+     - `flash_mode` fastread y `flash_freq` 999x;
+     - una línea con un token de sobra y `--encrypt`.
+
+Al terminar, el broker y el AP quedaron apagados, como estaban. El SLOT2 no se tocó.
