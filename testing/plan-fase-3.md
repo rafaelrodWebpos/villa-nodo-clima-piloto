@@ -234,13 +234,20 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
   - `build_checks` exige `LWIP_DNS_MAX_HOST_IP=1`.
   - La app ocupa 0x108530 bytes (66 % libre).
   - CI en verde.
-- (2) A3-02 y A3-03: falta el texto de los hallazgos. El informe H-91 está fuera del repo y hay que pedírselo al
-  propietario.
-- (3) #52:
-  - fork villa-2 `20b42df` con CI en verde: `pi/flash_args.py` y el driver `flash(flash_args=...)`;
-  - proyecto `32621f6`: driver fijado, `grabado.py` manda las opciones del build y JRN-01.0 anota la velocidad SPI.
-  - **Falta reinstalar el fork en la Pi** (tras la revisión del auditor del diff `f50858b..20b42df`).
-  - La comprobación de que arranca a 80 MHz se hace en la regresión.
+- (2) A3-02 y A3-03: hechos en `96a7bf7`, con CI en verde.
+  - A3-02: un salto a github.com pasa la ruta del repo y FR-OTA-13 (TC-OTA-02).
+  - A3-03: contexto propio de cada tarea y turno `ota_turno` (TC-OTA-16, host).
+  - Texto de T20 en `fsd_pending`.
+- (3) #52, fork villa-2:
+  - `20b42df`: `pi/flash_args.py` y el driver `flash(flash_args=...)`.
+  - `fb3c300`: #86, la parte de PR #87 en `plain_rfc2217_server.py` (abrir el puerto ya no reinicia el DUT).
+  - CI del fork en verde (490 pruebas).
+  - En el proyecto, `32621f6`: driver `20b42df` fijado; es el mismo en `fb3c300`.
+  - **Revisión independiente:** `git diff f50858b..fb3c300` (9 archivos).
+  - **Reinstalación en la Pi:** después de la prueba de 24 h de AGUA (jueves 21:03). Hasta entonces no se toca el banco,
+    salvo el SLOT1.
+  - En la regresión se comprueba que el arranque sale a 80 MHz y que no hay segundo arranque tras enchufar.
+- Puerta 05 con `espressif/idf:v6.0.3` (`2503d3a`).
 - Regresión completa y visita con el iPhone: domingo 22. El tag v0.0.2 lo crea el propietario.
 
 ## Issues nuevos del upstream (revisión del 2026-11-18)
