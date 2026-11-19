@@ -1,7 +1,7 @@
 # Un proyecto, un contenedor: toolchain, nivel bench y el runner del job
 # release-verify (docs/Method/project/arquitectura.md).
 # SEC-08: imagen base por digest (la etiqueta es mutable)
-FROM espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67
+FROM espressif/idf:v6.0.3@sha256:54278f2c01e6e759502e2f04c9103589c17528923426f4d63193490c7a08f555
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG RUNNER_VERSION=2.337.0

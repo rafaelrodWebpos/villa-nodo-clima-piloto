@@ -6,7 +6,7 @@
 name: Build Firmware
 
 env:
-  IDF_TAG: v6.0.2                # igual que la imagen del contenedor de abajo
+  IDF_TAG: v6.0.3                # igual que la imagen del contenedor de abajo
   MULTI_VARIANT: 'true'          # producción + imagen de banco (FSD §18.1)
   VARIANT_MARKER: NODO-BENCH-IMAGE
   APP_NAME: nodo_clima
@@ -32,7 +32,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: espressif/idf:v6.0.2@sha256:0d8c9773d48a327233f9c1d7c654ff0bcf133ae24503ea2e97a57cfe02b8cb67   # SEC-08: por digest
+    container: espressif/idf:v6.0.3@sha256:54278f2c01e6e759502e2f04c9103589c17528923426f4d63193490c7a08f555   # SEC-08: por digest
     defaults:
       run:
         shell: bash

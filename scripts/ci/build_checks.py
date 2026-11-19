@@ -6,6 +6,8 @@ TC-BLD-01 · C-BLD-01: gen_esp32part.py sobre la tabla de la imagen = tabla de F
 TC-BLD-02 · C-BLD-02: check_sizes.py rechaza una app de 0x300001 bytes y acepta la real.
 TC-BLD-03 · C-BLD-03: ESP-IDF v6.x y target esp32s3.
 TC-BLD-04 · C-BLD-04: rollback de aplicación activado en el sdkconfig de la imagen (Fase 3).
+GHSA-ch63-jxm5-vmvf: CONFIG_LWIP_DNS_MAX_HOST_IP=1 (el desbordamiento de la caché DNS de lwIP
+necesita varias IP por nombre; defensa aunque ESP-IDF 6.0.3 ya lo corrige).
 Uso: python3 build_checks.py <dir de build> <nombre de la app>"""
 import os, pathlib, re, subprocess, sys, tempfile
 
@@ -60,6 +62,9 @@ chk('CONFIG_IDF_TARGET="esp32s3"' in sdk, "C-BLD-03: target esp32s3", "C-BLD-03:
 # C-BLD-04 (Fase 3): el rollback del bootloader, del que dependen FR-OTA-07 y T23
 chk("CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y" in sdk, "C-BLD-04: rollback de aplicación activado",
     "C-BLD-04: CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE no está activado")
+# GHSA-ch63-jxm5-vmvf (ESP-IDF ≤ 6.0.2): una sola IP por nombre en la caché DNS
+chk("CONFIG_LWIP_DNS_MAX_HOST_IP=1" in sdk, "GHSA-ch63-jxm5-vmvf: LWIP_DNS_MAX_HOST_IP=1",
+    "GHSA-ch63-jxm5-vmvf: CONFIG_LWIP_DNS_MAX_HOST_IP distinto de 1")
 for m in ok: print("ok   ", m)
 for m in mal: print("FALLA", m)
 sys.exit(1 if mal else 0)
