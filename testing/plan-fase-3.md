@@ -279,3 +279,17 @@ Va todo junto, con una sola regresión de banco y una sola visita física, antes
     JRN-01.7 lo exige.
   - **Grabado a 80 MHz con `flash_args`:** JRN-01.0 exige que la velocidad SPI de arranque sea la del build.
   - **Aborto de una OTA lenta seguido de un `cmd_ota` nuevo:** TC-OTA-17 (bench+).
+
+## Delta del fork `fb3c300..6dffd70`: «sí, se puede instalar» (revisión del 2026-11-18)
+
+- `6dffd70` se instala tal cual en la Pi. El fork no se cambia antes de la reinstalación.
+- **Pendientes de la revisión, para después del domingo 22**, en una ronda nueva del fork con su revisión:
+
+| ID | Dónde | Qué hacer |
+|---|---|---|
+| L-1 | `pi/flash_args.py:34-35` | Expresiones regulares solo con dígitos ASCII: usar `[0-9]` o `re.ASCII`, y `re.fullmatch` en lugar de `^…$` con `match` |
+| L-2 | handler de `/api/flash` | Pasar a esptool `hex(check_offset(...))` y no el texto original, para que un offset como «0065536» no termine en 500 |
+| L-3 | `/api/flash`, `/api/flash/read`, `/api/chip/info` | Lista cerrada para `chip` y `baud` |
+| L-4 | handler de `/api/flash` | Reemplazar rutas solo en las posiciones de archivo de la línea de esptool |
+| L-5 | `docs/fork-villa.md` | Anotar que un `flash_args` con `--encrypt` (u otra opción fuera de la lista) da 400 |
+| T-1 | `pytest/host/` | Prueba del 400 de punta a punta (handler), dígitos Unicode y un `flash_args` real completo de ESP-IDF |
