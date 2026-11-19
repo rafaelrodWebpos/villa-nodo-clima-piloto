@@ -13,12 +13,15 @@ solo después del aviso del propietario de que terminó la prueba de 24 h de AGU
 | Tanda | Pruebas | Inicio y fin previstos |
 |---|---|---|
 | 0. Watchdog 24 h | TC-WDT-01 (aceptación 22.1-2) | viernes 20, ~18:15 → sábado 21, ~18:20 |
-| A. Recorrido y portal | JRN-01.0 a 01.6, TC-POR-02, 05, 07, 09, 11, 12, TC-CON-07, TC-CON-11, TC-CON-14, TC-HW-02, TC-HW-03 | sábado ~18:20 → ~19:20 |
-| B. Conectividad y MQTT | TC-CON-03, 06, 08, 09, 10, TC-MQTT-03, TC-MQTT-05, TC-MED-01, TC-MED-02, TC-MED-06, TC-LOG-03, TC-LOG-04, TC-LOG-08 | ~19:20 → ~20:50 |
-| C. Hora y watchdog | TC-TIME-03, 05, 06, 08, TC-WDT-02 | ~20:50 → ~21:30 |
-| D. OTA | JRN-02.1, JRN-02.2, TC-OTA-06 a 14, TC-OTA-17 (nuevo) | ~21:30 → ~23:30 |
-| E. Largas | TC-CON-12 (70 min), TC-TIME-04 (2 h o más) | ~23:30 → domingo 22, ~03:00 |
-| F. Ensayo de `verify` | journey `-m journey` y TC-OTA-14 con la imagen de producción | domingo ~03:00 → ~03:30 |
+| A. Recorrido y portal | JRN-01.0 a 01.6, TC-POR-02, 05, 07, 09, 11, 12, TC-CON-07, TC-CON-14, TC-HW-02, TC-HW-03 | sábado ~18:20 → ~19:20 |
+| B. Conectividad y MQTT | TC-CON-03, 06, 08, 09, 10, TC-MQTT-03, TC-MQTT-05, TC-MED-01, TC-MED-02, TC-MED-06, TC-LOG-03, TC-LOG-08 | ~19:20 → ~20:40 |
+| C. Hora y watchdog | TC-TIME-05, 06, 08, TC-WDT-02 | ~20:40 → ~21:10 |
+| D. OTA | JRN-02.1, JRN-02.2, TC-OTA-06 a 13, TC-OTA-17 (nuevo) | ~21:10 → ~23:10 |
+| E. Largas | TC-CON-11 (AP apagado 60 min), TC-CON-12 (70 min), TC-TIME-04 (2 h o más) | ~23:10 → domingo 22, ~03:25 |
+| F. Imagen de producción | ensayo de `verify` (`-m journey`), TC-LOG-04, TC-OTA-14 | domingo ~03:25 → ~04:05 |
+
+La lanza `scripts/regresion/cadena.sh <run del build de banco> <run del build de producción> <sha7>`, en un solo
+contenedor (`docker logs cadena`), con una salida por tanda en `test-results/cadena-<fecha>/`.
 
 - **Las horas son aproximadas:** cada tanda empieza cuando termina la anterior.
 - **Si una prueba falla, la cadena sigue** (sin `-x`), y el domingo por la mañana reviso los resultados antes de la visita.
@@ -34,8 +37,9 @@ solo después del aviso del propietario de que terminó la prueba de 24 h de AGU
 | 3 | TC-CFG-02 y TC-MQTT-04, en la misma sesión que la 2 | 5 cortes | 30 min |
 | 4 | TC-SEN-04, el SDA del SHT41 | soltar y poner el Dupont | 10 min |
 | 5 | TC-OTA-15, corte durante la descarga | desenchufar con el segundo aviso | 15 min |
+| 6 | TC-TIME-03, corte con SNTP bloqueado | desenchufar y enchufar con los avisos | 10 min |
 
-En total, 1 h 15 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPhone.
+En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPhone.
 
 ## Salvedades (propietario, 2026-11-19)
 
