@@ -16,8 +16,14 @@ Comprobación. revisar(): la salida de esptool tiene que decir, para cada offset
    caso de v0.0.1), así que B es la defensa y JRN-01.0 falla además si el arranque
    dice «Image hash failed».
 
+Frecuencia (upstream #52, 2026-11-18): el banco graba con dio/40m/keep si no recibe
+flash_args. opciones() toma las líneas de opciones del coldflash/flash_args del build
+(«--flash-mode dio --flash-freq 80m --flash-size 8MB») que está junto a las imágenes, y
+envolver() las manda si el driver acepta flash_args (fork villa-2 20b42df o posterior).
+
 Solo biblioteca estándar: lo prueba tests/host/test_grabado.py en la CI.
 """
+import inspect
 import pathlib
 import re
 import tempfile
@@ -57,14 +63,29 @@ def revisar(salida_esptool, tamanos):
     return errores
 
 
+def opciones(images):
+    """Líneas «--…» del flash_args del build que esté junto a alguna imagen, o None."""
+    for ruta in images.values():
+        fa = pathlib.Path(ruta).parent / "flash_args"
+        if fa.is_file():
+            lineas = [ln.strip() for ln in fa.read_text().splitlines() if ln.strip().startswith("--")]
+            return "\n".join(lineas) + "\n" if lineas else None
+    return None
+
+
 def envolver(tb):
     """Sustituye tb.flash por una versión que protege las imágenes y revisa la salida."""
     original = tb.flash
+    acepta_fa = "flash_args" in inspect.signature(original).parameters
 
     def flash(slot, images, chip="auto", erase=False, timeout=300):
+        extra = {}
+        fa = opciones(images) if acepta_fa else None
+        if fa:
+            extra["flash_args"] = fa
         with tempfile.TemporaryDirectory(prefix="grabado-") as tmp:
             rutas, tamanos = proteger(images, tmp)
-            res = original(slot, rutas, chip=chip, erase=erase, timeout=timeout)
+            res = original(slot, rutas, chip=chip, erase=erase, timeout=timeout, **extra)
         if res.get("ok"):
             errores = revisar(res.get("output") or res.get("log") or "", tamanos)
             if errores:

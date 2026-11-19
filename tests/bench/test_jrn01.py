@@ -68,6 +68,8 @@ def test_jrn_01_0_flash_ci_image(testbench, dut_slot, firmware, boot_marker,
         has_marker = any(bench_image_marker in ln for ln in boot)
         has_init = any(boot_marker in ln for ln in boot)
         ver = next((ln for ln in boot if re.search(r"nodo_clima \S+", ln)), "")
+        spi = next((ln.rsplit(":", 1)[-1].strip() for ln in boot if "Boot SPI Speed" in ln), "?")
+        c.note(f"- velocidad SPI de arranque: {spi} (upstream #52: 80MHz con el fork villa-2 20b42df o posterior)")
         c.note(f"- tras el último `rst:` ({len(boot)} líneas):",
                f"- `{bench_image_marker}`: {'sí' if has_marker else 'NO'}",
                f"- `{boot_marker}`: {'sí' if has_init else 'NO'}",

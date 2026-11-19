@@ -93,6 +93,27 @@ class TestGrabado(unittest.TestCase):
         banco = grabado.envolver(BancoSimulado(recorta=True))
         self.assertTrue(banco.flash("SLOT1", {"0x20000": self.imagen("e.bin", app)})["ok"])
         self.assertEqual(banco.flash_mem["0x20000"][:len(app)], app)                  # con B llega entera
+    def test_flash_args_del_build_si_el_driver_lo_acepta(self):
+        # upstream #52: las líneas de opciones del coldflash/flash_args van al banco
+        cold = self.dir / "coldflash"
+        cold.mkdir()
+        (cold / "flash_args").write_text("--flash-mode dio --flash-freq 80m --flash-size 8MB\n"
+                                         "0x0 bootloader/bootloader.bin\n0x20000 nodo_clima.bin\n")
+        (cold / "bootloader.bin").write_bytes(b"\xe9boot\x25")
+
+        class DriverNuevo(BancoSimulado):
+            def flash(self, slot, images, chip="auto", erase=False, timeout=300, flash_args=None):
+                self.fa = flash_args
+                return super().flash(slot, images, chip=chip, erase=erase, timeout=timeout)
+        nuevo = grabado.envolver(DriverNuevo(recorta=False))
+        self.assertTrue(nuevo.flash("SLOT1", {"0x0": str(cold / "bootloader.bin")})["ok"])
+        self.assertEqual(nuevo.fa, "--flash-mode dio --flash-freq 80m --flash-size 8MB\n")
+        # un driver sin flash_args (fork anterior) sigue funcionando, sin el parámetro
+        viejo = grabado.envolver(BancoSimulado(recorta=False))
+        self.assertTrue(viejo.flash("SLOT1", {"0x0": str(cold / "bootloader.bin")})["ok"])
+        # sin flash_args junto a las imágenes no se manda nada
+        self.assertIsNone(grabado.opciones({"0x9000": self.imagen("nvs.bin", b"\xff" * 16)}))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=1)

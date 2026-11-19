@@ -21,10 +21,11 @@ RUN python3 -m venv /opt/bench-venv \
 # del repo del testbench, fijado a un commit y a su sha256. Solo usa la
 # biblioteca estándar. Cambiar de commit = cambiar las dos líneas a la vez.
 # Fork villa-2 (H-87): el driver del fork, que envía el token X-Harness-Token
-# (TESTBENCH_TOKEN del .env) y trae los métodos de las capacidades nuevas.
+# (TESTBENCH_TOKEN del .env) y trae los métodos de las capacidades nuevas;
+# 20b42df: flash(flash_args=...) para grabar a la frecuencia del build (upstream #52).
 ARG TESTBENCH_REPO=rafaelrodWebpos/Embedded-AI-Harness
-ARG TESTBENCH_COMMIT=b5623c457f855ba961946d2a94e0cfac25ca6b25
-ARG TESTBENCH_DRIVER_SHA256=efef06678417f299bd7d4cb8ca5636bd5b06d1201de47ff69fa639d7cb76406f
+ARG TESTBENCH_COMMIT=20b42df2aa92d2a24f8e4700dc4a942b940a23bb
+ARG TESTBENCH_DRIVER_SHA256=b9efe1f6624b8756cc9f2d5a5f392177499f16937bc236e270051ea851f8296c
 RUN site=$(/opt/bench-venv/bin/python -c 'import sysconfig; print(sysconfig.get_paths()["purelib"])') \
     && curl -sSfL -o "$site/testbench_driver.py" \
        "https://raw.githubusercontent.com/${TESTBENCH_REPO}/${TESTBENCH_COMMIT}/pytest/testbench_driver.py" \
