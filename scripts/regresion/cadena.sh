@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Regresión con ESP-IDF 6.0.3 (testing/regresion-6.0.3.md): una sola cadena desacoplada en el SLOT1.
 # Uso, desde la raíz del repo y solo tras el aviso del propietario de que el banco está libre:
-#   scripts/regresion/cadena.sh <run-id del build de banco> <run-id del build de producción> <sha7>
-# Un contenedor corre las tandas 0 y A–F una tras otra, sin -x (si una prueba falla, sigue).
+#   scripts/regresion/cadena.sh <run-id del build de banco> <run-id del build de producción> <sha7> [--con-wdt]
+# Un contenedor corre las tandas A–F una tras otra, sin -x (si una prueba falla, sigue). La tanda 0
+# (TC-WDT-01, 24 h) solo con --con-wdt: el propietario la dejó fuera de la regresión 6.0.3 (2026-11-20).
 # Cada tanda deja su salida en test-results/cadena-<fecha>/<tanda>.log. TESTBENCH_URL y
 # TESTBENCH_TOKEN salen del .env (nunca se versionan). Estado: docker logs cadena.
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 set -a; . ./.env; set +a
-RUN_BANCO=$1; RUN_PROD=$2; V=$3
+RUN_BANCO=$1; RUN_PROD=$2; V=$3; CON_WDT=${4:-}
 FW=${TMPDIR:-/tmp}/cadena-fw-$V
 mkdir -p "$FW/banco" "$FW/prod"
 [ -f "$FW/banco/firmware_v0.0.0-$V-bench.bin" ] || gh run download "$RUN_BANCO" -n "firmware-v0.0.0-$V-bench" -D "$FW/banco" >/dev/null
@@ -17,7 +18,8 @@ OUT=test-results/cadena-$(date -u +%Y%m%dT%H%M%SZ)
 mkdir -p "$OUT"
 
 B=tests/bench
-T0="$B/test_wdt.py::test_tc_wdt_01_24h_stability"
+T0=""
+[ "$CON_WDT" = "--con-wdt" ] && T0="$B/test_wdt.py::test_tc_wdt_01_24h_stability"
 TA="$B/test_jrn01.py::test_jrn_01_0_flash_ci_image $B/test_jrn01.py::test_jrn_01_1_portal_without_config
  $B/test_jrn01.py::test_jrn_01_2_provision $B/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log
  $B/test_jrn01.py::test_jrn_01_4_broker_and_status $B/test_jrn01.py::test_jrn_01_5_home_assistant_discovery
@@ -49,7 +51,7 @@ TF="$B/test_villa2.py::test_tc_log_04_no_udp_log_in_production $B/test_ota.py::t
 CADENA='
 PY="/opt/bench-venv/bin/python -m pytest -rA -p no:cacheprovider"
 tanda() { echo "== tanda $1 $(date -u +%FT%TZ)"; }
-tanda 0; $PY $T0 --firmware-dir $FW/banco > $OUT/0-wdt.log 2>&1 || true
+if [ -n "$T0" ]; then tanda 0; $PY $T0 --firmware-dir $FW/banco > $OUT/0-wdt.log 2>&1 || true; fi
 tanda A; $PY $TA --firmware-dir $FW/banco > $OUT/A.log 2>&1 || true
 tanda B; $PY $TB --firmware-dir $FW/banco > $OUT/B.log 2>&1 || true
 tanda C; $PY $TC --firmware-dir $FW/banco > $OUT/C.log 2>&1 || true

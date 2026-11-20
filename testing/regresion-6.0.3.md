@@ -6,13 +6,15 @@ Las pruebas se lanzan en contenedores desacoplados, una tanda tras otra.
 
 ## Orden acordado (propietario, 2026-11-19)
 
+**Cambio del 2026-11-20:** sin TC-WDT-01. La cadena arranca cuando el propietario avise de que terminó AGUA
+(sábado ~12:40), así que las horas de abajo se adelantan unas 5 h 40 min: A empieza hacia las 12:45 y F termina hacia las 22:30.
+
 Todo corre en el SLOT1, en **una sola cadena desacoplada**: un contenedor lanzado una vez que corre las tandas una
 tras otra, sin esperar a nadie. La laptop tiene que quedarse encendida todo el fin de semana. La cadena se lanza
 solo después del aviso del propietario de que terminó la prueba de 24 h de AGUA.
 
 | Tanda | Pruebas | Inicio y fin previstos |
 |---|---|---|
-| 0. Watchdog 24 h | TC-WDT-01 (aceptación 22.1-2) | viernes 20, ~18:15 → sábado 21, ~18:20 |
 | A. Recorrido y portal | JRN-01.0 a 01.6, TC-POR-02, 05, 07, 09, 11, 12, TC-CON-07, TC-CON-14, TC-HW-02, TC-HW-03 | sábado ~18:20 → ~19:20 |
 | B. Conectividad y MQTT | TC-CON-03, 06, 08, 09, 10, TC-MQTT-03, TC-MQTT-05, TC-MED-01, TC-MED-02, TC-MED-06, TC-LOG-03, TC-LOG-08 | ~19:20 → ~20:40 |
 | C. Hora y watchdog | TC-TIME-05, 06, 08, TC-WDT-02 | ~20:40 → ~21:10 |
@@ -45,5 +47,7 @@ En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPho
 
 - **TC-SEN-03 y TC-SEN-05 no se repiten:** el código del sensor no cambió en este paquete (ESP-IDF 6.0.3, A3-02,
   A3-03, B-1, #52 y #86). Su último verde sigue valiendo, como salvedad.
-- **TC-WDT-01 sí se repite** (tanda 0).
+- **TC-WDT-01 (24 h) no se repite en esta regresión** (decisión del propietario, 2026-11-20). La prueba de 24 h de AGUA
+  se repitió y ocupa el banco hasta el sábado ~12:40. Motivos: el código del watchdog no cambió, el cambio de ESP-IDF
+  es de parche y el nodo no es crítico. `cadena.sh` solo la corre con `--con-wdt`.
 - **El tag v0.0.2** lo crea el propietario cuando todo esté en verde, como con v0.0.1 (runner levantado durante la release).

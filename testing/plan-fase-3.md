@@ -321,3 +321,7 @@ Al terminar, el broker y el AP quedaron apagados, como estaban. El SLOT2 no se t
   - el domingo, la visita de 1 h 15 min.
 - **Salvedad:** TC-SEN-03 y TC-SEN-05 no se repiten con ESP-IDF 6.0.3, porque el código del sensor no cambió. Vale su
   último verde.
+
+- **Salvedad (propietario, 2026-11-20):** TC-WDT-01 (24 h) no se repite en la regresión con ESP-IDF 6.0.3. El código
+  del watchdog no cambió, el cambio de ESP-IDF es de parche y el nodo no es crítico. La cadena (tandas A–F) se lanza
+  cuando el propietario avise de que terminó la prueba de 24 h de AGUA, repetida hasta el sábado ~12:40.
