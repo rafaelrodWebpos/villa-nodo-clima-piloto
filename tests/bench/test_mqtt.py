@@ -426,3 +426,68 @@ def test_tc_mqtt_04_last_will_on_power_cut(testbench, run_dir):
         assert not mal, "; ".join(mal)
         peor = max(s for _, _, s, _ in LWT_MEDIDOS)
         c.passed(f"{len(LWT_MEDIDOS)} cortes: Last Will retenido en ≤ {peor:.1f} s (límite {LWT_LIMITE_S} s)")
+
+
+# --------------------------------------------------------------------------
+# TC-CON-15 · FR-CON-03, FR-CON-04, FR-CON-01 — orden de regreso tras un apagón (H12, H-94)
+# --------------------------------------------------------------------------
+ORDEN_AP_S = 180          # el nodo vuelve primero; el AP, 3 min después
+ORDEN_BROKER_S = 180      # el broker, otros 3 min después del AP
+
+
+def test_tc_con_15_return_order_after_outage(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+    """TC-CON-15 · FR-CON-03, FR-CON-04, FR-CON-01 — análisis de cortes parciales, H12 (H-94):
+    el nodo vuelve antes que el AP y el AP antes que el broker. Reset con AP y broker apagados;
+    AP a los 3 min: Wi-Fi arriba (T08) en ≤ 90 s y sin OPERATIVO; broker 3 min después: primer
+    mensaje status online y una medida en ≤ 75 s; un solo arranque en todo el proceso."""
+    tb = testbench
+    nodo = _nodo(dut_mac)
+    with case(tb, "TC-CON-15", "Orden de regreso tras un apagón", run_dir, spec="TC-CON villa-nodo-clima-piloto") as c, \
+            configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+        banco.broker_on()
+        t0, reg = _a_operativo(tb, dut_slot, banco, c)
+        c.step("Apagar AP y broker; reiniciar el nodo (vuelve el primero)")
+        banco.ap_off()
+        banco.broker_off()
+        t_r = time.time()
+        tb.serial_reset(dut_slot)
+        time.sleep(ORDEN_AP_S)
+        c.step(f"Levantar el AP a los {ORDEN_AP_S} s; el broker sigue apagado")
+        t_ap = time.time()
+        banco.ap_on()
+        t08 = reg.esperar(re.escape("con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)"), 100, desde_ts=t_ap)
+        time.sleep(max(0.0, t_ap + ORDEN_BROKER_S - time.time()))
+        c.step(f"Levantar el broker {ORDEN_BROKER_S} s después del AP")
+        t_br = time.time()
+        banco.broker_on()
+        with _suscribir(tb, nodo) as sub:
+            fin = time.time() + 90
+            while time.time() < fin and not any(m["topic"].rsplit("/", 1)[-1] in MEDIDAS
+                                                for m in _del_nodo(sub.mensajes(), nodo, t_br)):
+                time.sleep(1)
+            msgs = sub.mensajes()
+        ent = [e for e in reg.leer() if e.get("ts", 0) >= t_r]
+        _guardar(c, ent, msgs, t0)
+        textos = [e["text"] for e in ent]
+        boots = [t for t in textos if "nodo: boot: " in t]
+        # un serial/reset da hoy dos arranques seguidos (~2,6 s, CR-TB-12 / upstream #83): solo
+        # cuenta como reinicio del nodo un arranque 15 s o más después del reset
+        tardios = [e["text"] for e in ent if "nodo: boot: " in e["text"] and e.get("ts", 0) >= t_r + 15]
+        antes_broker = [e["text"] for e in ent if e.get("ts", 0) < t_br]
+        del_nodo = [m for m in _del_nodo(msgs, nodo, t_br) if m["payload"] != LWT]
+        primero = del_nodo[0] if del_nodo else None
+        medida = next((m for m in del_nodo if m["topic"].rsplit("/", 1)[-1] in MEDIDAS), None)
+        c.note("", "## Resultado", "",
+               f"- arranques tras el reset: {len(boots)} (los del reset del banco); después de +15 s: {len(tardios)}",
+               f"- AP a +{t_ap - t_r:.0f} s; T08 (wifi_up) a {(t08['ts'] - t_ap) if t08 else float('nan'):+.1f} s del AP (límite 90 s)",
+               f"- broker a +{t_br - t_ap:.0f} s del AP; primer mensaje del nodo: "
+               f"{primero['topic'].rsplit('/', 1)[-1] + ' ' + primero['payload'][:40] if primero else '-'}",
+               f"- primera medida a {(medida['t'] - t_br) if medida else float('nan'):+.1f} s del broker (límite 75 s)")
+        assert boots, "la captura no contiene el arranque tras el reset"
+        assert not tardios, f"el nodo se reinició durante la espera (FR-CON-01): {tardios[:1]}"
+        assert t08 and t08["ts"] - t_ap <= 90, "sin Wi-Fi arriba en 90 s desde el AP (FR-CON-03)"
+        assert not any("-> OPERATIVO" in t for t in antes_broker), "OPERATIVO sin broker"
+        assert primero and primero["topic"].endswith("/status") and '"online"' in primero["payload"], \
+            f"el primer mensaje no es status online: {primero}"
+        assert medida and medida["t"] - t_br <= 75, "sin medida en 75 s desde el broker (FR-CON-04)"
+        c.passed(f"sin reinicios; Wi-Fi a {t08['ts'] - t_ap:.0f} s del AP; medida a {medida['t'] - t_br:.0f} s del broker")

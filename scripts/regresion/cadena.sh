@@ -43,7 +43,7 @@ TD="$B/test_jrn02.py::test_jrn_02_1_ota_to_b1_and_b2 $B/test_jrn02.py::test_jrn_
  $B/test_jrn02.py::test_tc_ota_10_bad_images $B/test_jrn02.py::test_tc_ota_11_ap_lost_during_download
  $B/test_jrn02.py::test_tc_ota_12_busy_during_download $B/test_jrn02.py::test_nfr_ota_01_measurement_period_during_download
  $B/test_jrn02.py::test_tc_ota_17_abort_slow_download_then_new_command"
-TE="$B/test_con_largo.py::test_tc_con_11_ap_off_60_min $B/test_con_largo.py::test_tc_con_12_broker_off_60_min
+TE="$B/test_mqtt.py::test_tc_con_15_return_order_after_outage $B/test_con_largo.py::test_tc_con_11_ap_off_60_min $B/test_con_largo.py::test_tc_con_12_broker_off_60_min
  $B/test_bench_plus.py::test_tc_time_04_resync_failure_keeps_time"
 TF="$B/test_villa2.py::test_tc_log_04_no_udp_log_in_production $B/test_ota.py::test_tc_ota_14_production_rejects_test_prerelease"
 

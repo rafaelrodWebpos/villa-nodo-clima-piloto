@@ -2189,6 +2189,22 @@ tests:
       35 s, un reset arranca A en su partición (la imagen abortada no es la de arranque) y un
       cmd_ota de B2 termina en fw = B2; B1 no arranca nunca
     impl: tests/bench/test_jrn02.py::test_tc_ota_17_abort_slow_download_then_new_command
+  - id: TC-CON-15
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 3
+    tier: bench
+    verifies: [FR-CON-03, FR-CON-04, FR-CON-01]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, bench-serial-monitor, dut-board]
+    expect: >
+      análisis de cortes parciales, H12 (H-94): orden de regreso tras un apagón. Con el nodo
+      configurado, AP y broker apagados y reset del nodo (vuelve el primero); AP a los 180 s:
+      con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up) en ≤ 90 s y ningún OPERATIVO sin broker;
+      broker 180 s después: el primer mensaje en vivo es status online y una medida llega en
+      ≤ 75 s; ningún arranque 15 s o más después del reset (los dos del reset del banco no
+      cuentan, CR-TB-12)
+    impl: tests/bench/test_mqtt.py::test_tc_con_15_return_order_after_outage
   - id: TC-SEC-03
     shape: atomic
     kind: standard

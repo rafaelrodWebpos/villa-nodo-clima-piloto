@@ -19,7 +19,7 @@ solo después del aviso del propietario de que terminó la prueba de 24 h de AGU
 | B. Conectividad y MQTT | TC-CON-03, 06, 08, 09, 10, TC-MQTT-03, TC-MQTT-05, TC-MED-01, TC-MED-02, TC-MED-06, TC-LOG-03, TC-LOG-08 | ~19:20 → ~20:40 |
 | C. Hora y watchdog | TC-TIME-05, 06, 08, TC-WDT-02 | ~20:40 → ~21:10 |
 | D. OTA | JRN-02.1, JRN-02.2, TC-OTA-06 a 13, TC-OTA-17 (nuevo) | ~21:10 → ~23:10 |
-| E. Largas | TC-CON-11 (AP apagado 60 min), TC-CON-12 (70 min), TC-TIME-04 (2 h o más) | ~23:10 → domingo 22, ~03:25 |
+| E. Largas | TC-CON-15 (orden de regreso, nueva, ~8 min), TC-CON-11 (AP apagado 60 min), TC-CON-12 (70 min), TC-TIME-04 (2 h o más) | ~23:10 → domingo 22, ~03:25 |
 | F. Imagen de producción | ensayo de `verify` (`-m journey`), TC-LOG-04, TC-OTA-14 | domingo ~03:25 → ~04:05 |
 
 La lanza `scripts/regresion/cadena.sh <run del build de banco> <run del build de producción> <sha7>`, en un solo
