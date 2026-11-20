@@ -34,6 +34,34 @@ OWASP ASVS / Top 10, CWE y NIST SP 800-115. Un criterio de seguridad tiene que
 poder fallar: «cifrado u ofuscado» no puede fallar; «la contraseña marcador no
 aparece en ninguna captura» sí.
 
+## Matriz de fallos parciales (H-94, 2026-11-20)
+
+Un plan que solo corta del todo el Wi-Fi, el broker o la alimentación deja sin
+probar los fallos que más se ven en una casa. Antes de cerrar cada fase con red,
+y antes de cada instalación, se recorre esta matriz contra el FSD. Para cada
+fila se responde qué detecta el nodo, qué sigue funcionando, qué alerta sale (y
+quién la emite) y cómo se recupera solo. Cada fila acaba con una prueba, con una
+salvedad escrita o con una propuesta. El primer recorrido está en
+`testing/analisis-cortes-parciales.md`.
+
+| Familia | Fallos que hay que mirar | Cómo se simula en el banco |
+|---|---|---|
+| Internet parcial | Sin salida a Internet con la LAN arriba; DNS que no contesta o que da NXDOMAIN; pérdida de paquetes, retardo o cortes intermitentes; un servicio de nube caído con Internet arriba | `bench-ap-internet` (apagar la salida), `bench-sntp-block`, `bench-dns-override`; pérdida y DNS mudo: capacidades pendientes (CR-TB-23 a CR-TB-26) |
+| Red parcial | AP o punto del mesh apagado; punto del mesh encendido sin enlace al resto; broker inalcanzable por DROP (no por RST); DHCP caído con el AP arriba; contrato DHCP que no se renueva; cambio a otra red | P-AP-OUTAGE, P-BROKER-OUTAGE; DROP y DHCP: capacidades pendientes; cambio de punto de acceso: solo en campo (una radio) |
+| Energía parcial | Caídas breves y bajo voltaje (brownout); pérdida de una fase; un UPS que respalda unos equipos y otros no | Corte del USB-C con operador (`bench-operator-prompt`); bajo voltaje: solo con fuente regulable o en campo |
+| Combinados | Orden de regreso tras un apagón (el nodo antes que el AP, el AP antes que el broker, Internet al final); bajo voltaje repetido mientras falla la red | Reset por la línea del banco con el AP y el broker apagados y levantados en orden (ejemplo: TC-CON-15) |
+
+Reglas:
+
+- **Las alertas son parte del caso.** Si el firmware no emite alertas, se dice
+  quién las emite (por ejemplo, Home Assistant con el Last Will y los campos de
+  diagnóstico) y se prueba ahí. Un fallo que nadie ve cuenta como hueco.
+- **Sin el instrumento no hay verde.** Si el banco no puede simular un fallo, la
+  fila queda como salvedad o como propuesta de capacidad (CR-TB del
+  propietario). Nunca se da por probada con un fallo total parecido.
+- **Total y parcial no son lo mismo.** Un broker parado (RST) y un broker que no
+  contesta (DROP) ejercitan caminos distintos de TCP; se prueban por separado.
+
 ---
 
 # Ejecutar una prueba

@@ -325,3 +325,7 @@ Al terminar, el broker y el AP quedaron apagados, como estaban. El SLOT2 no se t
 - **Salvedad (propietario, 2026-11-20):** TC-WDT-01 (24 h) no se repite en la regresión con ESP-IDF 6.0.3. El código
   del watchdog no cambió, el cambio de ESP-IDF es de parche y el nodo no es crítico. La cadena (tandas A–F) se lanza
   cuando el propietario avise de que terminó la prueba de 24 h de AGUA, repetida hasta el sábado ~12:40.
+
+## Cortes parciales (H-94, 2026-11-20)
+
+Lo que se aprobó y en qué orden está en `testing/analisis-cortes-parciales.md`, sección «Decisión del propietario».

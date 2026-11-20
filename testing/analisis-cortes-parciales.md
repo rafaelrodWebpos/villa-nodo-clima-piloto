@@ -97,3 +97,17 @@ nueva del banco (fork; el número CR-TB lo da el propietario), **T** = prueba nu
 2. **Siguiente ronda del FSD** (con aprobación): H1, H2 y, si se quiere, H5.
 3. **Siguiente ronda del fork** (junto con L-1…L-5 y T-1): H9, H8, H10 y H11, con sus números CR-TB.
 4. **En la instalación (S2):** H6 y H13 en campo.
+
+## Decisión del propietario (H-94, 2026-11-20)
+
+1. **Ya, sin banco:**
+   - H12 como TC-CON-15 (`dca7f93`, en la tanda E de la regresión);
+   - borrador de las alertas de HA (H3 y H4) en `testing/borrador-alertas-ha.md`, para revisar;
+   - H14, la matriz de fallos parciales en `docs/Method/standards/testing.md`.
+2. **Próxima ronda del FSD:** H1 y H2.
+3. **Próxima ronda del fork** (junto con L-1…L-5 y T-1), con estos números del propietario:
+   - CR-TB-23: H8, agujero negro hacia el broker;
+   - CR-TB-24: H9, DHCP apagado;
+   - CR-TB-25: H10, pérdida y retardo;
+   - CR-TB-26: H11, DNS que no contesta.
+4. **En la instalación (S2):** broker por IP (H6) y apagar un satélite en campo (H13).
