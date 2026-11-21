@@ -20,6 +20,8 @@ import pytest
 from testbench_driver import TestbenchDriver
 
 import grabado
+import reintento
+import testbench_driver
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 PLAN = REPO / "testing" / "test-plan.yaml"
@@ -79,6 +81,7 @@ def testbench():
     url = os.environ.get("TESTBENCH_URL")
     if not url:
         pytest.skip("not done: TESTBENCH_URL no definido (precondición)")
+    reintento.instalar(testbench_driver)   # cortes breves de la red de WSL (2026-11-21): ~1 min de reintento
     tb = TestbenchDriver(url)
     grabado.envolver(tb)   # bytes exactos en /api/flash y «Wrote N bytes» revisado (2026-11-15)
     try:
