@@ -1,0 +1,91 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 63 items / 56 deselected / 7 selected
+
+tests/bench/test_jrn01.py .FssssF                                        [100%]
+
+=================================== FAILURES ===================================
+_____________________ test_jrn_01_1_portal_without_config ______________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7b91a1216ff0>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T120029Z-5334375')
+
+    def test_jrn_01_1_portal_without_config(testbench, dut_slot, dut_mac, run_dir):
+        """JRN-01.1 — sin configuración: ARRANQUE -> PORTAL y AP abierto clima-xxxxxx en ≤ 10 s; id estable en 3 reinicios."""
+        tb = testbench
+        expected_id = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+        with case(tb, "JRN-01.1", "Portal sin configuración", run_dir, requires="JRN-01.0") as c:
+            c.note(f"- slot: {dut_slot}; id esperado (FR-ID-01, MAC de dut.identity): `{expected_id}`", "")
+            # Precondiciones: la NVS la dejó en blanco JRN-01.0; la radio del banco, libre para escanear
+            c.step("Precondiciones: AP del banco apagado (el escaneo comparte la radio)")
+>           assert not tb.ap_status().get("active"), \
+                "el AP del banco está activo: el escaneo no puede correr (no se apaga aquí: no es nuestro)"
+E           AssertionError: el AP del banco está activo: el escaneo no puede correr (no se apaga aquí: no es nuestro)
+E           assert not True
+E            +  where True = <built-in method get of dict object at 0x7b91a09b8b40>('active')
+E            +    where <built-in method get of dict object at 0x7b91a09b8b40> = {'active': True, 'channel': 1, 'internet': False, 'sntp_blocked': False, ...}.get
+E            +      where {'active': True, 'channel': 1, 'internet': False, 'sntp_blocked': False, ...} = ap_status()
+E            +        where ap_status = <testbench_driver.TestbenchDriver object at 0x7b91a1216ff0>.ap_status
+
+tests/bench/test_jrn01.py:111: AssertionError
+___________________________ test_jrn_01_7_power_cut ____________________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7b91a1216ff0>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/prod'), 'variant': 'production', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T120029Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-5/test_jrn_01_7_power_cut0')
+
+    def test_jrn_01_7_power_cut(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """JRN-01.7 — con el suscriptor conectado desde antes, el operador desenchufa el USB-C de la
+        placa y lo vuelve a enchufar: el primer status en vivo trae reset = poweron bajo
+        sitio1/zona1/<nodo>/status, sin AP clima-* en el escaneo, y la primera medida en vivo llega
+        ≤ 30 s después del encendido estimado. Pone su propia precondición (imagen de la CI y
+        aprovisionamiento): JRN-01.6 está bloqueado (bench-ap-internet) y no deja el estado."""
+        from benchlib import suscriptor_mqtt
+        from cortes import corte, errores, filtros, guardar_mqtt, limpiar, preparar, resumen, sin_hacer
+        from test_mqtt import configurado
+        tb = testbench
+        nodo = "clima-" + dut_mac.replace(":", "").lower()[-6:]
+        with case(tb, "JRN-01.7", "Corte de alimentación visto por MQTT", run_dir) as c:
+>           with configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn01.py:580: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7b91a1216ff0>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7b91a09e5040>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-5/test_jrn_01_7_power_cut0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
+SKIPPED [1] tests/bench/benchlib.py:56: not done: JRN-01.1 no ha pasado en esta sesión (workflow)
+SKIPPED [1] tests/bench/benchlib.py:56: not done: JRN-01.2 no ha pasado en esta sesión (workflow)
+SKIPPED [1] tests/bench/benchlib.py:56: not done: JRN-01.3 no ha pasado en esta sesión (workflow)
+SKIPPED [1] tests/bench/benchlib.py:56: not done: JRN-01.4 no ha pasado en esta sesión (workflow)
+FAILED tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config - Asser...
+FAILED tests/bench/test_jrn01.py::test_jrn_01_7_power_cut - AssertionError: e...
+============ 2 failed, 1 passed, 4 skipped, 56 deselected in 44.02s ============

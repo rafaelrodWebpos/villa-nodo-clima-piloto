@@ -1,0 +1,11 @@
+I (33603) nodo: ota: estado en_curso
+I (33613) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (38083) esp_https_ota: Starting OTA...
+I (38083) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (38133) nodo: ota: 0 %
+I (40043) nodo: ota: 10 %
+I (42123) nodo: ota: 20 %
+I (44153) nodo: ota: 30 %
+I (46203) nodo: ota: 40 %
+I (48123) nodo: ota: 50 %
+I (50343) nodo: ota: 60 %

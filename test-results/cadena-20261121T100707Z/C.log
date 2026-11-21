@@ -1,0 +1,373 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 4 items
+
+tests/bench/test_time.py FF                                              [ 50%]
+tests/bench/test_villa2.py FF                                            [100%]
+
+=================================== FAILURES ===================================
+_____________________ test_tc_time_05_publish_without_time _____________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x775cae440530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115558Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_time_05_publish_withou0')
+
+>   ???
+
+/repo/tests/bench/test_time.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x775cae440530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x775cae4421e0>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_time_05_publish_withou0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+___________________ test_tc_time_06_sntp_retry_without_time ____________________
+
+self = <urllib.request.HTTPHandler object at 0x775cae4ad370>
+http_class = <class 'http.client.HTTPConnection'>
+req = <urllib.request.Request object at 0x775cae27a9f0>, http_conn_args = {}
+host = '<banco>:8080'
+h = <http.client.HTTPConnection object at 0x775cae27b4d0>
+headers = {'Connection': 'close', 'Content-Length': '74', 'Content-Type': 'application/json', 'Host': '<banco>:8080', ...}
+
+    def do_open(self, http_class, req, **http_conn_args):
+        """Return an HTTPResponse object for the request, using http_class.
+    
+        http_class must implement the HTTPConnection API from http.client.
+        """
+        host = req.host
+        if not host:
+            raise URLError('no host given')
+    
+        # will parse host:port
+        h = http_class(host, timeout=req.timeout, **http_conn_args)
+        h.set_debuglevel(self._debuglevel)
+    
+        headers = dict(req.unredirected_hdrs)
+        headers.update({k: v for k, v in req.headers.items()
+                        if k not in headers})
+    
+        # TODO(jhylton): Should this be redesigned to handle
+        # persistent connections?
+    
+        # We want to make an HTTP/1.1 request, but the addinfourl
+        # class isn't prepared to deal with a persistent connection.
+        # It will try to read all remaining data from the socket,
+        # which will block while the server waits for the next request.
+        # So make sure the connection gets closed after the (only)
+        # request.
+        headers["Connection"] = "close"
+        headers = {name.title(): val for name, val in headers.items()}
+    
+        if req._tunnel_host:
+            tunnel_headers = {}
+            proxy_auth_hdr = "Proxy-Authorization"
+            if proxy_auth_hdr in headers:
+                tunnel_headers[proxy_auth_hdr] = headers[proxy_auth_hdr]
+                # Proxy-Authorization should not be sent to origin
+                # server.
+                del headers[proxy_auth_hdr]
+            h.set_tunnel(req._tunnel_host, headers=tunnel_headers)
+    
+        try:
+            try:
+>               h.request(req.get_method(), req.selector, req.data, headers,
+                          encode_chunked=req.has_header('Transfer-encoding'))
+
+/usr/lib/python3.12/urllib/request.py:1344: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/http/client.py:1365: in request
+    self._send_request(method, url, body, headers, encode_chunked)
+/usr/lib/python3.12/http/client.py:1411: in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+/usr/lib/python3.12/http/client.py:1360: in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+/usr/lib/python3.12/http/client.py:1120: in _send_output
+    self.send(msg)
+/usr/lib/python3.12/http/client.py:1064: in send
+    self.connect()
+/usr/lib/python3.12/http/client.py:1030: in connect
+    self.sock = self._create_connection(
+/usr/lib/python3.12/socket.py:852: in create_connection
+    raise exceptions[0]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+address = ('<banco>', 8080), timeout = 10, source_address = None
+
+    def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
+                          source_address=None, *, all_errors=False):
+        """Connect to *address* and return the socket object.
+    
+        Convenience function.  Connect to *address* (a 2-tuple ``(host,
+        port)``) and return the socket object.  Passing the optional
+        *timeout* parameter will set the timeout on the socket instance
+        before attempting to connect.  If no *timeout* is supplied, the
+        global default timeout setting returned by :func:`getdefaulttimeout`
+        is used.  If *source_address* is set it must be a tuple of (host, port)
+        for the socket to bind as a source address before making the connection.
+        A host of '' or port 0 tells the OS to use the default. When a connection
+        cannot be created, raises the last error if *all_errors* is False,
+        and an ExceptionGroup of all errors if *all_errors* is True.
+        """
+    
+        host, port = address
+        exceptions = []
+        for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+            af, socktype, proto, canonname, sa = res
+            sock = None
+            try:
+                sock = socket(af, socktype, proto)
+                if timeout is not _GLOBAL_DEFAULT_TIMEOUT:
+                    sock.settimeout(timeout)
+                if source_address:
+                    sock.bind(source_address)
+>               sock.connect(sa)
+E               OSError: [Errno 101] Network is unreachable
+
+/usr/lib/python3.12/socket.py:837: OSError
+
+During handling of the above exception, another exception occurred:
+
+self = <testbench_driver.TestbenchDriver object at 0x775cae440530>
+path = '/api/test/update'
+body = {'phase': 'Fase 1', 'spec': 'TC-TIME villa-nodo-clima-piloto', 'total': 1}
+timeout = 10
+
+    def _api_post(self, path: str, body: Optional[dict] = None,
+                  timeout: float = 10) -> dict:
+        """POST JSON to an API endpoint, return parsed JSON."""
+        url = f"{self.base_url}{path}"
+        data_bytes = json.dumps(body or {}).encode("utf-8")
+        req = self._request(
+            url, data=data_bytes,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+>           with urllib.request.urlopen(req, timeout=timeout) as resp:
+
+/opt/bench-venv/lib/python3.12/site-packages/testbench_driver.py:188: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/urllib/request.py:215: in urlopen
+    return opener.open(url, data, timeout)
+/usr/lib/python3.12/urllib/request.py:515: in open
+    response = self._open(req, data)
+/usr/lib/python3.12/urllib/request.py:532: in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+/usr/lib/python3.12/urllib/request.py:492: in _call_chain
+    result = func(*args)
+/usr/lib/python3.12/urllib/request.py:1373: in http_open
+    return self.do_open(http.client.HTTPConnection, req)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <urllib.request.HTTPHandler object at 0x775cae4ad370>
+http_class = <class 'http.client.HTTPConnection'>
+req = <urllib.request.Request object at 0x775cae27a9f0>, http_conn_args = {}
+host = '<banco>:8080'
+h = <http.client.HTTPConnection object at 0x775cae27b4d0>
+headers = {'Connection': 'close', 'Content-Length': '74', 'Content-Type': 'application/json', 'Host': '<banco>:8080', ...}
+
+    def do_open(self, http_class, req, **http_conn_args):
+        """Return an HTTPResponse object for the request, using http_class.
+    
+        http_class must implement the HTTPConnection API from http.client.
+        """
+        host = req.host
+        if not host:
+            raise URLError('no host given')
+    
+        # will parse host:port
+        h = http_class(host, timeout=req.timeout, **http_conn_args)
+        h.set_debuglevel(self._debuglevel)
+    
+        headers = dict(req.unredirected_hdrs)
+        headers.update({k: v for k, v in req.headers.items()
+                        if k not in headers})
+    
+        # TODO(jhylton): Should this be redesigned to handle
+        # persistent connections?
+    
+        # We want to make an HTTP/1.1 request, but the addinfourl
+        # class isn't prepared to deal with a persistent connection.
+        # It will try to read all remaining data from the socket,
+        # which will block while the server waits for the next request.
+        # So make sure the connection gets closed after the (only)
+        # request.
+        headers["Connection"] = "close"
+        headers = {name.title(): val for name, val in headers.items()}
+    
+        if req._tunnel_host:
+            tunnel_headers = {}
+            proxy_auth_hdr = "Proxy-Authorization"
+            if proxy_auth_hdr in headers:
+                tunnel_headers[proxy_auth_hdr] = headers[proxy_auth_hdr]
+                # Proxy-Authorization should not be sent to origin
+                # server.
+                del headers[proxy_auth_hdr]
+            h.set_tunnel(req._tunnel_host, headers=tunnel_headers)
+    
+        try:
+            try:
+                h.request(req.get_method(), req.selector, req.data, headers,
+                          encode_chunked=req.has_header('Transfer-encoding'))
+            except OSError as err: # timeout error
+>               raise URLError(err)
+E               urllib.error.URLError: <urlopen error [Errno 101] Network is unreachable>
+
+/usr/lib/python3.12/urllib/request.py:1347: URLError
+
+During handling of the above exception, another exception occurred:
+
+testbench = <testbench_driver.TestbenchDriver object at 0x775cae440530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115558Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_time_06_sntp_retry_wit0')
+
+>   ???
+
+/repo/tests/bench/test_time.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/benchlib.py:53: in case
+    tb.test_start(spec, "Fase 1", total=1)
+/opt/bench-venv/lib/python3.12/site-packages/testbench_driver.py:581: in test_start
+    return self._api_post("/api/test/update",
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <testbench_driver.TestbenchDriver object at 0x775cae440530>
+path = '/api/test/update'
+body = {'phase': 'Fase 1', 'spec': 'TC-TIME villa-nodo-clima-piloto', 'total': 1}
+timeout = 10
+
+    def _api_post(self, path: str, body: Optional[dict] = None,
+                  timeout: float = 10) -> dict:
+        """POST JSON to an API endpoint, return parsed JSON."""
+        url = f"{self.base_url}{path}"
+        data_bytes = json.dumps(body or {}).encode("utf-8")
+        req = self._request(
+            url, data=data_bytes,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                data = json.loads(resp.read())
+        except urllib.error.URLError as e:
+>           raise CommandTimeout(f"POST {path}: {e}")
+E           testbench_driver.CommandTimeout: POST /api/test/update: <urlopen error [Errno 101] Network is unreachable>
+
+/opt/bench-venv/lib/python3.12/site-packages/testbench_driver.py:191: CommandTimeout
+_____________________ test_tc_time_08_reboot_without_sntp ______________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x775cae440530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115558Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_time_08_reboot_without0')
+
+    def test_tc_time_08_reboot_without_sntp(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-TIME-08 · FR-TIME-02 — tras reiniciar sin SNTP, hora_valida = false."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-TIME-08", "Reinicio sin SNTP: hora no válida", run_dir, spec="TC-TIME villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_villa2.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x775cae440530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x775cae27bec0>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_time_08_reboot_without0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+_________________________ test_tc_wdt_02_task_watchdog _________________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x775cae440530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115558Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_wdt_02_task_watchdog0')
+
+    def test_tc_wdt_02_task_watchdog(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-WDT-02 · NFR-WDT-01 (target) — wdt-test → reset=task_wdt en ≤ 30 s (+ 2 s)."""
+        tb = testbench
+>       with case(tb, "TC-WDT-02", "Watchdog de tareas (wdt-test)", run_dir, spec="TC-WDT villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_villa2.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x775cae440530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x775cae279760>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-2/test_tc_wdt_02_task_watchdog0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+=========================== short test summary info ============================
+FAILED tests/bench/test_time.py::test_tc_time_05_publish_without_time - Asser...
+FAILED tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time - te...
+FAILED tests/bench/test_villa2.py::test_tc_time_08_reboot_without_sntp - Asse...
+FAILED tests/bench/test_villa2.py::test_tc_wdt_02_task_watchdog - AssertionEr...
+============================== 4 failed in 46.24s ==============================

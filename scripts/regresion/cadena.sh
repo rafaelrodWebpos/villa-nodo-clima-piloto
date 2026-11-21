@@ -49,7 +49,7 @@ TF="$B/test_villa2.py::test_tc_log_04_no_udp_log_in_production $B/test_ota.py::t
 
 # Dentro del contenedor: las variables llegan por -e; las comillas simples impiden que este shell las expanda
 CADENA='
-PY="/opt/bench-venv/bin/python -m pytest -rA -p no:cacheprovider"
+PY="/opt/bench-venv/bin/python -m pytest -rA --tb=short -p no:cacheprovider"   # --tb=short: sin variables locales (cabeceras con el token, 2026-11-21)
 tanda() { echo "== tanda $1 $(date -u +%FT%TZ)"; }
 if [ -n "$T0" ]; then tanda 0; $PY $T0 --firmware-dir $FW/banco > $OUT/0-wdt.log 2>&1 || true; fi
 tanda A; $PY $TA --firmware-dir $FW/banco > $OUT/A.log 2>&1 || true

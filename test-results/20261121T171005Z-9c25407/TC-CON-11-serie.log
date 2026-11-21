@@ -1,0 +1,414 @@
+I (289) esp_image: segment 4: paddr=00119df0 vaddr=40374b14 size=13f5ch ( 81756) load
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40056f6f
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x1534
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2fdc
+entry 0x403c8908
+I (24) boot: ESP-IDF v6.0.3 2nd stage bootloader
+I (24) boot: compile time Nov 19 2026 22:10:41
+I (25) boot: Multicore bootloader
+I (25) boot: chip revision: v0.2
+I (27) boot: efuse block revision: v1.4
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (35) boot.esp32s3: SPI Mode       : DIO
+I (39) boot.esp32s3: SPI Flash Size : 8MB
+I (42) boot: Enabling RNG early entropy source...
+I (47) boot: Partition Table:
+I (50) boot: ## Label            Usage          Type ST Offset   Length
+I (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (62) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (69) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (75) boot:  3 ota_0            OTA app          00 10 00020000 00300000
+I (82) boot:  4 ota_1            OTA app          00 11 00320000 00300000
+I (88) boot: End of partition table
+I (92) esp_image: segment 0: paddr=00020020 vaddr=3c0c0020 size=39318h (234264) map
+I (141) esp_image: segment 1: paddr=00059340 vaddr=3fc98b00 size=061bch ( 25020) load
+I (147) esp_image: segment 2: paddr=0005f504 vaddr=40374000 size=00b14h (  2836) load
+I (148) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=b9dc8h (761288) map
+I (308) esp_image: segment 5: paddr=0012dd54 vaddr=50000000 size=00024h (    36) load
+I (317) boot: Loaded app from partition at offset 0x20000
+I (317) boot: Disabling RNG early entropy source...
+I (327) cpu_start: Multicore app
+I (336) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (337) cpu_start: Pro cpu start user code
+I (337) cpu_start: cpu freq: 160000000 Hz
+I (338) app_init: Application information:
+I (342) app_init: Project name:     nodo_clima
+I (346) app_init: App version:      0.0.0-9e80669-bench
+I (351) app_init: Compile time:     Nov 19 2026 22:11:25
+I (356) app_init: ELF file SHA256:  375bdfa5d...
+I (361) app_init: ESP-IDF:          v6.0.3
+I (364) efuse_init: Min chip rev:     v0.0
+I (368) efuse_init: Max chip rev:     v0.99
+I (372) efuse_init: Chip rev:         v0.2
+I (376) heap_init: Initializing. RAM available for dynamic allocation:
+I (382) heap_init: At 3FCA3D40 len 000459D0 (278 KiB): RAM
+I (387) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (393) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (398) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (404) spi_flash: detected chip: gd
+I (406) spi_flash: flash io: dio
+I (410) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (416) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (423) main_task: Started on CPU0
+I (423) main_task: Calling app_main()
+I (433) nodo: boot: clima-f3c6d4 fw=0.0.0-9e80669-bench reset=usb part=ota_0 img=valida
+I (433) nodo: nodo_clima 0.0.0-9e80669-bench
+I (443) nodo: NODO-BENCH-IMAGE
+I (483) nodo: cfg: sitio=sitio1 zona=zona1
+I (483) pp: pp rom version: e7ae62f
+I (483) net80211: net80211 rom version: e7ae62f
+I (493) wifi:wifi driver task: 3fcb16ac, prio:23, stack:6656, core=0
+I (503) wifi:wifi firmware version: da143fa
+I (503) wifi:wifi certification version: v7.0
+I (503) wifi:config NVS flash: enabled
+I (503) wifi:config nano formatting: disabled
+I (513) wifi:Init data frame dynamic rx buffer num: 32
+I (513) wifi:Init static rx mgmt buffer num: 5
+I (523) wifi:Init management short buffer num: 32
+I (523) wifi:Init dynamic tx buffer num: 32
+I (523) wifi:Init static tx FG buffer num: 2
+I (533) wifi:Init static rx buffer size: 1600
+I (533) wifi:Init static rx buffer num: 10
+I (543) wifi:Init dynamic rx buffer num: 32
+I (493) nodo: med: T=31.6 HR=66.7 Td=24.7
+I (543) wifi_init: rx ba win: 6
+I (553) wifi_init: accept mbox: 6
+I (553) wifi_init: tcpip mbox: 32
+I (553) wifi_init: udp mbox: 6
+I (553) wifi_init: tcp mbox: 6
+I (563) wifi_init: tcp tx win: 5760
+I (563) wifi_init: tcp rx win: 5760
+I (563) wifi_init: tcp mss: 1440
+I (573) wifi_init: WiFi IRAM OP enabled
+I (573) wifi_init: WiFi RX IRAM OP enabled
+I (583) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (623) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (623) wifi:enable tsf
+I (623) nodo: wifi: intento 1
+I (623) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (633) nodo: Init complete
+I (633) main_task: Returned from app_main()
+I (3033) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (4033) nodo: wifi: intento 2
+I (4043) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (6453) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_dowI (8453) nodo: wifi: intento 3
+I (8453) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (10863) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (14863) nodo: wifi: intento 4
+I (14863) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (14873) wifi:state: init -> auth (0xb0)
+I (14883) wifi:state: auth -> assoc (0x0)
+I (14893) wifi:state: assoc -> run (0x10)
+I (14913) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (14913) wifi:security: WPA2-PSK, phy: bgn, rssi: -28, cipher(pairwise:0x3, group:0x3), pmf:0
+I (14923) wifi:pm start, type: 1
+I (14923) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (14933) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (14953) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (14953) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (14953) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (15973) nodo: UDP logging -> 192.168.4.1:5555
+I (15973) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (15973) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (15973) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (15983) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (15993) nodo: mqtt: intento 1
+I (16043) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (16483) nodo: sntp: inicio pool.ntp.org
+I (21713) wifi:state: run -> init (0x3c0)
+I (21723) wifi:pm stop, total sleep time: 5980808 us / 6793686 us
+I (21723) wifi:<ba-del>idx:1, tid:0
+I (21723) wifi:<ba-del>idx:0, tid:7
+E (21723) transport_base: poll_write select error 113, errno = Software caused connection abort, fd = 55
+W (21733) transport_base: Poll timeout or error, errno=Success, fd=55, timeout_ms=10000
+E (21733) mqtt_client: Writing failed: errno=0
+E (21743) mqtt_client: Error sending disconnect message
+I (21743) nodo: con: OPERATIVO -> CONECTANDO_WIFI (wifi_down)
+I (22743) nodo: wifi: intento 1
+I (22753) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (25163) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (27163) nodo: wifi: intento 2
+I (27163) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (29573) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (33573) nodo: wifi: intento 3
+I (33573) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (35983) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (43983) nodo: wifi: intento 4
+I (43993) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (46403) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (60483) nodo: udplog: descartadas=1 reintentadas=0 cola_llena=0
+I (60493) nodo: med: T=31.6 HR=66.7 Td=24.6
+I (62403) nodo: wifi: intento 5
+I (62403) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (64813) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (96813) nodo: wifi: intento 6
+I (96813) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (99223) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (120493) nodo: med: T=31.6 HR=66.6 Td=24.6
+I (159223) nodo: wifi: intento 7
+I (159233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (161643) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (180493) nodo: med: T=31.5 HR=66.7 Td=24.6
+I (221643) nodo: wifi: intento 8
+I (221643) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (224053) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (240493) nodo: med: T=31.6 HR=66.5 Td=24.6
+I (284053) nodo: wifi: intento 9
+I (284053) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (286463) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (300493) nodo: med: T=31.5 HR=66.4 Td=24.5
+I (346463) nodo: wifi: intento 10
+I (346463) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (348883) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (360493) nodo: med: T=31.5 HR=66.3 Td=24.5
+I (408883) nodo: wifi: intento 11
+I (408883) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (411293) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (420493) nodo: med: T=31.6 HR=66.1 Td=24.5
+I (471293) nodo: wifi: intento 12
+I (471293) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (473703) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (480493) nodo: med: T=31.6 HR=66.3 Td=24.5
+I (533703) nodo: wifi: intento 13
+I (533703) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (536123) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (540493) nodo: med: T=31.6 HR=66.3 Td=24.5
+I (596123) nodo: wifi: intento 14
+I (596123) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (598533) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (600493) nodo: med: T=31.5 HR=66.5 Td=24.5
+I (658533) nodo: wifi: intento 15
+I (658533) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (660493) nodo: med: T=31.5 HR=66.5 Td=24.5
+I (660943) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (720493) nodo: med: T=31.5 HR=66.4 Td=24.5
+I (720943) nodo: wifi: intento 16
+I (720943) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (723363) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (780493) nodo: med: T=31.5 HR=66.0 Td=24.4
+I (783363) nodo: wifi: intento 17
+I (783363) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (785773) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (840493) nodo: med: T=31.5 HR=65.8 Td=24.4
+I (845773) nodo: wifi: intento 18
+I (845773) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (848183) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (900493) nodo: med: T=31.5 HR=65.9 Td=24.4
+I (908183) nodo: wifi: intento 19
+I (908183) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (910603) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (960493) nodo: med: T=31.5 HR=65.9 Td=24.4
+I (970603) nodo: wifi: intento 20
+I (970603) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (973013) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1020493) nodo: med: T=31.5 HR=66.5 Td=24.5
+I (1033013) nodo: wifi: intento 21
+I (1033013) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1035423) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1080493) nodo: med: T=31.5 HR=66.7 Td=24.5
+I (1095423) nodo: wifi: intento 22
+I (1095423) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1097833) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1140493) nodo: med: T=31.5 HR=66.7 Td=24.5
+I (1157833) nodo: wifi: intento 23
+I (1157843) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1160253) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1200493) nodo: med: T=31.5 HR=66.4 Td=24.4
+I (1220253) nodo: wifi: intento 24
+I (1220253) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1222663) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1260493) nodo: med: T=31.5 HR=66.3 Td=24.4
+I (1282663) nodo: wifi: intento 25
+I (1282663) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1285073) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1320493) nodo: med: T=31.5 HR=66.2 Td=24.4
+I (1345073) nodo: wifi: intento 26
+I (1345083) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1347493) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1380493) nodo: med: T=31.4 HR=66.8 Td=24.5
+I (1407493) nodo: wifi: intento 27
+I (1407493) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1409903) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1440493) nodo: med: T=31.5 HR=66.9 Td=24.6
+I (1469903) nodo: wifi: intento 28
+I (1469903) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1472313) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1500493) nodo: med: T=31.4 HR=66.8 Td=24.5
+I (1532313) nodo: wifi: intento 29
+I (1532323) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1534733) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1560493) nodo: med: T=31.4 HR=66.9 Td=24.5
+I (1594733) nodo: wifi: intento 30
+I (1594733) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1597143) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1620493) nodo: med: T=31.4 HR=67.6 Td=24.7
+I (1657143) nodo: wifi: intento 31
+I (1657143) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1659553) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1680493) nodo: med: T=31.4 HR=67.6 Td=24.7
+I (1719553) nodo: wifi: intento 32
+I (1719563) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1721973) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1740493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (1781973) nodo: wifi: intento 33
+I (1781973) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1784383) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1800493) nodo: med: T=31.4 HR=68.1 Td=24.8
+I (1844383) nodo: wifi: intento 34
+I (1844383) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1846793) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1860493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (1906793) nodo: wifi: intento 35
+I (1906793) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1909213) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1920493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (1969213) nodo: wifi: intento 36
+I (1969213) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (1971623) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (1980493) nodo: med: T=31.4 HR=67.8 Td=24.7
+I (2031623) nodo: wifi: intento 37
+I (2031623) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2034033) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2040493) nodo: med: T=31.4 HR=67.9 Td=24.7
+I (2094033) nodo: wifi: intento 38
+I (2094033) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2096453) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2100493) nodo: med: T=31.4 HR=67.7 Td=24.7
+I (2156453) nodo: wifi: intento 39
+I (2156453) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2158863) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2160493) nodo: med: T=31.4 HR=67.4 Td=24.6
+I (2218863) nodo: wifi: intento 40
+I (2218863) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2220493) nodo: med: T=31.4 HR=67.4 Td=24.6
+I (2221273) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2280493) nodo: med: T=31.4 HR=67.5 Td=24.6
+I (2281273) nodo: wifi: intento 41
+I (2281273) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2283683) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2340493) nodo: med: T=31.4 HR=68.2 Td=24.8
+I (2343683) nodo: wifi: intento 42
+I (2343693) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2346103) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2400493) nodo: med: T=31.4 HR=68.1 Td=24.8
+I (2406103) nodo: wifi: intento 43
+I (2406103) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2408513) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2460493) nodo: med: T=31.4 HR=67.9 Td=24.8
+I (2468513) nodo: wifi: intento 44
+I (2468513) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2470923) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2520493) nodo: med: T=31.4 HR=68.1 Td=24.8
+I (2530923) nodo: wifi: intento 45
+I (2530933) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2533343) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2580493) nodo: med: T=31.4 HR=68.1 Td=24.8
+I (2593343) nodo: wifi: intento 46
+I (2593343) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2595753) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2640493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (2655753) nodo: wifi: intento 47
+I (2655753) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2658163) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2700493) nodo: med: T=31.5 HR=68.2 Td=24.9
+I (2718163) nodo: wifi: intento 48
+I (2718173) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2720583) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2760493) nodo: med: T=31.4 HR=68.4 Td=24.9
+I (2780583) nodo: wifi: intento 49
+I (2780583) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2782993) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2820493) nodo: med: T=31.4 HR=68.3 Td=24.9
+I (2842993) nodo: wifi: intento 50
+I (2842993) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2845403) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2880493) nodo: med: T=31.4 HR=67.9 Td=24.8
+I (2905403) nodo: wifi: intento 51
+I (2905413) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2907823) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (2940493) nodo: med: T=31.4 HR=67.7 Td=24.7
+I (2967823) nodo: wifi: intento 52
+I (2967823) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (2970233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3000493) nodo: med: T=31.4 HR=67.7 Td=24.7
+I (3030233) nodo: wifi: intento 53
+I (3030233) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3032643) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3060493) nodo: med: T=31.4 HR=67.6 Td=24.7
+I (3092643) nodo: wifi: intento 54
+I (3092643) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3095063) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3120493) nodo: med: T=31.4 HR=67.5 Td=24.6
+I (3155063) nodo: wifi: intento 55
+I (3155063) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3157473) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3180493) nodo: med: T=31.4 HR=67.6 Td=24.7
+I (3217473) nodo: wifi: intento 56
+I (3217473) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3219883) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3240493) nodo: med: T=31.4 HR=67.8 Td=24.7
+I (3279883) nodo: wifi: intento 57
+I (3279883) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3282303) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3300493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (3342303) nodo: wifi: intento 58
+I (3342303) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3344713) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3360493) nodo: med: T=31.3 HR=68.1 Td=24.8
+I (3404713) nodo: wifi: intento 59
+I (3404713) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3407123) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3420493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (3467123) nodo: wifi: intento 60
+I (3467123) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3469543) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3480493) nodo: med: T=31.4 HR=67.8 Td=24.7
+I (3529543) nodo: wifi: intento 61
+I (3529543) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3531953) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3540493) nodo: med: T=31.4 HR=68.0 Td=24.8
+I (3591953) nodo: wifi: intento 62
+I (3591953) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3594363) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (3600493) nodo: med: T=31.4 HR=67.7 Td=24.7
+I (3654363) nodo: wifi: intento 63
+I (3654363) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (3654373) wifi:state: init -> auth (0xb0)
+I (3654383) wifi:state: auth -> assoc (0x0)
+I (3654383) wifi:state: assoc -> run (0x10)
+I (3654413) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (3654413) wifi:security: WPA2-PSK, phy: bgn, rssi: -31, cipher(pairwise:0x3, group:0x3), pmf:0
+I (3654423) wifi:pm start, type: 1
+I (3654423) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (3654423) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (3654473) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (3654473) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (3657653) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (3657663) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (3658673) nodo: UDP logging -> 192.168.4.1:5555
+I (3658673) nodo: udplog: descartadas=1 reintentadas=0 cola_llena=0
+I (3658673) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (3658673) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (3658683) nodo: mqtt: intento 1
+W (3659173) nodo: sntp: fallo
+I (3659173) nodo: sntp: inicio pool.ntp.org
+I (3659733) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (3660483) nodo: udplog: descartadas=1 reintentadas=1 cola_llena=0
+I (3660493) nodo: med: T=31.4 HR=67.4 Td=24.7
+I (3669173) nodo: sntp: inicio pool.ntp.org
+I (3679183) nodo: sntp: inicio pool.ntp.org
+W (3689183) nodo: sntp: fallo
+I (3689183) nodo: sntp: inicio pool.ntp.org
+I (3699183) nodo: sntp: inicio pool.ntp.org
+I (3709183) nodo: sntp: inicio pool.ntp.org
+W (3719183) nodo: sntp: fallo
+I (3719183) nodo: sntp: inicio pool.ntp.org
+I (3720493) nodo: med: T=31.4 HR=67.5 Td=24.6
+I (3729183) nodo: sntp: inicio pool.ntp.org
+I (3739183) nodo: sntp: inicio pool.ntp.org

@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 63 items / 56 deselected / 7 selected
+
+tests/bench/test_jrn01.py .....ss                                        [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
+PASSED tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
+PASSED tests/bench/test_jrn01.py::test_jrn_01_2_provision
+PASSED tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log
+PASSED tests/bench/test_jrn01.py::test_jrn_01_4_broker_and_status
+SKIPPED [1] tests/bench/ha_cliente.py:23: not done: no hay Home Assistant de prueba (scripts/ha/ha_prueba.py up)
+SKIPPED [1] tests/bench/cortes.py:130: not done: el slot no quedó ausente en 600 s (corte 1 sin hacer)
+=========== 5 passed, 2 skipped, 56 deselected in 1010.39s (0:16:50) ===========

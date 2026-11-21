@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 4 items
+
+tests/bench/test_time.py ..                                              [ 50%]
+tests/bench/test_villa2.py ..                                            [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_time.py::test_tc_time_05_publish_without_time
+PASSED tests/bench/test_time.py::test_tc_time_06_sntp_retry_without_time
+PASSED tests/bench/test_villa2.py::test_tc_time_08_reboot_without_sntp
+PASSED tests/bench/test_villa2.py::test_tc_wdt_02_task_watchdog
+======================== 4 passed in 809.14s (0:13:29) =========================

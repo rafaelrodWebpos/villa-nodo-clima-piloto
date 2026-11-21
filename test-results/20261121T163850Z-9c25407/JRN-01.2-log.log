@@ -1,0 +1,142 @@
+I (11357) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<255,255>, prof:1, snd_ch_cfg:0x0
+I (11357) wifi:station: <mac> join, AID=1, bgn, 20
+I (11477) wifi:<ba-add>idx:2 (ifx:1, <mac>), tid:7, ssn:0, winSize:64
+I (12047) wifi:<ba-add>idx:3 (ifx:1, <mac>), tid:0, ssn:0, winSize:64
+I (12087) esp_netif_lwip: DHCP server assigned IP to a client, IP is: 192.168.4.2
+I (18497) wifi:mode : sta (3c:0f:02:f3:c6:d4) + softAP (3c:0f:02:f3:c6:d5)
+I (18497) wifi:enable tsf
+I (18517) nodo: wifi: intento 1
+I (18517) nodo: con: PORTAL -> VALIDANDO (envío)
+I (18527) portal: POST / -> probando
+I (18607) wifi:station: <mac> leave, AID = 1, reason = 8, bss_flags is 33721443, bss:0x3fca4cd8
+I (18607) wifi:<ba-del>idx:3, tid:0
+I (18607) wifi:<ba-del>idx:2, tid:7
+I (18617) wifi:new:<1,1>, old:<1,0>, ap:<1,1>, sta:<0,0>, prof:1, snd_ch_cfg:0x0
+I (18617) wifi:scan in process, ignore set current channel
+I (20237) wifi:state: init -> auth (0xb0)
+I (20237) wifi:state: auth -> assoc (0x0)
+I (20247) wifi:state: assoc -> run (0x10)
+I (20267) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (20267) wifi:security: WPA2-PSK, phy: bgn, rssi: -28, cipher(pairwise:0x3, group:0x3), pmf:0
+I (20287) wifi:pm start, type: 1
+I (20287) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (20287) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (20317) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us
+I (20317) wifi:AP's beacon interval = 102400 us, DTIM period = 2
+I (21797) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (22807) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (22807) nodo: nvs: config escrita
+I (22807) wifi:state: run -> init (0x0)
+I (22807) wifi:pm stop, total sleep time: 2090810 us / 2522652 us
+I (22817) wifi:<ba-del>idx:0, tid:7
+I (22817) wifi:new:<1,0>, old:<1,1>, ap:<1,1>, sta:<1,0>, prof:1, snd_ch_cfg:0x0
+I (22827) wifi:mode : softAP (3c:0f:02:f3:c6:d5)
+I (22837) nodo: con: VALIDANDO -> ARRANQUE (wifi_up)
+I (26837) wifi:flush txq
+I (26837) wifi:stop sw txq
+I (26837) wifi:lmac stop hw txq
+ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0x8 (SPI_FAST_FLASH_BOOT)
+Saved PC:0x4037d529
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x1534
+load:0x403c8700,len:0xda0
+load:0x403cb700,len:0x2fdc
+entry 0x403c8908
+I (24) boot: ESP-IDF v6.0.3 2nd stage bootloader
+I (24) boot: compile time Nov 19 2026 22:07:44
+I (24) boot: Multicore bootloader
+I (24) boot: chip revision: v0.2
+I (27) boot: efuse block revision: v1.4
+I (31) boot.esp32s3: Boot SPI Speed : 80MHz
+I (34) boot.esp32s3: SPI Mode       : DIO
+I (38) boot.esp32s3: SPI Flash Size : 8MB
+I (42) boot: Enabling RNG early entropy source...
+I (46) boot: Partition Table:
+I (49) boot: ## Label            Usage          Type ST Offset   Length
+I (55) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (62) boot:  1 otadata          OTA data         01 00 0000f000 00002000
+I (68) boot:  2 phy_init         RF data          01 01 00011000 00001000
+I (75) boot:  3 ota_0            OTA app          00 10 00020000 00300000
+I (81) boot:  4 ota_1            OTA app          00 11 00320000 00300000
+I (88) boot: End of partition table
+I (91) esp_image: segment 0: paddr=00020020 vaddr=3c0c0020 size=383b0h (230320) map
+I (140) esp_image: segment 1: paddr=000583d8 vaddr=3fc98000 size=0512ch ( 20780) load
+I (145) esp_image: segment 2: paddr=0005d50c vaddr=40374000 size=02b0ch ( 11020) load
+I (148) esp_image: segment 3: paddr=00060020 vaddr=42000020 size=b7338h (750392) map
+I (286) esp_image: segment 4: paddr=00117360 vaddr=40376b0c size=11478h ( 70776) load
+I (302) esp_image: segment 5: paddr=001287e0 vaddr=50000000 size=00024h (    36) load
+I (311) boot: Loaded app from partition at offset 0x20000
+I (311) boot: Disabling RNG early entropy source...
+I (321) cpu_start: Multicore app
+I (330) cpu_start: GPIO 44 and 43 are used as console UART I/O pins
+I (331) cpu_start: Pro cpu start user code
+I (331) cpu_start: cpu freq: 160000000 Hz
+I (332) app_init: Application information:
+I (336) app_init: Project name:     nodo_clima
+I (340) app_init: App version:      0.0.0-9e80669
+I (345) app_init: Compile time:     Nov 19 2026 22:08:18
+I (350) app_init: ELF file SHA256:  8557ad608...
+I (354) app_init: ESP-IDF:          v6.0.3
+I (358) efuse_init: Min chip rev:     v0.0
+I (362) efuse_init: Max chip rev:     v0.99 
+I (366) efuse_init: Chip rev:         v0.2
+I (369) heap_init: Initializing. RAM available for dynamic allocation:
+I (376) heap_init: At 3FCA2130 len 000475E0 (285 KiB): RAM
+I (381) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM
+I (386) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM
+I (391) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM
+I (397) spi_flash: detected chip: gd
+I (400) spi_flash: flash io: dio
+I (403) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (409) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (416) main_task: Started on CPU0
+I (416) main_task: Calling app_main()
+I (426) nodo: boot: clima-f3c6d4 fw=0.0.0-9e80669 reset=sw part=ota_0 img=valida
+I (426) nodo: nodo_clima 0.0.0-9e80669
+I (466) nodo: cfg: sitio=sitio1 zona=zona1
+I (466) pp: pp rom version: e7ae62f
+I (466) net80211: net80211 rom version: e7ae62f
+I (486) wifi:wifi driver task: 3fceedb4, prio:23, stack:6656, core=0
+I (486) nodo: med: T=31.6 HR=66.2 Td=24.6
+I (496) wifi:wifi firmware version: da143fa
+I (496) wifi:wifi certification version: v7.0
+I (496) wifi:config NVS flash: enabled
+I (496) wifi:config nano formatting: disabled
+I (506) wifi:Init data frame dynamic rx buffer num: 32
+I (506) wifi:Init static rx mgmt buffer num: 5
+I (516) wifi:Init management short buffer num: 32
+I (516) wifi:Init dynamic tx buffer num: 32
+I (516) wifi:Init static tx FG buffer num: 2
+I (526) wifi:Init static rx buffer size: 1600
+I (526) wifi:Init static rx buffer num: 10
+I (536) wifi:Init dynamic rx buffer num: 32
+I (536) wifi_init: rx ba win: 6
+I (536) wifi_init: accept mbox: 6
+I (546) wifi_init: tcpip mbox: 32
+I (546) wifi_init: udp mbox: 6
+I (546) wifi_init: tcp mbox: 6
+I (546) wifi_init: tcp tx win: 5760
+I (556) wifi_init: tcp rx win: 5760
+I (556) wifi_init: tcp mss: 1440
+I (556) wifi_init: WiFi IRAM OP enabled
+I (566) wifi_init: WiFi RX IRAM OP enabled
+I (576) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (616) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (616) wifi:enable tsf
+I (616) nodo: wifi: intento 1
+I (616) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (616) nodo: Init complete
+I (616) wifi:state: init -> auth (0xb0)
+I (626) main_task: Returned from app_main()
+I (636) wifi:state: auth -> assoc (0x0)
+I (646) wifi:state: assoc -> run (0x10)
+I (666) wifi:connected with <ssid-de-prueba>, aid = 1, channel 1, BW20, bssid = <mac>
+I (666) wifi:security: WPA2-PSK, phy: bgn, rssi: -32, cipher(pairwise:0x3, group:0x3), pmf:0
+I (676) wifi:pm start, type: 1
+I (676) wifi:dp: 1, bi: 102400, li: 3, scale listen interval from 307200 us to 307200 us
+I (686) wifi:set rx beacon pti, rx_bcn_pti: 0, bcn_timeout: 25000, mt_pti: 0, mt_time: 10000
+I (696) wifi:<ba-add>idx:0 (ifx:0, <mac>), tid:7, ssn:0, winSize:64
+I (746) wifi:dp: 2, bi: 102400, li: 4, scale listen interval from 307200 us to 409600 us

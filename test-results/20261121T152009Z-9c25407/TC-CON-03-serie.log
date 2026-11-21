@@ -1,0 +1,71 @@
+I (433) nodo: boot: clima-f3c6d4 fw=0.0.0-9e80669-bench reset=usb part=ota_0 img=valida
+I (433) nodo: nodo_clima 0.0.0-9e80669-bench
+I (443) nodo: NODO-BENCH-IMAGE
+I (483) nodo: cfg: sitio=sitio1 zona=zona1
+I (483) pp: pp rom version: e7ae62f
+I (483) net80211: net80211 rom version: e7ae62f
+I (493) wifi:wifi driver task: 3fcb16ac, prio:23, stack:6656, core=0
+I (503) wifi:wifi firmware version: da143fa
+I (503) wifi:wifi certification version: v7.0
+I (503) wifi:config NVS flash: enabled
+I (503) wifi:config nano formatting: disabled
+I (513) wifi:Init data frame dynamic rx buffer num: 32
+I (513) wifi:Init static rx mgmt buffer num: 5
+I (513) wifi:Init management short buffer num: 32
+I (523) wifi:Init dynamic tx buffer num: 32
+I (523) wifi:Init static tx FG buffer num: 2
+I (533) wifi:Init static rx buffer size: 1600
+I (533) wifi:Init static rx buffer num: 10
+I (543) wifi:Init dynamic rx buffer num: 32
+I (493) nodo: med: T=31.5 HR=63.8 Td=23.8
+I (543) wifi_init: rx ba win: 6
+I (553) wifi_init: accept mbox: 6
+I (553) wifi_init: tcpip mbox: 32
+I (553) wifi_init: udp mbox: 6
+I (553) wifi_init: tcp mbox: 6
+I (563) wifi_init: tcp tx win: 5760
+I (563) wifi_init: tcp rx win: 5760
+I (563) wifi_init: tcp mss: 1440
+I (573) wifi_init: WiFi IRAM OP enabled
+I (573) wifi_init: WiFi RX IRAM OP enabled
+I (583) phy_init: phy_version 712,87e8c20e,Apr 13 2026,18:51:10
+I (623) wifi:mode : sta (3c:0f:02:f3:c6:d4)
+I (623) wifi:enable tsf
+I (623) nodo: wifi: intento 1
+I (633) nodo: con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)
+I (633) nodo: Init complete
+I (633) main_task: Returned from app_main()
+I (3043) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (4043) nodo: wifi: intento 2
+I (4043) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (6453) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_dowI (8453) nodo: wifi: intento 3
+I (8453) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (10863) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (14863) nodo: wifi: intento 4
+I (14873) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (17283) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (25283) nodo: wifi: intento 5
+I (25283) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (27693) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (43693) nodo: wifi: intento 6
+I (43693) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (46103) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (60493) nodo: med: T=31.5 HR=63.9 Td=23.9
+I (78103) nodo: wifi: intento 7
+I (78103) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (80523) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (120493) nodo: med: T=31.5 HR=63.9 Td=23.9
+I (140523) nodo: wifi: intento 8
+I (140523) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (142933) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (180493) nodo: med: T=31.6 HR=63.8 Td=23.9
+I (202933) nodo: wifi: intento 9
+I (202933) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (205343) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (240493) nodo: med: T=31.6 HR=63.6 Td=23.8
+I (265343) nodo: wifi: intento 10
+I (265343) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)
+I (267763) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)
+I (300493) nodo: med: T=31.6 HR=63.6 Td=23.8
+I (327763) nodo: wifi: intento 11
+I (327763) nodo: con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)

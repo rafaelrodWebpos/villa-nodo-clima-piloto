@@ -83,3 +83,28 @@ En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPho
 
   Ningún paso empieza si no termina antes de las 16:20. **TC-CON-12 y TC-TIME-04 (largas) quedan para después de la
   visita.**
+
+## Cadena 2 y visita del 2026-11-21
+
+- **Cadena 2** (`test-results/cadena2-20261121T151518Z/`):
+  - en verde: TC-CON-03, TC-LOG-08, C (4/4), D (10/11), F (journey en producción, TC-LOG-04, TC-OTA-14), TC-CON-15 y
+    TC-CON-11;
+  - **JRN-01.3**, del banco: la captura pegó dos líneas (`…(mqttI (8103) nodo: mqtt: intento 3`). La prueba ya las
+    separa (`62eba77`);
+  - **TC-OTA-17**, de la prueba: el firmware dio `en_curso` y, 10 ms después, `error:red` (A3-03 correcto). La prueba
+    se quedaba con el primer status; ahora espera el resultado (`62eba77`). B-1 se cumplió: tras el reset arranca A
+    en `ota_0`.
+- **Visita** (`test-results/visita-20261121T191123Z/`):
+  - **iPhone, H-83, 15:09:** iPhone 14 Pro Max, iOS 27.2.1, con la imagen candidata `0.0.0-9e80669-bench`. El log
+    del portal registró:
+    - 15:09:14, unión, `GET /hotspot-detect.html -> 302` y `GET / -> formulario`;
+    - 15:09:37, segunda unión, con lo mismo;
+    - 15:09:51, `GET / -> formulario` con los íconos de Safari;
+    - ningún POST; el nodo siguió en PORTAL.
+  - **Pruebas de corte, en verde:** JRN-01.7 (sin segundo arranque tras enchufar: el arreglo #86 funciona),
+    TC-CFG-02, TC-MQTT-04, TC-TIME-03, TC-SEN-04 y TC-OTA-15 (corte al 60 %, A arranca, 330 s sin rollback; el
+    primer intento quedó not done, sin desenchufe).
+- **Cadena de la noche** (`test-results/cadena4-…`): JRN-01.0 a 01.3, TC-OTA-17, TC-CON-12 y TC-TIME-04.
+- **Revisión de red:** dos registros crudos de pytest de la primera cadena llevaban la IP del banco y el token del
+  banco (variables locales de una traza). Se redactaron como `<banco>` y `<TOKEN>` antes del commit, y `cadena.sh`
+  usa ahora `--tb=short`.

@@ -1,0 +1,42 @@
+I (15953) nodo: UDP logging -> 192.168.4.1:5555
+I (15953) nodo: udplog: descartadas=0 reintentadas=0 cola_llena=0
+I (15953) esp_netif_handlers: sta ip: 192.168.4.11, mask: 255.255.255.0, gw: 192.168.4.1
+I (15953) wifi:<ba-add>idx:1 (ifx:0, <mac>), tid:0, ssn:2, winSize:64
+I (15963) nodo: con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)
+I (15973) nodo: mqtt: intento 1
+I (16023) nodo: con: CONECTANDO_BROKER -> OPERATIVO (mqtt_up)
+I (16463) nodo: sntp: inicio pool.ntp.org
+I (16823) nodo: ota: estado en_curso
+I (16823) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (17843) nodo: sntp: sincronizado ts=1795278189
+I (21693) esp_https_ota: Starting OTA...
+I (21693) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (21853) nodo: ota: estado error:imagen
+I (21853) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)
+I (25833) nodo: ota: estado en_curso
+I (25833) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (30513) esp_https_ota: Starting OTA...
+I (30513) esp_https_ota: Writing to <ota_1> partition at offset 0x320000
+I (30693) nodo: ota: 0 %
+I (31733) nodo: ota: 10 %
+I (32753) nodo: ota: 20 %
+I (33783) nodo: ota: 30 %
+I (34833) nodo: ota: 40 %
+I (35763) nodo: ota: 50 %
+I (36823) nodo: ota: 60 %
+I (37793) nodo: ota: 70 %
+I (38713) nodo: ota: 80 %
+I (39923) nodo: ota: 90 %
+I (40813) nodo: ota: 100 %
+I (40813) esp_image: segment 0: paddr=00320020 vaddr=3c0c0020 size=394dch (234716) map
+I (40853) esp_image: segment 1: paddr=00359504 vaddr=3fc98b00 size=061bch ( 25020) 
+I (40853) esp_image: segment 2: paddr=0035f6c8 vaddr=40374000 size=00950h (  2384) 
+I (40853) esp_image: segment 3: paddr=00360020 vaddr=42000020 size=b8a78h (756344) map
+I (40963) esp_image: segment 4: paddr=00418aa0 vaddr=00000000 size=00000h (     0) 
+I (40963) esp_image: segment 5: paddr=00418aa8 vaddr=00000000 size=40374910h (1077365008) 
+E (40963) flash_mmap: Address 0x00410000 is out of range for 24bit flash mapping, see CONFIG_BOOTLOADER_CACHE_32BIT_ADDR_QUAD_FLASH and CONFIG_BOOTLOADER_CACHE_32BIT_ADDR_OCTAL_FLASH for more details
+E (40983) bootloader_mmap: spi_flash_mmap failed: 0x102
+E (40983) esp_image: bootloader_mmap(0x418aa8, 0x1ef0000) failed
+E (40993) esp_ota_ops: New image failed verification
+I (41003) nodo: ota: estado error:imagen
+I (41003) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)

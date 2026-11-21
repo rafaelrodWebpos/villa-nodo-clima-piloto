@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 2 items
+
+tests/bench/test_con.py .                                                [ 50%]
+tests/bench/test_villa2.py .                                             [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_con.py::test_tc_con_03_wifi_backoff
+PASSED tests/bench/test_villa2.py::test_tc_log_08_udp_log_unicast_only
+======================== 2 passed in 688.47s (0:11:28) =========================

@@ -1,0 +1,494 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 11 items
+
+tests/bench/test_jrn02.py FF                                             [ 18%]
+tests/bench/test_ota.py FFFF                                             [ 54%]
+tests/bench/test_jrn02.py FFFFF                                          [100%]
+
+=================================== FAILURES ===================================
+________________________ test_jrn_02_1_ota_to_b1_and_b2 ________________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_jrn_02_1_ota_to_b1_and_b20')
+
+    def test_jrn_02_1_ota_to_b1_and_b2(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """JRN-02.1 — A → B1 → B1 (misma_version) → B2, por cmd/ota contra ota-test-1."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "JRN-02.1", "OTA a B1 y a B2", run_dir, spec="JRN-02 villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:73: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa6846b0>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_jrn_02_1_ota_to_b1_and_b20')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+____________ test_jrn_02_2_rollback_when_new_image_never_operative _____________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_jrn_02_2_rollback_when_ne0')
+
+    def test_jrn_02_2_rollback_when_new_image_never_operative(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """JRN-02.2 · FR-OTA-07, T23 — imagen sin MQTT: boot B pendiente, «ota: rollback» ≤ 300 s,
+        boot A, primer status fw = A y 15 min sin reinicio."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+        a = firmware["version"]
+>       with case(tb, "JRN-02.2", "Rollback de una imagen que no llega a OPERATIVO", run_dir, spec="JRN-02 villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4bda90>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_jrn_02_2_rollback_when_ne0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+__________________________ test_tc_ota_06_rejections ___________________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_06_rejections0')
+
+    def test_tc_ota_06_rejections(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-06 · T18, FR-OTA-09, FR-MQTT-09 — rechazos por payload, host y ruta en ≤ 2 s."""
+        tb = testbench
+        nodo = _nodo(dut_mac)
+        base = f"sitio1/zona1/{nodo}"
+>       with case(tb, "TC-OTA-06", "Rechazos de comandos OTA (T18)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_ota.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4be120>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_06_rejections0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+___________________ test_tc_ota_07_retained_command_ignored ____________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_07_retained_comman0')
+
+    def test_tc_ota_07_retained_command_ignored(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-07 · FR-OTA-04 — un comando retained se ignora al reconectar (E8)."""
+        tb = testbench
+        nodo = _nodo(dut_mac)
+        base = f"sitio1/zona1/{nodo}"
+        topico = f"{base}/cmd/ota"
+>       with case(tb, "TC-OTA-07", "Comando OTA retained ignorado", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_ota.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4bc830>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_07_retained_comman0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+___________________ test_tc_ota_08_missing_asset_http_error ____________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_08_missing_asset_h0')
+
+    def test_tc_ota_08_missing_asset_http_error(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-08 · FR-OTA-12, FR-OTA-01, T17/T20 — asset inexistente: en_curso ≤ 2 s y error:http."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-OTA-08", "Asset inexistente (error:http)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_ota.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4bfa10>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_08_missing_asset_h0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+________________ test_tc_ota_09_untrusted_certificate_tls_error ________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_09_untrusted_certi0')
+
+    def test_tc_ota_09_untrusted_certificate_tls_error(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-09 · FR-OTA-03, T20 (tls) — github.com resuelto al HTTPS autofirmado del banco: error:tls."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-OTA-09", "Certificado no confiable (error:tls)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_ota.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4bf8c0>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_09_untrusted_certi0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+__________________________ test_tc_ota_10_bad_images ___________________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_10_bad_images0')
+
+    def test_tc_ota_10_bad_images(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-10 · FR-OTA-05 — imagen para esp32 y truncada: error:imagen, sin cambio de slot."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-OTA-10", "Imágenes inválidas (error:imagen)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4bc890>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_10_bad_images0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+____________________ test_tc_ota_11_ap_lost_during_download ____________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_11_ap_lost_during_0')
+
+    def test_tc_ota_11_ap_lost_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-11 · FR-OTA-08, T22, FR-MQTT-09 — AP apagado 30 s a mitad de descarga."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-OTA-11", "Wi-Fi perdido durante la descarga", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4c0740>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_11_ap_lost_during_0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+_____________________ test_tc_ota_12_busy_during_download ______________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_12_busy_during_dow0')
+
+    def test_tc_ota_12_busy_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-12 · FR-OTA-10, T21 — en_curso → rechazado:ocupado → ok → fw = B1."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-OTA-12", "Comando durante la descarga (ocupado)", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4bd010>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_12_busy_during_dow0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+______________ test_nfr_ota_01_measurement_period_during_download ______________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_nfr_ota_01_measurement_pe0')
+
+    def test_nfr_ota_01_measurement_period_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """NFR-OTA-01 — tres OTAs alternas con una medida dentro de OTA_DESCARGA: intervalos en [55, 65] s."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+>       with case(tb, "TC-OTA-13", "Periodo de medición durante la descarga", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4c2300>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_nfr_ota_01_measurement_pe0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+_____________ test_tc_ota_17_abort_slow_download_then_new_command ______________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x7520fa684530>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T115644Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_17_abort_slow_down0')
+
+    def test_tc_ota_17_abort_slow_download_then_new_command(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-17 · FR-OTA-08, T22, T20 — revisión 2026-11-18 (A3-03, B-1): una descarga lenta
+        (sin salida a Internet) se aborta por T22; un cmd_ota nuevo mientras la tarea vieja sigue
+        viva da error:red; la imagen abortada no queda arrancable (un reset arranca A en su
+        partición) y el cmd_ota siguiente termina en fw = B2, sin que B1 arranque nunca."""
+        tb = testbench
+        base = f"sitio1/zona1/{_nodo(dut_mac)}"
+        a = firmware["version"]
+>       with case(tb, "TC-OTA-17", "Aborto de una OTA lenta y cmd_ota nuevo", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_jrn02.py:311: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x7520fa684530>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x7520fa4c15b0>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-3/test_tc_ota_17_abort_slow_down0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+=========================== short test summary info ============================
+FAILED tests/bench/test_jrn02.py::test_jrn_02_1_ota_to_b1_and_b2 - AssertionE...
+FAILED tests/bench/test_jrn02.py::test_jrn_02_2_rollback_when_new_image_never_operative
+FAILED tests/bench/test_ota.py::test_tc_ota_06_rejections - AssertionError: e...
+FAILED tests/bench/test_ota.py::test_tc_ota_07_retained_command_ignored - Ass...
+FAILED tests/bench/test_ota.py::test_tc_ota_08_missing_asset_http_error - Ass...
+FAILED tests/bench/test_ota.py::test_tc_ota_09_untrusted_certificate_tls_error
+FAILED tests/bench/test_jrn02.py::test_tc_ota_10_bad_images - AssertionError:...
+FAILED tests/bench/test_jrn02.py::test_tc_ota_11_ap_lost_during_download - As...
+FAILED tests/bench/test_jrn02.py::test_tc_ota_12_busy_during_download - Asser...
+FAILED tests/bench/test_jrn02.py::test_nfr_ota_01_measurement_period_during_download
+FAILED tests/bench/test_jrn02.py::test_tc_ota_17_abort_slow_download_then_new_command
+======================== 11 failed in 164.19s (0:02:44) ========================

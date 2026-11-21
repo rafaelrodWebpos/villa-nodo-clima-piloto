@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 1 item
+
+tests/bench/test_bench_plus.py .                                         [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_bench_plus.py::test_tc_time_03_power_cut_with_sntp_blocked
+======================== 1 passed in 556.08s (0:09:16) =========================

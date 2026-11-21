@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 1 item
+
+tests/bench/test_jrn02.py s                                              [100%]
+
+=========================== short test summary info ============================
+SKIPPED [1] tests/bench/cortes.py:130: not done: el slot no quedó ausente en 600 s (corte 1 sin hacer)
+======================== 1 skipped in 709.03s (0:11:49) ========================

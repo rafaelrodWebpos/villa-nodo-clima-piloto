@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 1 item
+
+tests/bench/test_jrn02.py .                                              [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_jrn02.py::test_tc_ota_15_power_cut_during_download
+======================== 1 passed in 581.18s (0:09:41) =========================

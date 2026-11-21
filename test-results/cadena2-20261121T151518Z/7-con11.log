@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 1 item
+
+tests/bench/test_con_largo.py .                                          [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_con_largo.py::test_tc_con_11_ap_off_60_min
+======================== 1 passed in 3812.96s (1:03:32) ========================

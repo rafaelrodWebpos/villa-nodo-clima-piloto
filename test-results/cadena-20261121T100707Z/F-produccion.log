@@ -1,0 +1,103 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 2 items
+
+tests/bench/test_villa2.py F                                             [ 50%]
+tests/bench/test_ota.py F                                                [100%]
+
+=================================== FAILURES ===================================
+___________________ test_tc_log_04_no_udp_log_in_production ____________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x73ad4d4b39e0>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/prod'), 'variant': 'production', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T120113Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-6/test_tc_log_04_no_udp_log_in_p0')
+
+    def test_tc_log_04_no_udp_log_in_production(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-LOG-04 · FR-LOG-01 — imagen de producción: por UDP solo DHCP, DNS y SNTP."""
+        tb = testbench
+        if firmware["variant"] != "production":
+            pytest.skip("not done: TC-LOG-04 necesita la imagen de producción (--firmware-dir)")
+>       with case(tb, "TC-LOG-04", "Sin log UDP en producción", run_dir, spec="TC-LOG villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_villa2.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x73ad4d4b39e0>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x73ad4d51c830>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-6/test_tc_log_04_no_udp_log_in_p0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+______________ test_tc_ota_14_production_rejects_test_prerelease _______________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x73ad4d4b39e0>
+dut_slot = 'SLOT1', dut_mac = '3c:0f:02:f3:c6:d4'
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/prod'), 'variant': 'production', ...}
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T120113Z-5334375')
+tmp_path = PosixPath('/tmp/pytest-of-ubuntu/pytest-6/test_tc_ota_14_production_reje0')
+
+    def test_tc_ota_14_production_rejects_test_prerelease(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
+        """TC-OTA-14 · FR-OTA-13 — la imagen de producción rechaza una ota-test-* con rechazado:ruta
+        y no pasa a OTA_DESCARGA. Corre en el job verify, sobre los bytes de la release."""
+        if firmware.get("variant") != "production":
+            pytest.skip("FR-OTA-13 se comprueba en la imagen de producción (en banco ota-test-* se acepta)")
+        tb = testbench
+        nodo = _nodo(dut_mac)
+        base = f"sitio1/zona1/{nodo}"
+        url = REPO + "ota-test-2/firmware_b1.bin"
+>       with case(tb, "TC-OTA-14", "Producción rechaza una pre-release ota-test-*", run_dir, spec="TC-OTA villa-nodo-clima-piloto") as c, \
+                configurado(tb, dut_slot, dut_mac, firmware, c, tmp_path) as banco:
+
+tests/bench/test_ota.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.12/contextlib.py:137: in __enter__
+    return next(self.gen)
+tests/bench/test_mqtt.py:103: in configurado
+    ssid, clave = aprovisionar(tb, slot, _nodo(dut_mac), c, tmp_path, mqtt_host=BROKER_BANCO,
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tb = <testbench_driver.TestbenchDriver object at 0x73ad4d4b39e0>, slot = 'SLOT1'
+ssid_portal = 'clima-f3c6d4', c = <benchlib.Case object at 0x73ad4d2dfe60>
+tmp_dir = PosixPath('/tmp/pytest-of-ubuntu/pytest-6/test_tc_ota_14_production_reje0')
+mqtt_host = '192.168.4.1', mqtt_user = '', mqtt_pass = ''
+
+    def aprovisionar(tb, slot, ssid_portal, c, tmp_dir, mqtt_host="broker.local", mqtt_user="", mqtt_pass=""):
+        """Precondición compartida: deja el DUT configurado contra un AP desechable del
+        banco nuevo (SSID y clave aleatorios), por el portal, como JRN-01.2: P-NVS-ERASE
+        y reset hasta PORTAL, POST válido, AP del banco arriba hasta «nvs: config
+        escrita» y el reinicio, y AP abajo. Devuelve (ssid, clave); not done si no se
+        llega a guardar. Nunca escribe las credenciales en la evidencia."""
+        from urllib.parse import urlencode
+        import pytest
+        ap_ssid, ap_clave = credenciales_desechables()
+        c.secretos = list(getattr(c, "secretos", [])) + [(ap_clave, "<clave-de-prueba>"), (ap_ssid, "<ssid-de-prueba>")]
+>       assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+E       AssertionError: el AP del banco está activo: no es nuestro, no se toca
+
+tests/bench/benchlib.py:243: AssertionError
+=========================== short test summary info ============================
+FAILED tests/bench/test_villa2.py::test_tc_log_04_no_udp_log_in_production - ...
+FAILED tests/bench/test_ota.py::test_tc_ota_14_production_rejects_test_prerelease
+============================== 2 failed in 31.37s ==============================

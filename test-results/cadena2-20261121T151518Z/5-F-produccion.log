@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 2 items
+
+tests/bench/test_villa2.py .                                             [ 50%]
+tests/bench/test_ota.py .                                                [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_villa2.py::test_tc_log_04_no_udp_log_in_production
+PASSED tests/bench/test_ota.py::test_tc_ota_14_production_rejects_test_prerelease
+======================== 2 passed in 390.28s (0:06:30) =========================

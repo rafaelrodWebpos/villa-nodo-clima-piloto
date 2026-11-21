@@ -1,0 +1,15 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 3 items
+
+tests/bench/test_jrn01.py .                                              [ 33%]
+tests/bench/test_cfg.py .                                                [ 66%]
+tests/bench/test_mqtt.py .                                               [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_jrn01.py::test_jrn_01_7_power_cut
+PASSED tests/bench/test_cfg.py::test_tc_cfg_02_power_cuts
+PASSED tests/bench/test_mqtt.py::test_tc_mqtt_04_last_will_on_power_cut
+======================== 3 passed in 1141.31s (0:19:01) ========================

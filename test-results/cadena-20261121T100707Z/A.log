@@ -1,0 +1,127 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 17 items
+
+tests/bench/test_jrn01.py ...Fss                                         [ 35%]
+tests/bench/test_bench_plus.py .                                         [ 41%]
+tests/bench/test_por.py .....                                            [ 70%]
+tests/bench/test_seguridad.py .                                          [ 76%]
+tests/bench/test_con.py .                                                [ 82%]
+tests/bench/test_seguridad.py .                                          [ 88%]
+tests/bench/test_hw.py ..                                                [100%]
+
+=================================== FAILURES ===================================
+________________________ test_jrn_01_3_wifi_and_udp_log ________________________
+
+testbench = <testbench_driver.TestbenchDriver object at 0x727ffef3dd60>
+dut_slot = 'SLOT1'
+run_dir = PosixPath('/home/rafael_rodriguez/villa/villa-nodo-clima-piloto/test-results/20261121T100711Z-7ab8fba')
+firmware = {'ci_run': None, 'commit': None, 'dir': PosixPath('/tmp/cadena-fw-9e80669/banco'), 'variant': 'bench', ...}
+
+    def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir, firmware):
+        """JRN-01.3 — tras el reinicio, el nodo configurado arranca el STA (T01), se une al AP
+        del banco y copia su log por UDP al receptor del banco (FR-LOG-02) durante 3 ciclos."""
+        from benchlib import esperar_lineas, primera
+        tb = testbench
+        with case(tb, "JRN-01.3", "Unirse al Wi-Fi y log UDP", run_dir, requires="JRN-01.2") as c:
+            assert AP_PRUEBA, "JRN-01.2 no dejó las credenciales del AP desechable"
+            c.secretos = [(AP_PRUEBA["clave"], "<clave-de-prueba>"), (AP_PRUEBA["ssid"], "<ssid-de-prueba>")]
+            c.note("- el banco levanta el mismo AP desechable que el DUT guardó en JRN-01.2 (redactado)", "")
+            c.step("Precondiciones: AP y broker del banco apagados; el DUT quedó configurado (JRN-01.2)")
+            assert not tb.ap_status().get("active"), "el AP del banco está activo: no es nuestro, no se toca"
+            assert not tb.mqtt_status().get("running"), "el broker del banco está activo: T11 no debe ocurrir en este paso"
+            ap_on = False
+            try:
+                c.step("El banco levanta su AP desechable (canal 1) y resetea el DUT")
+                tb.ap_start(AP_PRUEBA["ssid"], AP_PRUEBA["clave"], channel=1); ap_on = True
+                t0 = time.time()
+                tb.serial_reset(dut_slot)
+                vistas = esperar_lineas(tb, dut_slot, t0, ["con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)"], timeout=30)
+                t_ip = primera(vistas, "con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)")
+                udp = []
+                if t_ip:
+                    c.step(f"Observando {CICLOS} ciclos de medición ({CICLOS * CICLO_S} s) en el log serie y en el receptor UDP")
+                    time.sleep(CICLOS * CICLO_S + 5)
+                    vistas = esperar_lineas(tb, dut_slot, t0, [], timeout=0)
+                    udp = tb.udplog(limit=2000)
+            finally:
+                if ap_on:
+                    tb.ap_stop()
+            c.save_log("serie", [e["text"] for e in vistas])
+            c.save_log("udp", [str(u.get("line", u) if isinstance(u, dict) else u) for u in udp])
+            # Solo lo que siguió a nuestro reset: el buffer del banco puede entregar tarde la cola
+            # del arranque anterior con marcas de tiempo posteriores a t0
+            ult = ultimo_arranque(vistas)   # el último arranque, aunque llegue sin rst: (CR-TB-12)
+            assert ult is not None, "la captura no contiene el inicio del arranque tras el reset"
+            vistas = vistas[ult:]
+            textos = [e["text"] for e in vistas]
+            t_ip = primera(vistas, "con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)")
+    
+            # T01: boot:, cfg:, con: ARRANQUE -> CONECTANDO_WIFI y el primer intento en ≤ 2 s; sin AP
+            boot = primera(vistas, "boot: clima-")
+            assert boot, "falta la línea boot:"
+            assert primera(vistas, "cfg: sitio=sitio1 zona=zona1"), "falta cfg: sitio=sitio1 zona=zona1 (E2)"
+            assert primera(vistas, "con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)"), "falta T01"
+            intento = primera(vistas, "wifi: intento 1")
+            assert intento, "falta wifi: intento 1 (E4): T01 no arrancó el STA"
+            t01 = _ms(intento["text"]) - _ms(boot["text"])
+            c.note(f"- T01: boot: → wifi: intento 1 en {t01} ms (límite {T01_LIMIT_MS} ms)")
+            assert 0 <= t01 <= T01_LIMIT_MS, f"T01 en {t01} ms"
+            assert not any("softAP" in t for t in textos if "wifi:mode" in t), "T01 abrió el AP (prohibido)"
+            assert not primera(vistas, "con: ARRANQUE -> PORTAL"), "el nodo configurado volvió a PORTAL"
+    
+            # T08 (Fase 1): su línea con: en ≤ 30 s y sin AP; MQTT y SNTP son de la Fase 2
+            assert t_ip, "falta con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up) en 30 s"
+            assert not primera(vistas, "con: CONECTANDO_BROKER -> OPERATIVO"), "OPERATIVO sin broker (T11 en la Fase 1)"
+    
+            # Imagen de producción (job verify, release_verify del plan): sin log UDP (E11 solo con
+            # CONFIG_NODO_UDP_LOG=y); su contraparte es que el receptor no recibe nada del DUT
+            if firmware["variant"] == "production":
+                del_dut = [u for u in udp if (u.get("ts", 0) if isinstance(u, dict) else 0) >= t0]
+                meds = sorted({t.strip() for t in textos if "nodo: med: " in t})
+                c.note(f"- producción: {len(del_dut)} líneas en el receptor UDP en {CICLOS} ciclos; {len(meds)} med: en la consola")
+                assert not any("UDP logging -> " in t for t in textos), "la imagen de producción anuncia log UDP (E11)"
+                assert not del_dut, f"el receptor UDP recibió {len(del_dut)} líneas de la imagen de producción"
+                assert len(meds) >= CICLOS, f"solo {len(meds)} ciclos de medición en la ventana"
+                c.passed(f"T01 en {t01} ms, unido al AP del banco; producción sin log UDP en {CICLOS} ciclos")
+                return
+    
+            # FR-LOG-02: «UDP logging -> host:port» y cada línea serie en el receptor en ≤ 1 s
+            def txt(u): return str(u.get("line", u.get("text", "")) if isinstance(u, dict) else u).strip()   # el receptor da «line»
+            def ts(u): return float(u.get("ts", 0)) if isinstance(u, dict) else 0.0
+            assert any("UDP logging -> " in txt(u) for u in udp if ts(u) >= t0), "el receptor UDP no recibió UDP logging -> <host>:<port> (E11)"
+            # Desde la línea de T08 en el orden en que el DUT escribe (la hora de llegada al banco va a ráfagas)
+            tras_ip = [e for e in vistas[vistas.index(t_ip):] if e["text"].strip()]
+            perdidas, tarde = [], []
+            for e in tras_ip:
+                cuerpo = e["text"].strip()   # con su «I (ms)» del DUT: no casa con una línea igual de otro arranque
+                m = next((u for u in udp if ts(u) >= t0 and txt(u) == cuerpo), None)
+                if not m: perdidas.append(cuerpo)
+                elif ts(m) - e["ts"] > UDP_RETARDO_S: tarde.append(cuerpo)
+            c.note(f"- {len(tras_ip)} líneas serie tras obtener IP; perdidas {len(perdidas)}, tarde {len(tarde)}")
+>           assert not perdidas, f"{len(perdidas)} líneas serie sin copia UDP (FR-LOG-02)"
+E           AssertionError: 1 líneas serie sin copia UDP (FR-LOG-02)
+E           assert not ['I (5073) nodo: con:']
+
+tests/bench/test_jrn01.py:341: AssertionError
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
+PASSED tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
+PASSED tests/bench/test_jrn01.py::test_jrn_01_2_provision
+PASSED tests/bench/test_bench_plus.py::test_jrn_01_6_sntp_and_measures
+PASSED tests/bench/test_por.py::test_tc_por_02_get_form
+PASSED tests/bench/test_por.py::test_tc_por_05_invalid_submit
+PASSED tests/bench/test_por.py::test_tc_por_07_captive_redirects
+PASSED tests/bench/test_por.py::test_tc_por_09_wrong_password
+PASSED tests/bench/test_por.py::test_tc_por_11_no_portal_when_configured
+PASSED tests/bench/test_seguridad.py::test_tc_por_12_portal_closes_after_10_min
+PASSED tests/bench/test_con.py::test_tc_con_07_busy_while_validating
+PASSED tests/bench/test_seguridad.py::test_tc_con_14_open_twin_rejected
+PASSED tests/bench/test_hw.py::test_tc_hw_02_chip_reading
+PASSED tests/bench/test_hw.py::test_tc_hw_03_boots_without_psram
+SKIPPED [1] tests/bench/benchlib.py:56: not done: JRN-01.3 no ha pasado en esta sesión (workflow)
+SKIPPED [1] tests/bench/benchlib.py:56: not done: JRN-01.4 no ha pasado en esta sesión (workflow)
+FAILED tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log - AssertionE...
+============= 1 failed, 14 passed, 2 skipped in 1990.51s (0:33:10) =============

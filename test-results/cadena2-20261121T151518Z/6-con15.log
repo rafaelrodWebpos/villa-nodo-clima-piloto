@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 1 item
+
+tests/bench/test_mqtt.py .                                               [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_mqtt.py::test_tc_con_15_return_order_after_outage
+======================== 1 passed in 473.41s (0:07:53) =========================
