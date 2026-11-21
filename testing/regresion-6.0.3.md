@@ -61,3 +61,25 @@ En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPho
   - La prueba ahora cuenta una línea serie cortada como copiada si es prefijo de una línea UDP con la misma
     «I (ms)», y la anota aparte.
   - JRN-01.0 a 01.5 se repiten al terminar la cadena (~15 min), antes de la visita.
+- **C–F no corrieron en la primera cadena** (`test-results/cadena-20261121T100707Z/`).
+  - A las 07:55, al final de TC-LOG-08, la laptop perdió la red con el banco («Network is unreachable», Errno 101).
+    El `ap_stop` de su limpieza falló, y el AP desechable `nodo-prueba-*` y el broker quedaron encendidos.
+  - Las tandas C a F se negaron a tocar ese AP («no es nuestro, no se toca») y terminaron en pocos minutos.
+  - El AP era nuestro: tiene el formato de `benchlib.credenciales_desechables`. Se apagó a las 11:1x, igual que el
+    broker.
+  - Arreglo: `Banco.limpiar` reintenta cada paso durante ~3 min y los hace por separado (`722ecc3`).
+- **TC-CON-03 en rojo por el banco:** la captura serie pegó dos líneas y perdió bytes
+  (`…(wifi_dowI (8453) nodo: wifi: intento 3`). Los intervalos del firmware son correctos (6453 → 8453 ms = 2 s).
+  La prueba ahora separa las líneas pegadas y reconoce T09 por prefijo (`722ecc3`).
+- **TC-LOG-08 en rojo por la red de la laptop**, no por el firmware: se repite.
+- **Segunda cadena, 11:15, con prioridad para v0.0.2** (`test-results/cadena2-…`):
+  1. JRN-01.0 a 01.5;
+  2. TC-CON-03 y TC-LOG-08;
+  3. C;
+  4. D (OTA);
+  5. F (producción);
+  6. TC-CON-15;
+  7. TC-CON-11, solo si cabe.
+
+  Ningún paso empieza si no termina antes de las 16:20. **TC-CON-12 y TC-TIME-04 (largas) quedan para después de la
+  visita.**
