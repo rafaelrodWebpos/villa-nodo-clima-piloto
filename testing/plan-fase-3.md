@@ -329,3 +329,12 @@ Al terminar, el broker y el AP quedaron apagados, como estaban. El SLOT2 no se t
 ## Cortes parciales (H-94, 2026-11-20)
 
 Lo que se aprobó y en qué orden está en `testing/analisis-cortes-parciales.md`, sección «Decisión del propietario».
+
+## Issues del upstream #88 y #89 frente a nuestras pruebas (2026-11-21)
+
+| Issue | Qué dice | ¿Nos afecta? | Mitigación que tenemos | Qué falta |
+|---|---|---|---|---|
+| #88 | `ap_status.stations` pierde un DUT que volvió a unirse tras un reset | Solo lo usa TC-CON-14 (gemelo abierto). Un DUT escondido daría un falso «no asociado» | TC-CON-14 exige además que no haya T08 en el log serie, que es otra prueba independiente | Nada |
+| #89 (1) | `POST /api/serial/reset` a veces cierra la conexión sin responder | Sí: 24 llamadas en la suite. Daría un rojo falso (`RemoteDisconnected`), nunca un verde falso. **La caída de la 24 h de AGUA (05:26:17, «Connection reset by peer» en `GET /api/wifi/ap_status`) parece de la misma familia:** el handler suelta el socket. En `/api/log` no hay rastro: el búfer de 200 entradas estaba lleno de líneas UDP del DUT de AGUA, la última a las 05:26:10 | Si una prueba de la regresión cae así, se repite sola esa prueba | Proponer un comentario en #89 con este dato (GET y no solo POST). Opcional: reintento de las lecturas idempotentes (`ap_status`) en el envoltorio del proyecto |
+| #89 (2) | Segundo reset ~7 s después, al reabrir el proxy | Visto en el S3 (CR-TB-12, ~2,6 s). El fork `fb3c300`/`6dffd70` trae el arreglo de #86 (DTR/RTS al abrir) | `ultimo_arranque` en `benchlib`; TC-CON-15 ignora los arranques de los primeros 15 s | Comprobar en la regresión si sigue apareciendo |
+| #89 (3) | El búfer serie pierde líneas y vuelve a sellar con la hora nueva líneas viejas | Riesgo de coincidencias falsas en esperas por ventana de tiempo del banco | Las medidas de tiempo usan el reloj del DUT («I (ms)») y el último arranque; MQTT y UDP como segunda vía | Si aparece un caso, comparar por contenido y no por hora, como sugiere el issue |
