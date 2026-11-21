@@ -7,7 +7,7 @@
 
 project: villa-nodo-clima-piloto
 fsd: docs/Functionality/FSD-nodo-clima.md
-fsd_version: 0.9.11
+fsd_version: 0.9.12
 testing_standard: docs/Method/standards/testing.md
 debugging_agenda: testing/debugging-agenda.md
 gates_dir: testing/gates/
@@ -229,6 +229,14 @@ capabilities:
       http://example.com/ por /api/wifi/http se resuelve con el DNS del Pi, sale
       por eth0 y devuelve la página real (200, 577 bytes); y urllib sigue los
       302. Pedido como CR-TB-09
+  bench-dhcp-off:
+    what: >
+      apagar solo el DHCP del AP del banco (dnsmasq sin DHCP) con el AP arriba, y
+      contratos DHCP cortos para forzar una renovación que no llega
+    available: no
+    reason: >
+      el banco no lo ofrece; pedido como CR-TB-24 (H-94) para la próxima ronda del
+      fork. Necesario para la fila bench de FR-CON-08 (FSD 0.9.12)
   bench-driver:
     what: TestbenchDriver instalado en el devcontainer (nivel bench)
     available: yes
@@ -712,7 +720,7 @@ tests:
     wave: 1
     phase: 1
     tier: host
-    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26]   # el contrato host de §6.6 cubre T01–T26; T17–T23 en el núcleo (Fase 3), sus acciones en el adaptador OTA
+    verifies: [T01, T02, T03, T04, T05, T06, T07, T08, T09, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, T23, T24, T25, T26, T27]   # el contrato host de §6.6 cubre T01–T27 (T27 desde 0.9.12, firmware en la ronda siguiente); T17–T23 en el núcleo (Fase 3), sus acciones en el adaptador OTA
     needs: [hosted-ci]
     regression: >
       H-85, T26 (7a7402c): envíos del portal en verde sobre 0.0.0-7a7402c-bench — JRN-01.0
@@ -2205,6 +2213,60 @@ tests:
       ≤ 75 s; ningún arranque 15 s o más después del reset (los dos del reset del banco no
       cuentan, CR-TB-12)
     impl: tests/bench/test_mqtt.py::test_tc_con_15_return_order_after_outage
+  - id: TC-CON-16
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 4
+    tier: host
+    verifies: [FR-CON-08]
+    needs: [hosted-ci]
+    expect: >
+      FSD 0.9.12 (H-94/H-95): núcleo de conectividad — STA asociado sin IP 59 s → nada, 60 s →
+      wifi_down con desasociación; IP_LOST en CONECTANDO_BROKER, OPERATIVO y OTA_DESCARGA →
+      wifi_down (T14, T16, T22); en VALIDANDO solo el plazo de T06 (20 s)
+    impl: null   # firmware en la ronda siguiente (§3.6)
+  - id: TC-CON-17
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 4
+    tier: bench
+    verifies: [FR-CON-08]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-dhcp-off, bench-mqtt-broker, bench-serial-monitor, dut-board]
+    expect: >
+      FSD 0.9.12: DUT en OPERATIVO; el banco apaga solo su DHCP con el AP arriba y fuerza la
+      renovación; E15 «wifi: sin ip (perdida|60s)» y con: … -> CONECTANDO_WIFI (wifi_down) en
+      ≤ 61 s desde que queda sin IP; nuevos intentos de unión; con el DHCP de vuelta, wifi_up y
+      una medida en ≤ 90 s; ninguna línea boot:
+    impl: null   # bloqueado: bench-dhcp-off en no (CR-TB-24); firmware en la ronda siguiente
+  - id: TC-CON-18
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 4
+    tier: host
+    verifies: [FR-CON-09, T27]
+    needs: [hosted-ci]
+    expect: >
+      FSD 0.9.12: broker_ausente a 600 s de la entrada en CONECTANDO_BROKER (no a 599 s); tras
+      T27 y T08, el siguiente a 600 s de la nueva entrada; salir del estado cancela el
+      temporizador; T27 desasocia y lanza un intento de unión con el backoff a 1 s
+    impl: null   # firmware en la ronda siguiente (§3.6)
+  - id: TC-CON-19
+    shape: atomic
+    kind: standard
+    wave: 1
+    phase: 4
+    tier: bench
+    verifies: [FR-CON-09, T27]
+    needs: [bench-driver, bench-flash, bench-wifi-ap, bench-mqtt-broker, bench-broker-outage, bench-serial-monitor, dut-board]
+    expect: >
+      FSD 0.9.12: DUT en OPERATIVO; broker del banco detenido 25 min con el AP arriba:
+      con: CONECTANDO_BROKER -> CONECTANDO_WIFI (broker_ausente) dos veces, a 600 s (+ 5 s) de
+      cada entrada en CONECTANDO_BROKER, cada una seguida de wifi_up; uptime_s monótono, sin
+      boot:; con el broker de vuelta, una medida en ≤ 75 s
+    impl: null   # firmware en la ronda siguiente (§3.6)
   - id: TC-SEC-03
     shape: atomic
     kind: standard

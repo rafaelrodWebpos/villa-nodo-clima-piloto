@@ -2,7 +2,7 @@
 
 ```yaml
 document_status: vigente — Load defined
-fsd_version: 0.9.11
+fsd_version: 0.9.12
 repository: villa-nodo-clima-piloto (público)
 baseline_commit: (commit que introduce este documento)
 applicable_firmware_version: ninguna todavía
@@ -151,6 +151,12 @@ change_history:
     SEC-06 por consulta con `IP_PKTINFO` (destino 192.168.4.1, interfaz del AP y origen
     192.168.4.0/24) en lugar de ligar el socket a esa IP y a la interfaz con `SO_BINDTODEVICE`,
     porque así ligado no contestaba a un iPhone real. La protección es la misma. Sin otros cambios.
+  - 0.9.12 (2026-11-21): robustez ante cortes parciales de red (propietario, H-94; valores de H-95,
+    los mismos que AGUA). (1) H1: `wifi_down` incluye la pérdida de la IP (`IP_LOST`) y 60 s asociado
+    sin IP (FR-CON-08, E15). (2) H2: con el Wi-Fi asociado y el broker inalcanzable 10 min, una
+    reasociación del Wi-Fi sin reiniciar, como máximo una cada 10 min (FR-CON-09, evento
+    `broker_ausente`, T27); FR-CON-04 lo exceptúa. (3) §3.6, ronda de robustez de red antes de la
+    instalación. El firmware va en la ronda siguiente. Sin otros cambios.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -448,6 +454,18 @@ reservados ni tópicos de comando definidos para él.
   Fase 3, con las demás pruebas físicas de esa fase (H-83); hasta entonces FR-POR-02
   queda con la evidencia caducada, declarada como salvedad.
 
+### 3.6 Ronda de robustez de red (antes de la instalación, H-94)
+
+- **Origen.** Análisis de cortes parciales (`testing/analisis-cortes-parciales.md`, huecos H1 y H2),
+  aprobado en H-94, con los valores de H-95 [user].
+- **Alcance.** FR-CON-08, FR-CON-09, el evento `broker_ausente`, la fila T27 y la línea E15.
+- **Criterios de salida.** Pasan los contratos de FR-CON-08, FR-CON-09 y T27 de §6.6, y la
+  regresión de banco de conectividad (T08–T16, FR-CON-01 a FR-CON-04) sobre el mismo firmware.
+- **Dependencias.** La fila bench de FR-CON-08 necesita apagar solo el DHCP del AP del banco
+  (`bench-dhcp-off`, CR-TB-24, próxima ronda del fork). Hasta que exista, esa fila queda
+  bloqueada por el banco y se declara como salvedad; las filas host y la de FR-CON-09 no
+  dependen de ella.
+
 ---
 
 ## 4. Riesgos, supuestos y dependencias
@@ -625,6 +643,7 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T14 | CONECTANDO_BROKER | wifi_down | — | CONECTANDO_WIFI | Detener los intentos MQTT; programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
 | T15 | OPERATIVO | mqtt_down | — | CONECTANDO_BROKER | Programar un reintento MQTT | 1 s | Reiniciar el nodo; desconectar el Wi-Fi |
 | T16 | OPERATIVO | wifi_down | — | CONECTANDO_WIFI | Programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
+| T27 | CONECTANDO_BROKER | broker_ausente | — | CONECTANDO_WIFI | Detener los intentos MQTT, desasociar el STA y lanzar un intento de unión con el backoff de Wi-Fi a 1 s (FR-CON-09) | 1 s | Reiniciar el nodo; abrir el AP; volver a PORTAL |
 | T17 | OPERATIVO | cmd_ota | Payload conforme a §12.1 (FR-OTA-09), URL inicial bien formada (FR-OTA-14), con esquema y host permitidos (FR-OTA-02) y con la ruta del repo (FR-OTA-11, FR-OTA-13) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
 | T18 | OPERATIVO | cmd_ota | Incumple alguna regla de la guarda de T17, evaluadas en el orden payload → host → ruta; el motivo es la primera que falla | OPERATIVO | Publicar `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` | 2 s | Descargar; cambiar de partición |
 | T19 | OTA_DESCARGA | ota_ok | — | ARRANQUE (reinicio) | Publicar `status` con `ota` = `ok`, publicar `offline` y reiniciar en el nuevo slot | 5 s | Reiniciar sin cambiar de slot |
@@ -640,21 +659,30 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 reinicia desde cualquier estado. Es el único reinicio no ordenado por T05, T19
 o T23.
 
+**Eventos de red (0.9.12, H-94).**
+- `wifi_down` es la desasociación del STA, la pérdida de su IP (`IP_LOST`) o 60 s asociado sin
+  obtener IP (FR-CON-08). En los dos últimos casos el nodo desasocia el STA antes de aplicar la fila
+  de `wifi_down` del estado (T09, T14, T16 o T22) y escribe E15. En VALIDANDO sigue valiendo
+  el plazo propio de 20 s sin IP de T06.
+- `broker_ausente` se emite cuando el nodo lleva 600 s seguidos en CONECTANDO_BROKER desde su
+  última entrada en ese estado (FR-CON-09). El temporizador se arma al entrar en
+  CONECTANDO_BROKER y se cancela al salir.
+
 ### 6.4 Completitud (estado × evento)
 
 `Tnn` = la fila que lo trata · `ign` = se ignora y se registra a nivel debug ·
 `imp` = imposible por construcción (motivo al pie).
 
-| Estado \ Evento | fin_arranque | envío | wifi_up | wifi_down | backoff | mqtt_up | mqtt_down | cmd_ota | ota_ok/err | portal_vence |
-|---|---|---|---|---|---|---|---|---|---|---|
-| ARRANQUE | T01/T02 | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ |
-| PORTAL | imp⁶ | T03/T04/T26 | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T24 |
-| VALIDANDO | imp⁶ | T07 | T05 | T06 | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T25 |
-| CONECTANDO_WIFI | imp⁶ | imp¹ | T08 | T09 | T10 | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ |
-| CONECTANDO_BROKER | imp⁶ | imp¹ | ign | T14 | T13 | T11 | T12 | imp⁴ | imp⁵ | imp⁸ |
-| OPERATIVO | imp⁶ | imp¹ | ign | T16 | ign⁷ | ign | T15 | T17/T18 | imp⁵ | imp⁸ |
-| OTA_DESCARGA | imp⁶ | imp¹ | ign | T22 | ign⁷ | ign | T22 | T21 | T19/T20 | imp⁸ |
-| ESPERA | imp⁶ | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁹ |
+| Estado \ Evento | fin_arranque | envío | wifi_up | wifi_down | backoff | mqtt_up | mqtt_down | cmd_ota | ota_ok/err | portal_vence | broker_ausente |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| ARRANQUE | T01/T02 | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ | imp¹⁰ |
+| PORTAL | imp⁶ | T03/T04/T26 | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T24 | imp¹⁰ |
+| VALIDANDO | imp⁶ | T07 | T05 | T06 | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | T25 | imp¹⁰ |
+| CONECTANDO_WIFI | imp⁶ | imp¹ | T08 | T09 | T10 | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁸ | imp¹⁰ |
+| CONECTANDO_BROKER | imp⁶ | imp¹ | ign | T14 | T13 | T11 | T12 | imp⁴ | imp⁵ | imp⁸ | T27 |
+| OPERATIVO | imp⁶ | imp¹ | ign | T16 | ign⁷ | ign | T15 | T17/T18 | imp⁵ | imp⁸ | imp¹⁰ |
+| OTA_DESCARGA | imp⁶ | imp¹ | ign | T22 | ign⁷ | ign | T22 | T21 | T19/T20 | imp⁸ | imp¹⁰ |
+| ESPERA | imp⁶ | imp¹ | imp² | imp² | imp³ | imp⁴ | imp⁴ | imp⁴ | imp⁵ | imp⁹ | imp¹⁰ |
 
 ¹ El servidor HTTP del portal solo existe en PORTAL y VALIDANDO.
 ² El STA no está iniciado. ³ No hay temporizador de backoff armado.
@@ -662,7 +690,8 @@ o T23.
 ⁵ No hay descarga en curso. ⁶ Se emite una sola vez por arranque.
 ⁷ Un temporizador residual se cancela al entrar en OPERATIVO; si dispara, se
 ignora. ⁸ El temporizador del portal solo se arma en T02, y un nodo configurado no
-pasa por T02. ⁹ ESPERA solo se alcanza por T24, ya emitido.
+pasa por T02. ⁹ ESPERA solo se alcanza por T24, ya emitido. ¹⁰ El temporizador de
+`broker_ausente` solo está armado en CONECTANDO_BROKER y se cancela al salir de ese estado.
 
 Un comando OTA entregado con el flag retain no genera el evento `cmd_ota`: se
 ignora y se registra (FR-OTA-04). Las redirecciones, el certificado, la
@@ -681,7 +710,8 @@ y sus fallos llegan como `ota_err` (T20).
 - **FR-CON-03** [Must] [user]: después de que el AP Wi-Fi vuelva a estar
   disponible, el nodo deberá publicar una medida válida en ≤ **90 s**.
 - **FR-CON-04** [Must] [user]: después de que el broker vuelva a estar
-  disponible, el nodo deberá publicar una medida válida en ≤ **75 s**, sin desasociarse del Wi-Fi.
+  disponible, el nodo deberá publicar una medida válida en ≤ **75 s**, sin desasociarse del Wi-Fi
+  (salvo la reasociación de FR-CON-09, si el broker estuvo inalcanzable 10 min o más).
 - **FR-CON-05** [Must] [derived]: desde el encendido de un nodo configurado,
   con Wi-Fi y broker disponibles, la primera medida válida deberá llegar al
   broker en ≤ **30 s**.
@@ -693,6 +723,14 @@ y sus fallos llegan como `ota_err` (T20).
   modo que no se una a una red abierta con el mismo SSID («evil twin»). Con
   `wifi_pass` vacía (red abierta, §17) admite una red abierta. Aplica en
   CONECTANDO_WIFI y en la prueba de unión de VALIDANDO.
+- **FR-CON-08** [Must] [user] (H-94, H-95): fuera de VALIDANDO, si el STA pierde su IP
+  (`IP_LOST`) o pasa **60 s** asociado sin obtener IP, el nodo deberá desasociar el STA,
+  escribir E15 y tratarlo como `wifi_down` en ≤ **1 s** (T09, T14, T16 o T22, según el estado),
+  sin reiniciarse.
+- **FR-CON-09** [Must] [user] (H-94, H-95): con el Wi-Fi asociado y con IP, si el nodo lleva
+  **600 s** seguidos en CONECTANDO_BROKER, deberá desasociar el STA y volver a unirse
+  (`broker_ausente`, T27) en ≤ **1 s**, sin reiniciarse. Como cada entrada en CONECTANDO_BROKER
+  vuelve a armar el plazo, el nodo no hace más de **una reasociación cada 600 s**.
 
 ### 6.6 Contratos de verificación
 
@@ -777,10 +815,14 @@ verification:
 | FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP (desde el arranque en la Fase 1; después de conectar, pasando por T14 (broker caído) o T16 (desde OPERATIVO), en la Fase 2); esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
 | FR-CON-07 | Función que prepara la configuración del STA con clave vacía y con clave de 8–63 caracteres | Umbral `WIFI_AUTH_OPEN` con clave vacía y `WIFI_AUTH_WPA2_PSK` con clave; PMF `capable` = true en los dos | Umbral abierto con clave; PMF `required` (dejaría fuera routers sin PMF) | host |
 | FR-CON-07 | DUT configurado contra el AP desechable del banco con clave; el banco levanta en su lugar un AP abierto con el mismo SSID de prueba (nunca el SSID de la casa, H-83) durante 3 min; después, el AP con clave otra vez | Con el AP abierto: líneas `wifi: intento` y ninguna `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` ni asociación (la lista de estaciones del AP del banco no muestra la MAC del DUT); con el AP con clave: T08 en ≤ 90 s | Que el DUT obtenga IP del AP abierto | bench |
+| FR-CON-08 | Núcleo: un STA asociado sin IP durante 59 s y durante 60 s; un evento `IP_LOST` en CONECTANDO_BROKER, OPERATIVO y OTA_DESCARGA; el mismo plazo en VALIDANDO | 60 s sin IP → `wifi_down` con desasociación; 59 s → nada; `IP_LOST` → `wifi_down` en cada estado; en VALIDANDO solo el plazo de T06 (20 s) | `wifi_down` antes de 60 s; ninguna acción en VALIDANDO distinta de T06 | host |
+| FR-CON-08 | DUT en OPERATIVO con el AP desechable del banco; el banco apaga solo su DHCP con el AP arriba (`bench-dhcp-off`, CR-TB-24) y fuerza la renovación (contrato DHCP corto); después lo vuelve a encender | E15 `wifi: sin ip (perdida)` o `wifi: sin ip (60s)` y `con: … -> CONECTANDO_WIFI (wifi_down)` en ≤ 61 s desde que el DUT queda sin IP; nuevos intentos de unión; al volver el DHCP, `wifi_up` y una medida en ≤ 90 s; ninguna línea `boot:` | Quedarse en CONECTANDO_BROKER u OPERATIVO sin IP más de 61 s; reiniciar | bench |
+| FR-CON-09 | Núcleo: entrada en CONECTANDO_BROKER y reloj simulado a 599 s, 600 s, y otra vez tras la reasociación; salida a OPERATIVO a los 300 s | `broker_ausente` a 600 s, no a 599 s; tras T27 y T08, el siguiente a 600 s de la nueva entrada; salir del estado cancela el temporizador | Dos `broker_ausente` en menos de 600 s; `broker_ausente` fuera de CONECTANDO_BROKER | host |
+| FR-CON-09 | DUT en OPERATIVO; broker del banco detenido 25 min con el AP arriba; luego arrancado | `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (broker_ausente)` dos veces, a 600 s (+ 5 s) de cada entrada en CONECTANDO_BROKER, cada una seguida de `wifi_up`; `uptime_s` monótono y ninguna línea `boot:`; al volver el broker, una medida en ≤ 75 s | Más de una reasociación cada 600 s; reiniciar; abrir el AP | bench |
 | T24 | DUT sin configuración; reset y esperar 10 min sin enviar nada | `con: PORTAL -> ESPERA (portal_vence)` a 600 s ± 5 s de `con: ARRANQUE -> PORTAL (fin_arranque)`; `portal: dns detenido` (E14) en ≤ 5 s; el SSID `clima-*` desaparece de los escaneos en ≤ 2 s + un escaneo; las líneas `med:` siguen; tras otro reset, el AP vuelve | El AP o el HTTP siguen tras el cierre; `nvs: config escrita`; un reinicio sin reset | bench |
 | T25 | Núcleo: VALIDANDO + portal_vence; luego T06 y T05 | VALIDANDO sigue; tras T06, el evento repetido lleva a ESPERA por T24; con T05 se guarda y se reinicia | Abandonar la prueba de unión | host |
 | T26 | Núcleo: PORTAL + envío válido con el cierre pendiente | PORTAL, responder «ocupado» | T04 (probar la unión) | host |
-| T01–T26 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
+| T01–T27 | Una prueba por fila: forzar el estado de origen, inyectar el evento y comprobar la guarda | Estado siguiente y acción de la fila dentro del límite | Lo indicado en la columna «No debe ocurrir» de la fila | host (lógica de la tabla, todas las filas) |
 | T01–T10 | Una prueba por fila con el portal y el AP reales del banco, sin broker (Fase 1); tras T08 el DUT queda en CONECTANDO_BROKER | La línea `con:` de la fila (§18) y su acción, observada con `boot:`, `med:`, `wifi: intento` y `nvs: config escrita` (§18), dentro del límite; en T03, T04 y T06, un reset posterior muestra `con: ARRANQUE -> PORTAL (fin_arranque)` y ninguna `nvs: config escrita`; en T08, la Fase 1 observa solo la transición, su línea `con:` y que el AP `clima-*` no aparece en el escaneo; su acción se observa en la fila siguiente (Fase 2) | Lo indicado en la columna «No debe ocurrir» de la fila; en T08, «abrir el AP» (la parte MQTT es de la fila siguiente) | bench |
 | T08 (arranque de SNTP y MQTT), T11–T16 | Una prueba por fila con el AP y el broker reales del banco (Fase 2) | La línea `con:` de la fila (§18) y su acción, observada con `mqtt: intento`, `sntp:`, `wifi: intento`, `med:` y `ota: estado` (§18) o con `status`, dentro del límite; en T08, `sntp:` y `mqtt: intento 1` tras su línea `con:`; el reinicio de su backoff, con al menos 4 fallos de unión antes de T08, de modo que el último intervalo observado antes de T08 fue de 8 s o más: el siguiente `wifi: intento` llega en ≤ 2 s desde la línea `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (wifi_down)` de T14 | Lo indicado en la columna «No debe ocurrir» de la fila | bench |
 | T18 | Comando OTA con un payload, un host o una ruta que incumplen la guarda de T17, por el broker del banco (Fase 3) | `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` y ninguna línea `con:` de descarga | Lo indicado en la columna «No debe ocurrir» de T18 | bench |
@@ -1389,6 +1431,7 @@ operativos, no secretos (§17).
 | E11 | `UDP logging -> <host>:<port>` | Con `CONFIG_NODO_UDP_LOG=y`, al obtener IP, como primera línea enviada por UDP (FR-LOG-02) |
 | E12 | `i2c: scan sda=<g> scl=<g> hz=<f> ack=<lista\|ninguno>` | Solo en el firmware de prueba de C-HW-04/05, tras escanear el bus |
 | E14 | `portal: dns detenido` · `portal: dns no disponible` | Al terminar la tarea del DNS cautivo en T24 · en T02, si el socket DNS no se pudo ligar; el portal sigue sin DNS cautivo (FR-POR-08, FR-POR-10) |
+| E15 | `wifi: sin ip (<perdida\|60s>)` | Al tratar como `wifi_down` la pérdida de la IP del STA o 60 s asociado sin IP, fuera de VALIDANDO (FR-CON-08) |
 
 **Comandos serie de la imagen de banco (E13) [user].** Solo con
 `CONFIG_NODO_BENCH_BUILD=y`, el nodo lee comandos terminados en salto de línea
