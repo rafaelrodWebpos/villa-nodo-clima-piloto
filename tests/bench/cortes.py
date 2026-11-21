@@ -34,10 +34,11 @@ AP_APAGADO_ANTES_S = 3        # H-63: AP abajo antes de escanear (≈ 20 s con e
 SEGUNDO_ARRANQUE_S = 30      # ventana tras el primer status para ver un reinicio del banco (#86)
 VUELTA_ESPERA_S = 150         # del AP de vuelta a un status en vivo (backoff de FR-CON-02)
 
-AVISO_DESENCHUFAR = ("Corte {n} de {total} ({tid}): desenchufa el cable USB-C del lado de la PLACA "
-                     "(el lado de la Raspberry Pi no se toca) y pulsa «Hecho». NO lo vuelvas a enchufar "
+AVISO_DESENCHUFAR = ("Corte {n} de {total} ({tid}): desenchufa el cable USB-C del lado de la PLACA de la ES32 del SLOT1 (piloto, la del sensor SHT41) "
+                     "(el lado de la Raspberry Pi no se toca; la ES32 del SLOT2, nodo-agua, NO se toca). "
+                     "Pulsa «Hecho». NO lo vuelvas a enchufar "
                      "todavía: en unos 2 minutos saldrá otro aviso.")
-AVISO_ENCHUFAR = ("Corte {n} de {total} ({tid}): vuelve a enchufar el cable USB-C en la PLACA y "
+AVISO_ENCHUFAR = ("Corte {n} de {total} ({tid}): vuelve a enchufar el cable USB-C en la PLACA de la ES32 del SLOT1 (piloto, la del sensor SHT41) y "
                   "pulsa «Hecho».")
 
 # Retrasos del Last Will medidos en esta sesión: [(tid, n, segundos o None, retenido)] para TC-MQTT-04
@@ -123,7 +124,7 @@ def corte(tb, slot, sub, nodo, tid, n, total, c, banco):
     base = f"sitio1/zona1/{nodo}"
     r = {"n": n, "tid": tid}
     # 1) Desenchufar
-    c.step(f"Corte {n}/{total}: aviso «desenchufa el USB-C de la placa»")
+    c.step(f"Corte {n}/{total}: aviso «desenchufa el USB-C de la ES32 del SLOT1»")
     h1 = _aviso(tb, AVISO_DESENCHUFAR.format(n=n, total=total, tid=tid), c, f"aviso-{tid}-{n}-a")
     vista = _esperar_presencia(tb, slot, False, ESPERA_OPERADOR_S)
     if not vista:
@@ -137,7 +138,7 @@ def corte(tb, slot, sub, nodo, tid, n, total, c, banco):
     r["sigue_ausente"] = _presente(tb, slot) is False
     LWT_MEDIDOS.append((tid, n, r["lwt_s"], r["lwt_retenido"]))
     # 3) Volver a enchufar
-    c.step(f"Corte {n}/{total}: aviso «vuelve a enchufar el USB-C en la placa»")
+    c.step(f"Corte {n}/{total}: aviso «vuelve a enchufar el USB-C de la ES32 del SLOT1»")
     h2 = _aviso(tb, AVISO_ENCHUFAR.format(n=n, total=total, tid=tid), c, f"aviso-{tid}-{n}-b")
     vista = _esperar_presencia(tb, slot, True, ESPERA_OPERADOR_S)
     if not vista:

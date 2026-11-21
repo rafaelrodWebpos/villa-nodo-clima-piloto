@@ -78,9 +78,9 @@ SEN03_ESPERA_OPERADOR_S = 300  # sda-disconnect: con 180 s un aviso caducó (202
 SEN03_LIMITE_S = 61            # timing del contrato, desde la reconexión
 SEN03_TOLERANCIA_S = 60        # tolerancia: un ciclo
 SEN03_PROHIBIDOS = (0.0, -45.0, -6.0)
-AVISO_SDA_OFF = ("TC-SEN-04 (FR-SEN-03): desconecta el Dupont de SDA del SHT41 en la protoboard "
+AVISO_SDA_OFF = ("TC-SEN-04 (FR-SEN-03): desconecta el Dupont de SDA del SHT41 de la ES32 del SLOT1 (piloto, la del sensor SHT41) en la protoboard "
                  "y pulsa «Hecho». NO lo vuelvas a conectar todavía: en unos 3 minutos saldrá otro aviso.")
-AVISO_SDA_ON = ("TC-SEN-04 (FR-SEN-03): vuelve a conectar el Dupont de SDA del SHT41 y pulsa «Hecho» "
+AVISO_SDA_ON = ("TC-SEN-04 (FR-SEN-03): vuelve a conectar el Dupont de SDA del SHT41 de la ES32 del SLOT1 (piloto, la del sensor SHT41) y pulsa «Hecho» "
                 "en cuanto esté conectado.")
 
 
@@ -226,7 +226,7 @@ def _hr_contrastada():
     return bool(CONTRASTE_HR["sal saturada (NaCl, 75 %)"]
                 or (CONTRASTE_HR["sobre 33 %"] and CONTRASTE_HR["sobre 75 %"]))
 AVISO_COLOCAR = ("NFR-SEN-01: ¿está el WH32B junto al SHT41 (a 2-5 cm, a la misma altura, sin "
-                 "tocarlo, ambos a 5 cm o más de la placa, sin sol ni corrientes)? Pulsa Hecho y "
+                 "tocarlo, ambos a 5 cm o más de la placa de la ES32 del SLOT1, sin sol ni corrientes)? Pulsa Hecho y "
                  "no lo toques más: empiezan 30 min de estabilización")
 AVISO_LEER = ("LEE AHORA LA CONSOLA WS-2000: temperatura y humedad INTERIOR. Apunta la lectura "
               "{n} de {total} y pulsa Hecho en menos de 30 s")

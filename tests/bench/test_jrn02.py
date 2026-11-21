@@ -249,8 +249,9 @@ def test_nfr_ota_01_measurement_period_during_download(testbench, dut_slot, dut_
 
 
 OTA_PCT = re.compile(r"nodo: ota: (\d+) %")
-AVISO_LISTO = ("TC-OTA-15: ponte junto a la placa. Al pulsar «Hecho» se manda la OTA; unos 10 s después sale el "
-               "aviso de desenchufar el USB-C de la PLACA: hazlo en cuanto salga (quedan ~20 s de descarga).")
+AVISO_LISTO = ("TC-OTA-15: ponte junto a la ES32 del SLOT1 (piloto, la del sensor SHT41). Al pulsar «Hecho» se manda la OTA; unos 10 s después sale el "
+               "aviso de desenchufar el USB-C de la PLACA de esa ES32 (no la del SLOT2, nodo-agua): hazlo en cuanto salga "
+               "(quedan ~20 s de descarga).")
 
 
 def test_tc_ota_15_power_cut_during_download(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
