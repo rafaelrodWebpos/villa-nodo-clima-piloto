@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 4 items
+
+tests/bench/test_jrn01.py ....                                           [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_jrn01.py::test_jrn_01_0_flash_ci_image
+PASSED tests/bench/test_jrn01.py::test_jrn_01_1_portal_without_config
+PASSED tests/bench/test_jrn01.py::test_jrn_01_2_provision
+PASSED tests/bench/test_jrn01.py::test_jrn_01_3_wifi_and_udp_log
+======================== 4 passed in 275.89s (0:04:35) =========================

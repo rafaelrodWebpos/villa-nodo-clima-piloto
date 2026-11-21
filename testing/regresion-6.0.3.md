@@ -116,3 +116,10 @@ En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPho
   vio bien: el SLOT1 nunca quedó ausente, así que quedó not done. El segundo intento (15:57) sí cortó la ES32 del
   SLOT1 y es el que vale (PASS, corte al 60 %). **Pendiente:** el texto de los avisos tiene que nombrar «ES32 del
   SLOT1 (piloto, la del sensor SHT41)»; solo el texto, después de la visita.
+- **Cadena de la noche** (`test-results/cadena4-20261121T200739Z/`, 16:07–19:21): **7 de 7 en verde**: JRN-01.0 a
+  01.3 (repetidas, con la prueba corregida), TC-OTA-17 (`error:red` con la tarea vieja viva; A arranca tras el
+  reset; B2 después), TC-CON-12 y TC-TIME-04. Revisión de red limpia: sin la IP ni el token del banco. El banco quedó
+  con el AP y el broker apagados y el candado libre a las 19:21.
+- **Resultado de la regresión con ESP-IDF 6.0.3:** todas las pruebas del guion en verde, con las salvedades
+  aprobadas (TC-WDT-01, TC-SEN-03 y TC-SEN-05 no se repiten). El tag v0.0.2 queda para el domingo, después de la 24 h
+  de AGUA, con el propietario presente (opción b).

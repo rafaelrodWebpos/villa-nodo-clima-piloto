@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 1 item
+
+tests/bench/test_bench_plus.py .                                         [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_bench_plus.py::test_tc_time_04_resync_failure_keeps_time
+======================== 1 passed in 7355.43s (2:02:35) ========================
