@@ -258,12 +258,13 @@ def test_tc_time_04_resync_failure_keeps_time(testbench, dut_slot, dut_mac, firm
 BLOQUEO_TRAS_CORTE_S = 300      # «mantener SNTP bloqueado 5 min»
 DESENCHUFADO_S = 10             # lo que la placa queda sin alimentación
 VUELTA_TRAS_DESBLOQUEO_S = 100  # ≤ 30 s hasta la hora válida + hasta 60 s de ciclo + margen
-AVISO_FUERA = ("TC-TIME-03: DESCONECTA AHORA el cable USB-C del lado de la PLACA (el lado de la "
+AVISO_FUERA = ("TC-TIME-03: DESCONECTA AHORA el cable USB-C del lado de la PLACA de la ES32 del SLOT1 (piloto, la del sensor SHT41) "
+               "(no la del SLOT2, nodo-agua; el lado de la "
                "Raspberry Pi no se toca) y pulsa «Hecho». NO lo vuelvas a conectar todavía: en unos "
                f"{DESENCHUFADO_S} s saldrá otro aviso.")
 CORTE_MIN_S = 5                 # H-76: evidencia de corte real
 UPTIME_MAX_S = 5
-AVISO_DENTRO = "TC-TIME-03: VUELVE A CONECTAR el cable USB-C en la PLACA y pulsa «Hecho»."
+AVISO_DENTRO = "TC-TIME-03: VUELVE A CONECTAR el cable USB-C en la PLACA de la ES32 del SLOT1 (piloto, la del sensor SHT41) y pulsa «Hecho»."
 
 
 def test_tc_time_03_power_cut_with_sntp_blocked(testbench, dut_slot, dut_mac, firmware, run_dir, tmp_path):
