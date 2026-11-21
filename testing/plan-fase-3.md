@@ -338,3 +338,18 @@ Lo que se aprobó y en qué orden está en `testing/analisis-cortes-parciales.md
 | #89 (1) | `POST /api/serial/reset` a veces cierra la conexión sin responder | Sí: 24 llamadas en la suite. Daría un rojo falso (`RemoteDisconnected`), nunca un verde falso. **La caída de la 24 h de AGUA (05:26:17, «Connection reset by peer» en `GET /api/wifi/ap_status`) parece de la misma familia:** el handler suelta el socket. En `/api/log` no hay rastro: el búfer de 200 entradas estaba lleno de líneas UDP del DUT de AGUA, la última a las 05:26:10 | Si una prueba de la regresión cae así, se repite sola esa prueba | Proponer un comentario en #89 con este dato (GET y no solo POST). Opcional: reintento de las lecturas idempotentes (`ap_status`) en el envoltorio del proyecto |
 | #89 (2) | Segundo reset ~7 s después, al reabrir el proxy | Visto en el S3 (CR-TB-12, ~2,6 s). El fork `fb3c300`/`6dffd70` trae el arreglo de #86 (DTR/RTS al abrir) | `ultimo_arranque` en `benchlib`; TC-CON-15 ignora los arranques de los primeros 15 s | Comprobar en la regresión si sigue apareciendo |
 | #89 (3) | El búfer serie pierde líneas y vuelve a sellar con la hora nueva líneas viejas | Riesgo de coincidencias falsas en esperas por ventana de tiempo del banco | Las medidas de tiempo usan el reloj del DUT («I (ms)») y el último arranque; MQTT y UDP como segunda vía | Si aparece un caso, comparar por contenido y no por hora, como sugiere el issue |
+
+## Puerta 01 sobre el FSD 0.9.12 (revisor independiente, 2026-11-21): ABIERTA
+
+- **Resultado:** las 7 filas pasan, sin bloqueantes, y las comprobaciones mecánicas también (86 IDs, todos con contrato).
+- **No bloqueantes que trae 0.9.12** (pendientes de decisión del propietario):
+  - (a) El criterio de salida de §3.6 debería exceptuar la fila bench de FR-CON-08 mientras CR-TB-24 no exista.
+  - (b) A la fila bench de FR-CON-08 le falta fijar el contrato DHCP (por ejemplo, 30 s) y desde cuándo se mide el
+    plazo de 61 s.
+  - (c) Al contrato núcleo de FR-CON-08 le falta el caso CONECTANDO_WIFI (T09).
+  - (d) Nota en el bloque YAML de FR-CON-04 sobre la excepción de FR-CON-09.
+  - (e) FR-MED-02 (broker detenido 10 min) roza los 600 s de FR-CON-09: decir que ahí T27 es normal o bajar a 9 min.
+  - (f) La tolerancia de 600 s es solo por arriba (+5 s); aclararlo.
+  - (g) T27 está entre T16 y T17 en la tabla.
+- **Preexistentes:** el revisor no encontró ninguno en lo que revisó, pero no hizo un barrido de juicio completo del
+  resto del FSD.
