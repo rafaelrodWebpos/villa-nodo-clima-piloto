@@ -108,3 +108,11 @@ En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPho
 - **Revisión de red:** dos registros crudos de pytest de la primera cadena llevaban la IP del banco y el token del
   banco (variables locales de una traza). Se redactaron como `<banco>` y `<TOKEN>` antes del commit, y `cadena.sh`
   usa ahora `--tb=short`.
+- **Capturas del iPhone para H-83** (iPhone 14 Pro Max, iOS 27.2.1), en `test-results/visita-20261121T191123Z/`:
+  - `H-83-paso2-ventana-cautiva.png`: la ventana «Captive Wi-Fi» se abrió sola en 192.168.4.1 con el formulario
+    «Nodo clima», firmware `0.0.0-9e80669-bench`.
+  - `H-83-paso4-safari-example-com.png`: Safari con `example.com` mostró el formulario del nodo.
+- **TC-OTA-15, primer intento:** el propietario desenchufó por error la ES32 del SLOT2 (nodo-agua) y la prueba lo
+  vio bien: el SLOT1 nunca quedó ausente, así que quedó not done. El segundo intento (15:57) sí cortó la ES32 del
+  SLOT1 y es el que vale (PASS, corte al 60 %). **Pendiente:** el texto de los avisos tiene que nombrar «ES32 del
+  SLOT1 (piloto, la del sensor SHT41)»; solo el texto, después de la visita.
