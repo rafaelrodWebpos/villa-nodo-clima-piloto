@@ -1,19 +1,21 @@
-# Borrador: alertas de Home Assistant para el nodo clima (H3 y H4, H-94) — para revisar
+# Borrador: alertas de Home Assistant para los nodos clima (H3 y H4, H-94) — revisión 2
 
-El firmware no emite alertas (FSD, historial 0.9.0): las saca Home Assistant de lo que el nodo publica. Este
-borrador cubre los huecos H3 y H4 de `testing/analisis-cortes-parciales.md`. **No está instalado ni probado.**
-Es para que el propietario lo revise. Los marcadores `<sitio>`, `<zona>` y `<nodo>` se cambian en la instalación,
-nunca en el repo. `<nodo>` es `clima-xxxxxx`.
+**Revisión 2** (propietario, 2026-11-21): gravedad baja y 15 min para A1 y A2; las alertas del clima van a un
+resumen y solo las de agua y seguridad avisan al instante; sin Internet, el aviso lo da el vigilante externo del
+hub (FR-VIG-01, H-93); el canal del teléfono es WhatsApp; y en lugar de automatizaciones copiadas, una plantilla
+(blueprint) por nodo.
 
-## Qué publica el nodo y qué usa cada alerta
+El firmware no emite alertas (FSD, historial 0.9.0): las saca Home Assistant de lo que el nodo publica. **Este
+documento no está instalado ni probado.** Los marcadores `<sitio>`, `<zona>` y `<nodo>` se cambian en la
+instalación, nunca en el repo.
 
-- `homeassistant/sensor/<nodo>/…/config`: las tres medidas, por Discovery, con disponibilidad por `status`
-  (`online` y `offline`).
-- `<sitio>/<zona>/<nodo>/status`, retenido, QoS 1: `estado`, `fw`, `rssi`, `reset`, `uptime_s`, `lecturas`,
-  `err_sensor`, `ota` y `hora_valida` (§9.3). Si el nodo se cae, el broker lo reemplaza por el Last Will
-  `{"estado":"offline"}` en ≤ 100 s.
-- `status` **no** va por Discovery. Para las alertas A3 a A7 hace falta un sensor MQTT que lo lea, en
-  `configuration.yaml`:
+## Lo que usa la plantilla
+
+- **Medidas:** `temperatura`, `humedad` y `punto_rocio`, por Discovery, con disponibilidad por `status`.
+- **`status`** (`<sitio>/<zona>/<nodo>/status`, retenido): `estado`, `fw`, `rssi`, `reset`, `uptime_s`,
+  `lecturas`, `err_sensor`, `ota` y `hora_valida` (§9.3). Si el nodo se cae, el broker lo reemplaza por el Last
+  Will `{"estado":"offline"}` en ≤ 100 s.
+- **Un sensor MQTT por nodo que lea `status`**, porque `status` no va por Discovery. Va en `configuration.yaml`:
 
 ```yaml
 mqtt:
@@ -25,135 +27,156 @@ mqtt:
       json_attributes_topic: "<sitio>/<zona>/<nodo>/status"
 ```
 
-## Alertas propuestas (H3)
+## Alertas (todas de gravedad baja: el nodo clima no es crítico)
 
-| ID | Condición | Por qué | Gravedad |
-|---|---|---|---|
-| A1 | `estado` = `offline` durante 2 min | Nodo caído, sin Wi-Fi o sin broker (LWT) | Alta |
-| A2 | La temperatura no se actualiza en 3 min, aunque el nodo esté `online` | Medidas que no llegan (pérdida de paquetes, sensor colgado) | Alta |
-| A3 | `hora_valida` = false durante 1 h | Sin SNTP: sin Internet o sin DNS. Las medidas siguen llegando, pero sin `ts` | Baja |
-| A4 | `reset` cambia a `brownout`, `panic`, `task_wdt`, `int_wdt` o `wdt` | Fuente floja, fallo o watchdog | Media |
-| A5 | `uptime_s` baja respecto del valor anterior | Reinicio del nodo, cualquiera que sea la causa | Media; alta si son más de 3 en 1 h (bucle) |
-| A6 | `rssi` < −80 dBm durante 15 min | Señal débil: anuncia cortes intermitentes | Baja |
-| A7 | `err_sensor` sube | Lecturas del SHT41 inválidas | Media |
+| ID | Condición | Por qué |
+|---|---|---|
+| A1 | `estado` = `offline` durante **15 min** | Nodo caído, sin Wi-Fi o sin broker (LWT) |
+| A2 | Sin medida de temperatura en **15 min** con el nodo `online` | Medidas que no llegan |
+| A3 | `hora_valida` = false durante 1 h | Sin SNTP (Internet o DNS); las medidas siguen sin `ts` |
+| A4 | Reinicio con `reset` en {brownout, panic, task_wdt, int_wdt, wdt} | Fuente floja, fallo o watchdog |
+| A5 | Cualquier reinicio (`uptime_s` baja) | Reinicios en general; un bucle se ve en el resumen |
+| A6 | `rssi` < −80 dBm durante 15 min | Señal débil que anuncia cortes |
+| A7 | `err_sensor` sube | Lecturas del SHT41 inválidas |
 
-```yaml
-automation:
-  - alias: "Clima <zona>: nodo offline"                      # A1
-    triggers:
-      - trigger: state
-        entity_id: sensor.clima_<zona>_estado
-        to: "offline"
-        for: "00:02:00"
-    actions:
-      - action: script.aviso_clima
-        data: {nivel: alta, texto: "Nodo clima <zona> sin conexión desde hace 2 min"}
+**Ninguna avisa al instante.** Todas van al resumen de la casa. Los avisos al instante quedan para los sistemas de
+agua y de seguridad, que no son de este documento.
 
-  - alias: "Clima <zona>: sin medidas"                       # A2
-    triggers:
-      - trigger: time_pattern
-        minutes: "/1"
-    conditions:
-      - condition: state
-        entity_id: sensor.clima_<zona>_estado
-        state: "online"
-      - condition: template
-        value_template: >
-          {{ (now() - states.sensor.clima_<zona>_temperatura.last_updated).total_seconds() > 180 }}
-    actions:
-      - action: script.aviso_clima
-        data: {nivel: alta, texto: "Nodo clima <zona> conectado pero sin medidas desde hace 3 min"}
+## Plantilla (blueprint) `nodo_clima_alertas.yaml`
 
-  - alias: "Clima <zona>: sin hora de red"                   # A3
-    triggers:
-      - trigger: template
-        value_template: "{{ state_attr('sensor.clima_<zona>_estado', 'hora_valida') == false }}"
-        for: "01:00:00"
-    actions:
-      - action: script.aviso_clima
-        data: {nivel: baja, texto: "Nodo clima <zona> sin hora de red desde hace 1 h (¿Internet o DNS?)"}
-
-  - alias: "Clima <zona>: reinicio anómalo"                  # A4 y A5
-    triggers:
-      - trigger: state
-        entity_id: sensor.clima_<zona>_estado
-        attribute: uptime_s
-    conditions:
-      - condition: template
-        value_template: >
-          {{ trigger.from_state is not none and trigger.to_state.attributes.uptime_s is number
-             and trigger.from_state.attributes.uptime_s is number
-             and trigger.to_state.attributes.uptime_s < trigger.from_state.attributes.uptime_s }}
-    actions:
-      - action: script.aviso_clima
-        data:
-          nivel: >
-            {{ 'media' if trigger.to_state.attributes.reset in
-               ['brownout','panic','task_wdt','int_wdt','wdt'] else 'baja' }}
-          texto: "Nodo clima <zona> se reinició (reset = {{ trigger.to_state.attributes.reset }})"
-
-  - alias: "Clima <zona>: señal débil"                       # A6
-    triggers:
-      - trigger: numeric_state
-        entity_id: sensor.clima_<zona>_estado
-        attribute: rssi
-        below: -80
-        for: "00:15:00"
-    actions:
-      - action: script.aviso_clima
-        data: {nivel: baja, texto: "Nodo clima <zona> con señal Wi-Fi débil (< −80 dBm) desde hace 15 min"}
-
-  - alias: "Clima <zona>: errores del sensor"                # A7
-    triggers:
-      - trigger: state
-        entity_id: sensor.clima_<zona>_estado
-        attribute: err_sensor
-    conditions:
-      - condition: template
-        value_template: >
-          {{ trigger.from_state is not none and trigger.to_state.attributes.err_sensor is number
-             and trigger.from_state.attributes.err_sensor is number
-             and trigger.to_state.attributes.err_sensor > trigger.from_state.attributes.err_sensor }}
-    actions:
-      - action: script.aviso_clima
-        data: {nivel: media, texto: "Nodo clima <zona>: lecturas inválidas del sensor"}
-```
-
-La A5 de bucle (más de 3 reinicios en 1 h) necesita un contador (`counter` que se pone a cero cada hora). Se deja
-para la revisión.
-
-## Aviso que no dependa de la nube (H4)
-
-Un único script `aviso_clima` reparte cada alerta por dos vías. La local siempre funciona; la de la nube, solo si
-hay Internet:
+Una sola plantilla. Cada nodo es una automatización creada desde ella, con sus tres entidades y su zona. Se
+guarda en `blueprints/automation/villa/nodo_clima_alertas.yaml`.
 
 ```yaml
-script:
-  aviso_clima:
-    fields:
-      nivel: {description: "alta | media | baja"}
-      texto: {description: "mensaje"}
-    sequence:
-      - action: persistent_notification.create          # local: se ve en HA aunque no haya Internet
-        data: {title: "Clima ({{ nivel }})", message: "{{ texto }}"}
-      - action: logbook.log                             # rastro local
-        data: {name: "Clima", message: "{{ texto }}"}
-      - continue_on_error: true                         # nube: puede fallar sin Internet
-        action: notify.notify                           # servicio de aviso del teléfono (el que ya use la villa)
-        data: {title: "Clima ({{ nivel }})", message: "{{ texto }}"}
+blueprint:
+  name: Nodo clima — alertas al resumen
+  description: >
+    Alertas de gravedad baja de un nodo clima (A1–A7). No avisan al instante: dejan cada alerta en el resumen de
+    la casa con la acción «Añadir al resumen». Sin Internet, el aviso lo da el vigilante externo del hub
+    (FR-VIG-01, H-93), no esta plantilla.
+  domain: automation
+  input:
+    zona:
+      name: Zona
+      selector: {text: {}}
+    estado:
+      name: Sensor de status del nodo
+      description: El sensor MQTT que lee <sitio>/<zona>/<nodo>/status, con sus atributos
+      selector: {entity: {domain: sensor}}
+    temperatura:
+      name: Sensor de temperatura del nodo
+      selector: {entity: {domain: sensor}}
+    al_resumen:
+      name: Añadir al resumen
+      description: Acción que añade una línea al resumen de la casa (recibe las variables «zona» y «texto»)
+      selector: {action: {}}
+
+mode: queued
+max: 10
+
+trigger_variables:
+  temperatura: !input temperatura
+
+triggers:
+  - trigger: state                                   # A1
+    id: a1
+    entity_id: !input estado
+    to: "offline"
+    for: "00:15:00"
+  - trigger: template                                # A2: dispara una vez al pasar el umbral
+    id: a2
+    value_template: >
+      {{ states[temperatura] is not none and
+         (now() - states[temperatura].last_updated).total_seconds() > 900 }}
+  - trigger: state                                   # A3
+    id: a3
+    entity_id: !input estado
+    attribute: hora_valida
+    to: false
+    for: "01:00:00"
+  - trigger: state                                   # A4 y A5
+    id: a45
+    entity_id: !input estado
+    attribute: uptime_s
+  - trigger: numeric_state                           # A6
+    id: a6
+    entity_id: !input estado
+    attribute: rssi
+    below: -80
+    for: "00:15:00"
+  - trigger: state                                   # A7
+    id: a7
+    entity_id: !input estado
+    attribute: err_sensor
+
+variables:
+  zona: !input zona
+  estado_ent: !input estado
+  nuevo: "{{ trigger.to_state.attributes if trigger.to_state is defined and trigger.to_state else {} }}"
+  viejo: "{{ trigger.from_state.attributes if trigger.from_state is defined and trigger.from_state else {} }}"
+  texto: >
+    {% if trigger.id == 'a1' %}sin conexión desde hace 15 min
+    {% elif trigger.id == 'a2' %}conectado pero sin medidas desde hace 15 min
+    {% elif trigger.id == 'a3' %}sin hora de red desde hace 1 h (¿Internet o DNS?)
+    {% elif trigger.id == 'a45' %}se reinició (reset = {{ nuevo.reset }})
+    {% elif trigger.id == 'a6' %}señal Wi-Fi débil (< −80 dBm) desde hace 15 min
+    {% else %}lecturas inválidas del sensor (err_sensor = {{ nuevo.err_sensor }}){% endif %}
+
+conditions:
+  - condition: template                              # A2 solo con el nodo online (si no, ya avisa A1)
+    value_template: "{{ trigger.id != 'a2' or states(estado_ent) == 'online' }}"
+  - condition: template                              # A4/A5 solo si uptime_s bajó de verdad
+    value_template: >
+      {{ trigger.id != 'a45' or (nuevo.uptime_s is number and viejo.uptime_s is number
+                                  and nuevo.uptime_s < viejo.uptime_s) }}
+  - condition: template                              # A7 solo si err_sensor subió
+    value_template: >
+      {{ trigger.id != 'a7' or (nuevo.err_sensor is number and viejo.err_sensor is number
+                                 and nuevo.err_sensor > viejo.err_sensor) }}
+
+actions:
+  - action: logbook.log                              # rastro local en HA
+    data: {name: "Clima {{ zona }}", message: "{{ texto }}"}
+  - choose: []
+    default: !input al_resumen
 ```
 
-Propuestas para revisar:
+Notas de la plantilla:
 
-- **Reintento al volver Internet:** si `notify.notify` falló, reenviar las alertas pendientes cuando HA vuelva a
-  tener Internet. Por ejemplo, con un `input_text` que guarde la última alerta no entregada.
-- **Vía local activa** para las alertas altas, si la villa tiene con qué: un altavoz o una pantalla de HA en la
-  casa, o un aviso por la red local a un equipo siempre encendido.
-- **Alerta de «HA sin Internet»:** que HA avise localmente cuando pierde la salida (por ejemplo, con un `ping`
-  periódico a una IP pública). Así se distingue «el nodo está bien pero el aviso no salió».
+- `al_resumen` recibe las variables `zona` y `texto`. La acción concreta depende de cómo esté hecho el resumen de
+  la casa: por ejemplo, añadir una tarea a una lista `todo` o una línea a un `input_text`. Se decide con el resumen.
+- A4 y A5 van en un solo disparador. El texto lleva el valor de `reset`, así un brownout o un watchdog se
+  distinguen en el resumen sin una alerta aparte.
 
-## Cómo se probaría (después de revisarlo)
+## Canal al teléfono: WhatsApp (decisión base)
 
-En el HA de prueba (`scripts/ha/ha_prueba.py`), con el banco: A1 (corte del AP y del broker), A2 (pérdida, cuando
-exista CR-TB-25), A3 (`bench-sntp-block` y un reinicio), A4/A5 (reset por la línea del banco y `wdt-test` de la
-imagen de banco), A6 (no se puede bajar el RSSI en el banco: queda para campo) y A7 (SDA suelto, con operador).
+- **El resumen sale por WhatsApp**, a la hora o con la frecuencia que fije el resumen de la casa. Es un envío para
+  toda la casa, no uno por nodo, y lo hace la automatización del resumen, no esta plantilla.
+- **El aviso inmediato por WhatsApp** queda para agua y seguridad.
+
+## Sin Internet: el vigilante externo del hub (FR-VIG-01, H-93)
+
+- Con la casa vacía, una notificación local de HA no la ve nadie. **El aviso de «casa sin Internet» lo da el
+  vigilante externo del hub** (FR-VIG-01, 15 min, aprobado en H-93 para AGUA). Es uno solo para toda la casa, y
+  esta plantilla no lo duplica.
+- Mientras falte Internet, las alertas del clima siguen en el `logbook` y en el resumen pendiente. Salen por
+  WhatsApp con el siguiente resumen, cuando vuelva la conexión.
+
+## Pendiente de decisión del propietario
+
+- **Segundo canal por SMS con un módem 4G en la Pi**, para avisar sin depender de Internet ni de WhatsApp. No se
+  propone para el clima, que es de gravedad baja; sería para agua y seguridad, y para el propio vigilante. Hay que
+  decidir el módem, el plan de datos y SMS, y qué alertas lo usan.
+
+## Cómo se probaría (después de aprobarlo)
+
+En el HA de prueba (`scripts/ha/ha_prueba.py`), con la plantilla y una acción `al_resumen` que escriba en una lista:
+
+| Alerta | Cómo se provoca |
+|---|---|
+| A1 | Corte del AP y del broker más de 15 min |
+| A2 | Pérdida de paquetes, cuando exista CR-TB-25 |
+| A3 | `bench-sntp-block` y un reinicio |
+| A4 y A5 | Reset por la línea del banco, y `wdt-test` de la imagen de banco |
+| A6 | No se puede en el banco: queda para campo |
+| A7 | SDA suelto, con operador |

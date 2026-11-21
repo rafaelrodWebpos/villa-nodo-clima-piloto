@@ -111,3 +111,8 @@ nueva del banco (fork; el número CR-TB lo da el propietario), **T** = prueba nu
    - CR-TB-25: H10, pérdida y retardo;
    - CR-TB-26: H11, DNS que no contesta.
 4. **En la instalación (S2):** broker por IP (H6) y apagar un satélite en campo (H13).
+
+- **Revisión del borrador de alertas** (propietario, 2026-11-21): A1 y A2 con gravedad baja y 15 min; las alertas
+  del clima van a un resumen; sin Internet avisa el vigilante externo del hub (FR-VIG-01, H-93); el canal es
+  WhatsApp; y una plantilla (blueprint) por nodo. Queda pendiente de decisión el segundo canal por SMS con un
+  módem 4G en la Pi.
