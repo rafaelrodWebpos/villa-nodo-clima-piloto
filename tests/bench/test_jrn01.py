@@ -331,13 +331,19 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir, firmware):
         assert any("UDP logging -> " in txt(u) for u in udp if ts(u) >= t0), "el receptor UDP no recibió UDP logging -> <host>:<port> (E11)"
         # Desde la línea de T08 en el orden en que el DUT escribe (la hora de llegada al banco va a ráfagas)
         tras_ip = [e for e in vistas[vistas.index(t_ip):] if e["text"].strip()]
-        perdidas, tarde = [], []
+        perdidas, tarde, cortadas = [], [], []
         for e in tras_ip:
             cuerpo = e["text"].strip()   # con su «I (ms)» del DUT: no casa con una línea igual de otro arranque
             m = next((u for u in udp if ts(u) >= t0 and txt(u) == cuerpo), None)
+            if not m and re.match(r"^[IWE] \(\d+\) \S", cuerpo):
+                # la captura serie del banco a veces corta una línea (upstream #89, punto 3); la línea
+                # serie cortada cuenta como copiada si es prefijo de una línea UDP con la misma «I (ms)»
+                m = next((u for u in udp if ts(u) >= t0 and txt(u).startswith(cuerpo) and txt(u) != cuerpo), None)
+                if m: cortadas.append(cuerpo)
             if not m: perdidas.append(cuerpo)
             elif ts(m) - e["ts"] > UDP_RETARDO_S: tarde.append(cuerpo)
-        c.note(f"- {len(tras_ip)} líneas serie tras obtener IP; perdidas {len(perdidas)}, tarde {len(tarde)}")
+        c.note(f"- {len(tras_ip)} líneas serie tras obtener IP; perdidas {len(perdidas)}, tarde {len(tarde)}; "
+               f"cortadas por la captura serie del banco (#89) y completas por UDP: {len(cortadas)} {cortadas[:2]}")
         assert not perdidas, f"{len(perdidas)} líneas serie sin copia UDP (FR-LOG-02)"
         assert not tarde, f"{len(tarde)} líneas llegaron por UDP más de {UDP_RETARDO_S} s tarde"
         meds = sorted({t.strip() for t in textos if "nodo: med: " in t})   # el buffer del banco puede repetir una línea

@@ -51,3 +51,13 @@ En total, 1 h 25 min. Antes de la visita yo dejo el SLOT1 en PORTAL para el iPho
   se repitió y ocupa el banco hasta el sábado ~12:40. Motivos: el código del watchdog no cambió, el cambio de ESP-IDF
   es de parche y el nodo no es crítico. `cadena.sh` solo la corre con `--con-wdt`.
 - **El tag v0.0.2** lo crea el propietario cuando todo esté en verde, como con v0.0.1 (runner levantado durante la release).
+
+## Incidencias de la ejecución del 2026-11-21
+
+- **JRN-01.3 en rojo por el banco, no por el firmware.** La captura serie del banco cortó una línea a
+  «`I (5073) nodo: con:`», que por UDP llegó completa (`… CONECTANDO_BROKER -> CONECTANDO_BROKER (mqtt_down)`).
+  Es el defecto de upstream #89, punto 3.
+  - Por eso JRN-01.4 y 01.5 se saltaron (dependen de JRN-01.3).
+  - La prueba ahora cuenta una línea serie cortada como copiada si es prefijo de una línea UDP con la misma
+    «I (ms)», y la anota aparte.
+  - JRN-01.0 a 01.5 se repiten al terminar la cadena (~15 min), antes de la visita.
