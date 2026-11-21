@@ -156,7 +156,10 @@ change_history:
     sin IP (FR-CON-08, E15). (2) H2: con el Wi-Fi asociado y el broker inalcanzable 10 min, una
     reasociación del Wi-Fi sin reiniciar, como máximo una cada 10 min (FR-CON-09, evento
     `broker_ausente`, T27); FR-CON-04 lo exceptúa. (3) §3.6, ronda de robustez de red antes de la
-    instalación. El firmware va en la ronda siguiente. Sin otros cambios.
+    instalación. El firmware va en la ronda siguiente. Sin otros cambios. Correcciones de texto tras la
+    puerta 01 (2026-11-21, propietario): salvedad de §3.6, rig de la fila bench de FR-CON-08 (contrato
+    DHCP de 30 s), caso CONECTANDO_WIFI en su núcleo, nota en FR-CON-04 y FR-MED-02, tolerancia de
+    FR-CON-09 y orden de T27; los valores aprobados no cambian.
 superseded_requirements: []
 open_decisions: []
 related_test_baseline: ninguna todavía (testing/test-plan.yaml, propiedad de /build)
@@ -459,7 +462,8 @@ reservados ni tópicos de comando definidos para él.
 - **Origen.** Análisis de cortes parciales (`testing/analisis-cortes-parciales.md`, huecos H1 y H2),
   aprobado en H-94, con los valores de H-95 [user].
 - **Alcance.** FR-CON-08, FR-CON-09, el evento `broker_ausente`, la fila T27 y la línea E15.
-- **Criterios de salida.** Pasan los contratos de FR-CON-08, FR-CON-09 y T27 de §6.6, y la
+- **Criterios de salida.** Pasan los contratos de FR-CON-08, FR-CON-09 y T27 de §6.6 (salvo la fila
+  bench de FR-CON-08 mientras `bench-dhcp-off` no exista: salvedad declarada abajo), y la
   regresión de banco de conectividad (T08–T16, FR-CON-01 a FR-CON-04) sobre el mismo firmware.
 - **Dependencias.** La fila bench de FR-CON-08 necesita apagar solo el DHCP del AP del banco
   (`bench-dhcp-off`, CR-TB-24, próxima ronda del fork). Hasta que exista, esa fila queda
@@ -579,7 +583,7 @@ conectividad salvo ARRANQUE (§6).
 | ID | Precondición · estímulo | Observación esperada | No debe ocurrir | Nivel |
 |---|---|---|---|---|
 | FR-MED-01 | OPERATIVO; capturar 11 mensajes consecutivos de `temperatura` recibidos en vivo (retain = 0) | Los 10 intervalos entre llegadas están en [59, 61] s | Deriva acumulada > 2 s en 10 ciclos; dos publicaciones en el mismo ciclo | bench |
-| FR-MED-02 | Broker detenido 10 min | Entre el último `status` previo al corte y el primero posterior, Δ`lecturas` = ⌊Δ`uptime_s`/60⌋ ± 1 | `lecturas` sin cambio; reinicio del nodo (uptime menor) | bench |
+| FR-MED-02 | Broker detenido 10 min | Entre el último `status` previo al corte y el primero posterior, Δ`lecturas` = ⌊Δ`uptime_s`/60⌋ ± 1. Con 10 min de broker detenido es normal una reasociación por FR-CON-09 (`broker_ausente`, T27): no es un fallo de esta prueba | `lecturas` sin cambio; reinicio del nodo (uptime menor) | bench |
 | FR-MED-03 | Tabla de 200 pares (T, HR) en la rejilla del rango, incluidos los extremos | \|Td − Td_ref\| ≤ 0,1 °C en todos | NaN o infinito para HR ∈ [1, 100] | host |
 | FR-MED-04 | Entrada con HR = 0 y entrada con T inválida | La salida es «no publicar punto_rocio» | Que se publique punto_rocio con 0, NaN, −273 o el valor anterior | host |
 | FR-MED-05 | Entradas en float32: 21,45 · −0,05 · 21,449 · 99,96 | 21,5 · −0,1 · 21,4 · 100,0 | Más de 1 decimal en el JSON; `v` como string | host |
@@ -643,7 +647,6 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T14 | CONECTANDO_BROKER | wifi_down | — | CONECTANDO_WIFI | Detener los intentos MQTT; programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
 | T15 | OPERATIVO | mqtt_down | — | CONECTANDO_BROKER | Programar un reintento MQTT | 1 s | Reiniciar el nodo; desconectar el Wi-Fi |
 | T16 | OPERATIVO | wifi_down | — | CONECTANDO_WIFI | Programar un reintento Wi-Fi | 1 s | Reiniciar el nodo |
-| T27 | CONECTANDO_BROKER | broker_ausente | — | CONECTANDO_WIFI | Detener los intentos MQTT, desasociar el STA y lanzar un intento de unión con el backoff de Wi-Fi a 1 s (FR-CON-09) | 1 s | Reiniciar el nodo; abrir el AP; volver a PORTAL |
 | T17 | OPERATIVO | cmd_ota | Payload conforme a §12.1 (FR-OTA-09), URL inicial bien formada (FR-OTA-14), con esquema y host permitidos (FR-OTA-02) y con la ruta del repo (FR-OTA-11, FR-OTA-13) | OTA_DESCARGA | Iniciar la descarga; diagnóstico `ota` = `en_curso` | 2 s | Aceptar un segundo cmd_ota durante la descarga; marcar arrancable el slot nuevo antes de verificar la imagen completa |
 | T18 | OPERATIVO | cmd_ota | Incumple alguna regla de la guarda de T17, evaluadas en el orden payload → host → ruta; el motivo es la primera que falla | OPERATIVO | Publicar `status` con `ota` = `rechazado:payload`, `rechazado:host` o `rechazado:ruta` | 2 s | Descargar; cambiar de partición |
 | T19 | OTA_DESCARGA | ota_ok | — | ARRANQUE (reinicio) | Publicar `status` con `ota` = `ok`, publicar `offline` y reiniciar en el nuevo slot | 5 s | Reiniciar sin cambiar de slot |
@@ -654,6 +657,7 @@ reinicios y los reintentos; [derived] para el resto. Los plazos proceden de §4.
 | T24 | PORTAL | portal_vence (10 min desde T02, D24) | — | ESPERA | Apagar el AP y, después, detener el HTTP y el DNS del portal (E14) | 2 s | Mantener el AP o el HTTP; escribir en la NVS; reiniciar |
 | T26 | PORTAL | envío | El portal ya venció y su cierre está pendiente (T25) | PORTAL | Responder «ocupado» sin validar ni probar la unión; el cierre (T24) llega en ≤ 2 s | 1 s | Iniciar una prueba de unión; escribir en la NVS; alargar la ventana de 10 min |
 | T25 | VALIDANDO | portal_vence | — | VALIDANDO | Aplazar el cierre: la prueba de unión en curso sigue; si termina por T05, el nodo guarda y reinicia; si termina por T06, `portal_vence` se vuelve a emitir al llegar a PORTAL y se aplica T24 | — | Interrumpir la prueba de unión; responder «no se pudo conectar» por el cierre |
+| T27 | CONECTANDO_BROKER | broker_ausente | — | CONECTANDO_WIFI | Detener los intentos MQTT, desasociar el STA y lanzar un intento de unión con el backoff de Wi-Fi a 1 s (FR-CON-09) | 1 s | Reiniciar el nodo; abrir el AP; volver a PORTAL |
 
 **Acciones globales.** Si salta el watchdog de tareas (NFR-WDT-01), el nodo se
 reinicia desde cualquier estado. Es el único reinicio no ordenado por T05, T19
@@ -801,6 +805,8 @@ verification:
     - Reinicio del DUT.
     - Una línea `con: … -> CONECTANDO_WIFI (wifi_down)` en la ventana.
     - Ráfaga — más de 1 mensaje por medida en [`status` online de la reconexión, +5 s] (viola FR-MED-06).
+  notes:
+    - Con 5 min de broker detenido no aplica la reasociación de FR-CON-09 (600 s); con 600 s o más, la línea `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (broker_ausente)` y su `wifi_up` son esperadas y no cuentan como pérdida de la asociación.
   tier: bench
   evidence: [instantes de stop/start del broker, primer mensaje, log serie]
   cleanup: [broker activo]
@@ -815,10 +821,10 @@ verification:
 | FR-CON-06 | Aprovisionar contra el AP del banco y apagar ese AP (desde el arranque en la Fase 1; después de conectar, pasando por T14 (broker caído) o T16 (desde OPERATIVO), en la Fase 2); esperar 15 min | Ninguna línea `con:` con destino distinto de CONECTANDO_WIFI en los 15 min; el AP del portal no aparece en el escaneo | AP `clima-*` visible; una línea `con: … -> PORTAL` | bench |
 | FR-CON-07 | Función que prepara la configuración del STA con clave vacía y con clave de 8–63 caracteres | Umbral `WIFI_AUTH_OPEN` con clave vacía y `WIFI_AUTH_WPA2_PSK` con clave; PMF `capable` = true en los dos | Umbral abierto con clave; PMF `required` (dejaría fuera routers sin PMF) | host |
 | FR-CON-07 | DUT configurado contra el AP desechable del banco con clave; el banco levanta en su lugar un AP abierto con el mismo SSID de prueba (nunca el SSID de la casa, H-83) durante 3 min; después, el AP con clave otra vez | Con el AP abierto: líneas `wifi: intento` y ninguna `con: CONECTANDO_WIFI -> CONECTANDO_BROKER (wifi_up)` ni asociación (la lista de estaciones del AP del banco no muestra la MAC del DUT); con el AP con clave: T08 en ≤ 90 s | Que el DUT obtenga IP del AP abierto | bench |
-| FR-CON-08 | Núcleo: un STA asociado sin IP durante 59 s y durante 60 s; un evento `IP_LOST` en CONECTANDO_BROKER, OPERATIVO y OTA_DESCARGA; el mismo plazo en VALIDANDO | 60 s sin IP → `wifi_down` con desasociación; 59 s → nada; `IP_LOST` → `wifi_down` en cada estado; en VALIDANDO solo el plazo de T06 (20 s) | `wifi_down` antes de 60 s; ninguna acción en VALIDANDO distinta de T06 | host |
-| FR-CON-08 | DUT en OPERATIVO con el AP desechable del banco; el banco apaga solo su DHCP con el AP arriba (`bench-dhcp-off`, CR-TB-24) y fuerza la renovación (contrato DHCP corto); después lo vuelve a encender | E15 `wifi: sin ip (perdida)` o `wifi: sin ip (60s)` y `con: … -> CONECTANDO_WIFI (wifi_down)` en ≤ 61 s desde que el DUT queda sin IP; nuevos intentos de unión; al volver el DHCP, `wifi_up` y una medida en ≤ 90 s; ninguna línea `boot:` | Quedarse en CONECTANDO_BROKER u OPERATIVO sin IP más de 61 s; reiniciar | bench |
+| FR-CON-08 | Núcleo: un STA asociado sin IP durante 59 s y durante 60 s en CONECTANDO_WIFI; un evento `IP_LOST` en CONECTANDO_BROKER, OPERATIVO y OTA_DESCARGA; el mismo plazo en VALIDANDO | En CONECTANDO_WIFI, 60 s sin IP → `wifi_down` con desasociación (T09); 59 s → nada; `IP_LOST` → `wifi_down` en cada estado (T14, T16, T22); en VALIDANDO solo el plazo de T06 (20 s) | `wifi_down` antes de 60 s; ninguna acción en VALIDANDO distinta de T06 | host |
+| FR-CON-08 | DUT en OPERATIVO con el AP desechable del banco, que da contratos DHCP de **30 s**; en el instante t0 el banco apaga solo su DHCP con el AP arriba (`bench-dhcp-off`, CR-TB-24); 5 min después lo vuelve a encender | El DUT pierde la IP al vencer su contrato sin renovarlo (≤ t0 + 30 s) y lwIP la retira a los 120 s (`IP_LOST_TIMER`); E15 `wifi: sin ip (perdida)` y `con: … -> CONECTANDO_WIFI (wifi_down)` en ≤ t0 + 30 s + 120 s + 1 s; después, en CONECTANDO_WIFI, cada unión sin IP acaba en E15 `wifi: sin ip (60s)` a 60 s (+ 1 s) de su `wifi: intento`; nuevos intentos de unión; al volver el DHCP, `wifi_up` y una medida en ≤ 90 s; ninguna línea `boot:` | Quedarse en CONECTANDO_BROKER u OPERATIVO sin IP más de 61 s; reiniciar | bench |
 | FR-CON-09 | Núcleo: entrada en CONECTANDO_BROKER y reloj simulado a 599 s, 600 s, y otra vez tras la reasociación; salida a OPERATIVO a los 300 s | `broker_ausente` a 600 s, no a 599 s; tras T27 y T08, el siguiente a 600 s de la nueva entrada; salir del estado cancela el temporizador | Dos `broker_ausente` en menos de 600 s; `broker_ausente` fuera de CONECTANDO_BROKER | host |
-| FR-CON-09 | DUT en OPERATIVO; broker del banco detenido 25 min con el AP arriba; luego arrancado | `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (broker_ausente)` dos veces, a 600 s (+ 5 s) de cada entrada en CONECTANDO_BROKER, cada una seguida de `wifi_up`; `uptime_s` monótono y ninguna línea `boot:`; al volver el broker, una medida en ≤ 75 s | Más de una reasociación cada 600 s; reiniciar; abrir el AP | bench |
+| FR-CON-09 | DUT en OPERATIVO; broker del banco detenido 25 min con el AP arriba; luego arrancado | `con: CONECTANDO_BROKER -> CONECTANDO_WIFI (broker_ausente)` dos veces, a 600 s (tolerancia −0 s / +5 s: nunca antes de 600 s) de cada entrada en CONECTANDO_BROKER, cada una seguida de `wifi_up`; `uptime_s` monótono y ninguna línea `boot:`; al volver el broker, una medida en ≤ 75 s | Más de una reasociación cada 600 s; reiniciar; abrir el AP | bench |
 | T24 | DUT sin configuración; reset y esperar 10 min sin enviar nada | `con: PORTAL -> ESPERA (portal_vence)` a 600 s ± 5 s de `con: ARRANQUE -> PORTAL (fin_arranque)`; `portal: dns detenido` (E14) en ≤ 5 s; el SSID `clima-*` desaparece de los escaneos en ≤ 2 s + un escaneo; las líneas `med:` siguen; tras otro reset, el AP vuelve | El AP o el HTTP siguen tras el cierre; `nvs: config escrita`; un reinicio sin reset | bench |
 | T25 | Núcleo: VALIDANDO + portal_vence; luego T06 y T05 | VALIDANDO sigue; tras T06, el evento repetido lleva a ESPERA por T24; con T05 se guarda y se reinicia | Abandonar la prueba de unión | host |
 | T26 | Núcleo: PORTAL + envío válido con el cierre pendiente | PORTAL, responder «ocupado» | T04 (probar la unión) | host |

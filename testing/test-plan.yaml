@@ -2235,10 +2235,11 @@ tests:
     verifies: [FR-CON-08]
     needs: [bench-driver, bench-flash, bench-wifi-ap, bench-dhcp-off, bench-mqtt-broker, bench-serial-monitor, dut-board]
     expect: >
-      FSD 0.9.12: DUT en OPERATIVO; el banco apaga solo su DHCP con el AP arriba y fuerza la
-      renovación; E15 «wifi: sin ip (perdida|60s)» y con: … -> CONECTANDO_WIFI (wifi_down) en
-      ≤ 61 s desde que queda sin IP; nuevos intentos de unión; con el DHCP de vuelta, wifi_up y
-      una medida en ≤ 90 s; ninguna línea boot:
+      FSD 0.9.12: DUT en OPERATIVO con contratos DHCP de 30 s; en t0 el banco apaga solo su
+      DHCP con el AP arriba: E15 «wifi: sin ip (perdida)» y con: … -> CONECTANDO_WIFI
+      (wifi_down) en ≤ t0 + 30 s + 120 s + 1 s; cada unión sin IP acaba en E15 «wifi: sin ip
+      (60s)» a 60 s (+ 1 s) de su «wifi: intento»; 5 min después vuelve el DHCP: wifi_up y una
+      medida en ≤ 90 s; ninguna línea boot:
     impl: null   # bloqueado: bench-dhcp-off en no (CR-TB-24); firmware en la ronda siguiente
   - id: TC-CON-18
     shape: atomic
