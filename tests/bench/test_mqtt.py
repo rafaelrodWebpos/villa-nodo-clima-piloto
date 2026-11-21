@@ -45,6 +45,10 @@ def _discovery_esperado(nodo, medida, fw):
                        "model": "Waveshare ESP32-S3-DEV-KIT-N8R8 + SHT41", "sw_version": fw}}
 
 
+LIMPIEZA_INTENTOS = 18        # 18 × 10 s ≈ 3 min: aguanta un corte breve de la red de la laptop
+LIMPIEZA_ESPERA_S = 10
+
+
 class Banco:
     """AP y broker que el test enciende; al salir, apaga solo lo que encendió."""
 
@@ -66,11 +70,26 @@ class Banco:
     def broker_off(self):
         self.tb.mqtt_stop(); self.broker = False
 
-    def limpiar(self):
-        if self.ap:
-            self.ap_off()
-        if self.broker:
-            self.broker_off()
+    def limpiar(self, intentos=LIMPIEZA_INTENTOS, espera_s=LIMPIEZA_ESPERA_S):
+        """Apaga lo que encendió el test. Cada paso por separado y con reintentos: el
+        2026-11-21 la laptop perdió la red con el banco al final de TC-LOG-08, su ap_stop falló y
+        el AP quedó encendido; las tandas C–F de la regresión se negaron después a tocarlo."""
+        fallos = []
+        for activo, paso, nombre in ((self.ap, self.ap_off, "ap_stop"), (self.broker, self.broker_off, "mqtt_stop")):
+            if not activo:
+                continue
+            for n in range(1, intentos + 1):
+                try:
+                    paso()
+                    break
+                except Exception as e:      # red de la laptop caída, timeout del banco…
+                    if n == intentos:
+                        fallos.append(f"{nombre}: {type(e).__name__}: {e}")
+                    else:
+                        time.sleep(espera_s)
+        if fallos:
+            raise RuntimeError("limpieza incompleta del banco (queda encendido lo que este test levantó): "
+                               + "; ".join(fallos))
 
 
 PUERTO_OCUPADO = "Could not exclusively lock port"

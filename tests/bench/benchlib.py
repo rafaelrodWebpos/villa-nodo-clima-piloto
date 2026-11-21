@@ -145,6 +145,19 @@ def _boot_ids(lines: list) -> list:
 
 
 
+_LINEA_ESP = re.compile(r"(?<=\S)(?=[IWE] \(\d+\) )")
+
+
+def partir_pegadas(textos: list) -> list:
+    """La captura serie del banco a veces pega dos líneas y pierde los bytes del corte (upstream
+    #89, punto 3): «…(wifi_dowI (8453) nodo: wifi: intento 3». Separa cada «I/W/E (<ms>) » que
+    no empieza línea; la primera mitad queda cortada y solo casa por prefijo."""
+    out = []
+    for t in textos:
+        out.extend(_LINEA_ESP.split(t))
+    return out
+
+
 def hora_utc(t: float) -> str:
     """HH:MM:SS.mmm UTC de un instante epoch (para cruzar la evidencia con el log del banco)."""
     return time.strftime("%H:%M:%S", time.gmtime(t)) + f".{int(t * 1000) % 1000:03d}"

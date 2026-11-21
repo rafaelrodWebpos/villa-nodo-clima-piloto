@@ -3,11 +3,11 @@ establece su precondición con los procedimientos de benchlib."""
 import re
 import time
 
-from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, primera, ultimo_arranque
+from benchlib import _parse_flash_args, aprovisionar, case, esperar_lineas, partir_pegadas, primera, ultimo_arranque
 
 BACKOFF_S = [1, 2, 4, 8, 16, 32, 60, 60, 60, 60]   # FR-CON-02
 TOLERANCIA = 0.10
-CAIDA = "-> CONECTANDO_WIFI (wifi_down)"
+CAIDA = "-> CONECTANDO_WIFI (wifi_do"   # prefijo: la captura del banco puede cortar el final (#89)
 
 
 def _ms(texto):
@@ -46,7 +46,7 @@ def test_tc_con_03_wifi_backoff(testbench, dut_slot, dut_mac, firmware, run_dir,
         lineas = lineas[ultimo_arranque(lineas) or 0:]   # el último arranque, aunque llegue sin rst: (CR-TB-12)
         c.save_log("serie", [c._r(e["text"]) for e in lineas])
 
-        textos = [e["text"] for e in lineas]
+        textos = partir_pegadas([e["text"] for e in lineas])   # líneas pegadas por la captura (#89)
         assert primera(lineas, "con: ARRANQUE -> CONECTANDO_WIFI (fin_arranque)"), "falta T01"
         assert not any("con: ARRANQUE -> PORTAL" in t for t in textos), "el nodo configurado abrió el portal"
         assert not any("softAP" in t for t in textos if "wifi:mode" in t), "se abrió el AP (prohibido en T09/T10)"
@@ -63,7 +63,7 @@ def test_tc_con_03_wifi_backoff(testbench, dut_slot, dut_mac, firmware, run_dir,
                     break
                 intervalos.append(round((_ms(sig) - desde) / 1000, 2))
             i += 1
-        t09 = sum("con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_down)" in t for t in textos)
+        t09 = sum("con: CONECTANDO_WIFI -> CONECTANDO_WIFI (wifi_do" in t for t in textos)
         t10 = sum("con: CONECTANDO_WIFI -> CONECTANDO_WIFI (backoff)" in t for t in textos)
         c.note("", "## Resultado", "", f"- líneas T09: {t09}, T10: {t10}",
                *[f"- intervalo {k + 1}: {v} s (esperado {BACKOFF_S[k]} s ± 10 %)" for k, v in enumerate(intervalos)])
