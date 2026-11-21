@@ -329,7 +329,9 @@ def test_tc_ota_17_abort_slow_download_then_new_command(testbench, dut_slot, dut
             assert vuelta, "sin status tras volver el broker"
             c.step("cmd_ota nuevo con la tarea vieja viva: error:red (A3-03)")
             t2 = _ota(tb, base, "firmware_b2.bin")
-            seg = _esperar(sub, base, t2, lambda s: s.get("ota") in ("error:red", "en_curso"), 20)
+            # T17 publica en_curso y, si la tarea vieja sigue viva, T20 publica error:red ~10 ms
+            # después: se espera el resultado, no el primer status (2026-11-21)
+            seg = _esperar(sub, base, t2, lambda s: s.get("ota") not in (None, "en_curso", "ninguno"), 20)
             c.step("Devolver Internet; esperar a que la tarea vieja salga (≤ 30 s)")
             tb.ap_internet(True)
             time.sleep(35)

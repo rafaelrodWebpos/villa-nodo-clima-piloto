@@ -331,6 +331,10 @@ def test_jrn_01_3_wifi_and_udp_log(testbench, dut_slot, run_dir, firmware):
         assert any("UDP logging -> " in txt(u) for u in udp if ts(u) >= t0), "el receptor UDP no recibió UDP logging -> <host>:<port> (E11)"
         # Desde la línea de T08 en el orden en que el DUT escribe (la hora de llegada al banco va a ráfagas)
         tras_ip = [e for e in vistas[vistas.index(t_ip):] if e["text"].strip()]
+        # la captura serie del banco a veces pega dos líneas (upstream #89, punto 3): se separan,
+        # cada trozo con la hora de llegada de la línea pegada
+        from benchlib import partir_pegadas
+        tras_ip = [dict(e, text=t) for e in tras_ip for t in partir_pegadas([e["text"]]) if t.strip()]
         perdidas, tarde, cortadas = [], [], []
         for e in tras_ip:
             cuerpo = e["text"].strip()   # con su «I (ms)» del DUT: no casa con una línea igual de otro arranque
