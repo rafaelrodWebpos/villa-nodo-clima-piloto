@@ -24,6 +24,8 @@ jobs:
         run: python3 tests/host/test_consola.py
       - name: Grabado por el banco con los bytes exactos (release v0.0.1)
         run: python3 tests/host/test_grabado.py
+      - name: H-62 límite de esperas del hook de la sesión de IA
+        run: python3 tests/host/test_limite_espera.py
       - name: Reintento de las llamadas al banco ante cortes de red de la laptop (2026-11-21)
         run: python3 tests/host/test_reintento.py
 

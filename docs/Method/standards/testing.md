@@ -94,6 +94,7 @@ Reglas:
 | `Build Firmware` (`build.yml`) | push, tag `v*.*.*`, manual | Build en `espressif/idf:v6.0.3`; marcador de banco ausente en producción y presente en la imagen de banco; con un tag, el journey en el banco antes de publicar |
 | `devcontainer image builds` | cambios en `.devcontainer/` | La imagen se construye con toolchain, pytest y runner |
 | `scripts/git-hooks/pre-push` (local; se activa con `git config core.hooksPath scripts/git-hooks`) | cada `git push` | gitleaks fijado (la misma versión que `ci.yml`) y los valores de `.env`, con el host de cada URL, sobre los commits que se suben; si encuentra algo, bloquea el push |
+| `.claude/hooks/limite-espera.py` (H-62; hook PreToolUse de Claude Code) | cada comando Bash de la sesión de IA | Ninguna espera en segundo plano sin límite: bucle con sleep, `docker wait` o `tail --pid` con `timeout` ≤ 600 s. **Decisión del propietario (2026-11-23):** espera larga de hasta 93600 s (26 h) solo con `timeout N docker wait <contenedor>` o `timeout N bash -c 'while kill -0 <pid>; do sleep 60; done'`; lo demás sigue en 600 s. `gh run list -c` solo con el hash completo. Prueba: `tests/host/test_limite_espera.py` (CI) |
 
 Los niveles target, bench, bench+ y field no los cubre ningún runner alojado.
 
