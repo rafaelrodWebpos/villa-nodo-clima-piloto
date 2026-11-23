@@ -27,8 +27,8 @@ Mesh, NimBLE, Bluedroid ni OpenThread.
   - JRN-01.0 a 01.4 en verde;
   - JRN-01.5 not done (no hay Home Assistant de prueba en el workspace del runner);
   - **JRN-01.7 en verde:** el banco vio el SLOT1 ausente 0,5 s después del aviso de desenchufar y enchufado otra
-    vez a los 85 s; primer status con `reset=poweron` y `uptime_s=1`. El propietario dice que no vio el aviso.
-    Queda por aclarar quién hizo ese corte.
+    vez a los 85 s; primer status con `reset=poweron` y `uptime_s=1`. El corte lo hizo el propietario al ver el
+    aviso del banco (confirmado por él el 2026-11-22). Pendiente cerrado.
 - **TC-OTA-14 (FR-OTA-13)** en verde (`test-results/verify-v0.0.2-20261123T000026Z-1dc4d5c/`): `rechazado:ruta`
   a 0,22 s, sin pasar a OTA_DESCARGA.
 - **Runner:** levantado solo durante la release; al terminar no quedó ninguno registrado.
