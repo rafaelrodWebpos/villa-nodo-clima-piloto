@@ -84,5 +84,69 @@ class Consola(unittest.TestCase):
         self.assertEqual(len(consola.reinicios(limpias)), 1)
 
 
+
+def vivo(t_arranque, ms_lista, texto="nodo: alive {n}", desfase=0.0):
+    """Líneas de un arranque en t_arranque, con su llegada al banco = arranque + ms + desfase."""
+    return [{"text": f"I ({ms}) " + texto.format(n=i + 1), "ts": t_arranque + ms / 1000 + desfase}
+            for i, ms in enumerate(ms_lista)]
+
+
+class LineasViejas(unittest.TestCase):
+    """quitar_viejas (upstream #89, punto 3; 2026-11-22)."""
+
+    def test_reenvio_de_lineas_viejas_se_quita_y_no_es_reinicio(self):
+        # arranque a t=1000; ventana de 60 s a partir de ~180 s; el banco reenvía alive 1–3 con hora nueva
+        antes = vivo(1000, [181000, 183000, 185000])
+        viejas = [{"text": f"I ({ms}) nodo: alive {n}", "ts": 1186.0} for n, ms in ((1, 1000), (2, 2000), (3, 3000))]
+        despues = vivo(1000, [187000, 189000])
+        entradas = antes + viejas + despues
+        limpias, quitadas = consola.quitar_viejas(entradas)
+        self.assertEqual(quitadas, [3, 4, 5])
+        self.assertEqual(limpias, antes + despues)
+        self.assertEqual(consola.reinicios(limpias), [])           # sin el filtro, contaría un reinicio
+        self.assertEqual(len(consola.reinicios(entradas)), 1)
+
+    def test_reinicio_real_se_conserva(self):
+        a = vivo(1000, [100000, 102000, 104000])
+        b = vivo(1110, [300, 500, 2000, 4000])                      # el DUT se reinició a t≈1110
+        limpias, quitadas = consola.quitar_viejas(a + b)
+        self.assertEqual(quitadas, [])
+        self.assertEqual(len(consola.reinicios(limpias)), 1)
+
+    def test_reinicio_real_al_final_con_una_sola_linea(self):
+        a = vivo(1000, [100000, 102000])
+        b = vivo(1110, [300])
+        self.assertEqual(consola.quitar_viejas(a + b)[1], [])
+
+    def test_sellado_unico_de_serial_reset_no_se_quita(self):
+        # serial/reset devuelve el arranque con la hora del final de su lectura de 5 s
+        a = vivo(1000, [100000, 102000])
+        reset = [{"text": f"I ({ms}) boot: x", "ts": 1115.0} for ms in (27, 433, 513, 2000)]
+        siguiente = vivo(1110, [6000, 8000, 10000])                 # luego llegan a su hora real
+        limpias, quitadas = consola.quitar_viejas(a + reset + siguiente)
+        self.assertEqual(quitadas, [])
+        self.assertEqual(len(consola.reinicios(limpias)), 1)
+
+    def test_latencia_a_rafagas_no_se_quita(self):
+        a = vivo(1000, [100000, 102000, 104000], desfase=0.0) + vivo(1000, [106000], desfase=7.0) + vivo(1000, [108000])
+        self.assertEqual(consola.quitar_viejas(a)[1], [])
+
+    def test_lineas_sin_reloj_o_sin_hora_se_conservan(self):
+        a = vivo(1000, [100000, 102000])
+        sin = [{"text": "ESP-ROM:esp32s3-20210327", "ts": 1186.0}, {"text": "I (1000) nodo: alive 1", "ts": 0},
+               "texto suelto"]
+        limpias, quitadas = consola.quitar_viejas(a + sin + vivo(1000, [104000]))
+        self.assertEqual(quitadas, [])
+        self.assertEqual(len(limpias), 6)
+
+    def test_tramo_largo_seguido_del_viejo_cuenta_como_arranque(self):
+        a = vivo(1000, [100000, 102000])
+        b = vivo(1110, list(range(300, 300 + 25 * 1000, 1000)))     # 25 líneas de un arranque nuevo
+        viejo = vivo(1000, [104000])                                 # una línea vieja reaparece
+        limpias, quitadas = consola.quitar_viejas(a + b + viejo)
+        self.assertNotIn(2, quitadas)                               # el arranque nuevo se conserva
+        self.assertEqual(quitadas, [len(a + b)])                   # y la línea vieja se quita
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
