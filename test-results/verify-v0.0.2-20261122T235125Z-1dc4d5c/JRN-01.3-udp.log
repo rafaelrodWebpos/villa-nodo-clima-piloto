@@ -1,0 +1,2000 @@
+I (73139096) nodo: sntp: inicio pool.ntp.org
+I (73141266) nodo: ana: niv=falla p=falla i=12.11 vbat=0.00 red=0
+I (73149096) nodo: sntp: inicio pool.ntp.org
+W (73159096) nodo: sntp: fallo
+I (73159096) nodo: sntp: inicio pool.ntp.org
+I (73169096) nodo: sntp: inicio pool.ntp.org
+I (73179096) nodo: sntp: inicio pool.ntp.org
+W (73189096) nodo: sntp: fallo
+I (73189106) nodo: sntp: inicio pool.ntp.org
+I (73199106) nodo: sntp: inicio pool.ntp.org
+I (73201266) nodo: ana: niv=falla p=falla i=12.01 vbat=0.00 red=0
+I (73209106) nodo: sntp: inicio pool.ntp.org
+W (73219106) nodo: sntp: fallo
+I (73219106) nodo: sntp: inicio pool.ntp.org
+I (73229106) nodo: sntp: inicio pool.ntp.org
+I (73239106) nodo: sntp: inicio pool.ntp.org
+W (73249106) nodo: sntp: fallo
+I (73249106) nodo: sntp: inicio pool.ntp.org
+I (73259106) nodo: sntp: inicio pool.ntp.org
+I (73261266) nodo: ana: niv=falla p=falla i=12.29 vbat=0.00 red=0
+I (73269106) nodo: sntp: inicio pool.ntp.org
+W (73279116) nodo: sntp: fallo
+I (73279116) nodo: sntp: inicio pool.ntp.org
+I (73289116) nodo: sntp: inicio pool.ntp.org
+I (73299116) nodo: sntp: inicio pool.ntp.org
+W (73309116) nodo: sntp: fallo
+I (73309116) nodo: sntp: inicio pool.ntp.org
+I (73319116) nodo: sntp: inicio pool.ntp.org
+I (73321266) nodo: ana: niv=falla p=falla i=11.88 vbat=0.00 red=0
+I (73329116) nodo: sntp: inicio pool.ntp.org
+W (73339116) nodo: sntp: fallo
+I (73339116) nodo: sntp: inicio pool.ntp.org
+I (73349116) nodo: sntp: inicio pool.ntp.org
+I (73359126) nodo: sntp: inicio pool.ntp.org
+W (73369126) nodo: sntp: fallo
+I (73369126) nodo: sntp: inicio pool.ntp.org
+I (73379126) nodo: sntp: inicio pool.ntp.org
+I (73381266) nodo: ana: niv=falla p=falla i=12.15 vbat=0.00 red=0
+I (73389126) nodo: sntp: inicio pool.ntp.org
+W (73399126) nodo: sntp: fallo
+I (73399126) nodo: sntp: inicio pool.ntp.org
+I (73409126) nodo: sntp: inicio pool.ntp.org
+I (73419126) nodo: sntp: inicio pool.ntp.org
+W (73429126) nodo: sntp: fallo
+I (73429126) nodo: sntp: inicio pool.ntp.org
+I (73439136) nodo: sntp: inicio pool.ntp.org
+I (73441266) nodo: ana: niv=falla p=falla i=11.98 vbat=0.00 red=0
+I (73449136) nodo: sntp: inicio pool.ntp.org
+W (73459136) nodo: sntp: fallo
+I (73459136) nodo: sntp: inicio pool.ntp.org
+I (73469136) nodo: sntp: inicio pool.ntp.org
+I (73479136) nodo: sntp: inicio pool.ntp.org
+W (73489136) nodo: sntp: fallo
+I (73489136) nodo: sntp: inicio pool.ntp.org
+I (73499136) nodo: sntp: inicio pool.ntp.org
+I (73501266) nodo: ana: niv=falla p=falla i=12.14 vbat=0.00 red=0
+I (73509136) nodo: sntp: inicio pool.ntp.org
+W (73519146) nodo: sntp: fallo
+I (73519146) nodo: sntp: inicio pool.ntp.org
+I (73529146) nodo: sntp: inicio pool.ntp.org
+I (73539146) nodo: sntp: inicio pool.ntp.org
+W (73549146) nodo: sntp: fallo
+I (73549146) nodo: sntp: inicio pool.ntp.org
+I (73559146) nodo: sntp: inicio pool.ntp.org
+I (73561266) nodo: ana: niv=falla p=falla i=12.02 vbat=0.00 red=0
+I (73569146) nodo: sntp: inicio pool.ntp.org
+W (73579146) nodo: sntp: fallo
+I (73579146) nodo: sntp: inicio pool.ntp.org
+I (73589146) nodo: sntp: inicio pool.ntp.org
+I (73599156) nodo: sntp: inicio pool.ntp.org
+W (73609156) nodo: sntp: fallo
+I (73609156) nodo: sntp: inicio pool.ntp.org
+I (73619156) nodo: sntp: inicio pool.ntp.org
+I (73621266) nodo: ana: niv=falla p=falla i=12.10 vbat=0.00 red=0
+I (73629156) nodo: sntp: inicio pool.ntp.org
+W (73639156) nodo: sntp: fallo
+I (73639156) nodo: sntp: inicio pool.ntp.org
+I (73649156) nodo: sntp: inicio pool.ntp.org
+I (73659156) nodo: sntp: inicio pool.ntp.org
+W (73669156) nodo: sntp: fallo
+I (73669156) nodo: sntp: inicio pool.ntp.org
+I (73679166) nodo: sntp: inicio pool.ntp.org
+I (73681266) nodo: ana: niv=falla p=falla i=11.95 vbat=0.00 red=0
+I (73689166) nodo: sntp: inicio pool.ntp.org
+W (73699166) nodo: sntp: fallo
+I (73699166) nodo: sntp: inicio pool.ntp.org
+I (73709166) nodo: sntp: inicio pool.ntp.org
+I (73719166) nodo: sntp: inicio pool.ntp.org
+W (73729166) nodo: sntp: fallo
+I (73729166) nodo: sntp: inicio pool.ntp.org
+I (73739166) nodo: sntp: inicio pool.ntp.org
+I (73741266) nodo: ana: niv=falla p=falla i=12.08 vbat=0.00 red=0
+I (73749166) nodo: sntp: inicio pool.ntp.org
+W (73759166) nodo: sntp: fallo
+I (73759176) nodo: sntp: inicio pool.ntp.org
+I (73769176) nodo: sntp: inicio pool.ntp.org
+I (73779176) nodo: sntp: inicio pool.ntp.org
+W (73789176) nodo: sntp: fallo
+I (73789176) nodo: sntp: inicio pool.ntp.org
+I (73799176) nodo: sntp: inicio pool.ntp.org
+I (73801266) nodo: ana: niv=falla p=falla i=11.70 vbat=0.00 red=0
+I (73809176) nodo: sntp: inicio pool.ntp.org
+W (73819176) nodo: sntp: fallo
+I (73819176) nodo: sntp: inicio pool.ntp.org
+I (73829176) nodo: sntp: inicio pool.ntp.org
+I (73839176) nodo: sntp: inicio pool.ntp.org
+W (73849186) nodo: sntp: fallo
+I (73849186) nodo: sntp: inicio pool.ntp.org
+I (73859186) nodo: sntp: inicio pool.ntp.org
+I (73861266) nodo: ana: niv=falla p=falla i=11.78 vbat=0.00 red=0
+I (73869186) nodo: sntp: inicio pool.ntp.org
+W (73879186) nodo: sntp: fallo
+I (73879186) nodo: sntp: inicio pool.ntp.org
+I (73889186) nodo: sntp: inicio pool.ntp.org
+I (73899186) nodo: sntp: inicio pool.ntp.org
+W (73909186) nodo: sntp: fallo
+I (73909186) nodo: sntp: inicio pool.ntp.org
+I (73919186) nodo: sntp: inicio pool.ntp.org
+I (73921266) nodo: ana: niv=falla p=falla i=11.95 vbat=0.00 red=0
+I (73929196) nodo: sntp: inicio pool.ntp.org
+W (73939196) nodo: sntp: fallo
+I (73939196) nodo: sntp: inicio pool.ntp.org
+I (73949196) nodo: sntp: inicio pool.ntp.org
+I (73959196) nodo: sntp: inicio pool.ntp.org
+W (73969196) nodo: sntp: fallo
+I (73969196) nodo: sntp: inicio pool.ntp.org
+I (73979196) nodo: sntp: inicio pool.ntp.org
+I (73981266) nodo: ana: niv=falla p=falla i=11.75 vbat=0.00 red=0
+I (73989196) nodo: sntp: inicio pool.ntp.org
+W (73999196) nodo: sntp: fallo
+I (73999206) nodo: sntp: inicio pool.ntp.org
+I (74009206) nodo: sntp: inicio pool.ntp.org
+I (74019206) nodo: sntp: inicio pool.ntp.org
+W (74029206) nodo: sntp: fallo
+I (74029206) nodo: sntp: inicio pool.ntp.org
+I (74039206) nodo: sntp: inicio pool.ntp.org
+I (74041266) nodo: ana: niv=falla p=falla i=12.04 vbat=0.00 red=0
+I (74049206) nodo: sntp: inicio pool.ntp.org
+W (74059206) nodo: sntp: fallo
+I (74059206) nodo: sntp: inicio pool.ntp.org
+I (74069206) nodo: sntp: inicio pool.ntp.org
+I (74079206) nodo: sntp: inicio pool.ntp.org
+W (74089216) nodo: sntp: fallo
+I (74089216) nodo: sntp: inicio pool.ntp.org
+I (74099216) nodo: sntp: inicio pool.ntp.org
+I (74101266) nodo: ana: niv=falla p=falla i=11.76 vbat=0.00 red=0
+I (74109216) nodo: sntp: inicio pool.ntp.org
+W (74119216) nodo: sntp: fallo
+I (74119216) nodo: sntp: inicio pool.ntp.org
+I (74129216) nodo: sntp: inicio pool.ntp.org
+I (74139216) nodo: sntp: inicio pool.ntp.org
+W (74149216) nodo: sntp: fallo
+I (74149216) nodo: sntp: inicio pool.ntp.org
+I (74159216) nodo: sntp: inicio pool.ntp.org
+I (74161266) nodo: ana: niv=falla p=falla i=11.84 vbat=0.00 red=0
+I (74169226) nodo: sntp: inicio pool.ntp.org
+W (74179226) nodo: sntp: fallo
+I (74179226) nodo: sntp: inicio pool.ntp.org
+I (74189226) nodo: sntp: inicio pool.ntp.org
+I (74199226) nodo: sntp: inicio pool.ntp.org
+W (74209226) nodo: sntp: fallo
+I (74209226) nodo: sntp: inicio pool.ntp.org
+I (74219226) nodo: sntp: inicio pool.ntp.org
+I (74221266) nodo: ana: niv=falla p=falla i=11.92 vbat=0.00 red=0
+I (74229226) nodo: sntp: inicio pool.ntp.org
+W (74239226) nodo: sntp: fallo
+I (74239226) nodo: sntp: inicio pool.ntp.org
+I (74249226) nodo: sntp: inicio pool.ntp.org
+I (74259236) nodo: sntp: inicio pool.ntp.org
+W (74269236) nodo: sntp: fallo
+I (74269236) nodo: sntp: inicio pool.ntp.org
+I (74279236) nodo: sntp: inicio pool.ntp.org
+I (74281266) nodo: ana: niv=falla p=falla i=11.89 vbat=0.00 red=0
+I (74289236) nodo: sntp: inicio pool.ntp.org
+W (74299236) nodo: sntp: fallo
+I (74299236) nodo: sntp: inicio pool.ntp.org
+I (74309236) nodo: sntp: inicio pool.ntp.org
+I (74319236) nodo: sntp: inicio pool.ntp.org
+W (74329236) nodo: sntp: fallo
+I (74329236) nodo: sntp: inicio pool.ntp.org
+I (74339246) nodo: sntp: inicio pool.ntp.org
+I (74341266) nodo: ana: niv=falla p=falla i=12.06 vbat=0.00 red=0
+I (74349246) nodo: sntp: inicio pool.ntp.org
+W (74359246) nodo: sntp: fallo
+I (74359246) nodo: sntp: inicio pool.ntp.org
+I (74369246) nodo: sntp: inicio pool.ntp.org
+I (74379246) nodo: sntp: inicio pool.ntp.org
+W (74389246) nodo: sntp: fallo
+I (74389246) nodo: sntp: inicio pool.ntp.org
+I (74399246) nodo: sntp: inicio pool.ntp.org
+I (74401266) nodo: ana: niv=falla p=falla i=12.03 vbat=0.00 red=0
+I (74409246) nodo: sntp: inicio pool.ntp.org
+W (74419246) nodo: sntp: fallo
+I (74419256) nodo: sntp: inicio pool.ntp.org
+I (74429256) nodo: sntp: inicio pool.ntp.org
+I (74439256) nodo: sntp: inicio pool.ntp.org
+W (74449256) nodo: sntp: fallo
+I (74449256) nodo: sntp: inicio pool.ntp.org
+I (74459256) nodo: sntp: inicio pool.ntp.org
+I (74461266) nodo: ana: niv=falla p=falla i=11.86 vbat=0.00 red=0
+I (74469256) nodo: sntp: inicio pool.ntp.org
+W (74479256) nodo: sntp: fallo
+I (74479256) nodo: sntp: inicio pool.ntp.org
+I (74489256) nodo: sntp: inicio pool.ntp.org
+I (74499256) nodo: sntp: inicio pool.ntp.org
+W (74509266) nodo: sntp: fallo
+I (74509266) nodo: sntp: inicio pool.ntp.org
+I (74519266) nodo: sntp: inicio pool.ntp.org
+I (74521266) nodo: ana: niv=falla p=falla i=11.77 vbat=0.00 red=0
+I (74529266) nodo: sntp: inicio pool.ntp.org
+W (74539266) nodo: sntp: fallo
+I (74539266) nodo: sntp: inicio pool.ntp.org
+I (74549266) nodo: sntp: inicio pool.ntp.org
+I (74559266) nodo: sntp: inicio pool.ntp.org
+W (74569266) nodo: sntp: fallo
+I (74569266) nodo: sntp: inicio pool.ntp.org
+I (74579266) nodo: sntp: inicio pool.ntp.org
+I (74581266) nodo: ana: niv=falla p=falla i=11.97 vbat=0.00 red=0
+I (74589266) nodo: sntp: inicio pool.ntp.org
+W (74599276) nodo: sntp: fallo
+I (74599276) nodo: sntp: inicio pool.ntp.org
+I (74609276) nodo: sntp: inicio pool.ntp.org
+I (74619276) nodo: sntp: inicio pool.ntp.org
+W (74629276) nodo: sntp: fallo
+I (74629276) nodo: sntp: inicio pool.ntp.org
+I (74639276) nodo: sntp: inicio pool.ntp.org
+I (74641266) nodo: ana: niv=falla p=falla i=12.02 vbat=0.00 red=0
+I (74649276) nodo: sntp: inicio pool.ntp.org
+W (74659276) nodo: sntp: fallo
+I (74659276) nodo: sntp: inicio pool.ntp.org
+I (74669276) nodo: sntp: inicio pool.ntp.org
+I (74679286) nodo: sntp: inicio pool.ntp.org
+W (74689286) nodo: sntp: fallo
+I (74689286) nodo: sntp: inicio pool.ntp.org
+I (74699286) nodo: sntp: inicio pool.ntp.org
+I (74701266) nodo: ana: niv=falla p=falla i=11.85 vbat=0.00 red=0
+I (74709286) nodo: sntp: inicio pool.ntp.org
+W (74719286) nodo: sntp: fallo
+I (74719286) nodo: sntp: inicio pool.ntp.org
+I (74729286) nodo: sntp: inicio pool.ntp.org
+I (74739286) nodo: sntp: inicio pool.ntp.org
+W (74749286) nodo: sntp: fallo
+I (74749286) nodo: sntp: inicio pool.ntp.org
+I (74759286) nodo: sntp: inicio pool.ntp.org
+I (74761266) nodo: ana: niv=falla p=falla i=11.92 vbat=0.00 red=0
+I (74769296) nodo: sntp: inicio pool.ntp.org
+W (74779296) nodo: sntp: fallo
+I (74779296) nodo: sntp: inicio pool.ntp.org
+I (74789296) nodo: sntp: inicio pool.ntp.org
+I (74799296) nodo: sntp: inicio pool.ntp.org
+W (74809296) nodo: sntp: fallo
+I (74809296) nodo: sntp: inicio pool.ntp.org
+I (74819296) nodo: sntp: inicio pool.ntp.org
+I (74821266) nodo: ana: niv=falla p=falla i=11.85 vbat=0.00 red=0
+I (74829296) nodo: sntp: inicio pool.ntp.org
+W (74839296) nodo: sntp: fallo
+I (74839306) nodo: sntp: inicio pool.ntp.org
+I (74849306) nodo: sntp: inicio pool.ntp.org
+I (74859306) nodo: sntp: inicio pool.ntp.org
+W (74869306) nodo: sntp: fallo
+I (74869306) nodo: sntp: inicio pool.ntp.org
+I (74879306) nodo: sntp: inicio pool.ntp.org
+I (74881266) nodo: ana: niv=falla p=falla i=11.90 vbat=0.00 red=0
+I (74889306) nodo: sntp: inicio pool.ntp.org
+W (74899306) nodo: sntp: fallo
+I (74899306) nodo: sntp: inicio pool.ntp.org
+I (74909306) nodo: sntp: inicio pool.ntp.org
+I (74919306) nodo: sntp: inicio pool.ntp.org
+W (74929316) nodo: sntp: fallo
+I (74929316) nodo: sntp: inicio pool.ntp.org
+I (74939316) nodo: sntp: inicio pool.ntp.org
+I (74941266) nodo: ana: niv=falla p=falla i=12.00 vbat=0.00 red=0
+I (74949316) nodo: sntp: inicio pool.ntp.org
+W (74959316) nodo: sntp: fallo
+I (74959316) nodo: sntp: inicio pool.ntp.org
+I (74969316) nodo: sntp: inicio pool.ntp.org
+I (74979316) nodo: sntp: inicio pool.ntp.org
+W (74989316) nodo: sntp: fallo
+I (74989316) nodo: sntp: inicio pool.ntp.org
+I (74999316) nodo: sntp: inicio pool.ntp.org
+I (75001266) nodo: ana: niv=falla p=falla i=11.86 vbat=0.00 red=0
+I (75009326) nodo: sntp: inicio pool.ntp.org
+W (75019326) nodo: sntp: fallo
+I (75019326) nodo: sntp: inicio pool.ntp.org
+I (75029326) nodo: sntp: inicio pool.ntp.org
+I (75039326) nodo: sntp: inicio pool.ntp.org
+W (75049326) nodo: sntp: fallo
+I (75049326) nodo: sntp: inicio pool.ntp.org
+I (75059326) nodo: sntp: inicio pool.ntp.org
+I (75061266) nodo: ana: niv=falla p=falla i=12.07 vbat=0.00 red=0
+I (75069326) nodo: sntp: inicio pool.ntp.org
+W (75079336) nodo: sntp: fallo
+I (75079336) nodo: sntp: inicio pool.ntp.org
+I (75089336) nodo: sntp: inicio pool.ntp.org
+I (75099336) nodo: sntp: inicio pool.ntp.org
+W (75109336) nodo: sntp: fallo
+I (75109336) nodo: sntp: inicio pool.ntp.org
+I (75119336) nodo: sntp: inicio pool.ntp.org
+I (75121266) nodo: ana: niv=falla p=falla i=11.72 vbat=0.00 red=0
+I (75129336) nodo: sntp: inicio pool.ntp.org
+W (75139336) nodo: sntp: fallo
+I (75139336) nodo: sntp: inicio pool.ntp.org
+I (75149336) nodo: sntp: inicio pool.ntp.org
+I (75159346) nodo: sntp: inicio pool.ntp.org
+W (75169346) nodo: sntp: fallo
+I (75169346) nodo: sntp: inicio pool.ntp.org
+I (75179346) nodo: sntp: inicio pool.ntp.org
+I (75181266) nodo: ana: niv=falla p=falla i=12.17 vbat=0.00 red=0
+I (75189346) nodo: sntp: inicio pool.ntp.org
+W (75199346) nodo: sntp: fallo
+I (75199346) nodo: sntp: inicio pool.ntp.org
+I (75209346) nodo: sntp: inicio pool.ntp.org
+I (75219346) nodo: sntp: inicio pool.ntp.org
+W (75229346) nodo: sntp: fallo
+I (75229356) nodo: sntp: inicio pool.ntp.org
+I (75239356) nodo: sntp: inicio pool.ntp.org
+I (75241266) nodo: ana: niv=falla p=falla i=12.11 vbat=0.00 red=0
+I (75249356) nodo: sntp: inicio pool.ntp.org
+W (75259356) nodo: sntp: fallo
+I (75259356) nodo: sntp: inicio pool.ntp.org
+I (75269356) nodo: sntp: inicio pool.ntp.org
+I (75279356) nodo: sntp: inicio pool.ntp.org
+W (75289356) nodo: sntp: fallo
+I (75289356) nodo: sntp: inicio pool.ntp.org
+I (75299356) nodo: sntp: inicio pool.ntp.org
+I (75301266) nodo: ana: niv=falla p=falla i=11.91 vbat=0.00 red=0
+I (75309366) nodo: sntp: inicio pool.ntp.org
+W (75319366) nodo: sntp: fallo
+I (75319366) nodo: sntp: inicio pool.ntp.org
+I (75329366) nodo: sntp: inicio pool.ntp.org
+I (75339366) nodo: sntp: inicio pool.ntp.org
+W (75349366) nodo: sntp: fallo
+I (75349366) nodo: sntp: inicio pool.ntp.org
+I (75359366) nodo: sntp: inicio pool.ntp.org
+I (75361266) nodo: ana: niv=falla p=falla i=11.98 vbat=0.00 red=0
+I (75369366) nodo: sntp: inicio pool.ntp.org
+W (75379366) nodo: sntp: fallo
+I (75379366) nodo: sntp: inicio pool.ntp.org
+I (75389366) nodo: sntp: inicio pool.ntp.org
+I (75399376) nodo: sntp: inicio pool.ntp.org
+W (75409376) nodo: sntp: fallo
+I (75409376) nodo: sntp: inicio pool.ntp.org
+I (75419376) nodo: sntp: inicio pool.ntp.org
+I (75421266) nodo: ana: niv=falla p=falla i=12.06 vbat=0.00 red=0
+I (75429376) nodo: sntp: inicio pool.ntp.org
+W (75439376) nodo: sntp: fallo
+I (75439376) nodo: sntp: inicio pool.ntp.org
+I (75449376) nodo: sntp: inicio pool.ntp.org
+I (75459376) nodo: sntp: inicio pool.ntp.org
+W (75469386) nodo: sntp: fallo
+I (75469386) nodo: sntp: inicio pool.ntp.org
+I (75479386) nodo: sntp: inicio pool.ntp.org
+I (75481266) nodo: ana: niv=falla p=falla i=12.11 vbat=0.00 red=0
+I (75489386) nodo: sntp: inicio pool.ntp.org
+W (75499386) nodo: sntp: fallo
+I (75499386) nodo: sntp: inicio pool.ntp.org
+I (75509386) nodo: sntp: inicio pool.ntp.org
+I (75519386) nodo: sntp: inicio pool.ntp.org
+W (75529386) nodo: sntp: fallo
+I (75529386) nodo: sntp: inicio pool.ntp.org
+I (75539386) nodo: sntp: inicio pool.ntp.org
+I (75541266) nodo: ana: niv=falla p=falla i=12.09 vbat=0.00 red=0
+I (75549396) nodo: sntp: inicio pool.ntp.org
+W (75559396) nodo: sntp: fallo
+I (75559396) nodo: sntp: inicio pool.ntp.org
+I (75569396) nodo: sntp: inicio pool.ntp.org
+I (75579396) nodo: sntp: inicio pool.ntp.org
+W (75589396) nodo: sntp: fallo
+I (75589396) nodo: sntp: inicio pool.ntp.org
+I (75599396) nodo: sntp: inicio pool.ntp.org
+I (75601266) nodo: ana: niv=falla p=falla i=12.00 vbat=0.00 red=0
+I (75609396) nodo: sntp: inicio pool.ntp.org
+W (75619396) nodo: sntp: fallo
+I (75619406) nodo: sntp: inicio pool.ntp.org
+I (75629406) nodo: sntp: inicio pool.ntp.org
+I (75639406) nodo: sntp: inicio pool.ntp.org
+W (75649406) nodo: sntp: fallo
+I (75649406) nodo: sntp: inicio pool.ntp.org
+I (75659406) nodo: sntp: inicio pool.ntp.org
+I (75661266) nodo: ana: niv=falla p=falla i=12.10 vbat=0.00 red=0
+I (75669406) nodo: sntp: inicio pool.ntp.org
+W (75679406) nodo: sntp: fallo
+I (75679406) nodo: sntp: inicio pool.ntp.org
+I (75689406) nodo: sntp: inicio pool.ntp.org
+I (75699406) nodo: sntp: inicio pool.ntp.org
+W (75709416) nodo: sntp: fallo
+I (75709416) nodo: sntp: inicio pool.ntp.org
+I (75719416) nodo: sntp: inicio pool.ntp.org
+I (75721266) nodo: ana: niv=falla p=falla i=12.05 vbat=0.00 red=0
+I (75729416) nodo: sntp: inicio pool.ntp.org
+W (75739416) nodo: sntp: fallo
+I (75739416) nodo: sntp: inicio pool.ntp.org
+I (75749416) nodo: sntp: inicio pool.ntp.org
+I (75759416) nodo: sntp: inicio pool.ntp.org
+W (75769416) nodo: sntp: fallo
+I (75769416) nodo: sntp: inicio pool.ntp.org
+I (75779416) nodo: sntp: inicio pool.ntp.org
+I (75781266) nodo: ana: niv=falla p=falla i=12.07 vbat=0.00 red=0
+I (75789426) nodo: sntp: inicio pool.ntp.org
+W (75799426) nodo: sntp: fallo
+I (75799426) nodo: sntp: inicio pool.ntp.org
+I (75809426) nodo: sntp: inicio pool.ntp.org
+I (75819426) nodo: sntp: inicio pool.ntp.org
+W (75829426) nodo: sntp: fallo
+I (75829426) nodo: sntp: inicio pool.ntp.org
+I (75839426) nodo: sntp: inicio pool.ntp.org
+I (75841266) nodo: ana: niv=falla p=falla i=11.99 vbat=0.00 red=0
+I (75849426) nodo: sntp: inicio pool.ntp.org
+W (75859426) nodo: sntp: fallo
+I (75859426) nodo: sntp: inicio pool.ntp.org
+I (75869436) nodo: sntp: inicio pool.ntp.org
+I (75879436) nodo: sntp: inicio pool.ntp.org
+W (75889436) nodo: sntp: fallo
+I (75889436) nodo: sntp: inicio pool.ntp.org
+I (75899436) nodo: sntp: inicio pool.ntp.org
+I (75901266) nodo: ana: niv=falla p=falla i=11.92 vbat=0.00 red=0
+I (75909436) nodo: sntp: inicio pool.ntp.org
+W (75919436) nodo: sntp: fallo
+I (75919436) nodo: sntp: inicio pool.ntp.org
+I (75929436) nodo: sntp: inicio pool.ntp.org
+I (75939436) nodo: sntp: inicio pool.ntp.org
+W (75949446) nodo: sntp: fallo
+I (75949446) nodo: sntp: inicio pool.ntp.org
+I (75959446) nodo: sntp: inicio pool.ntp.org
+I (75961266) nodo: ana: niv=falla p=falla i=11.94 vbat=0.00 red=0
+I (75969446) nodo: sntp: inicio pool.ntp.org
+W (75979446) nodo: sntp: fallo
+I (75979446) nodo: sntp: inicio pool.ntp.org
+I (75989446) nodo: sntp: inicio pool.ntp.org
+I (75999446) nodo: sntp: inicio pool.ntp.org
+W (76009446) nodo: sntp: fallo
+I (76009446) nodo: sntp: inicio pool.ntp.org
+I (76019446) nodo: sntp: inicio pool.ntp.org
+I (76021266) nodo: ana: niv=falla p=falla i=12.13 vbat=0.00 red=0
+I (76029456) nodo: sntp: inicio pool.ntp.org
+W (76039456) nodo: sntp: fallo
+I (76039456) nodo: sntp: inicio pool.ntp.org
+I (76049456) nodo: sntp: inicio pool.ntp.org
+I (76059456) nodo: sntp: inicio pool.ntp.org
+W (76069456) nodo: sntp: fallo
+I (76069456) nodo: sntp: inicio pool.ntp.org
+I (76079456) nodo: sntp: inicio pool.ntp.org
+I (76081266) nodo: ana: niv=falla p=falla i=11.86 vbat=0.00 red=0
+I (76089456) nodo: sntp: inicio pool.ntp.org
+W (76099456) nodo: sntp: fallo
+I (76099456) nodo: sntp: inicio pool.ntp.org
+I (76109466) nodo: sntp: inicio pool.ntp.org
+I (76119466) nodo: sntp: inicio pool.ntp.org
+W (76129466) nodo: sntp: fallo
+I (76129466) nodo: sntp: inicio pool.ntp.org
+I (76139466) nodo: sntp: inicio pool.ntp.org
+I (76141266) nodo: ana: niv=falla p=falla i=12.23 vbat=0.00 red=0
+I (76149466) nodo: sntp: inicio pool.ntp.org
+W (76159466) nodo: sntp: fallo
+I (76159466) nodo: sntp: inicio pool.ntp.org
+I (76169466) nodo: sntp: inicio pool.ntp.org
+I (76179466) nodo: sntp: inicio pool.ntp.org
+W (76189466) nodo: sntp: fallo
+I (76189476) nodo: sntp: inicio pool.ntp.org
+I (76199476) nodo: sntp: inicio pool.ntp.org
+I (76201266) nodo: ana: niv=falla p=falla i=12.13 vbat=0.00 red=0
+I (76209476) nodo: sntp: inicio pool.ntp.org
+W (76219476) nodo: sntp: fallo
+I (76219476) nodo: sntp: inicio pool.ntp.org
+I (76229476) nodo: sntp: inicio pool.ntp.org
+I (76239476) nodo: sntp: inicio pool.ntp.org
+W (76249476) nodo: sntp: fallo
+I (76249476) nodo: sntp: inicio pool.ntp.org
+I (76259476) nodo: sntp: inicio pool.ntp.org
+I (76261266) nodo: ana: niv=falla p=falla i=11.86 vbat=0.00 red=0
+I (76269476) nodo: sntp: inicio pool.ntp.org
+W (76279486) nodo: sntp: fallo
+I (76279486) nodo: sntp: inicio pool.ntp.org
+I (76289486) nodo: sntp: inicio pool.ntp.org
+I (76299486) nodo: sntp: inicio pool.ntp.org
+W (76309486) nodo: sntp: fallo
+I (76309486) nodo: sntp: inicio pool.ntp.org
+I (76319486) nodo: sntp: inicio pool.ntp.org
+I (76321266) nodo: ana: niv=falla p=falla i=12.11 vbat=0.00 red=0
+I (76329486) nodo: sntp: inicio pool.ntp.org
+W (76339486) nodo: sntp: fallo
+I (76339486) nodo: sntp: inicio pool.ntp.org
+I (76349486) nodo: sntp: inicio pool.ntp.org
+I (76359496) nodo: sntp: inicio pool.ntp.org
+W (76369496) nodo: sntp: fallo
+I (76369496) nodo: sntp: inicio pool.ntp.org
+I (76379496) nodo: sntp: inicio pool.ntp.org
+I (76381266) nodo: ana: niv=falla p=falla i=12.09 vbat=0.00 red=0
+I (76389496) nodo: sntp: inicio pool.ntp.org
+W (76399496) nodo: sntp: fallo
+I (76399496) nodo: sntp: inicio pool.ntp.org
+I (76409496) nodo: sntp: inicio pool.ntp.org
+I (76419496) nodo: sntp: inicio pool.ntp.org
+W (76429496) nodo: sntp: fallo
+I (76429506) nodo: sntp: inicio pool.ntp.org
+I (76439506) nodo: sntp: inicio pool.ntp.org
+I (76441266) nodo: ana: niv=falla p=falla i=11.98 vbat=0.00 red=0
+I (76449506) nodo: sntp: inicio pool.ntp.org
+W (76459506) nodo: sntp: fallo
+I (76459506) nodo: sntp: inicio pool.ntp.org
+I (76469506) nodo: sntp: inicio pool.ntp.org
+I (76479506) nodo: sntp: inicio pool.ntp.org
+W (76489506) nodo: sntp: fallo
+I (76489506) nodo: sntp: inicio pool.ntp.org
+I (76499506) nodo: sntp: inicio pool.ntp.org
+I (76501266) nodo: ana: niv=falla p=falla i=11.99 vbat=0.00 red=0
+I (76509506) nodo: sntp: inicio pool.ntp.org
+W (76519516) nodo: sntp: fallo
+I (76519516) nodo: sntp: inicio pool.ntp.org
+I (76529516) nodo: sntp: inicio pool.ntp.org
+I (76539516) nodo: sntp: inicio pool.ntp.org
+W (76549516) nodo: sntp: fallo
+I (76549516) nodo: sntp: inicio pool.ntp.org
+I (76559516) nodo: sntp: inicio pool.ntp.org
+I (76561266) nodo: ana: niv=falla p=falla i=12.19 vbat=0.00 red=0
+I (76569516) nodo: sntp: inicio pool.ntp.org
+W (76579516) nodo: sntp: fallo
+I (76579516) nodo: sntp: inicio pool.ntp.org
+I (76589516) nodo: sntp: inicio pool.ntp.org
+I (76599526) nodo: sntp: inicio pool.ntp.org
+W (76609526) nodo: sntp: fallo
+I (76609526) nodo: sntp: inicio pool.ntp.org
+I (76619526) nodo: sntp: inicio pool.ntp.org
+I (76621266) nodo: ana: niv=falla p=falla i=12.29 vbat=0.00 red=0
+I (76629526) nodo: sntp: inicio pool.ntp.org
+W (76639526) nodo: sntp: fallo
+I (76639526) nodo: sntp: inicio pool.ntp.org
+I (76649526) nodo: sntp: inicio pool.ntp.org
+I (76659526) nodo: sntp: inicio pool.ntp.org
+W (76669526) nodo: sntp: fallo
+I (76669526) nodo: sntp: inicio pool.ntp.org
+I (76679526) nodo: sntp: inicio pool.ntp.org
+I (76681266) nodo: ana: niv=falla p=falla i=11.97 vbat=0.00 red=0
+I (76689536) nodo: sntp: inicio pool.ntp.org
+W (76699536) nodo: sntp: fallo
+I (76699536) nodo: sntp: inicio pool.ntp.org
+I (76709536) nodo: sntp: inicio pool.ntp.org
+I (76719536) nodo: sntp: inicio pool.ntp.org
+W (76729536) nodo: sntp: fallo
+I (76729536) nodo: sntp: inicio pool.ntp.org
+I (76739536) nodo: sntp: inicio pool.ntp.org
+I (76741266) nodo: ana: niv=falla p=falla i=11.85 vbat=0.00 red=0
+I (76749536) nodo: sntp: inicio pool.ntp.org
+W (76759536) nodo: sntp: fallo
+I (76759536) nodo: sntp: inicio pool.ntp.org
+I (76769546) nodo: sntp: inicio pool.ntp.org
+I (76779546) nodo: sntp: inicio pool.ntp.org
+W (76789546) nodo: sntp: fallo
+I (76789546) nodo: sntp: inicio pool.ntp.org
+I (76799546) nodo: sntp: inicio pool.ntp.org
+I (76801266) nodo: ana: niv=falla p=falla i=12.14 vbat=0.00 red=0
+I (76809546) nodo: sntp: inicio pool.ntp.org
+W (76819546) nodo: sntp: fallo
+I (76819546) nodo: sntp: inicio pool.ntp.org
+I (76829546) nodo: sntp: inicio pool.ntp.org
+I (76839546) nodo: sntp: inicio pool.ntp.org
+W (76849546) nodo: sntp: fallo
+I (76849556) nodo: sntp: inicio pool.ntp.org
+I (76859556) nodo: sntp: inicio pool.ntp.org
+I (76861266) nodo: ana: niv=falla p=falla i=11.78 vbat=0.00 red=0
+I (76869556) nodo: sntp: inicio pool.ntp.org
+W (76879556) nodo: sntp: fallo
+I (76879556) nodo: sntp: inicio pool.ntp.org
+I (76889556) nodo: sntp: inicio pool.ntp.org
+I (76899556) nodo: sntp: inicio pool.ntp.org
+W (76909556) nodo: sntp: fallo
+I (76909556) nodo: sntp: inicio pool.ntp.org
+I (76919556) nodo: sntp: inicio pool.ntp.org
+I (76921266) nodo: ana: niv=falla p=falla i=12.16 vbat=0.00 red=0
+I (76929556) nodo: sntp: inicio pool.ntp.org
+W (76939566) nodo: sntp: fallo
+I (76939566) nodo: sntp: inicio pool.ntp.org
+I (76949566) nodo: sntp: inicio pool.ntp.org
+I (76959566) nodo: sntp: inicio pool.ntp.org
+W (76969566) nodo: sntp: fallo
+I (76969566) nodo: sntp: inicio pool.ntp.org
+I (76979566) nodo: sntp: inicio pool.ntp.org
+I (76981266) nodo: ana: niv=falla p=falla i=12.10 vbat=0.00 red=0
+I (76989566) nodo: sntp: inicio pool.ntp.org
+W (76999566) nodo: sntp: fallo
+I (76999566) nodo: sntp: inicio pool.ntp.org
+I (77009566) nodo: sntp: inicio pool.ntp.org
+I (77019576) nodo: sntp: inicio pool.ntp.org
+W (77029576) nodo: sntp: fallo
+I (77029576) nodo: sntp: inicio pool.ntp.org
+I (77039576) nodo: sntp: inicio pool.ntp.org
+I (77041266) nodo: ana: niv=falla p=falla i=11.89 vbat=0.00 red=0
+I (77049576) nodo: sntp: inicio pool.ntp.org
+W (77059576) nodo: sntp: fallo
+I (77059576) nodo: sntp: inicio pool.ntp.org
+I (77069576) nodo: sntp: inicio pool.ntp.org
+I (77079576) nodo: sntp: inicio pool.ntp.org
+W (77089576) nodo: sntp: fallo
+I (77089576) nodo: sntp: inicio pool.ntp.org
+I (77099586) nodo: sntp: inicio pool.ntp.org
+I (77101266) nodo: ana: niv=falla p=falla i=12.04 vbat=0.00 red=0
+I (77109586) nodo: sntp: inicio pool.ntp.org
+W (77119586) nodo: sntp: fallo
+I (77119586) nodo: sntp: inicio pool.ntp.org
+I (77129586) nodo: sntp: inicio pool.ntp.org
+I (77139586) nodo: sntp: inicio pool.ntp.org
+W (77149586) nodo: sntp: fallo
+I (77149586) nodo: sntp: inicio pool.ntp.org
+I (77159586) nodo: sntp: inicio pool.ntp.org
+I (77161266) nodo: ana: niv=falla p=falla i=11.90 vbat=0.00 red=0
+I (77169586) nodo: sntp: inicio pool.ntp.org
+W (77179596) nodo: sntp: fallo
+I (77179596) nodo: sntp: inicio pool.ntp.org
+I (77189596) nodo: sntp: inicio pool.ntp.org
+I (77199596) nodo: sntp: inicio pool.ntp.org
+W (77209596) nodo: sntp: fallo
+I (77209596) nodo: sntp: inicio pool.ntp.org
+I (77219596) nodo: sntp: inicio pool.ntp.org
+I (77221266) nodo: ana: niv=falla p=falla i=11.80 vbat=0.00 red=0
+I (77229596) nodo: sntp: inicio pool.ntp.org
+W (77239606) nodo: sntp: fallo
+I (77239606) nodo: sntp: inicio pool.ntp.org
+I (77249606) nodo: sntp: inicio pool.ntp.org
+I (77259606) nodo: sntp: inicio pool.ntp.org
+W (77269606) nodo: sntp: fallo
+I (77269606) nodo: sntp: inicio pool.ntp.org
+I (77279606) nodo: sntp: inicio pool.ntp.org
+I (77281266) nodo: ana: niv=falla p=falla i=11.80 vbat=0.00 red=0
+I (77289606) nodo: sntp: inicio pool.ntp.org
+W (77299606) nodo: sntp: fallo
+I (77299606) nodo: sntp: inicio pool.ntp.org
+I (77309616) nodo: sntp: inicio pool.ntp.org
+I (77319616) nodo: sntp: inicio pool.ntp.org
+W (77329616) nodo: sntp: fallo
+I (77329616) nodo: sntp: inicio pool.ntp.org
+I (77339616) nodo: sntp: inicio pool.ntp.org
+I (77341266) nodo: ana: niv=falla p=falla i=12.17 vbat=0.00 red=0
+I (77349616) nodo: sntp: inicio pool.ntp.org
+W (77359616) nodo: sntp: fallo
+I (77359616) nodo: sntp: inicio pool.ntp.org
+I (77369616) nodo: sntp: inicio pool.ntp.org
+I (77379616) nodo: sntp: inicio pool.ntp.org
+W (77389626) nodo: sntp: fallo
+I (77389626) nodo: sntp: inicio pool.ntp.org
+I (77399626) nodo: sntp: inicio pool.ntp.org
+I (77401266) nodo: ana: niv=falla p=falla i=11.80 vbat=0.00 red=0
+I (77409626) nodo: sntp: inicio pool.ntp.org
+W (77419626) nodo: sntp: fallo
+I (77419626) nodo: sntp: inicio pool.ntp.org
+I (77429626) nodo: sntp: inicio pool.ntp.org
+I (77439626) nodo: sntp: inicio pool.ntp.org
+W (77449626) nodo: sntp: fallo
+I (77449626) nodo: sntp: inicio pool.ntp.org
+I (77459626) nodo: sntp: inicio pool.ntp.org
+I (77461266) nodo: ana: niv=falla p=falla i=12.24 vbat=0.00 red=0
+I (77469626) nodo: sntp: inicio pool.ntp.org
+W (77479636) nodo: sntp: fallo
+I (77479636) nodo: sntp: inicio pool.ntp.org
+I (77489636) nodo: sntp: inicio pool.ntp.org
+I (77499636) nodo: sntp: inicio pool.ntp.org
+W (77509636) nodo: sntp: fallo
+I (77509636) nodo: sntp: inicio pool.ntp.org
+I (77519636) nodo: sntp: inicio pool.ntp.org
+I (77521266) nodo: ana: niv=falla p=falla i=11.96 vbat=0.00 red=0
+I (77529636) nodo: sntp: inicio pool.ntp.org
+W (77539636) nodo: sntp: fallo
+I (77539646) nodo: sntp: inicio pool.ntp.org
+I (77549646) nodo: sntp: inicio pool.ntp.org
+I (77559646) nodo: sntp: inicio pool.ntp.org
+W (77569646) nodo: sntp: fallo
+I (77569646) nodo: sntp: inicio pool.ntp.org
+I (77579646) nodo: sntp: inicio pool.ntp.org
+I (77581266) nodo: ana: niv=falla p=falla i=11.96 vbat=0.00 red=0
+I (77589646) nodo: sntp: inicio pool.ntp.org
+W (77599646) nodo: sntp: fallo
+I (77599646) nodo: sntp: inicio pool.ntp.org
+I (77609646) nodo: sntp: inicio pool.ntp.org
+I (77619646) nodo: sntp: inicio pool.ntp.org
+W (77629656) nodo: sntp: fallo
+I (77629656) nodo: sntp: inicio pool.ntp.org
+I (77639656) nodo: sntp: inicio pool.ntp.org
+I (77641266) nodo: ana: niv=falla p=falla i=12.12 vbat=0.00 red=0
+I (77649656) nodo: sntp: inicio pool.ntp.org
+W (77659656) nodo: sntp: fallo
+I (77659656) nodo: sntp: inicio pool.ntp.org
+I (77669656) nodo: sntp: inicio pool.ntp.org
+I (77679656) nodo: sntp: inicio pool.ntp.org
+W (77689656) nodo: sntp: fallo
+I (77689656) nodo: sntp: inicio pool.ntp.org
+I (77699656) nodo: sntp: inicio pool.ntp.org
+I (77701266) nodo: ana: niv=falla p=falla i=12.15 vbat=0.00 red=0
+I (77709666) nodo: sntp: inicio pool.ntp.org
+W (77719666) nodo: sntp: fallo
+I (77719666) nodo: sntp: inicio pool.ntp.org
+I (77729666) nodo: sntp: inicio pool.ntp.org
+I (77739666) nodo: sntp: inicio pool.ntp.org
+W (77749666) nodo: sntp: fallo
+I (77749666) nodo: sntp: inicio pool.ntp.org
+I (77759666) nodo: sntp: inicio pool.ntp.org
+I (77761266) nodo: ana: niv=falla p=falla i=12.11 vbat=0.00 red=0
+I (77769666) nodo: sntp: inicio pool.ntp.org
+W (77779666) nodo: sntp: fallo
+I (77779666) nodo: sntp: inicio pool.ntp.org
+I (77789666) nodo: sntp: inicio pool.ntp.org
+I (77799676) nodo: sntp: inicio pool.ntp.org
+W (77809676) nodo: sntp: fallo
+I (77809676) nodo: sntp: inicio pool.ntp.org
+I (77819676) nodo: sntp: inicio pool.ntp.org
+I (77821266) nodo: ana: niv=falla p=falla i=12.05 vbat=0.00 red=0
+I (77829676) nodo: sntp: inicio pool.ntp.org
+W (77839676) nodo: sntp: fallo
+I (77839676) nodo: sntp: inicio pool.ntp.org
+I (77849676) nodo: sntp: inicio pool.ntp.org
+I (77859676) nodo: sntp: inicio pool.ntp.org
+W (77869676) nodo: sntp: fallo
+I (77869686) nodo: sntp: inicio pool.ntp.org
+I (77879686) nodo: sntp: inicio pool.ntp.org
+I (77881266) nodo: ana: niv=falla p=falla i=11.78 vbat=0.00 red=0
+I (77889686) nodo: sntp: inicio pool.ntp.org
+W (77899686) nodo: sntp: fallo
+I (77899686) nodo: sntp: inicio pool.ntp.org
+I (77909686) nodo: sntp: inicio pool.ntp.org
+I (77919686) nodo: sntp: inicio pool.ntp.org
+W (77929686) nodo: sntp: fallo
+I (77929686) nodo: sntp: inicio pool.ntp.org
+I (77939686) nodo: sntp: inicio pool.ntp.org
+I (77941266) nodo: ana: niv=falla p=falla i=11.81 vbat=0.00 red=0
+I (77949686) nodo: sntp: inicio pool.ntp.org
+W (77959696) nodo: sntp: fallo
+I (77959696) nodo: sntp: inicio pool.ntp.org
+I (77969696) nodo: sntp: inicio pool.ntp.org
+I (77979696) nodo: sntp: inicio pool.ntp.org
+W (77989696) nodo: sntp: fallo
+I (77989696) nodo: sntp: inicio pool.ntp.org
+I (77999696) nodo: sntp: inicio pool.ntp.org
+I (78001266) nodo: ana: niv=falla p=falla i=12.01 vbat=0.00 red=0
+I (78009696) nodo: sntp: inicio pool.ntp.org
+W (78019696) nodo: sntp: fallo
+I (78019696) nodo: sntp: inicio pool.ntp.org
+I (78029696) nodo: sntp: inicio pool.ntp.org
+I (78039706) nodo: sntp: inicio pool.ntp.org
+W (78049706) nodo: sntp: fallo
+I (78049706) nodo: sntp: inicio pool.ntp.org
+I (78059706) nodo: sntp: inicio pool.ntp.org
+I (78061266) nodo: ana: niv=falla p=falla i=11.68 vbat=0.00 red=0
+I (78069706) nodo: sntp: inicio pool.ntp.org
+W (78079706) nodo: sntp: fallo
+I (78079706) nodo: sntp: inicio pool.ntp.org
+I (78089706) nodo: sntp: inicio pool.ntp.org
+I (78099706) nodo: sntp: inicio pool.ntp.org
+W (78109706) nodo: sntp: fallo
+I (78109716) nodo: sntp: inicio pool.ntp.org
+I (78119716) nodo: sntp: inicio pool.ntp.org
+I (78121266) nodo: ana: niv=falla p=falla i=12.07 vbat=0.00 red=0
+I (78129716) nodo: sntp: inicio pool.ntp.org
+W (78139716) nodo: sntp: fallo
+I (78139716) nodo: sntp: inicio pool.ntp.org
+I (78149716) nodo: sntp: inicio pool.ntp.org
+I (78159716) nodo: sntp: inicio pool.ntp.org
+W (78169716) nodo: sntp: fallo
+I (78169716) nodo: sntp: inicio pool.ntp.org
+I (78179716) nodo: sntp: inicio pool.ntp.org
+I (78181266) nodo: ana: niv=falla p=falla i=12.14 vbat=0.00 red=0
+I (78189716) nodo: sntp: inicio pool.ntp.org
+W (78199726) nodo: sntp: fallo
+I (78199726) nodo: sntp: inicio pool.ntp.org
+I (78209726) nodo: sntp: inicio pool.ntp.org
+I (78219726) nodo: sntp: inicio pool.ntp.org
+W (78229726) nodo: sntp: fallo
+I (78229726) nodo: sntp: inicio pool.ntp.org
+I (78239726) nodo: sntp: inicio pool.ntp.org
+I (78241266) nodo: ana: niv=falla p=falla i=12.04 vbat=0.00 red=0
+I (78249726) nodo: sntp: inicio pool.ntp.org
+W (78259726) nodo: sntp: fallo
+I (78259726) nodo: sntp: inicio pool.ntp.org
+I (78269726) nodo: sntp: inicio pool.ntp.org
+I (78279726) nodo: sntp: inicio pool.ntp.org
+W (78289736) nodo: sntp: fallo
+I (78289736) nodo: sntp: inicio pool.ntp.org
+I (78299736) nodo: sntp: inicio pool.ntp.org
+I (78301266) nodo: ana: niv=falla p=falla i=11.99 vbat=0.00 red=0
+I (78309736) nodo: sntp: inicio pool.ntp.org
+W (78319736) nodo: sntp: fallo
+I (78319736) nodo: sntp: inicio pool.ntp.org
+I (78329736) nodo: sntp: inicio pool.ntp.org
+I (78339736) nodo: sntp: inicio pool.ntp.org
+W (78349736) nodo: sntp: fallo
+I (78349736) nodo: sntp: inicio pool.ntp.org
+I (78359746) nodo: sntp: inicio pool.ntp.org
+I (78361266) nodo: ana: niv=falla p=falla i=11.77 vbat=0.00 red=0
+I (78369746) nodo: sntp: inicio pool.ntp.org
+W (78379746) nodo: sntp: fallo
+I (78379746) nodo: sntp: inicio pool.ntp.org
+I (78389746) nodo: sntp: inicio pool.ntp.org
+I (78399746) nodo: sntp: inicio pool.ntp.org
+W (78409746) nodo: sntp: fallo
+I (78409746) nodo: sntp: inicio pool.ntp.org
+I (78419746) nodo: sntp: inicio pool.ntp.org
+I (78421266) nodo: ana: niv=falla p=falla i=11.83 vbat=0.00 red=0
+I (78429746) nodo: sntp: inicio pool.ntp.org
+W (78439746) nodo: sntp: fallo
+I (78439746) nodo: sntp: inicio pool.ntp.org
+I (78449756) nodo: sntp: inicio pool.ntp.org
+I (78459756) nodo: sntp: inicio pool.ntp.org
+W (78469756) nodo: sntp: fallo
+I (78469756) nodo: sntp: inicio pool.ntp.org
+I (78479756) nodo: sntp: inicio pool.ntp.org
+I (78481266) nodo: ana: niv=falla p=falla i=12.05 vbat=0.00 red=0
+I (78489756) nodo: sntp: inicio pool.ntp.org
+W (78499756) nodo: sntp: fallo
+I (78499756) nodo: sntp: inicio pool.ntp.org
+I (78509756) nodo: sntp: inicio pool.ntp.org
+I (78519756) nodo: sntp: inicio pool.ntp.org
+W (78529756) nodo: sntp: fallo
+I (78529766) nodo: sntp: inicio pool.ntp.org
+I (78539766) nodo: sntp: inicio pool.ntp.org
+I (78541266) nodo: ana: niv=falla p=falla i=11.66 vbat=0.00 red=0
+I (78549766) nodo: sntp: inicio pool.ntp.org
+W (78559766) nodo: sntp: fallo
+I (78559766) nodo: sntp: inicio pool.ntp.org
+I (78569766) nodo: sntp: inicio pool.ntp.org
+I (78579766) nodo: sntp: inicio pool.ntp.org
+W (78589766) nodo: sntp: fallo
+I (78589766) nodo: sntp: inicio pool.ntp.org
+I (78599766) nodo: sntp: inicio pool.ntp.org
+I (78601266) nodo: ana: niv=falla p=falla i=11.85 vbat=0.00 red=0
+I (78609766) nodo: sntp: inicio pool.ntp.org
+W (78619776) nodo: sntp: fallo
+I (78619776) nodo: sntp: inicio pool.ntp.org
+I (78629776) nodo: sntp: inicio pool.ntp.org
+I (78639776) nodo: sntp: inicio pool.ntp.org
+W (78649776) nodo: sntp: fallo
+I (78649776) nodo: sntp: inicio pool.ntp.org
+I (78659776) nodo: sntp: inicio pool.ntp.org
+I (78661266) nodo: ana: niv=falla p=falla i=11.79 vbat=0.00 red=0
+I (78669776) nodo: sntp: inicio pool.ntp.org
+W (78679776) nodo: sntp: fallo
+I (78679776) nodo: sntp: inicio pool.ntp.org
+I (78689776) nodo: sntp: inicio pool.ntp.org
+I (78699776) nodo: sntp: inicio pool.ntp.org
+W (78709786) nodo: sntp: fallo
+I (78709786) nodo: sntp: inicio pool.ntp.org
+I (78719786) nodo: sntp: inicio pool.ntp.org
+I (78721266) nodo: ana: niv=falla p=falla i=11.79 vbat=0.00 red=0
+I (78729786) nodo: sntp: inicio pool.ntp.org
+W (78739786) nodo: sntp: fallo
+I (78739786) nodo: sntp: inicio pool.ntp.org
+I (78749786) nodo: sntp: inicio pool.ntp.org
+I (78759786) nodo: sntp: inicio pool.ntp.org
+W (78769786) nodo: sntp: fallo
+I (78769786) nodo: sntp: inicio pool.ntp.org
+I (78779786) nodo: sntp: inicio pool.ntp.org
+I (78781266) nodo: ana: niv=falla p=falla i=11.99 vbat=0.00 red=0
+I (78789796) nodo: sntp: inicio pool.ntp.org
+W (78799796) nodo: sntp: fallo
+I (78799796) nodo: sntp: inicio pool.ntp.org
+I (78809796) nodo: sntp: inicio pool.ntp.org
+I (78819796) nodo: sntp: inicio pool.ntp.org
+W (78829796) nodo: sntp: fallo
+I (78829796) nodo: sntp: inicio pool.ntp.org
+I (78839796) nodo: sntp: inicio pool.ntp.org
+I (78841266) nodo: ana: niv=falla p=falla i=12.03 vbat=0.00 red=0
+I (78849796) nodo: sntp: inicio pool.ntp.org
+W (78859796) nodo: sntp: fallo
+I (78859796) nodo: sntp: inicio pool.ntp.org
+I (78869806) nodo: sntp: inicio pool.ntp.org
+I (78879806) nodo: sntp: inicio pool.ntp.org
+W (78889806) nodo: sntp: fallo
+I (78889806) nodo: sntp: inicio pool.ntp.org
+I (78899806) nodo: sntp: inicio pool.ntp.org
+I (78901266) nodo: ana: niv=falla p=falla i=11.70 vbat=0.00 red=0
+I (78909806) nodo: sntp: inicio pool.ntp.org
+W (78919806) nodo: sntp: fallo
+I (78919806) nodo: sntp: inicio pool.ntp.org
+I (78929806) nodo: sntp: inicio pool.ntp.org
+I (78939806) nodo: sntp: inicio pool.ntp.org
+W (78949806) nodo: sntp: fallo
+I (78949816) nodo: sntp: inicio pool.ntp.org
+I (78959816) nodo: sntp: inicio pool.ntp.org
+I (78961266) nodo: ana: niv=falla p=falla i=12.16 vbat=0.00 red=0
+I (78969816) nodo: sntp: inicio pool.ntp.org
+W (78979816) nodo: sntp: fallo
+I (78979816) nodo: sntp: inicio pool.ntp.org
+I (78989816) nodo: sntp: inicio pool.ntp.org
+I (78999816) nodo: sntp: inicio pool.ntp.org
+W (79009816) nodo: sntp: fallo
+I (79009816) nodo: sntp: inicio pool.ntp.org
+I (79019816) nodo: sntp: inicio pool.ntp.org
+I (79021266) nodo: ana: niv=falla p=falla i=11.64 vbat=0.00 red=0
+I (79029816) nodo: sntp: inicio pool.ntp.org
+W (79039826) nodo: sntp: fallo
+I (79039826) nodo: sntp: inicio pool.ntp.org
+I (79049826) nodo: sntp: inicio pool.ntp.org
+I (79059826) nodo: sntp: inicio pool.ntp.org
+W (79069826) nodo: sntp: fallo
+I (79069826) nodo: sntp: inicio pool.ntp.org
+I (79079826) nodo: sntp: inicio pool.ntp.org
+I (79081266) nodo: ana: niv=falla p=falla i=12.05 vbat=0.00 red=0
+I (79089826) nodo: sntp: inicio pool.ntp.org
+W (79099826) nodo: sntp: fallo
+I (79099826) nodo: sntp: inicio pool.ntp.org
+I (79109826) nodo: sntp: inicio pool.ntp.org
+I (79119836) nodo: sntp: inicio pool.ntp.org
+W (79129836) nodo: sntp: fallo
+I (79129836) nodo: sntp: inicio pool.ntp.org
+I (79139836) nodo: sntp: inicio pool.ntp.org
+I (79141266) nodo: ana: niv=falla p=falla i=11.93 vbat=0.00 red=0
+I (79149836) nodo: sntp: inicio pool.ntp.org
+W (79159836) nodo: sntp: fallo
+I (79159836) nodo: sntp: inicio pool.ntp.org
+I (79169836) nodo: sntp: inicio pool.ntp.org
+I (79179836) nodo: sntp: inicio pool.ntp.org
+W (79189836) nodo: sntp: fallo
+I (79189836) nodo: sntp: inicio pool.ntp.org
+I (79199836) nodo: sntp: inicio pool.ntp.org
+I (79201266) nodo: ana: niv=falla p=falla i=11.90 vbat=0.00 red=0
+I (79209846) nodo: sntp: inicio pool.ntp.org
+W (79219846) nodo: sntp: fallo
+I (79219846) nodo: sntp: inicio pool.ntp.org
+I (79229846) nodo: sntp: inicio pool.ntp.org
+I (79239846) nodo: sntp: inicio pool.ntp.org
+W (79249846) nodo: sntp: fallo
+I (79249846) nodo: sntp: inicio pool.ntp.org
+I (79259846) nodo: sntp: inicio pool.ntp.org
+I (79261266) nodo: ana: niv=falla p=falla i=11.75 vbat=0.00 red=0
+I (79269846) nodo: sntp: inicio pool.ntp.org
+W (79279846) nodo: sntp: fallo
+I (79279856) nodo: sntp: inicio pool.ntp.org
+I (79289856) nodo: sntp: inicio pool.ntp.org
+I (79299856) nodo: sntp: inicio pool.ntp.org
+W (79309856) nodo: sntp: fallo
+I (79309856) nodo: sntp: inicio pool.ntp.org
+I (79319856) nodo: sntp: inicio pool.ntp.org
+I (79321266) nodo: ana: niv=falla p=falla i=11.99 vbat=0.00 red=0
+I (79329856) nodo: sntp: inicio pool.ntp.org
+W (79339856) nodo: sntp: fallo
+I (79339856) nodo: sntp: inicio pool.ntp.org
+I (79349856) nodo: sntp: inicio pool.ntp.org
+I (79359856) nodo: sntp: inicio pool.ntp.org
+W (79369866) nodo: sntp: fallo
+I (79369866) nodo: sntp: inicio pool.ntp.org
+I (79379866) nodo: sntp: inicio pool.ntp.org
+I (79381266) nodo: ana: niv=falla p=falla i=11.53 vbat=0.00 red=0
+I (79389866) nodo: sntp: inicio pool.ntp.org
+W (79399866) nodo: sntp: fallo
+I (79399866) nodo: sntp: inicio pool.ntp.org
+I (79409866) nodo: sntp: inicio pool.ntp.org
+I (79419866) nodo: sntp: inicio pool.ntp.org
+W (79429866) nodo: sntp: fallo
+I (79429866) nodo: sntp: inicio pool.ntp.org
+I (79439866) nodo: sntp: inicio pool.ntp.org
+I (79441266) nodo: ana: niv=falla p=falla i=11.95 vbat=0.00 red=0
+I (79449876) nodo: sntp: inicio pool.ntp.org
+W (79459876) nodo: sntp: fallo
+I (79459876) nodo: sntp: inicio pool.ntp.org
+I (79469876) nodo: sntp: inicio pool.ntp.org
+I (79479876) nodo: sntp: inicio pool.ntp.org
+W (79489876) nodo: sntp: fallo
+I (79489876) nodo: sntp: inicio pool.ntp.org
+I (79499876) nodo: sntp: inicio pool.ntp.org
+I (79501266) nodo: ana: niv=falla p=falla i=12.00 vbat=0.00 red=0
+I (79509876) nodo: sntp: inicio pool.ntp.org
+W (79519876) nodo: sntp: fallo
+I (79519876) nodo: sntp: inicio pool.ntp.org
+I (79529876) nodo: sntp: inicio pool.ntp.org
+I (79539886) nodo: sntp: inicio pool.ntp.org
+W (79549886) nodo: sntp: fallo
+I (79549886) nodo: sntp: inicio pool.ntp.org
+I (79559886) nodo: sntp: inicio pool.ntp.org
+I (79561266) nodo: ana: niv=falla p=falla i=11.97 vbat=0.00 red=0
+I (79569886) nodo: sntp: inicio pool.ntp.org
+W (79579886) nodo: sntp: fallo
+I (79579886) nodo: sntp: inicio pool.ntp.org
+I (79589886) nodo: sntp: inicio pool.ntp.org
+I (79599886) nodo: sntp: inicio pool.ntp.org
+W (79609896) nodo: sntp: fallo
+I (79609896) nodo: sntp: inicio pool.ntp.org
+I (79619896) nodo: sntp: inicio pool.ntp.org
+I (79621266) nodo: ana: niv=falla p=falla i=11.91 vbat=0.00 red=0
+I (79629896) nodo: sntp: inicio pool.ntp.org
+W (79639896) nodo: sntp: fallo
+I (79639896) nodo: sntp: inicio pool.ntp.org
+I (79649896) nodo: sntp: inicio pool.ntp.org
+I (79659896) nodo: sntp: inicio pool.ntp.org
+W (79669896) nodo: sntp: fallo
+I (79669896) nodo: sntp: inicio pool.ntp.org
+I (79679896) nodo: sntp: inicio pool.ntp.org
+I (79681266) nodo: ana: niv=falla p=falla i=11.92 vbat=0.00 red=0
+I (79689906) nodo: sntp: inicio pool.ntp.org
+W (79699906) nodo: sntp: fallo
+I (79699906) nodo: sntp: inicio pool.ntp.org
+I (79709906) nodo: sntp: inicio pool.ntp.org
+I (79719906) nodo: sntp: inicio pool.ntp.org
+W (79729906) nodo: sntp: fallo
+I (79729906) nodo: sntp: inicio pool.ntp.org
+I (79739906) nodo: sntp: inicio pool.ntp.org
+I (79741266) nodo: ana: niv=falla p=falla i=12.06 vbat=0.00 red=0
+I (79749906) nodo: sntp: inicio pool.ntp.org
+W (79759906) nodo: sntp: fallo
+I (79759906) nodo: sntp: inicio pool.ntp.org
+I (79769916) nodo: sntp: inicio pool.ntp.org
+I (79779916) nodo: sntp: inicio pool.ntp.org
+W (79789916) nodo: sntp: fallo
+I (79789916) nodo: sntp: inicio pool.ntp.org
+I (79799916) nodo: sntp: inicio pool.ntp.org
+I (79801266) nodo: ana: niv=falla p=falla i=12.03 vbat=0.00 red=0
+I (79809916) nodo: sntp: inicio pool.ntp.org
+W (79819916) nodo: sntp: fallo
+I (79819916) nodo: sntp: inicio pool.ntp.org
+I (79829916) nodo: sntp: inicio pool.ntp.org
+I (79839926) nodo: sntp: inicio pool.ntp.org
+W (79849926) nodo: sntp: fallo
+I (79849926) nodo: sntp: inicio pool.ntp.org
+I (79859926) nodo: sntp: inicio pool.ntp.org
+I (79861266) nodo: ana: niv=falla p=falla i=11.71 vbat=0.00 red=0
+I (79869926) nodo: sntp: inicio pool.ntp.org
+W (79879926) nodo: sntp: fallo
+I (79879926) nodo: sntp: inicio pool.ntp.org
+I (79889926) nodo: sntp: inicio pool.ntp.org
+I (79899926) nodo: sntp: inicio pool.ntp.org
+W (79909926) nodo: sntp: fallo
+I (79909936) nodo: sntp: inicio pool.ntp.org
+I (79919936) nodo: sntp: inicio pool.ntp.org
+I (79921266) nodo: ana: niv=falla p=falla i=11.75 vbat=0.00 red=0
+I (79929936) nodo: sntp: inicio pool.ntp.org
+W (79939936) nodo: sntp: fallo
+I (79939936) nodo: sntp: inicio pool.ntp.org
+I (79949936) nodo: sntp: inicio pool.ntp.org
+I (79959936) nodo: sntp: inicio pool.ntp.org
+W (79969936) nodo: sntp: fallo
+I (79969936) nodo: sntp: inicio pool.ntp.org
+I (79979936) nodo: sntp: inicio pool.ntp.org
+I (79981266) nodo: ana: niv=falla p=falla i=11.64 vbat=0.00 red=0
+I (79989936) nodo: sntp: inicio pool.ntp.org
+W (79999946) nodo: sntp: fallo
+I (79999946) nodo: sntp: inicio pool.ntp.org
+I (80009946) nodo: sntp: inicio pool.ntp.org
+I (80019946) nodo: sntp: inicio pool.ntp.org
+W (80029946) nodo: sntp: fallo
+I (80029946) nodo: sntp: inicio pool.ntp.org
+I (80039946) nodo: sntp: inicio pool.ntp.org
+I (80041266) nodo: ana: niv=falla p=falla i=11.67 vbat=0.00 red=0
+I (80049946) nodo: sntp: inicio pool.ntp.org
+W (80059946) nodo: sntp: fallo
+I (80059946) nodo: sntp: inicio pool.ntp.org
+I (80069946) nodo: sntp: inicio pool.ntp.org
+I (80079956) nodo: sntp: inicio pool.ntp.org
+W (80089956) nodo: sntp: fallo
+I (80089956) nodo: sntp: inicio pool.ntp.org
+I (80099956) nodo: sntp: inicio pool.ntp.org
+I (80101266) nodo: ana: niv=falla p=falla i=11.89 vbat=0.00 red=0
+I (80109956) nodo: sntp: inicio pool.ntp.org
+W (80119956) nodo: sntp: fallo
+I (80119956) nodo: sntp: inicio pool.ntp.org
+I (80129956) nodo: sntp: inicio pool.ntp.org
+I (80139956) nodo: sntp: inicio pool.ntp.org
+W (80149956) nodo: sntp: fallo
+I (80149956) nodo: sntp: inicio pool.ntp.org
+I (80159966) nodo: sntp: inicio pool.ntp.org
+I (80161266) nodo: ana: niv=falla p=falla i=11.82 vbat=0.00 red=0
+I (80169966) nodo: sntp: inicio pool.ntp.org
+W (80179966) nodo: sntp: fallo
+I (80179966) nodo: sntp: inicio pool.ntp.org
+I (80189966) nodo: sntp: inicio pool.ntp.org
+I (80199966) nodo: sntp: inicio pool.ntp.org
+W (80209966) nodo: sntp: fallo
+I (80209966) nodo: sntp: inicio pool.ntp.org
+I (80219966) nodo: sntp: inicio pool.ntp.org
+I (80221266) nodo: ana: niv=falla p=falla i=11.90 vbat=0.00 red=0
+I (80229966) nodo: sntp: inicio pool.ntp.org
+W (80239976) nodo: sntp: fallo
+I (80239976) nodo: sntp: inicio pool.ntp.org
+I (80249976) nodo: sntp: inicio pool.ntp.org
+I (80259976) nodo: sntp: inicio pool.ntp.org
+W (80269976) nodo: sntp: fallo
+I (80269976) nodo: sntp: inicio pool.ntp.org
+I (80279976) nodo: sntp: inicio pool.ntp.org
+I (80281266) nodo: ana: niv=falla p=falla i=12.04 vbat=0.00 red=0
+I (80289976) nodo: sntp: inicio pool.ntp.org
+W (80299976) nodo: sntp: fallo
+I (80299976) nodo: sntp: inicio pool.ntp.org
+I (80309976) nodo: sntp: inicio pool.ntp.org
+I (80319986) nodo: sntp: inicio pool.ntp.org
+W (80329986) nodo: sntp: fallo
+I (80329986) nodo: sntp: inicio pool.ntp.org
+I (80339986) nodo: sntp: inicio pool.ntp.org
+I (80341266) nodo: ana: niv=falla p=falla i=11.76 vbat=0.00 red=0
+I (80349986) nodo: sntp: inicio pool.ntp.org
+W (80359986) nodo: sntp: fallo
+I (80359986) nodo: sntp: inicio pool.ntp.org
+I (80369986) nodo: sntp: inicio pool.ntp.org
+I (80379986) nodo: sntp: inicio pool.ntp.org
+W (80389986) nodo: sntp: fallo
+I (80389986) nodo: sntp: inicio pool.ntp.org
+I (80399986) nodo: sntp: inicio pool.ntp.org
+I (80401266) nodo: ana: niv=falla p=falla i=12.08 vbat=0.00 red=0
+I (80409996) nodo: sntp: inicio pool.ntp.org
+W (80419996) nodo: sntp: fallo
+I (80419996) nodo: sntp: inicio pool.ntp.org
+I (80429996) nodo: sntp: inicio pool.ntp.org
+I (80439996) nodo: sntp: inicio pool.ntp.org
+W (80449996) nodo: sntp: fallo
+I (80449996) nodo: sntp: inicio pool.ntp.org
+I (80459996) nodo: sntp: inicio pool.ntp.org
+I (80461266) nodo: ana: niv=falla p=falla i=12.06 vbat=0.00 red=0
+I (80469996) nodo: sntp: inicio pool.ntp.org
+W (80479996) nodo: sntp: fallo
+I (80480006) nodo: sntp: inicio pool.ntp.org
+I (80490006) nodo: sntp: inicio pool.ntp.org
+I (80500006) nodo: sntp: inicio pool.ntp.org
+W (80510006) nodo: sntp: fallo
+I (80510006) nodo: sntp: inicio pool.ntp.org
+I (80520006) nodo: sntp: inicio pool.ntp.org
+I (80521266) nodo: ana: niv=falla p=falla i=11.64 vbat=0.00 red=0
+I (80530006) nodo: sntp: inicio pool.ntp.org
+W (80540006) nodo: sntp: fallo
+I (80540006) nodo: sntp: inicio pool.ntp.org
+I (80550006) nodo: sntp: inicio pool.ntp.org
+I (80560006) nodo: sntp: inicio pool.ntp.org
+W (80570016) nodo: sntp: fallo
+I (80570016) nodo: sntp: inicio pool.ntp.org
+I (80580016) nodo: sntp: inicio pool.ntp.org
+I (80581266) nodo: ana: niv=falla p=falla i=11.86 vbat=0.00 red=0
+I (80590016) nodo: sntp: inicio pool.ntp.org
+W (80600016) nodo: sntp: fallo
+I (80600016) nodo: sntp: inicio pool.ntp.org
+I (80610016) nodo: sntp: inicio pool.ntp.org
+I (80620016) nodo: sntp: inicio pool.ntp.org
+W (80630016) nodo: sntp: fallo
+I (80630016) nodo: sntp: inicio pool.ntp.org
+I (80640016) nodo: sntp: inicio pool.ntp.org
+I (80641266) nodo: ana: niv=falla p=falla i=11.74 vbat=0.00 red=0
+I (80650026) nodo: sntp: inicio pool.ntp.org
+W (80660026) nodo: sntp: fallo
+I (80660026) nodo: sntp: inicio pool.ntp.org
+I (80670026) nodo: sntp: inicio pool.ntp.org
+I (80680026) nodo: sntp: inicio pool.ntp.org
+W (80690026) nodo: sntp: fallo
+I (80690026) nodo: sntp: inicio pool.ntp.org
+I (80700026) nodo: sntp: inicio pool.ntp.org
+I (80701266) nodo: ana: niv=falla p=falla i=11.89 vbat=0.00 red=0
+I (80710026) nodo: sntp: inicio pool.ntp.org
+W (80720026) nodo: sntp: fallo
+I (80720036) nodo: sntp: inicio pool.ntp.org
+I (80730036) nodo: sntp: inicio pool.ntp.org
+I (80740036) nodo: sntp: inicio pool.ntp.org
+W (80750036) nodo: sntp: fallo
+I (80750036) nodo: sntp: inicio pool.ntp.org
+I (80760036) nodo: sntp: inicio pool.ntp.org
+I (80761266) nodo: ana: niv=falla p=falla i=11.82 vbat=0.00 red=0
+I (80770036) nodo: sntp: inicio pool.ntp.org
+W (80780036) nodo: sntp: fallo
+I (80780036) nodo: sntp: inicio pool.ntp.org
+I (80790036) nodo: sntp: inicio pool.ntp.org
+I (80800036) nodo: sntp: inicio pool.ntp.org
+W (80810046) nodo: sntp: fallo
+I (80810046) nodo: sntp: inicio pool.ntp.org
+I (80820046) nodo: sntp: inicio pool.ntp.org
+I (80821266) nodo: ana: niv=falla p=falla i=11.70 vbat=0.00 red=0
+I (80830046) nodo: sntp: inicio pool.ntp.org
+W (80840046) nodo: sntp: fallo
+I (80840046) nodo: sntp: inicio pool.ntp.org
+I (80850046) nodo: sntp: inicio pool.ntp.org
+I (80860046) nodo: sntp: inicio pool.ntp.org
+W (80870046) nodo: sntp: fallo
+I (80870046) nodo: sntp: inicio pool.ntp.org
+I (80880046) nodo: sntp: inicio pool.ntp.org
+I (80881266) nodo: ana: niv=falla p=falla i=11.95 vbat=0.00 red=0
+I (80890056) nodo: sntp: inicio pool.ntp.org
+W (80900056) nodo: sntp: fallo
+I (80900056) nodo: sntp: inicio pool.ntp.org
+I (80910056) nodo: sntp: inicio pool.ntp.org
+I (80920056) nodo: sntp: inicio pool.ntp.org
+W (80930056) nodo: sntp: fallo
+I (80930056) nodo: sntp: inicio pool.ntp.org
+I (80940056) nodo: sntp: inicio pool.ntp.org
+I (80941266) nodo: ana: niv=falla p=falla i=12.18 vbat=0.00 red=0
+I (80950056) nodo: sntp: inicio pool.ntp.org
+W (80960056) nodo: sntp: fallo
+I (80960066) nodo: sntp: inicio pool.ntp.org
+I (80970066) nodo: sntp: inicio pool.ntp.org
+I (80980066) nodo: sntp: inicio pool.ntp.org
+W (80990066) nodo: sntp: fallo
+I (80990066) nodo: sntp: inicio pool.ntp.org
+I (81000066) nodo: sntp: inicio pool.ntp.org
+I (81001266) nodo: ana: niv=falla p=falla i=11.82 vbat=0.00 red=0
+I (81010066) nodo: sntp: inicio pool.ntp.org
+W (81020066) nodo: sntp: fallo
+I (81020066) nodo: sntp: inicio pool.ntp.org
+I (81030066) nodo: sntp: inicio pool.ntp.org
+I (81040076) nodo: sntp: inicio pool.ntp.org
+W (81050076) nodo: sntp: fallo
+I (81050076) nodo: sntp: inicio pool.ntp.org
+I (81060076) nodo: sntp: inicio pool.ntp.org
+I (81061266) nodo: ana: niv=falla p=falla i=11.99 vbat=0.00 red=0
+I (81070076) nodo: sntp: inicio pool.ntp.org
+W (81080076) nodo: sntp: fallo
+I (81080076) nodo: sntp: inicio pool.ntp.org
+I (81090076) nodo: sntp: inicio pool.ntp.org
+I (81100076) nodo: sntp: inicio pool.ntp.org
+W (81110076) nodo: sntp: fallo
+I (81110076) nodo: sntp: inicio pool.ntp.org
+I (81120086) nodo: sntp: inicio pool.ntp.org
+I (81121266) nodo: ana: niv=falla p=falla i=12.07 vbat=0.00 red=0
+I (81130086) nodo: sntp: inicio pool.ntp.org
+W (81140086) nodo: sntp: fallo
+I (81140086) nodo: sntp: inicio pool.ntp.org
+I (81150086) nodo: sntp: inicio pool.ntp.org
+I (81160086) nodo: sntp: inicio pool.ntp.org
+W (81170086) nodo: sntp: fallo
+I (81170086) nodo: sntp: inicio pool.ntp.org
+I (81180086) nodo: sntp: inicio pool.ntp.org
+I (81181266) nodo: ana: niv=falla p=falla i=12.22 vbat=0.00 red=0
+I (81190086) nodo: sntp: inicio pool.ntp.org
+W (81200086) nodo: sntp: fallo
+I (81200096) nodo: sntp: inicio pool.ntp.org
+I (81210096) nodo: sntp: inicio pool.ntp.org
+I (81220096) nodo: sntp: inicio pool.ntp.org
+W (81230096) nodo: sntp: fallo
+I (81230096) nodo: sntp: inicio pool.ntp.org
+I (81240096) nodo: sntp: inicio pool.ntp.org
+I (81241266) nodo: ana: niv=falla p=falla i=11.84 vbat=0.00 red=0
+I (81250096) nodo: sntp: inicio pool.ntp.org
+W (81260096) nodo: sntp: fallo
+I (81260096) nodo: sntp: inicio pool.ntp.org
+I (81270096) nodo: sntp: inicio pool.ntp.org
+I (81280096) nodo: sntp: inicio pool.ntp.org
+W (81290096) nodo: sntp: fallo
+I (81290106) nodo: sntp: inicio pool.ntp.org
+I (81300106) nodo: sntp: inicio pool.ntp.org
+I (81301266) nodo: ana: niv=falla p=falla i=12.32 vbat=0.00 red=0
+I (81310106) nodo: sntp: inicio pool.ntp.org
+W (81320106) nodo: sntp: fallo
+I (81320106) nodo: sntp: inicio pool.ntp.org
+I (81330106) nodo: sntp: inicio pool.ntp.org
+I (81340106) nodo: sntp: inicio pool.ntp.org
+W (81350106) nodo: sntp: fallo
+I (81350106) nodo: sntp: inicio pool.ntp.org
+I (81360106) nodo: sntp: inicio pool.ntp.org
+I (81361266) nodo: ana: niv=falla p=falla i=11.98 vbat=0.00 red=0
+I (81370106) nodo: sntp: inicio pool.ntp.org
+W (81380116) nodo: sntp: fallo
+I (81380116) nodo: sntp: inicio pool.ntp.org
+I (81390116) nodo: sntp: inicio pool.ntp.org
+I (81400116) nodo: sntp: inicio pool.ntp.org
+W (81410116) nodo: sntp: fallo
+I (81410116) nodo: sntp: inicio pool.ntp.org
+I (81420116) nodo: sntp: inicio pool.ntp.org
+I (81421266) nodo: ana: niv=falla p=falla i=12.26 vbat=0.00 red=0
+I (81430116) nodo: sntp: inicio pool.ntp.org
+W (81440116) nodo: sntp: fallo
+I (81440116) nodo: sntp: inicio pool.ntp.org
+I (81450116) nodo: sntp: inicio pool.ntp.org
+I (81460116) nodo: sntp: inicio pool.ntp.org
+W (81470126) nodo: sntp: fallo
+I (81470126) nodo: sntp: inicio pool.ntp.org
+I (81480126) nodo: sntp: inicio pool.ntp.org
+I (81481266) nodo: ana: niv=falla p=falla i=11.88 vbat=0.00 red=0
+I (81490126) nodo: sntp: inicio pool.ntp.org
+W (81500126) nodo: sntp: fallo
+I (81500126) nodo: sntp: inicio pool.ntp.org
+I (81510126) nodo: sntp: inicio pool.ntp.org
+I (81520126) nodo: sntp: inicio pool.ntp.org
+W (81530126) nodo: sntp: fallo
+I (81530126) nodo: sntp: inicio pool.ntp.org
+I (81540126) nodo: sntp: inicio pool.ntp.org
+I (81541266) nodo: ana: niv=falla p=falla i=12.34 vbat=0.00 red=0
+I (81550136) nodo: sntp: inicio pool.ntp.org
+W (81560136) nodo: sntp: fallo
+I (81560136) nodo: sntp: inicio pool.ntp.org
+I (81570136) nodo: sntp: inicio pool.ntp.org
+I (81580136) nodo: sntp: inicio pool.ntp.org
+W (81590136) nodo: sntp: fallo
+I (81590136) nodo: sntp: inicio pool.ntp.org
+I (81600136) nodo: sntp: inicio pool.ntp.org
+I (81601266) nodo: ana: niv=falla p=falla i=12.31 vbat=0.00 red=0
+I (81610136) nodo: sntp: inicio pool.ntp.org
+W (81620136) nodo: sntp: fallo
+I (81620136) nodo: sntp: inicio pool.ntp.org
+I (81630136) nodo: sntp: inicio pool.ntp.org
+I (81640146) nodo: sntp: inicio pool.ntp.org
+W (81650146) nodo: sntp: fallo
+I (81650146) nodo: sntp: inicio pool.ntp.org
+I (81660146) nodo: sntp: inicio pool.ntp.org
+I (81661266) nodo: ana: niv=falla p=falla i=12.19 vbat=0.00 red=0
+I (81670146) nodo: sntp: inicio pool.ntp.org
+W (81680146) nodo: sntp: fallo
+I (81680146) nodo: sntp: inicio pool.ntp.org
+I (81690146) nodo: sntp: inicio pool.ntp.org
+I (81700146) nodo: sntp: inicio pool.ntp.org
+W (81710146) nodo: sntp: fallo
+I (81710156) nodo: sntp: inicio pool.ntp.org
+I (81720156) nodo: sntp: inicio pool.ntp.org
+I (81721266) nodo: ana: niv=falla p=falla i=12.71 vbat=0.00 red=0
+I (81730156) nodo: sntp: inicio pool.ntp.org
+W (81740156) nodo: sntp: fallo
+I (81740156) nodo: sntp: inicio pool.ntp.org
+I (81750156) nodo: sntp: inicio pool.ntp.org
+I (81760156) nodo: sntp: inicio pool.ntp.org
+W (81770156) nodo: sntp: fallo
+I (81770156) nodo: sntp: inicio pool.ntp.org
+I (81780156) nodo: sntp: inicio pool.ntp.org
+I (81781266) nodo: ana: niv=falla p=falla i=12.55 vbat=0.00 red=0
+I (81790156) nodo: sntp: inicio pool.ntp.org
+W (81800156) nodo: sntp: fallo
+I (81800166) nodo: sntp: inicio pool.ntp.org
+I (81810166) nodo: sntp: inicio pool.ntp.org
+I (81820166) nodo: sntp: inicio pool.ntp.org
+W (81830166) nodo: sntp: fallo
+I (81830166) nodo: sntp: inicio pool.ntp.org
+I (81840166) nodo: sntp: inicio pool.ntp.org
+I (81841266) nodo: ana: niv=falla p=falla i=12.62 vbat=0.00 red=0
+I (81850166) nodo: sntp: inicio pool.ntp.org
+W (81860166) nodo: sntp: fallo
+I (81860166) nodo: sntp: inicio pool.ntp.org
+I (81870166) nodo: sntp: inicio pool.ntp.org
+I (81880176) nodo: sntp: inicio pool.ntp.org
+W (81890176) nodo: sntp: fallo
+I (81890176) nodo: sntp: inicio pool.ntp.org
+I (81900176) nodo: sntp: inicio pool.ntp.org
+I (81901266) nodo: ana: niv=falla p=falla i=12.49 vbat=0.00 red=0
+I (81910176) nodo: sntp: inicio pool.ntp.org
+W (81920176) nodo: sntp: fallo
+I (81920176) nodo: sntp: inicio pool.ntp.org
+I (81930176) nodo: sntp: inicio pool.ntp.org
+I (81940176) nodo: sntp: inicio pool.ntp.org
+W (81950176) nodo: sntp: fallo
+I (81950186) nodo: sntp: inicio pool.ntp.org
+I (81960186) nodo: sntp: inicio pool.ntp.org
+I (81961266) nodo: ana: niv=falla p=falla i=12.74 vbat=0.00 red=0
+I (81970186) nodo: sntp: inicio pool.ntp.org
+W (81980186) nodo: sntp: fallo
+I (81980186) nodo: sntp: inicio pool.ntp.org
+I (81990186) nodo: sntp: inicio pool.ntp.org
+I (82000186) nodo: sntp: inicio pool.ntp.org
+W (82010186) nodo: sntp: fallo
+I (82010186) nodo: sntp: inicio pool.ntp.org
+I (82020186) nodo: sntp: inicio pool.ntp.org
+I (82021266) nodo: ana: niv=falla p=falla i=12.64 vbat=0.00 red=0
+I (82030186) nodo: sntp: inicio pool.ntp.org
+W (82040186) nodo: sntp: fallo
+I (82040196) nodo: sntp: inicio pool.ntp.org
+I (82050196) nodo: sntp: inicio pool.ntp.org
+I (82060196) nodo: sntp: inicio pool.ntp.org
+W (82070196) nodo: sntp: fallo
+I (82070196) nodo: sntp: inicio pool.ntp.org
+I (82080196) nodo: sntp: inicio pool.ntp.org
+I (82081266) nodo: ana: niv=falla p=falla i=12.58 vbat=0.00 red=0
+I (82090196) nodo: sntp: inicio pool.ntp.org
+W (82100196) nodo: sntp: fallo
+I (82100196) nodo: sntp: inicio pool.ntp.org
+I (82110196) nodo: sntp: inicio pool.ntp.org
+I (82120196) nodo: sntp: inicio pool.ntp.org
+W (82130206) nodo: sntp: fallo
+I (82130206) nodo: sntp: inicio pool.ntp.org
+I (82140206) nodo: sntp: inicio pool.ntp.org
+I (82141266) nodo: ana: niv=falla p=falla i=12.32 vbat=0.00 red=0
+I (82150206) nodo: sntp: inicio pool.ntp.org
+W (82160206) nodo: sntp: fallo
+I (82160206) nodo: sntp: inicio pool.ntp.org
+I (82170206) nodo: sntp: inicio pool.ntp.org
+I (82180206) nodo: sntp: inicio pool.ntp.org
+W (82190206) nodo: sntp: fallo
+I (82190206) nodo: sntp: inicio pool.ntp.org
+I (82200216) nodo: sntp: inicio pool.ntp.org
+I (82201266) nodo: ana: niv=falla p=falla i=12.72 vbat=0.00 red=0
+I (82210216) nodo: sntp: inicio pool.ntp.org
+W (82220216) nodo: sntp: fallo
+I (82220216) nodo: sntp: inicio pool.ntp.org
+I (82230216) nodo: sntp: inicio pool.ntp.org
+I (82240216) nodo: sntp: inicio pool.ntp.org
+W (82250216) nodo: sntp: fallo
+I (82250216) nodo: sntp: inicio pool.ntp.org
+I (82260216) nodo: sntp: inicio pool.ntp.org
+I (82261266) nodo: ana: niv=falla p=falla i=12.38 vbat=0.00 red=0
+I (82270216) nodo: sntp: inicio pool.ntp.org
+W (82280226) nodo: sntp: fallo
+I (82280226) nodo: sntp: inicio pool.ntp.org
+I (82290226) nodo: sntp: inicio pool.ntp.org
+I (82300226) nodo: sntp: inicio pool.ntp.org
+W (82310226) nodo: sntp: fallo
+I (82310226) nodo: sntp: inicio pool.ntp.org
+I (82320226) nodo: sntp: inicio pool.ntp.org
+I (82321266) nodo: ana: niv=falla p=falla i=11.97 vbat=0.00 red=0
+I (82330226) nodo: sntp: inicio pool.ntp.org
+W (82340226) nodo: sntp: fallo
+I (82340226) nodo: sntp: inicio pool.ntp.org
+I (82350226) nodo: sntp: inicio pool.ntp.org
+I (82360226) nodo: sntp: inicio pool.ntp.org
+W (82370236) nodo: sntp: fallo
+I (82370236) nodo: sntp: inicio pool.ntp.org
+I (82380236) nodo: sntp: inicio pool.ntp.org
+I (82381266) nodo: ana: niv=falla p=falla i=12.23 vbat=0.00 red=0
+I (82390236) nodo: sntp: inicio pool.ntp.org
+W (82400236) nodo: sntp: fallo
+I (82400236) nodo: sntp: inicio pool.ntp.org
+I (82410236) nodo: sntp: inicio pool.ntp.org
+I (82420236) nodo: sntp: inicio pool.ntp.org
+W (82430236) nodo: sntp: fallo
+I (82430236) nodo: sntp: inicio pool.ntp.org
+I (82440236) nodo: sntp: inicio pool.ntp.org
+I (82441266) nodo: ana: niv=falla p=falla i=12.29 vbat=0.00 red=0
+I (82450246) nodo: sntp: inicio pool.ntp.org
+W (82460246) nodo: sntp: fallo
+I (82460246) nodo: sntp: inicio pool.ntp.org
+I (82470246) nodo: sntp: inicio pool.ntp.org
+I (82480246) nodo: sntp: inicio pool.ntp.org
+W (82490246) nodo: sntp: fallo
+I (82490246) nodo: sntp: inicio pool.ntp.org
+I (82500246) nodo: sntp: inicio pool.ntp.org
+I (82501266) nodo: ana: niv=falla p=falla i=12.10 vbat=0.00 red=0
+I (82510246) nodo: sntp: inicio pool.ntp.org
+W (82520246) nodo: sntp: fallo
+I (82520256) nodo: sntp: inicio pool.ntp.org
+I (82530256) nodo: sntp: inicio pool.ntp.org
+I (82540256) nodo: sntp: inicio pool.ntp.org
+W (82550256) nodo: sntp: fallo
+I (82550256) nodo: sntp: inicio pool.ntp.org
+I (82560256) nodo: sntp: inicio pool.ntp.org
+I (82561266) nodo: ana: niv=falla p=falla i=12.17 vbat=0.00 red=0
+I (82570256) nodo: sntp: inicio pool.ntp.org
+W (82580256) nodo: sntp: fallo
+I (82580256) nodo: sntp: inicio pool.ntp.org
+I (82590256) nodo: sntp: inicio pool.ntp.org
+I (82600256) nodo: sntp: inicio pool.ntp.org
+W (82610266) nodo: sntp: fallo
+I (82610266) nodo: sntp: inicio pool.ntp.org
+I (82620266) nodo: sntp: inicio pool.ntp.org
+I (82621266) nodo: ana: niv=falla p=falla i=12.05 vbat=0.00 red=0
+I (82630266) nodo: sntp: inicio pool.ntp.org
+W (82640266) nodo: sntp: fallo
+I (82640266) nodo: sntp: inicio pool.ntp.org
+I (82650266) nodo: sntp: inicio pool.ntp.org
+I (82660266) nodo: sntp: inicio pool.ntp.org
+W (82670266) nodo: sntp: fallo
+I (82670266) nodo: sntp: inicio pool.ntp.org
+I (82680266) nodo: sntp: inicio pool.ntp.org
+I (82681266) nodo: ana: niv=falla p=falla i=12.18 vbat=0.00 red=0
+I (82690276) nodo: sntp: inicio pool.ntp.org
+W (82700276) nodo: sntp: fallo
+I (82700276) nodo: sntp: inicio pool.ntp.org
+I (82710276) nodo: sntp: inicio pool.ntp.org
+I (82720276) nodo: sntp: inicio pool.ntp.org
+W (82730276) nodo: sntp: fallo
+I (82730276) nodo: sntp: inicio pool.ntp.org
+I (82740276) nodo: sntp: inicio pool.ntp.org
+I (82741266) nodo: ana: niv=falla p=falla i=12.35 vbat=0.00 red=0
+I (82750276) nodo: sntp: inicio pool.ntp.org
+W (82760276) nodo: sntp: fallo
+I (82760276) nodo: sntp: inicio pool.ntp.org
+I (82770286) nodo: sntp: inicio pool.ntp.org
+I (82780286) nodo: sntp: inicio pool.ntp.org
+W (82790286) nodo: sntp: fallo
+I (82790286) nodo: sntp: inicio pool.ntp.org
+I (82800286) nodo: sntp: inicio pool.ntp.org
+I (82801266) nodo: ana: niv=falla p=falla i=11.94 vbat=0.00 red=0
+I (82810286) nodo: sntp: inicio pool.ntp.org
+W (82820286) nodo: sntp: fallo
+I (82820286) nodo: sntp: inicio pool.ntp.org
+I (82830286) nodo: sntp: inicio pool.ntp.org
+I (82840286) nodo: sntp: inicio pool.ntp.org
+W (82850286) nodo: sntp: fallo
+I (82850296) nodo: sntp: inicio pool.ntp.org
+I (82860296) nodo: sntp: inicio pool.ntp.org
+I (82861266) nodo: ana: niv=falla p=falla i=12.05 vbat=0.00 red=0
+I (82870296) nodo: sntp: inicio pool.ntp.org
+W (82880296) nodo: sntp: fallo
+I (82880296) nodo: sntp: inicio pool.ntp.org
+I (82890296) nodo: sntp: inicio pool.ntp.org
+I (82900296) nodo: sntp: inicio pool.ntp.org
+W (82910296) nodo: sntp: fallo
+I (82910296) nodo: sntp: inicio pool.ntp.org
+I (82920296) nodo: sntp: inicio pool.ntp.org
+I (82921266) nodo: ana: niv=falla p=falla i=12.26 vbat=0.00 red=0
+I (82930296) nodo: sntp: inicio pool.ntp.org
+W (82940306) nodo: sntp: fallo
+I (82940306) nodo: sntp: inicio pool.ntp.org
+I (82950306) nodo: sntp: inicio pool.ntp.org
+I (82960306) nodo: sntp: inicio pool.ntp.org
+W (82970306) nodo: sntp: fallo
+I (82970306) nodo: sntp: inicio pool.ntp.org
+I (82980306) nodo: sntp: inicio pool.ntp.org
+I (82981266) nodo: ana: niv=falla p=falla i=11.81 vbat=0.00 red=0
+I (82990306) nodo: sntp: inicio pool.ntp.org
+W (83000306) nodo: sntp: fallo
+I (83000306) nodo: sntp: inicio pool.ntp.org
+I (83010316) nodo: sntp: inicio pool.ntp.org
+I (83020316) nodo: sntp: inicio pool.ntp.org
+W (83030316) nodo: sntp: fallo
+I (83030316) nodo: sntp: inicio pool.ntp.org
+I (83040316) nodo: sntp: inicio pool.ntp.org
+I (83041266) nodo: ana: niv=falla p=falla i=12.16 vbat=0.00 red=0
+I (83050316) nodo: sntp: inicio pool.ntp.org
+W (83060316) nodo: sntp: fallo
+I (83060316) nodo: sntp: inicio pool.ntp.org
+I (83070316) nodo: sntp: inicio pool.ntp.org
+I (83080316) nodo: sntp: inicio pool.ntp.org
+W (83090316) nodo: sntp: fallo
+I (83090326) nodo: sntp: inicio pool.ntp.org
+I (83100326) nodo: sntp: inicio pool.ntp.org
+I (83101266) nodo: ana: niv=falla p=falla i=12.18 vbat=0.00 red=0
+I (83110326) nodo: sntp: inicio pool.ntp.org
+W (83120326) nodo: sntp: fallo
+I (83120326) nodo: sntp: inicio pool.ntp.org
+I (83130326) nodo: sntp: inicio pool.ntp.org
+I (83140326) nodo: sntp: inicio pool.ntp.org
+W (83150326) nodo: sntp: fallo
+I (83150326) nodo: sntp: inicio pool.ntp.org
+I (83160326) nodo: sntp: inicio pool.ntp.org
+I (83161266) nodo: ana: niv=falla p=falla i=12.13 vbat=0.00 red=0
+I (83170326) nodo: sntp: inicio pool.ntp.org
+W (83180336) nodo: sntp: fallo
+I (83180336) nodo: sntp: inicio pool.ntp.org
+I (83190336) nodo: sntp: inicio pool.ntp.org
+I (83200336) nodo: sntp: inicio pool.ntp.org
+W (83210336) nodo: sntp: fallo
+I (83210336) nodo: sntp: inicio pool.ntp.org
+I (83220336) nodo: sntp: inicio pool.ntp.org
+I (83221266) nodo: ana: niv=falla p=falla i=12.43 vbat=0.00 red=0
+I (83230336) nodo: sntp: inicio pool.ntp.org
+W (83240336) nodo: sntp: fallo
+I (83240336) nodo: sntp: inicio pool.ntp.org
+I (83250336) nodo: sntp: inicio pool.ntp.org
+I (83260346) nodo: sntp: inicio pool.ntp.org
+W (83270346) nodo: sntp: fallo
+I (83270346) nodo: sntp: inicio pool.ntp.org
+I (83280346) nodo: sntp: inicio pool.ntp.org
+I (83281266) nodo: ana: niv=falla p=falla i=12.23 vbat=0.00 red=0
+I (83290346) nodo: sntp: inicio pool.ntp.org
+W (83300346) nodo: sntp: fallo
+I (83300346) nodo: sntp: inicio pool.ntp.org
+I (83310346) nodo: sntp: inicio pool.ntp.org
+I (83320346) nodo: sntp: inicio pool.ntp.org
+W (83330346) nodo: sntp: fallo
+I (83330356) nodo: sntp: inicio pool.ntp.org
+I (83340356) nodo: sntp: inicio pool.ntp.org
+I (83341266) nodo: ana: niv=falla p=falla i=12.52 vbat=0.00 red=0
+I (83350356) nodo: sntp: inicio pool.ntp.org
+W (83360356) nodo: sntp: fallo
+I (83360356) nodo: sntp: inicio pool.ntp.org
+I (83370356) nodo: sntp: inicio pool.ntp.org
+I (83380356) nodo: sntp: inicio pool.ntp.org
+W (83390356) nodo: sntp: fallo
+I (83390356) nodo: sntp: inicio pool.ntp.org
+I (83400356) nodo: sntp: inicio pool.ntp.org
+I (83401266) nodo: ana: niv=falla p=falla i=12.62 vbat=0.00 red=0
+I (83410356) nodo: sntp: inicio pool.ntp.org
+W (83420366) nodo: sntp: fallo
+I (83420366) nodo: sntp: inicio pool.ntp.org
+I (83430366) nodo: sntp: inicio pool.ntp.org
+I (83440366) nodo: sntp: inicio pool.ntp.org
+W (83450366) nodo: sntp: fallo
+I (83450366) nodo: sntp: inicio pool.ntp.org
+I (83460366) nodo: sntp: inicio pool.ntp.org
+I (83461266) nodo: ana: niv=falla p=falla i=12.13 vbat=0.00 red=0
+I (83470366) nodo: sntp: inicio pool.ntp.org
+W (83480366) nodo: sntp: fallo
+I (83480366) nodo: sntp: inicio pool.ntp.org
+I (83490366) nodo: sntp: inicio pool.ntp.org
+I (83500376) nodo: sntp: inicio pool.ntp.org
+W (83510376) nodo: sntp: fallo
+I (83510376) nodo: sntp: inicio pool.ntp.org
+I (83520376) nodo: sntp: inicio pool.ntp.org
+I (83521266) nodo: ana: niv=falla p=falla i=12.51 vbat=0.00 red=0
+I (83530376) nodo: sntp: inicio pool.ntp.org
+W (83540376) nodo: sntp: fallo
+I (83540376) nodo: sntp: inicio pool.ntp.org
+I (83550376) nodo: sntp: inicio pool.ntp.org
+I (83560376) nodo: sntp: inicio pool.ntp.org
+W (83570376) nodo: sntp: fallo
+I (83570386) nodo: sntp: inicio pool.ntp.org
+I (83580386) nodo: sntp: inicio pool.ntp.org
+I (83581266) nodo: ana: niv=falla p=falla i=12.51 vbat=0.00 red=0
+I (83590386) nodo: sntp: inicio pool.ntp.org
+W (83600386) nodo: sntp: fallo
+I (83600386) nodo: sntp: inicio pool.ntp.org
+I (83610386) nodo: sntp: inicio pool.ntp.org
+I (83620386) nodo: sntp: inicio pool.ntp.org
+W (83630386) nodo: sntp: fallo
+I (83630386) nodo: sntp: inicio pool.ntp.org
+I (83640386) nodo: sntp: inicio pool.ntp.org
+I (83641266) nodo: ana: niv=falla p=falla i=12.24 vbat=0.00 red=0
+I (83650386) nodo: sntp: inicio pool.ntp.org
+W (83660396) nodo: sntp: fallo
+I (83660396) nodo: sntp: inicio pool.ntp.org
+I (83670396) nodo: sntp: inicio pool.ntp.org
+I (83680396) nodo: sntp: inicio pool.ntp.org
+W (83690396) nodo: sntp: fallo
+I (83690396) nodo: sntp: inicio pool.ntp.org
+I (83700396) nodo: sntp: inicio pool.ntp.org
+I (83701266) nodo: ana: niv=falla p=falla i=12.23 vbat=0.00 red=0
+I (83710396) nodo: sntp: inicio pool.ntp.org
+W (83720396) nodo: sntp: fallo
+I (83720396) nodo: sntp: inicio pool.ntp.org
+I (83730396) nodo: sntp: inicio pool.ntp.org
+I (83740406) nodo: sntp: inicio pool.ntp.org
+W (83750406) nodo: sntp: fallo
+I (83750406) nodo: sntp: inicio pool.ntp.org
+I (83760406) nodo: sntp: inicio pool.ntp.org
+I (83761266) nodo: ana: niv=falla p=falla i=12.63 vbat=0.00 red=0
+I (83770406) nodo: sntp: inicio pool.ntp.org
+W (83780406) nodo: sntp: fallo
+I (83780406) nodo: sntp: inicio pool.ntp.org
+I (83790406) nodo: sntp: inicio pool.ntp.org
+I (83800406) nodo: sntp: inicio pool.ntp.org
+W (83810406) nodo: sntp: fallo
+I (83810406) nodo: sntp: inicio pool.ntp.org
+I (83820406) nodo: sntp: inicio pool.ntp.org
+I (83821266) nodo: ana: niv=falla p=falla i=12.49 vbat=0.00 red=0
+I (83830416) nodo: sntp: inicio pool.ntp.org
+W (83840416) nodo: sntp: fallo
+I (83840416) nodo: sntp: inicio pool.ntp.org
+I (83850416) nodo: sntp: inicio pool.ntp.org
+I (83860416) nodo: sntp: inicio pool.ntp.org
+W (83870416) nodo: sntp: fallo
+I (83870416) nodo: sntp: inicio pool.ntp.org
+I (83880416) nodo: sntp: inicio pool.ntp.org
+I (83881266) nodo: ana: niv=falla p=falla i=12.88 vbat=0.00 red=0
+I (83890416) nodo: sntp: inicio pool.ntp.org
+W (83900416) nodo: sntp: fallo
+I (83900416) nodo: sntp: inicio pool.ntp.org
+I (83910426) nodo: sntp: inicio pool.ntp.org
+I (83920426) nodo: sntp: inicio pool.ntp.org
+W (83930426) nodo: sntp: fallo
+I (83930426) nodo: sntp: inicio pool.ntp.org
+I (83940426) nodo: sntp: inicio pool.ntp.org
+I (83941266) nodo: ana: niv=falla p=falla i=12.69 vbat=0.00 red=0
+I (83950426) nodo: sntp: inicio pool.ntp.org
+W (83960426) nodo: sntp: fallo
+I (83960426) nodo: sntp: inicio pool.ntp.org
+I (83970426) nodo: sntp: inicio pool.ntp.org
+I (83980426) nodo: sntp: inicio pool.ntp.org
+W (83990426) nodo: sntp: fallo
+I (83990436) nodo: sntp: inicio pool.ntp.org
+I (84000436) nodo: sntp: inicio pool.ntp.org
+I (84001266) nodo: ana: niv=falla p=falla i=12.67 vbat=0.00 red=0
+I (84010436) nodo: sntp: inicio pool.ntp.org
+W (84020436) nodo: sntp: fallo
+I (84020436) nodo: sntp: inicio pool.ntp.org
+I (84030436) nodo: sntp: inicio pool.ntp.org
+I (84040436) nodo: sntp: inicio pool.ntp.org
+W (84050436) nodo: sntp: fallo
+I (84050436) nodo: sntp: inicio pool.ntp.org
+I (84060436) nodo: sntp: inicio pool.ntp.org
+I (84061266) nodo: ana: niv=falla p=falla i=12.68 vbat=0.00 red=0
+I (84070436) nodo: sntp: inicio pool.ntp.org
+W (84080446) nodo: sntp: fallo
+I (84080446) nodo: sntp: inicio pool.ntp.org
+I (84090446) nodo: sntp: inicio pool.ntp.org
+I (84100446) nodo: sntp: inicio pool.ntp.org
+W (84110446) nodo: sntp: fallo
+I (84110446) nodo: sntp: inicio pool.ntp.org
+I (84120446) nodo: sntp: inicio pool.ntp.org
+I (84121266) nodo: ana: niv=falla p=falla i=12.66 vbat=0.00 red=0
+I (84130446) nodo: sntp: inicio pool.ntp.org
+W (84140446) nodo: sntp: fallo
+I (84140446) nodo: sntp: inicio pool.ntp.org
+I (84150446) nodo: sntp: inicio pool.ntp.org
+I (84160446) nodo: sntp: inicio pool.ntp.org
+W (84170456) nodo: sntp: fallo
+I (84170456) nodo: sntp: inicio pool.ntp.org
+I (84180456) nodo: sntp: inicio pool.ntp.org
+I (84181266) nodo: ana: niv=falla p=falla i=12.70 vbat=0.00 red=0
+I (84190456) nodo: sntp: inicio pool.ntp.org
+W (84200456) nodo: sntp: fallo
+I (84200456) nodo: sntp: inicio pool.ntp.org
+I (84210456) nodo: sntp: inicio pool.ntp.org
+I (84220466) nodo: sntp: inicio pool.ntp.org
+W (84230466) nodo: sntp: fallo
+I (84230466) nodo: sntp: inicio pool.ntp.org
+I (84240466) nodo: sntp: inicio pool.ntp.org
+I (84241266) nodo: ana: niv=falla p=falla i=12.65 vbat=0.00 red=0
+I (84250466) nodo: sntp: inicio pool.ntp.org
+W (84260466) nodo: sntp: fallo
+I (84260466) nodo: sntp: inicio pool.ntp.org
+I (84270466) nodo: sntp: inicio pool.ntp.org
+I (84280466) nodo: sntp: inicio pool.ntp.org
+W (84290466) nodo: sntp: fallo
+I (84290466) nodo: sntp: inicio pool.ntp.org
+I (84300476) nodo: sntp: inicio pool.ntp.org
+I (84301266) nodo: ana: niv=falla p=falla i=12.59 vbat=0.00 red=0
+I (84310476) nodo: sntp: inicio pool.ntp.org
+W (84320476) nodo: sntp: fallo
+I (84320476) nodo: sntp: inicio pool.ntp.org
+I (84330476) nodo: sntp: inicio pool.ntp.org
+I (84340476) nodo: sntp: inicio pool.ntp.org
+W (84350476) nodo: sntp: fallo
+I (84350476) nodo: sntp: inicio pool.ntp.org
+I (84360476) nodo: sntp: inicio pool.ntp.org
+I (84361266) nodo: ana: niv=falla p=falla i=12.70 vbat=0.00 red=0
+I (84370476) nodo: sntp: inicio pool.ntp.org
+W (84380486) nodo: sntp: fallo
+I (84380486) nodo: sntp: inicio pool.ntp.org
+I (84390486) nodo: sntp: inicio pool.ntp.org
+I (84400486) nodo: sntp: inicio pool.ntp.org
+W (84410486) nodo: sntp: fallo
+I (84410486) nodo: sntp: inicio pool.ntp.org
+I (84420486) nodo: sntp: inicio pool.ntp.org
+I (84421266) nodo: ana: niv=falla p=falla i=12.84 vbat=0.00 red=0
+I (84430486) nodo: sntp: inicio pool.ntp.org
+W (84440486) nodo: sntp: fallo
+I (84440486) nodo: sntp: inicio pool.ntp.org
+I (84450486) nodo: sntp: inicio pool.ntp.org
+I (84460496) nodo: sntp: inicio pool.ntp.org
+W (84470496) nodo: sntp: fallo
+I (84470496) nodo: sntp: inicio pool.ntp.org
+I (84480496) nodo: sntp: inicio pool.ntp.org
+I (84481266) nodo: ana: niv=falla p=falla i=12.59 vbat=0.00 red=0
+I (84490496) nodo: sntp: inicio pool.ntp.org
+W (84500496) nodo: sntp: fallo
+I (84500496) nodo: sntp: inicio pool.ntp.org
+I (84510496) nodo: sntp: inicio pool.ntp.org
+I (84520496) nodo: sntp: inicio pool.ntp.org
+W (84530496) nodo: sntp: fallo
+I (84530506) nodo: sntp: inicio pool.ntp.org
+I (84540506) nodo: sntp: inicio pool.ntp.org
+I (84541266) nodo: ana: niv=falla p=falla i=12.80 vbat=0.00 red=0
+I (84550506) nodo: sntp: inicio pool.ntp.org
+W (84560506) nodo: sntp: fallo
+I (84560506) nodo: sntp: inicio pool.ntp.org
+I (84570506) nodo: sntp: inicio pool.ntp.org
+I (84580506) nodo: sntp: inicio pool.ntp.org
+W (84590506) nodo: sntp: fallo
+I (84590506) nodo: sntp: inicio pool.ntp.org
+I (84600506) nodo: sntp: inicio pool.ntp.org
+I (84601266) nodo: ana: niv=falla p=falla i=12.65 vbat=0.00 red=0
+I (84610506) nodo: sntp: inicio pool.ntp.org
+W (84620516) nodo: sntp: fallo
+I (84620516) nodo: sntp: inicio pool.ntp.org
+I (84630516) nodo: sntp: inicio pool.ntp.org
+I (84640516) nodo: sntp: inicio pool.ntp.org
+W (84650516) nodo: sntp: fallo
+I (84650516) nodo: sntp: inicio pool.ntp.org
+I (84660516) nodo: sntp: inicio pool.ntp.org
+I (84661266) nodo: ana: niv=falla p=falla i=12.96 vbat=0.00 red=0
+I (84670516) nodo: sntp: inicio pool.ntp.org
+W (84680516) nodo: sntp: fallo
+I (84680516) nodo: sntp: inicio pool.ntp.org
+I (84690516) nodo: sntp: inicio pool.ntp.org
+I (84700516) nodo: sntp: inicio pool.ntp.org
+W (84710526) nodo: sntp: fallo
+I (84710526) nodo: sntp: inicio pool.ntp.org
+I (84720526) nodo: sntp: inicio pool.ntp.org
+I (84721266) nodo: ana: niv=falla p=falla i=12.87 vbat=0.00 red=0
+I (84730526) nodo: sntp: inicio pool.ntp.org
+W (84740526) nodo: sntp: fallo
+I (84740526) nodo: sntp: inicio pool.ntp.org
+I (84750526) nodo: sntp: inicio pool.ntp.org
+I (84760526) nodo: sntp: inicio pool.ntp.org
+W (84770526) nodo: sntp: fallo
+I (84770526) nodo: sntp: inicio pool.ntp.org
+I (84780526) nodo: sntp: inicio pool.ntp.org
+I (84781266) nodo: ana: niv=falla p=falla i=12.62 vbat=0.00 red=0
+I (84790536) nodo: sntp: inicio pool.ntp.org
+W (84800536) nodo: sntp: fallo
+I (84800536) nodo: sntp: inicio pool.ntp.org
+I (84810536) nodo: sntp: inicio pool.ntp.org
+I (84820536) nodo: sntp: inicio pool.ntp.org
+W (84830536) nodo: sntp: fallo
+I (84830536) nodo: sntp: inicio pool.ntp.org
+I (84840536) nodo: sntp: inicio pool.ntp.org
+I (84841266) nodo: ana: niv=falla p=falla i=12.88 vbat=0.00 red=0
+I (84850536) nodo: sntp: inicio pool.ntp.org
+W (84860536) nodo: sntp: fallo
+I (84860536) nodo: sntp: inicio pool.ntp.org
+I (84870546) nodo: sntp: inicio pool.ntp.org
+I (84880546) nodo: sntp: inicio pool.ntp.org
+W (84890546) nodo: sntp: fallo
+I (84890546) nodo: sntp: inicio pool.ntp.org
+I (84900546) nodo: sntp: inicio pool.ntp.org
+I (84901266) nodo: ana: niv=falla p=falla i=13.09 vbat=0.00 red=0
+I (84910546) nodo: sntp: inicio pool.ntp.org
+W (84920546) nodo: sntp: fallo
+I (84920546) nodo: sntp: inicio pool.ntp.org
+I (84930546) nodo: sntp: inicio pool.ntp.org
+I (84940546) nodo: sntp: inicio pool.ntp.org
+W (84950556) nodo: sntp: fallo
+I (84950556) nodo: sntp: inicio pool.ntp.org
+I (84960556) nodo: sntp: inicio pool.ntp.org
+I (84961266) nodo: ana: niv=falla p=falla i=12.73 vbat=0.00 red=0
+I (84970556) nodo: sntp: inicio pool.ntp.org
+W (84980556) nodo: sntp: fallo
+I (84980556) nodo: sntp: inicio pool.ntp.org
+I (84990556) nodo: sntp: inicio pool.ntp.org
+I (85000556) nodo: sntp: inicio pool.ntp.org
+W (85010556) nodo: sntp: fallo
+I (85010556) nodo: sntp: inicio pool.ntp.org
+I (85020556) nodo: sntp: inicio pool.ntp.org
+I (85021266) nodo: ana: niv=falla p=falla i=12.78 vbat=0.00 red=0
+I (85030566) nodo: sntp: inicio pool.ntp.org
+W (85040566) nodo: sntp: fallo
+I (85040566) nodo: sntp: inicio pool.ntp.org
+I (85050566) nodo: sntp: inicio pool.ntp.org
+I (85060566) nodo: sntp: inicio pool.ntp.org
+W (85070566) nodo: sntp: fallo
+I (85070566) nodo: sntp: inicio pool.ntp.org
+I (85080566) nodo: sntp: inicio pool.ntp.org
+I (85081266) nodo: ana: niv=falla p=falla i=12.78 vbat=0.00 red=0
+I (85090566) nodo: sntp: inicio pool.ntp.org
+W (85100566) nodo: sntp: fallo
+I (85100566) nodo: sntp: inicio pool.ntp.org
+I (85110576) nodo: sntp: inicio pool.ntp.org
+I (85120576) nodo: sntp: inicio pool.ntp.org
+W (85130576) nodo: sntp: fallo
+I (85130576) nodo: sntp: inicio pool.ntp.org
+I (85140576) nodo: sntp: inicio pool.ntp.org
+I (85141266) nodo: ana: niv=falla p=falla i=12.87 vbat=0.00 red=0
+I (85150576) nodo: sntp: inicio pool.ntp.org
+W (85160576) nodo: sntp: fallo
+I (85160576) nodo: sntp: inicio pool.ntp.org
+I (85170576) nodo: sntp: inicio pool.ntp.org
+I (85180576) nodo: sntp: inicio pool.ntp.org
+W (85190586) nodo: sntp: fallo
+I (85190586) nodo: sntp: inicio pool.ntp.org
+I (85200586) nodo: sntp: inicio pool.ntp.org
+I (85201266) nodo: ana: niv=falla p=falla i=12.98 vbat=0.00 red=0
+I (85210586) nodo: sntp: inicio pool.ntp.org
+W (85220586) nodo: sntp: fallo
+I (85220586) nodo: sntp: inicio pool.ntp.org
+I (85230586) nodo: sntp: inicio pool.ntp.org
+I (85240586) nodo: sntp: inicio pool.ntp.org
+W (85250586) nodo: sntp: fallo
+I (85250586) nodo: sntp: inicio pool.ntp.org
+I (85260586) nodo: sntp: inicio pool.ntp.org
+I (85261266) nodo: ana: niv=falla p=falla i=12.94 vbat=0.00 red=0
+I (85270586) nodo: sntp: inicio pool.ntp.org
+W (85280596) nodo: sntp: fallo
+I (85280596) nodo: sntp: inicio pool.ntp.org
+I (85290596) nodo: sntp: inicio pool.ntp.org
+I (85300596) nodo: sntp: inicio pool.ntp.org
+W (85310596) nodo: sntp: fallo
+I (85310596) nodo: sntp: inicio pool.ntp.org
+I (85320596) nodo: sntp: inicio pool.ntp.org
+I (85321266) nodo: ana: niv=falla p=falla i=13.21 vbat=0.00 red=0
+I (85330596) nodo: sntp: inicio pool.ntp.org
+W (85340596) nodo: sntp: fallo
+I (85340596) nodo: sntp: inicio pool.ntp.org
+I (85350596) nodo: sntp: inicio pool.ntp.org
+I (85360606) nodo: sntp: inicio pool.ntp.org
+W (85370606) nodo: sntp: fallo
+I (85370606) nodo: sntp: inicio pool.ntp.org
+I (85380606) nodo: sntp: inicio pool.ntp.org
+I (85381266) nodo: ana: niv=falla p=falla i=12.91 vbat=0.00 red=0
+I (85390606) nodo: sntp: inicio pool.ntp.org
+W (85400606) nodo: sntp: fallo
+I (85400606) nodo: sntp: inicio pool.ntp.org
+I (85410606) nodo: sntp: inicio pool.ntp.org
+I (85420606) nodo: sntp: inicio pool.ntp.org
+W (85430606) nodo: sntp: fallo
+I (85430616) nodo: sntp: inicio pool.ntp.org
+I (85440616) nodo: sntp: inicio pool.ntp.org
+I (85441266) nodo: ana: niv=falla p=falla i=12.85 vbat=0.00 red=0
+I (85450616) nodo: sntp: inicio pool.ntp.org
+W (85460616) nodo: sntp: fallo
+I (85460616) nodo: sntp: inicio pool.ntp.org
+I (85470616) nodo: sntp: inicio pool.ntp.org
+I (85480616) nodo: sntp: inicio pool.ntp.org
+W (85490616) nodo: sntp: fallo
+I (85490616) nodo: sntp: inicio pool.ntp.org
+I (85500616) nodo: sntp: inicio pool.ntp.org
+I (85501266) nodo: ana: niv=falla p=falla i=13.05 vbat=0.00 red=0
+I (85510616) nodo: sntp: inicio pool.ntp.org
+W (85520626) nodo: sntp: fallo
+I (85520626) nodo: sntp: inicio pool.ntp.org
+I (85530626) nodo: sntp: inicio pool.ntp.org
+I (85540626) nodo: sntp: inicio pool.ntp.org
+W (85550626) nodo: sntp: fallo
+I (85550626) nodo: sntp: inicio pool.ntp.org
+I (85560626) nodo: sntp: inicio pool.ntp.org
+I (85561266) nodo: ana: niv=falla p=falla i=12.99 vbat=0.00 red=0
+I (85570626) nodo: sntp: inicio pool.ntp.org
+W (85580626) nodo: sntp: fallo
+I (85580626) nodo: sntp: inicio pool.ntp.org
+I (85590626) nodo: sntp: inicio pool.ntp.org
+I (85600636) nodo: sntp: inicio pool.ntp.org
+W (85610636) nodo: sntp: fallo
+I (85610636) nodo: sntp: inicio pool.ntp.org
+I (85620636) nodo: sntp: inicio pool.ntp.org
+I (85621266) nodo: ana: niv=falla p=falla i=12.87 vbat=0.00 red=0
+I (85630636) nodo: sntp: inicio pool.ntp.org
+W (85640636) nodo: sntp: fallo
+I (85640636) nodo: sntp: inicio pool.ntp.org
+I (85650636) nodo: sntp: inicio pool.ntp.org
+I (85660636) nodo: sntp: inicio pool.ntp.org
+W (85670636) nodo: sntp: fallo
+I (85670646) nodo: sntp: inicio pool.ntp.org
+I (85680646) nodo: sntp: inicio pool.ntp.org
+I (85681266) nodo: ana: niv=falla p=falla i=13.07 vbat=0.00 red=0
+I (85690646) nodo: sntp: inicio pool.ntp.org
+W (85700646) nodo: sntp: fallo
+I (85700646) nodo: sntp: inicio pool.ntp.org
+I (85710646) nodo: sntp: inicio pool.ntp.org
+I (85720646) nodo: sntp: inicio pool.ntp.org
+W (85730646) nodo: sntp: fallo
+I (85730646) nodo: sntp: inicio pool.ntp.org
+I (85740646) nodo: sntp: inicio pool.ntp.org
+I (85741266) nodo: ana: niv=falla p=falla i=12.99 vbat=0.00 red=0
+I (85750646) nodo: sntp: inicio pool.ntp.org
+W (85760656) nodo: sntp: fallo
+I (85760656) nodo: sntp: inicio pool.ntp.org
+I (85770656) nodo: sntp: inicio pool.ntp.org
+I (85780656) nodo: sntp: inicio pool.ntp.org
+W (85790656) nodo: sntp: fallo
+I (85790656) nodo: sntp: inicio pool.ntp.org
+I (85800656) nodo: sntp: inicio pool.ntp.org
+I (85801266) nodo: ana: niv=falla p=falla i=12.82 vbat=0.00 red=0
+I (85810656) nodo: sntp: inicio pool.ntp.org
+W (85820656) nodo: sntp: fallo
+I (85820656) nodo: sntp: inicio pool.ntp.org
+I (85830656) nodo: sntp: inicio pool.ntp.org
+I (85840666) nodo: sntp: inicio pool.ntp.org
+W (85850666) nodo: sntp: fallo
+I (85850666) nodo: sntp: inicio pool.ntp.org
+I (85860666) nodo: sntp: inicio pool.ntp.org
+I (85861266) nodo: ana: niv=falla p=falla i=13.06 vbat=0.00 red=0
+I (85870666) nodo: sntp: inicio pool.ntp.org
+W (85880666) nodo: sntp: fallo
+I (85880666) nodo: sntp: inicio pool.ntp.org
+I (85890666) nodo: sntp: inicio pool.ntp.org
+I (85900666) nodo: sntp: inicio pool.ntp.org
+W (85910666) nodo: sntp: fallo
+I (85910666) nodo: sntp: inicio pool.ntp.org
+I (85920676) nodo: sntp: inicio pool.ntp.org
+I (85921266) nodo: ana: niv=falla p=falla i=13.02 vbat=0.00 red=0
+I (85930676) nodo: sntp: inicio pool.ntp.org
+W (85940676) nodo: sntp: fallo
+I (85940676) nodo: sntp: inicio pool.ntp.org
+I (85950676) nodo: sntp: inicio pool.ntp.org
+I (85960676) nodo: sntp: inicio pool.ntp.org
+W (85970676) nodo: sntp: fallo
+I (85970676) nodo: sntp: inicio pool.ntp.org
+I (85980676) nodo: sntp: inicio pool.ntp.org
+I (85981266) nodo: ana: niv=falla p=falla i=12.76 vbat=0.00 red=0
+I (85990676) nodo: sntp: inicio pool.ntp.org
+W (86000676) nodo: sntp: fallo
+I (86000686) nodo: sntp: inicio pool.ntp.org
+I (86010686) nodo: sntp: inicio pool.ntp.org
+I (86020686) nodo: sntp: inicio pool.ntp.org
+W (86030686) nodo: sntp: fallo
+I (86030686) nodo: sntp: inicio pool.ntp.org
+I (86040686) nodo: sntp: inicio pool.ntp.org
+I (86041266) nodo: ana: niv=falla p=falla i=12.97 vbat=0.00 red=0
+I (86050686) nodo: sntp: inicio pool.ntp.org
+W (86060686) nodo: sntp: fallo
+I (86060686) nodo: sntp: inicio pool.ntp.org
+I (86070686) nodo: sntp: inicio pool.ntp.org
+I (86080686) nodo: sntp: inicio pool.ntp.org
+W (86090686) nodo: sntp: fallo
+I (86090696) nodo: sntp: inicio pool.ntp.org
+I (86100696) nodo: sntp: inicio pool.ntp.org
+I (86101266) nodo: ana: niv=falla p=falla i=13.08 vbat=0.00 red=0
+I (86110696) nodo: sntp: inicio pool.ntp.org
+W (86120696) nodo: sntp: fallo
+I (86120696) nodo: sntp: inicio pool.ntp.org
+I (86130696) nodo: sntp: inicio pool.ntp.org
+I (86140696) nodo: sntp: inicio pool.ntp.org
+W (86150696) nodo: sntp: fallo
+I (86150696) nodo: sntp: inicio pool.ntp.org
+I (86160696) nodo: sntp: inicio pool.ntp.org
+I (86161266) nodo: ana: niv=falla p=falla i=13.07 vbat=0.00 red=0
+I (86170696) nodo: sntp: inicio pool.ntp.org
+W (86180706) nodo: sntp: fallo
+I (86180706) nodo: sntp: inicio pool.ntp.org
+I (86190706) nodo: sntp: inicio pool.ntp.org
+I (86200706) nodo: sntp: inicio pool.ntp.org
+W (86210706) nodo: sntp: fallo
+I (86210706) nodo: sntp: inicio pool.ntp.org
+I (86220706) nodo: sntp: inicio pool.ntp.org
+I (86221266) nodo: ana: niv=falla p=falla i=13.25 vbat=0.00 red=0
+I (86230706) nodo: sntp: inicio pool.ntp.org
+W (86240706) nodo: sntp: fallo
+I (86240706) nodo: sntp: inicio pool.ntp.org
+I (86250706) nodo: sntp: inicio pool.ntp.org
+I (86260706) nodo: sntp: inicio pool.ntp.org
+W (86270716) nodo: sntp: fallo
+I (86270716) nodo: sntp: inicio pool.ntp.org
+I (86280716) nodo: sntp: inicio pool.ntp.org
+I (86281266) nodo: ana: niv=falla p=falla i=13.11 vbat=0.00 red=0
+I (86290716) nodo: sntp: inicio pool.ntp.org
+W (86300716) nodo: sntp: fallo
+I (86300716) nodo: sntp: inicio pool.ntp.org
+I (86310716) nodo: sntp: inicio pool.ntp.org
+I (86320716) nodo: sntp: inicio pool.ntp.org
+W (86330716) nodo: sntp: fallo
+I (86330716) nodo: sntp: inicio pool.ntp.org
+I (86340716) nodo: sntp: inicio pool.ntp.org
+I (86341266) nodo: ana: niv=falla p=falla i=12.93 vbat=0.00 red=0
+I (86350726) nodo: sntp: inicio pool.ntp.org
+W (86360726) nodo: sntp: fallo
+I (86360726) nodo: sntp: inicio pool.ntp.org
+I (86370726) nodo: sntp: inicio pool.ntp.org
+I (86380726) nodo: sntp: inicio pool.ntp.org
+W (86390726) nodo: sntp: fallo
+I (86390726) nodo: sntp: inicio pool.ntp.org
+I (86400726) nodo: sntp: inicio pool.ntp.org
+I (86401266) nodo: ana: niv=falla p=falla i=13.29 vbat=0.00 red=0
+I (86410726) nodo: sntp: inicio pool.ntp.org
+W (86420726) nodo: sntp: fallo
+I (86420726) nodo: sntp: inicio pool.ntp.org
+I (86430726) nodo: sntp: inicio pool.ntp.org
+I (86440736) nodo: sntp: inicio pool.ntp.org
+W (86450736) nodo: sntp: fallo
+I (86450736) nodo: sntp: inicio pool.ntp.org
+I (86460736) nodo: sntp: inicio pool.ntp.org
+I (86461266) nodo: ana: niv=falla p=falla i=12.95 vbat=0.00 red=0
