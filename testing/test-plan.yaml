@@ -2559,6 +2559,11 @@ tests:
     commit: ed91e26   # merge del PR #1 (rama sntp) en main, H-70
     date: 2026-11-08
     ci_run: 42476259789   # host tests + secret scan (secret-scan relanzado tras un 504 al descargar gitleaks)
+  # Regla del propietario (2026-11-23) para la prueba de 24 h (esta fila): se corre solo
+  #   (1) en la primera versión completa del nodo, antes de instalarlo (puerta S2), y
+  #   (2) tras un cambio grande: nueva ESP-IDF o nueva versión de una dependencia
+  #       (dependencies.lock), o cambios en Wi-Fi, MQTT, reloj (SNTP/hora) o watchdog.
+  # Para cualquier otro cambio basta la regresión corta (sin esta fila).
   - id: TC-WDT-01
     shape: atomic
     kind: standard
@@ -2566,6 +2571,11 @@ tests:
     phase: 2
     tier: bench
     verifies: [NFR-WDT-01]
+    when: >
+      regla del propietario (2026-11-23): primera versión completa antes de instalar (S2) y
+      tras un cambio grande (ESP-IDF, dependencia, Wi-Fi, MQTT, reloj o watchdog); para
+      cambios pequeños no se corre. Pendiente antes de S2: v0.0.2 trae ESP-IDF 6.0.3 y en su
+      regresión se dejó como salvedad (2026-11-20), así que la 24 h toca antes de instalar
     needs: [bench-driver, bench-flash, bench-wifi-ap, bench-wifi-ap-outage, bench-portal-driver, bench-mqtt-broker, bench-broker-outage, bench-serial-monitor, sht41-wiring, dut-board]
     expect: >
       fila bench de NFR-WDT-01 y aceptación 22.1-2 (H-71): OPERATIVO 24 h con 3

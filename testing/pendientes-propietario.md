@@ -51,3 +51,13 @@ Resueltos: FR-SEN-03 (2026-11-08, TC-SEN-04, H-70); JRN-01.7 con la imagen nueva
     **Corregido el 2026-11-18** (contexto propio de cada tarea y turno `ota_turno`; TC-OTA-16).
 - **Estado.** Abiertos. No bloquean el tag v0.0.1; sí bloquean la instalación en la villa (S2). Van en el paquete
   pendiente antes de S2 con ESP-IDF 6.0.3 y #52 (`testing/plan-fase-3.md`, aprobado el 2026-11-15).
+
+## 2026-11-23 · Prueba de 24 h (TC-WDT-01) según la regla nueva del propietario
+
+- **Regla:** la prueba de 24 h se corre solo en la primera versión completa antes de instalar (S2) y tras un
+  cambio grande (ESP-IDF, dependencia, Wi-Fi, MQTT, reloj o watchdog). Para cambios pequeños basta la regresión
+  corta. Está en la fila TC-WDT-01 de `testing/test-plan.yaml`.
+- **Qué implica ahora:** v0.0.2 es la primera versión completa y trae ESP-IDF 6.0.3, y en su regresión la 24 h se
+  dejó como salvedad (2026-11-20). **Antes de la instalación (S2) hay que correr TC-WDT-01 de 24 h** con el
+  firmware de v0.0.2, en un hueco del banco que no choque con AGUA.
+- **Estado:** pendiente; necesita 24 h de banco en el SLOT1, con el candado.
