@@ -1,0 +1,5 @@
+I (17853) nodo: sntp: sincronizado ts=1795849038
+I (19903) nodo: ota: estado en_curso
+I (19903) nodo: con: OPERATIVO -> OTA_DESCARGA (cmd_ota)
+I (22603) nodo: ota: estado error:http
+I (22603) nodo: con: OTA_DESCARGA -> OPERATIVO (ota_err)

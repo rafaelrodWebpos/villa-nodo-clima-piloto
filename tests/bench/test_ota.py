@@ -151,8 +151,8 @@ def _comprobar_fallo(c, reg, sub, base, t_pub, motivo, espera_s=90):
             break
         time.sleep(1)
     time.sleep(3)
-    from consola import quitar_relecturas, reinicios
-    ent, _ = quitar_relecturas([e for e in reg.leer() if e.get("ts", 0) >= t_pub - 1])
+    from consola import quitar_relecturas, quitar_viejas, reinicios
+    ent, _ = quitar_viejas(quitar_relecturas([e for e in reg.leer() if e.get("ts", 0) >= t_pub - 1])[0])   # (#89)
     txt = [e.get("text", "") for e in ent]
     c.save_log("serie", txt)
     en_curso = next((t for t, o in otas if o == "en_curso"), None)

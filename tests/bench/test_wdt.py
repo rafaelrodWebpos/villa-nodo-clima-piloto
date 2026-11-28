@@ -26,7 +26,7 @@ import time
 import pytest
 
 from benchlib import case
-from consola import quitar_relecturas, reinicios
+from consola import quitar_relecturas, quitar_viejas, reinicios
 from test_mqtt import MEDIDAS, _a_operativo, _nodo, _suscribir, configurado
 
 CICLO_S = 60
@@ -130,6 +130,7 @@ def test_tc_wdt_01_24h_stability(testbench, dut_slot, dut_mac, firmware, run_dir
                         if not (isinstance(uptimes[i], int) and isinstance(uptimes[i - 1], int) and uptimes[i] > uptimes[i - 1])]
         resets = sorted({s.get("reset") for _, s in st})
         limpias, relecturas = quitar_relecturas(ent)
+        limpias, viejas = quitar_viejas(limpias)   # reenvíos del banco con otra hora (#89, punto 3)
         retrocesos = [limpias[k]["text"].strip() for k in reinicios(limpias)
                       if limpias[k].get("ts", 0) >= t_ini - CICLO_S]
         boots = [e["text"].strip() for e in limpias if e.get("ts", 0) >= t_ini - CICLO_S and BOOT.search(e.get("text", ""))]
@@ -158,7 +159,8 @@ def test_tc_wdt_01_24h_stability(testbench, dut_slot, dut_mac, firmware, run_dir
                  + (f"{v} s de devolverlo" if v is not None else "— (ninguno)") for tipo, tc, v in vueltas],
                f"- uptime_s no creciente: {decrecientes or 'ninguno'}; valores de reset: {resets}",
                f"- relecturas del banco descartadas: {len(relecturas)} bloque(s) de "
-               f"{[n for _, n, _ in relecturas]} líneas; retrocesos del reloj de esp_log en la ventana: "
+               f"{[n for _, n, _ in relecturas]} líneas; líneas viejas reenviadas (#89): {len(viejas)}; "
+               f"retrocesos del reloj de esp_log en la ventana: "
                f"{retrocesos or 'ninguno'}; líneas boot:/rst: en la ventana tras descartarlas: {len(boots)}; "
                f"líneas con task_wdt: {len(wdt)}",
                f"- control de la consola: {n_med} líneas med: en la ventana; tramos de 10 min con < "

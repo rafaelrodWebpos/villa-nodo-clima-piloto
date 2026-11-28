@@ -1,0 +1,16 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.5, pluggy-1.7.0
+rootdir: /
+collected 5 items
+
+tests/bench/test_ota.py ....                                             [ 80%]
+tests/bench/test_seguridad.py .                                          [100%]
+
+==================================== PASSES ====================================
+=========================== short test summary info ============================
+PASSED tests/bench/test_ota.py::test_tc_ota_06_rejections
+PASSED tests/bench/test_ota.py::test_tc_ota_07_retained_command_ignored
+PASSED tests/bench/test_ota.py::test_tc_ota_08_missing_asset_http_error
+PASSED tests/bench/test_ota.py::test_tc_ota_09_untrusted_certificate_tls_error
+PASSED tests/bench/test_seguridad.py::test_tc_por_12_portal_closes_after_10_min
+======================== 5 passed in 1175.89s (0:19:35) ========================
